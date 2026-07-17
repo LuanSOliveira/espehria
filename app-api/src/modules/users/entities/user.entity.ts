@@ -8,20 +8,20 @@ export class User extends BaseEntity {
   @ApiProperty()
   @Index({ unique: true })
   @Column()
-  email: string;
+  email!: string;
 
   @ApiProperty()
   @Column()
-  name: string;
+  name!: string;
 
   @Column({ type: 'varchar', nullable: true, select: false })
-  password: string | null;
+  password!: string | null;
 
   @Column({ type: 'varchar', nullable: true })
   @Index({ unique: true, where: '"googleId" IS NOT NULL' })
-  googleId: string | null;
+  googleId!: string | null;
 
   @ApiProperty({ enum: AuthProvider })
   @Column({ type: 'enum', enum: AuthProvider, default: AuthProvider.LOCAL })
-  provider: AuthProvider;
+  provider!: AuthProvider;
 }
