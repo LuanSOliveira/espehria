@@ -1,10 +1,25 @@
 'use client';
 
-import { Box, IconButton, Tooltip } from '@mui/material';
+import { Box, IconButton, Tooltip, TooltipProps } from '@mui/material';
 import { FiMinus, FiPlus, FiRotateCcw } from 'react-icons/fi';
 import { useFontAccessibilityStore } from '@/store';
 import { useAccessibleFontSize } from '@/hooks/FontAccessibility';
 import { APP_BUTTON_STYLES, APP_BUTTON_BASE_FONT_SIZE } from '@/shared/constants';
+
+const tooltipSlotProps: TooltipProps['slotProps'] = {
+  popper: {
+    modifiers: [
+      {
+        name: 'preventOverflow',
+        options: {
+          rootBoundary: 'viewport',
+          altAxis: true,
+          padding: 8,
+        },
+      },
+    ],
+  },
+};
 
 export const FontAccessibilityControls = () => {
   const increaseFont = useFontAccessibilityStore((state) => state.increaseFont);
@@ -23,7 +38,7 @@ export const FontAccessibilityControls = () => {
         gap: '8px',
       }}
     >
-      <Tooltip title="Diminuir fonte">
+      <Tooltip title="Diminuir fonte" slotProps={tooltipSlotProps}>
         <IconButton
           aria-label="Diminuir fonte"
           onClick={decreaseFont}
@@ -32,7 +47,7 @@ export const FontAccessibilityControls = () => {
           <FiMinus />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Restaurar tamanho da fonte">
+      <Tooltip title="Restaurar tamanho da fonte" slotProps={tooltipSlotProps}>
         <IconButton
           aria-label="Restaurar tamanho da fonte"
           onClick={resetFont}
@@ -41,7 +56,11 @@ export const FontAccessibilityControls = () => {
           <FiRotateCcw />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Aumentar fonte">
+      <Tooltip
+        title="Aumentar fonte"
+        placement="bottom-end"
+        slotProps={tooltipSlotProps}
+      >
         <IconButton
           aria-label="Aumentar fonte"
           onClick={increaseFont}
