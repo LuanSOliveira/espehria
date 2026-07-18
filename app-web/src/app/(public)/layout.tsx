@@ -12,8 +12,8 @@ const cinzel = Cinzel({
 });
 
 export const metadata: Metadata = {
-  title: 'HUB',
-  description: 'Hub de Ferramentas',
+  title: 'Espehria',
+  description: 'Espehria',
 };
 
 export default function RootLayout({
@@ -22,10 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="pt-br"
-      className={`${cinzel.variable} h-full antialiased`}
-    >
+    <html lang="pt-br" className={`${cinzel.variable} h-full antialiased`}>
       <body>
         <Providers>
           <ThemeInitializer />

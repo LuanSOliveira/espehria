@@ -3,12 +3,68 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  --gold: #b8933f;
+  --gold-light: #d9b45c;
+  --gold-dark: #7a5a2a;
+  --gold-soft: #f0d488;
+  --gold-mid: #b8842a;
+  --gold-deep: #8a5c14;
+
+  --wood: #2b1c12;
+  --wood-light: #3a2717;
+
+  --parchment: #d9c9a3;
+  --parchment-light: #e6d7b3;
+  --parchment-mid: #d3c093;
+  --parchment-dark: #c7b284;
+
+  --text-brown: #5a3f22;
+  --text-brown-light: #6a4d24;
+  --text-brown-dark: #4a331a;
+
+  --input-bg: #2a1c10;
+  --input-bg-dark: #1c1108;
+  --input-text: #e8d9b5;
+  --input-placeholder: #8a7550;
+
+  --button-bg: #4a3218;
+  --button-bg-dark: #2e1d0c;
+  --button-text: #f0d488;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-cinzel);
+
+  --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+  --color-gold-dark: var(--gold-dark);
+  --color-gold-soft: var(--gold-soft);
+  --color-gold-mid: var(--gold-mid);
+  --color-gold-deep: var(--gold-deep);
+
+  --color-wood: var(--wood);
+  --color-wood-light: var(--wood-light);
+
+  --color-parchment: var(--parchment);
+  --color-parchment-light: var(--parchment-light);
+  --color-parchment-mid: var(--parchment-mid);
+  --color-parchment-dark: var(--parchment-dark);
+
+  --color-text-brown: var(--text-brown);
+  --color-text-brown-light: var(--text-brown-light);
+  --color-text-brown-dark: var(--text-brown-dark);
+
+  --color-input-bg: var(--input-bg);
+  --color-input-bg-dark: var(--input-bg-dark);
+  --color-input-text: var(--input-text);
+  --color-input-placeholder: var(--input-placeholder);
+
+  --color-button-bg: var(--button-bg);
+  --color-button-bg-dark: var(--button-bg-dark);
+  --color-button-text: var(--button-text);
 }
 
 @media (prefers-color-scheme: dark) {
