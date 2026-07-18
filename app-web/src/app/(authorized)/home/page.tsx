@@ -1,9 +1,15 @@
-import { DefaultText } from '@/shared/components/Texts';
+import { PageContainer } from '@/shared/components/Containers';
+import { Title, DefaultText } from '@/shared/components/Texts';
 
 export default function HomePage() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <DefaultText>Bem vindo!</DefaultText>
-    </div>
+    <PageContainer>
+      <Title component="h1" sx={{ textAlign: 'left' }}>
+        Bem vindo a Espehria!
+      </Title>
+      <DefaultText sx={{ marginTop: '12px' }}>
+        Esta aplicação será utilizada para gerenciar o mundo de Espehria.
+      </DefaultText>
+    </PageContainer>
   );
 }

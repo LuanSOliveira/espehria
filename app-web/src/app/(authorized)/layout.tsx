@@ -5,6 +5,7 @@ import { Providers } from '@/providers';
 import ThemeInitializer from '@/shared/components/ThemeInitializer';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { AuthorizedShell } from './components/AuthorizedShell';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -45,7 +46,7 @@ export default function AuthorizedLayout({
               backgroundPosition: 'center',
             }}
           />
-          <main className="relative min-h-screen">{children}</main>
+          <AuthorizedShell>{children}</AuthorizedShell>
         </Providers>
       </body>
     </html>

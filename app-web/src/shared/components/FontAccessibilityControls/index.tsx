@@ -30,10 +30,6 @@ export const FontAccessibilityControls = () => {
   return (
     <Box
       sx={{
-        position: 'fixed',
-        top: 16,
-        right: 16,
-        zIndex: 50,
         display: 'flex',
         gap: '8px',
       }}

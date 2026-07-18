@@ -2,6 +2,13 @@ import { SystemStyleObject, Theme } from '@mui/system';
 import { APP_COLORS } from '../../Colors';
 
 export const APP_CONTAINER_STYLES: Record<string, SystemStyleObject<Theme>> = {
+  page: {
+    width: '100%',
+    height: '100%',
+    padding: '32px',
+    overflowY: 'auto',
+    overflowX: 'hidden',
+  },
   card: {
     position: 'relative',
     width: '100%',

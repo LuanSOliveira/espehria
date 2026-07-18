@@ -66,7 +66,9 @@ export default function LoginPage() {
         backgroundPosition: 'center',
       }}
     >
-      <FontAccessibilityControls />
+      <Box sx={{ position: 'fixed', top: 16, right: 16, zIndex: 50 }}>
+        <FontAccessibilityControls />
+      </Box>
 
       <Card component="form" onSubmit={handleSubmit(onSubmit)}>
         <Box
