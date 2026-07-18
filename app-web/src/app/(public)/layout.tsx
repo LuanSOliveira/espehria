@@ -1,18 +1,13 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Cinzel } from 'next/font/google';
 import '../globals.css';
 import { Providers } from '@/providers';
 import ThemeInitializer from '@/shared/components/ThemeInitializer';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const cinzel = Cinzel({
+  variable: '--font-cinzel',
   subsets: ['latin'],
 });
 
@@ -29,7 +24,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-br"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${cinzel.variable} h-full antialiased`}
     >
       <body>
         <Providers>

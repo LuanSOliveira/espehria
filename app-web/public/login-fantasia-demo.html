@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Espehria — Demo CSS puro</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cinzel+Decorative:wght@700&display=swap');
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+    font-family: 'Cinzel', serif;
+
+    /* ===== FUNDO DE MADEIRA ===== */
+    background-color: #2b1c12;
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        rgba(0,0,0,0.15) 0px,
+        rgba(0,0,0,0) 2px,
+        rgba(0,0,0,0) 90px,
+        rgba(0,0,0,0.15) 92px
+      ),
+      linear-gradient(90deg, #3a2717 0%, #2b1c12 50%, #3a2717 100%),
+      repeating-linear-gradient(
+        0deg,
+        rgba(255,255,255,0.02) 0px,
+        rgba(255,255,255,0.02) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+  }
+
+  /* ===== MODAL "PAPEL" ===== */
+  .modal {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    padding: 40px 32px 32px;
+    border-radius: 6px;
+
+    background-color: #d9c9a3;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(120,90,50,0.25) 0, transparent 35%),
+      radial-gradient(circle at 85% 75%, rgba(120,90,50,0.2) 0, transparent 40%),
+      radial-gradient(circle at 50% 100%, rgba(90,65,35,0.3) 0, transparent 50%),
+      linear-gradient(160deg, #e6d7b3 0%, #d3c093 60%, #c7b284 100%);
+
+    /* borda dourada dupla via box-shadow, sem gastar espaço de layout */
+    box-shadow:
+      0 0 0 1px #7a5a2a,
+      0 0 0 4px #d9c9a3,
+      0 0 0 5px #b8933f,
+      0 15px 40px rgba(0,0,0,0.6);
+  }
+
+  /* cantos ornamentados com pseudo-elementos */
+  .modal::before, .modal::after,
+  .modal .corner-tr, .modal .corner-bl {
+    content: '';
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border: 2px solid #b8933f;
+  }
+  .modal::before { top: 6px; left: 6px; border-right: none; border-bottom: none; }
+  .modal::after  { bottom: 6px; right: 6px; border-left: none; border-top: none; }
+  .modal .corner-tr { top: 6px; right: 6px; border-left: none; border-bottom: none; }
+  .modal .corner-bl { bottom: 6px; left: 6px; border-right: none; border-top: none; }
+
+  .title {
+    text-align: center;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    margin: 0 0 4px;
+    color: #7a4a10;
+    background: linear-gradient(180deg, #f0d488 0%, #b8842a 55%, #8a5c14 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 1px 0 rgba(255,255,255,0.3));
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #5a3f22;
+    margin: 24px 0 20px;
+  }
+
+  .subtitle::before, .subtitle::after {
+    content: '◆';
+    color: #b8933f;
+    font-size: 10px;
+    margin: 0 10px;
+  }
+
+  label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #5a3f22;
+    margin: 16px 0 6px;
+  }
+
+  /* ===== INPUTS ESTILIZADOS ===== */
+  .input-wrap {
+    position: relative;
+  }
+
+  .input-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    fill: #b8933f;
+    opacity: 0.85;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px 14px 12px 38px;
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    color: #e8d9b5;
+    background: linear-gradient(180deg, #2a1c10 0%, #1c1108 100%);
+    border: 1px solid #7a5a2a;
+    border-radius: 3px;
+    outline: none;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+  }
+
+  input::placeholder { color: #8a7550; }
+
+  input:focus {
+    border-color: #d9b45c;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 0 2px rgba(184,147,63,0.35);
+  }
+
+  .forgot {
+    text-align: right;
+    font-size: 11px;
+    color: #6a4d24;
+    margin-top: 8px;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  /* ===== BOTÃO PRINCIPAL ===== */
+  button.enter {
+    width: 100%;
+    margin-top: 22px;
+    padding: 13px;
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 3px;
+    font-weight: 700;
+    color: #f0d488;
+    background: linear-gradient(180deg, #4a3218 0%, #2e1d0c 100%);
+    border: 1px solid #b8933f;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: filter 0.15s ease;
+  }
+
+  button.enter:hover { filter: brightness(1.25); }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 18px 0;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #6a4d24;
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #b8933f, transparent);
+  }
+
+  button.google {
+    width: 100%;
+    padding: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: #4a331a;
+    background: #e6d7b3;
+    border: 1px solid #b8933f;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+  <div class="modal">
+    <span class="corner-tr"></span>
+    <span class="corner-bl"></span>
+
+    <h1 class="title">Espehria</h1>
+    <p class="subtitle">Acesse sua conta</p>
+
+    <label>Usuário</label>
+    <div class="input-wrap">
+      <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/></svg>
+      <input type="text" placeholder="Digite seu usuário">
+    </div>
+
+    <label>Senha</label>
+    <div class="input-wrap">
+      <svg viewBox="0 0 24 24"><path d="M12 1a5 5 0 00-5 5v3H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2v-9a2 2 0 00-2-2h-2V6a5 5 0 00-5-5zm-3 8V6a3 3 0 016 0v3H9z"/></svg>
+      <input type="password" placeholder="Digite sua senha">
+    </div>
+    <div class="forgot">Esqueceu sua senha?</div>
+
+    <button class="enter">ENTRAR</button>
+
+    <div class="divider">OU</div>
+
+    <button class="google">Continuar com Google</button>
+  </div>
+
+</body>
+</html>
