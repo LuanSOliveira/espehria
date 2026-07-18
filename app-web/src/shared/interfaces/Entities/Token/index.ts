@@ -1,7 +1,6 @@
 export interface IJwtToken {
   sub: string;
-  role: string[];
-  iss: string;
+  email: string;
   exp: number;
   iat: number;
 }

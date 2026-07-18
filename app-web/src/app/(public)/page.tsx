@@ -3,12 +3,12 @@
 import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { Box } from '@mui/material';
-import { FiLock, FiUser } from 'react-icons/fi';
-import { FcGoogle } from 'react-icons/fc';
+import { FiLock, FiMail } from 'react-icons/fi';
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 
 import { Card } from '@/shared/components/Containers';
 import { FormPasswordInput, FormTextInput } from '@/shared/components/Inputs';
-import { PrimaryButton, SecondaryButton } from '@/shared/components/Buttons';
+import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText, Label } from '@/shared/components/Texts';
 import { FontAccessibilityControls } from '@/shared/components/FontAccessibilityControls';
 import {
@@ -17,6 +17,8 @@ import {
   loginFormResolver,
 } from '@/shared/formSchemas';
 import { APP_COLORS } from '@/shared/constants';
+import { useGoogleLoginMutation, useLoginMutation } from '@/hooks/Auth';
+import { showToast } from '@/shared/util';
 
 export default function LoginPage() {
   const { control, handleSubmit } = useForm<LoginFormData>({
@@ -24,8 +26,30 @@ export default function LoginPage() {
     defaultValues: loginFormDefaultValues,
   });
 
+  const loginMutation = useLoginMutation();
+  const googleLoginMutation = useGoogleLoginMutation();
+
   const onSubmit = (data: LoginFormData) => {
-    console.log(data);
+    loginMutation.mutate(data);
+  };
+
+  const handleGoogleSuccess = (credentialResponse: CredentialResponse) => {
+    if (!credentialResponse.credential) {
+      showToast({
+        message: 'Não foi possível entrar com o Google.',
+        type: 'error',
+      });
+      return;
+    }
+
+    googleLoginMutation.mutate({ idToken: credentialResponse.credential });
+  };
+
+  const handleGoogleError = () => {
+    showToast({
+      message: 'Não foi possível entrar com o Google.',
+      type: 'error',
+    });
   };
 
   return (
@@ -90,13 +114,14 @@ export default function LoginPage() {
           </DefaultText>
         </Box>
 
-        <Label htmlFor="username">Usuário</Label>
+        <Label htmlFor="email">E-mail</Label>
         <FormTextInput
-          id="username"
-          name="username"
+          id="email"
+          name="email"
+          type="email"
           control={control}
-          placeholder="Digite seu usuário"
-          icon={<FiUser />}
+          placeholder="Digite seu e-mail"
+          icon={<FiMail />}
         />
 
         <Box sx={{ marginTop: '16px' }}>
@@ -111,7 +136,9 @@ export default function LoginPage() {
         </Box>
 
         <Box sx={{ marginTop: '22px' }}>
-          <PrimaryButton type="submit">Entrar</PrimaryButton>
+          <PrimaryButton type="submit" isLoading={loginMutation.isPending}>
+            Entrar
+          </PrimaryButton>
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '18px 0' }}>
@@ -138,9 +165,16 @@ export default function LoginPage() {
           />
         </Box>
 
-        <SecondaryButton type="button" icon={<FcGoogle />}>
-          Continuar com Google
-        </SecondaryButton>
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            theme="filled_black"
+            shape="rectangular"
+            text="continue_with"
+            width="356"
+          />
+        </Box>
       </Card>
     </Box>
   );
