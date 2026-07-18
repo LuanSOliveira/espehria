@@ -4,11 +4,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
   typography: {
-    fontFamily: 'var(--font-cinzel), serif',
-    fontWeightLight: 400,
-    fontWeightRegular: 500,
-    fontWeightMedium: 600,
-    fontWeightBold: 800,
+    fontFamily: 'var(--font-geist-sans), sans-serif',
   },
 });
 
