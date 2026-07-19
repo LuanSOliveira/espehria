@@ -10,6 +10,7 @@ import configuration, { AppConfig } from './config/configuration';
 import { validate } from './config/env.validation';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
+import { CreaturesModule } from './modules/creatures/creatures.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { UsersModule } from './modules/users/users.module';
     }),
     UsersModule,
     AuthModule,
+    CreaturesModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

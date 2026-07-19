@@ -47,4 +47,82 @@ export const APP_INPUT_STYLES: Record<string, SystemStyleObject<Theme>> = {
       color: APP_COLORS.goldLight,
     },
   },
+  richTextField: {
+    backgroundImage: `linear-gradient(180deg, ${APP_COLORS.inputBg} 0%, ${APP_COLORS.inputBgDark} 100%)`,
+    borderRadius: '3px',
+    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.5)',
+    border: `1px solid ${APP_COLORS.goldDark}`,
+    padding: '8px 12px',
+    '&:hover': {
+      borderColor: APP_COLORS.gold,
+    },
+    '&:focus-within': {
+      borderColor: APP_COLORS.goldLight,
+    },
+  },
+  richTextToolbar: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '4px',
+    marginBottom: '8px',
+    paddingBottom: '8px',
+    borderBottom: `1px solid ${APP_COLORS.goldDark}`,
+  },
+  richTextToolbarButton: {
+    color: APP_COLORS.gold,
+    padding: '4px',
+    borderRadius: '3px',
+    '&:hover': {
+      backgroundColor: APP_COLORS.woodLight,
+    },
+  },
+  richTextToolbarButtonActive: {
+    color: APP_COLORS.goldLight,
+    backgroundColor: APP_COLORS.woodLight,
+  },
+  richTextContent: {
+    color: APP_COLORS.inputText,
+    minHeight: '120px',
+    '& .ProseMirror': {
+      outline: 'none',
+    },
+    '& .ProseMirror p': {
+      margin: '0.25em 0',
+    },
+    '& .ProseMirror h1': {
+      fontSize: '1.5em',
+      fontWeight: 700,
+      margin: '0.5em 0',
+    },
+    '& .ProseMirror h2': {
+      fontSize: '1.25em',
+      fontWeight: 700,
+      margin: '0.5em 0',
+    },
+    '& .ProseMirror h3': {
+      fontSize: '1.1em',
+      fontWeight: 700,
+      margin: '0.5em 0',
+    },
+    '& .ProseMirror ul': {
+      paddingLeft: '1.5em',
+      listStyleType: 'disc',
+    },
+    '& .ProseMirror ol': {
+      paddingLeft: '1.5em',
+      listStyleType: 'decimal',
+    },
+  },
+  richTextPlaceholder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    color: APP_COLORS.inputPlaceholder,
+    pointerEvents: 'none',
+  },
+  richTextError: {
+    marginTop: '4px',
+    fontSize: '12px',
+    color: APP_COLORS.goldDeep,
+  },
 };

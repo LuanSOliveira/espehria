@@ -13,7 +13,12 @@ export interface FormModalProps {
   children: ReactNode;
 }
 
-export const FormModal = ({ open, onClose, title, children }: FormModalProps) => {
+export const FormModal = ({
+  open,
+  onClose,
+  title,
+  children,
+}: FormModalProps) => {
   return (
     <Dialog
       open={open}

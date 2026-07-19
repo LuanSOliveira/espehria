@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Divider } from '@mui/material';
-import { FiHome, FiUsers } from 'react-icons/fi';
+import { FiFeather, FiHome, FiUsers } from 'react-icons/fi';
 import { IconType } from 'react-icons';
 import { DefaultText, Label } from '@/shared/components/Texts';
 import { useAccessibleFontSize } from '@/hooks/FontAccessibility';
@@ -24,6 +24,16 @@ interface NavSection {
 const NAV_SECTIONS: NavSection[] = [
   {
     items: [{ label: 'Home', href: APP_ROUTES.private.home, icon: FiHome }],
+  },
+  {
+    title: 'Mundo',
+    items: [
+      {
+        label: 'Criaturas',
+        href: APP_ROUTES.private.creatures,
+        icon: FiFeather,
+      },
+    ],
   },
   {
     title: 'Gerenciamento',
