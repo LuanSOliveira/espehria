@@ -27,13 +27,8 @@ export default function UsersPage() {
     perPage: APP_DEFAULT_PAGE_SIZE,
   });
 
-  const selectedUser = useSelectedUserStore((state) => state.selectedUser);
-  const setSelectedUser = useSelectedUserStore(
-    (state) => state.setSelectedUser,
-  );
-  const resetSelectedUser = useSelectedUserStore(
-    (state) => state.resetSelectedUser,
-  );
+  const { selectedUser, resetSelectedUser, setSelectedUser } =
+    useSelectedUserStore();
 
   const { data, isLoading } = useGetEntityList<IUser, IUserListFilters>({
     url: '/users',
