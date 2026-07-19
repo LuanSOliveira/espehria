@@ -6,6 +6,10 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
+import {
+  DEFAULT_PAGE,
+  DEFAULT_PER_PAGE,
+} from '../../common/variables/pagination';
 import { AuthProvider } from './enums/auth-provider.enum';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -13,8 +17,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { FindUsersQueryDto } from './dto/find-users-query.dto';
 
 const SALT_ROUNDS = 10;
-const DEFAULT_PAGE = 1;
-const DEFAULT_PER_PAGE = 20;
 
 export interface PaginatedUsers {
   data: User[];

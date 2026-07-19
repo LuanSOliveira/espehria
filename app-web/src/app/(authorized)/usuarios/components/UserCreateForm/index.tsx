@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { FiLock, FiMail, FiUser } from 'react-icons/fi';
 import { FormPasswordInput, FormTextInput } from '@/shared/components/Inputs';
-import { Label } from '@/shared/components/Texts';
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { usePostEntity, usePutEntity } from '@/hooks/Queries';
 import {
@@ -102,43 +101,35 @@ export const UserCreateForm = ({ onSaved }: UserCreateFormProps) => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      <div>
-        <Label htmlFor="user-form-name">Nome</Label>
-        <FormTextInput
-          id="user-form-name"
-          name="name"
-          control={control}
-          placeholder="Digite o nome"
-          icon={<FiUser />}
-        />
-      </div>
+      <FormTextInput
+        id="user-form-name"
+        name="name"
+        control={control}
+        label="Nome"
+        placeholder="Digite o nome"
+        icon={<FiUser />}
+      />
 
-      <div>
-        <Label htmlFor="user-form-email">E-mail</Label>
-        <FormTextInput
-          id="user-form-email"
-          name="email"
-          type="email"
-          control={control}
-          placeholder="Digite o e-mail"
-          icon={<FiMail />}
-        />
-      </div>
+      <FormTextInput
+        id="user-form-email"
+        name="email"
+        type="email"
+        control={control}
+        label="E-mail"
+        placeholder="Digite o e-mail"
+        icon={<FiMail />}
+      />
 
-      <div>
-        <Label htmlFor="user-form-password">
-          Senha{isEditMode ? ' (opcional)' : ''}
-        </Label>
-        <FormPasswordInput
-          id="user-form-password"
-          name="password"
-          control={control}
-          placeholder={
-            isEditMode ? 'Deixe em branco para manter a atual' : 'Digite a senha'
-          }
-          icon={<FiLock />}
-        />
-      </div>
+      <FormPasswordInput
+        id="user-form-password"
+        name="password"
+        control={control}
+        label={`Senha${isEditMode ? ' (opcional)' : ''}`}
+        placeholder={
+          isEditMode ? 'Deixe em branco para manter a atual' : 'Digite a senha'
+        }
+        icon={<FiLock />}
+      />
 
       <PrimaryButton type="submit" isLoading={isPending} sx={{ marginTop: '8px' }}>
         {isEditMode ? 'Salvar' : 'Cadastrar'}

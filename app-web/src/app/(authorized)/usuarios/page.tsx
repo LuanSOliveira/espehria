@@ -5,7 +5,7 @@ import { FiSearch } from 'react-icons/fi';
 
 import { PageContainer } from '@/shared/components/Containers';
 import { ConfirmationModal, FormModal } from '@/shared/components/Modals';
-import { Label, Title } from '@/shared/components/Texts';
+import { Title } from '@/shared/components/Texts';
 import { DefaultTextInput } from '@/shared/components/Inputs';
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { useDeleteEntity, useGetEntityList } from '@/hooks/Queries';
@@ -103,9 +103,9 @@ export default function UsersPage() {
         className="mt-6 flex max-w-90 items-end gap-3"
       >
         <div className="flex-1">
-          <Label htmlFor="users-email-filter">E-mail</Label>
           <DefaultTextInput
             id="users-email-filter"
+            label="E-mail"
             placeholder="Buscar por e-mail"
             value={emailInput}
             onChange={(event) => setEmailInput(event.target.value)}

@@ -9,20 +9,27 @@ import {
   TextFieldProps,
 } from '@mui/material';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { Label } from '@/shared/components/Texts';
 import { useAccessibleFontSize } from '@/hooks/FontAccessibility';
 import { APP_INPUT_STYLES, APP_INPUT_BASE_FONT_SIZE } from '@/shared/constants';
 
 export interface FormPasswordInputProps<TFieldValues extends FieldValues>
-  extends Omit<TextFieldProps, 'name' | 'variant' | 'defaultValue' | 'type'> {
+  extends Omit<
+    TextFieldProps,
+    'name' | 'variant' | 'defaultValue' | 'type' | 'label'
+  > {
   name: FieldPath<TFieldValues>;
   control: Control<TFieldValues>;
   icon?: ReactNode;
+  label?: ReactNode;
 }
 
 export const FormPasswordInput = <TFieldValues extends FieldValues>({
   name,
   control,
   icon,
+  label,
+  id,
   sx,
   slotProps,
   ...rest
@@ -32,54 +39,58 @@ export const FormPasswordInput = <TFieldValues extends FieldValues>({
   const iconFontSize = useAccessibleFontSize(APP_INPUT_BASE_FONT_SIZE.icon);
 
   return (
-    <Controller
-      name={name}
-      control={control}
-      render={({ field, fieldState }) => (
-        <TextField
-          {...field}
-          variant="outlined"
-          fullWidth
-          type={isVisible ? 'text' : 'password'}
-          error={!!fieldState.error}
-          helperText={fieldState.error?.message}
-          sx={[
-            APP_INPUT_STYLES.textField,
-            { '& .MuiOutlinedInput-input': { fontSize } },
-            ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
-          ]}
-          slotProps={{
-            ...slotProps,
-            input: {
-              startAdornment: icon ? (
-                <InputAdornment
-                  position="start"
-                  sx={[APP_INPUT_STYLES.startIcon, { fontSize: iconFontSize }]}
-                >
-                  {icon}
-                </InputAdornment>
-              ) : undefined,
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label={isVisible ? 'Ocultar senha' : 'Exibir senha'}
-                    onClick={() => setIsVisible((current) => !current)}
-                    edge="end"
-                    sx={[
-                      APP_INPUT_STYLES.visibilityToggle,
-                      { fontSize: iconFontSize },
-                    ]}
+    <div>
+      {label && <Label htmlFor={id}>{label}</Label>}
+      <Controller
+        name={name}
+        control={control}
+        render={({ field, fieldState }) => (
+          <TextField
+            {...field}
+            id={id}
+            variant="outlined"
+            fullWidth
+            type={isVisible ? 'text' : 'password'}
+            error={!!fieldState.error}
+            helperText={fieldState.error?.message}
+            sx={[
+              APP_INPUT_STYLES.textField,
+              { '& .MuiOutlinedInput-input': { fontSize } },
+              ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+            ]}
+            slotProps={{
+              ...slotProps,
+              input: {
+                startAdornment: icon ? (
+                  <InputAdornment
+                    position="start"
+                    sx={[APP_INPUT_STYLES.startIcon, { fontSize: iconFontSize }]}
                   >
-                    {isVisible ? <FiEyeOff /> : <FiEye />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-              ...slotProps?.input,
-            },
-          }}
-          {...rest}
-        />
-      )}
-    />
+                    {icon}
+                  </InputAdornment>
+                ) : undefined,
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label={isVisible ? 'Ocultar senha' : 'Exibir senha'}
+                      onClick={() => setIsVisible((current) => !current)}
+                      edge="end"
+                      sx={[
+                        APP_INPUT_STYLES.visibilityToggle,
+                        { fontSize: iconFontSize },
+                      ]}
+                    >
+                      {isVisible ? <FiEyeOff /> : <FiEye />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                ...slotProps?.input,
+              },
+            }}
+            {...rest}
+          />
+        )}
+      />
+    </div>
   );
 };

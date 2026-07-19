@@ -8,7 +8,7 @@ import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { Card } from '@/shared/components/Containers';
 import { FormPasswordInput, FormTextInput } from '@/shared/components/Inputs';
 import { PrimaryButton } from '@/shared/components/Buttons';
-import { DefaultText, Label } from '@/shared/components/Texts';
+import { DefaultText } from '@/shared/components/Texts';
 import { FontAccessibilityControls } from '@/shared/components/FontAccessibilityControls';
 import {
   LoginFormData,
@@ -95,22 +95,22 @@ export default function LoginPage() {
           </DefaultText>
         </div>
 
-        <Label htmlFor="email">E-mail</Label>
         <FormTextInput
           id="email"
           name="email"
           type="email"
           control={control}
+          label="E-mail"
           placeholder="Digite seu e-mail"
           icon={<FiMail />}
         />
 
         <div className="mt-4">
-          <Label htmlFor="password">Senha</Label>
           <FormPasswordInput
             id="password"
             name="password"
             control={control}
+            label="Senha"
             placeholder="Digite sua senha"
             icon={<FiLock />}
           />
