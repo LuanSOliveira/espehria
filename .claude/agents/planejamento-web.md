@@ -1,6 +1,6 @@
 ---
 name: planejamento-web
-description: Use PROACTIVELY quando uma demanda de frontend (app-web) precisar ser planejada antes da implementação — definir componentes reutilizáveis necessários e as páginas/funcionalidades que dependem deles. Deve rodar depois do agente `spec` (se um .claude/tasks/<slug>/spec.md existir, use-o como base). Não use para implementar código — apenas para gerar o plano de tarefas.
+description: Use PROACTIVELY quando uma demanda de frontend (app-web) precisar ser planejada antes da implementação — definir componentes reutilizáveis necessários e as páginas/funcionalidades que dependem deles, consolidados na etapa única "web-dev". Deve rodar depois do agente `spec` (se um .claude/tasks/<slug>/spec.md existir, use-o como base). Não use para implementar código — apenas para gerar o plano de tarefas.
 tools: Read, Grep, Glob, Write
 model: sonnet
 ---
@@ -47,13 +47,17 @@ produção, nunca cria componentes ou páginas de verdade — apenas planeja.
    query já usados para endpoints parecidos, etc. Isso informa o plano — não gera código.
 
 5. Defina o plano de implementação, deixando explícito:
-   - Se algum componente pequeno reutilizável precisa ser criado ANTES (inputs, cards,
-     botões etc.) — só inclua a etapa de componentes se algo realmente não existir
-     ainda em `shared/components/`; se tudo já existir, não crie essa etapa.
-   - Quais páginas/rotas e funcionalidades precisam ser criadas ou alteradas, sempre
-     modeladas como dependentes das etapas de componente (quando existirem), incluindo
-     quais endpoints da API serão consumidos e quais campos/regras de validação o
-     formulário (se houver) deve cobrir.
+   - Se algum componente pequeno reutilizável precisa ser criado (inputs, cards,
+     botões etc.) — só inclua a subseção de componentes se algo realmente não existir
+     ainda em `shared/components/`; se tudo já existir, não crie essa subseção.
+   - Quais páginas/rotas e funcionalidades precisam ser criadas ou alteradas,
+     incluindo quais endpoints da API serão consumidos e quais campos/regras de
+     validação o formulário (se houver) deve cobrir.
+
+   A implementação de componentes e de funcionalidade é feita por um único agente
+   (`web-dev`), então não é necessário modelar dependência entre etapas separadas —
+   apenas deixe claro, dentro da mesma etapa, que componentes (quando existirem)
+   precisam existir antes de a funcionalidade os consumir.
 
 6. Crie o arquivo `.claude/tasks/<slug>/task-web.md` com exatamente esta estrutura:
 
@@ -65,25 +69,25 @@ produção, nunca cria componentes ou páginas de verdade — apenas planeja.
 
    ## Etapas
 
-   ### 1. web-dev-componentes (se necessário)
+   ### 1. web-dev
+
+   #### Componentes (se necessário)
    - Componente: [nome]
    - Props: [lista]
    - Comportamento esperado: [descrição]
 
-   ### 2. web-dev-funcionalidade
-   - Depende da etapa 1 (se existir)
+   #### Funcionalidade
    - Páginas/rotas: [lista]
    - Integrações com API: [endpoints consumidos]
    - Formulário/validação: [campos e regras, se houver]
 
-   ### 3. web-dev-codereviewer
+   ### 2. web-dev-codereviewer
    - Revisar tudo acima
    ```
 
-   - Se nenhum componente novo for necessário, omita a etapa `web-dev-componentes`
-     inteira e ajuste a etapa `web-dev-funcionalidade` para não mencionar dependência
-     de etapa anterior.
-   - Preencha cada etapa com os detalhes concretos levantados no passo 5.
+   - Se nenhum componente novo for necessário, omita a subseção "Componentes"
+     inteira, mantendo apenas "Funcionalidade" dentro da etapa "1. web-dev".
+   - Preencha cada subseção com os detalhes concretos levantados no passo 5.
 
 ## Regras importantes
 

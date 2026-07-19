@@ -26,10 +26,10 @@ progresso através dos arquivos de task — você NUNCA implementa código diret
 - `spec` — esclarece ambiguidade e gera `.claude/tasks/<slug>/spec.md`.
 - `planejamento-api` — gera `.claude/tasks/<slug>/task-api.md`.
 - `planejamento-web` — gera `.claude/tasks/<slug>/task-web.md`.
-- Backend, em ordem: `api-dev-entidade` → `api-dev-migration` (se a task tiver essa
-  etapa) → `api-dev-controller` → `api-dev-doc` → `api-dev-codereviewer`.
-- Frontend, em ordem: `web-dev-componentes` (se a task tiver essa etapa) →
-  `web-dev-funcionalidade` → `web-dev-codereviewer`.
+- Backend, em ordem: `api-dev` (entidade + migration, quando houver + controller/
+  service/DTOs, em uma única execução) → `api-dev-doc` → `api-dev-codereviewer`.
+- Frontend, em ordem: `web-dev` (componentes, quando houver + página/funcionalidade,
+  em uma única execução) → `web-dev-codereviewer`.
 
 ## Processo
 
@@ -74,20 +74,23 @@ Antes de acionar cada agente de execução:
   a dependência parecer travada).
 - Ao invocar cada agente via Task, informe explicitamente: o caminho exato do arquivo
   de task (`.claude/tasks/<slug>/task-api.md` ou `task-web.md`) e a seção numerada que
-  ele deve ler (ex.: "leia a seção '3. api-dev-controller' de
+  ele deve ler (ex.: "leia a seção '1. api-dev' de
   .claude/tasks/cadastro-usuario/task-api.md"). Não resuma ou reinterprete o conteúdo
   da seção para o agente — ele deve ler a fonte diretamente.
 
 Ordem de execução:
-- Backend: `api-dev-entidade` → `api-dev-migration` (só se a etapa existir na task) →
-  `api-dev-controller` → `api-dev-doc` → `api-dev-codereviewer`.
-- Frontend: `web-dev-componentes` (só se a etapa existir na task) →
-  `web-dev-funcionalidade` → `web-dev-codereviewer`.
+- Backend: `api-dev` → `api-dev-doc` → `api-dev-codereviewer`.
+- Frontend: `web-dev` → `web-dev-codereviewer`.
+
+Cada um desses agentes já cobre internamente sua parte inteira do trabalho (o
+`api-dev` decide sozinho se precisa de migration e faz entidade+migration+controller
+juntos; o `web-dev` decide sozinho se precisa criar componentes antes de implementar a
+página) — você não precisa mais checar dependências dentro dessas etapas, apenas entre
+elas (ex.: `api-dev-doc` só depois de `api-dev` concluído).
 
 Se a demanda envolver ambos os apps e o frontend depender de endpoints da API (caso
-mais comum), execute o pipeline de backend até pelo menos `api-dev-controller`
-concluído antes de iniciar `web-dev-funcionalidade` — mas `web-dev-componentes` pode
-rodar em paralelo ao backend, já que não depende da API.
+mais comum), execute `api-dev` até concluído antes de iniciar `web-dev`, já que o
+`web-dev` pode precisar integrar com rotas que ainda não existem.
 
 ### 5. Tratar o resultado dos code reviewers
 
@@ -97,10 +100,11 @@ seção "## Revisão" do respectivo arquivo de task.
 - Se aprovado sem problemas, a pipeline daquele lado (api/web) está concluída.
 - Se houver problemas reportados, decida se devem ser corrigidos antes de considerar a
   demanda concluída:
-  - Delegue de volta ao agente responsável pelo arquivo com o problema (ex.: um
-    problema em um controller volta para `api-dev-controller`, um problema em
-    migration volta para `api-dev-migration`), apontando exatamente o achado da seção
-    "## Revisão" a ser corrigido.
+  - Delegue de volta ao agente responsável pelo tipo de arquivo com o problema (um
+    achado em entidade, migration, controller, service ou componente/página volta
+    para `api-dev`/`web-dev`; um achado puramente de documentação Swagger volta para
+    `api-dev-doc`), apontando exatamente o achado da seção "## Revisão" a ser
+    corrigido.
   - Após a correção, avalie se faz sentido rodar o code reviewer novamente antes de
     encerrar, especialmente se o achado era de segurança ou de inconsistência
     migration↔entidade.

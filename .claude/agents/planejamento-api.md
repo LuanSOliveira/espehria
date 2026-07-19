@@ -1,6 +1,6 @@
 ---
 name: planejamento-api
-description: Use PROACTIVELY quando uma demanda de backend (app-api) precisar ser planejada antes da implementação — definir entidades, migrations, controllers/endpoints e cobertura de Swagger. Deve rodar depois do agente `spec` (se um .claude/tasks/<slug>/spec.md existir, use-o como base). Não use para implementar código — apenas para gerar o plano de tarefas.
+description: Use PROACTIVELY quando uma demanda de backend (app-api) precisar ser planejada antes da implementação — definir entidades, migrations, controllers/endpoints (consolidados na etapa única "api-dev") e cobertura de Swagger. Deve rodar depois do agente `spec` (se um .claude/tasks/<slug>/spec.md existir, use-o como base). Não use para implementar código — apenas para gerar o plano de tarefas.
 tools: Read, Grep, Glob, Write
 model: sonnet
 ---
@@ -51,6 +51,10 @@ nunca cria migrations de verdade, nunca edita entidades ou controllers — apena
    - O que a documentação Swagger deve cobrir (novos `@ApiProperty`, respostas,
      tags, etc.).
 
+   A implementação de entidade, migration e controller é feita por um único agente
+   (`api-dev`), então não é necessário modelar dependência entre etapas separadas para
+   essas três partes — apenas descreva cada uma com clareza dentro da mesma etapa.
+
 6. Crie o arquivo `.claude/tasks/<slug>/task-api.md` com exatamente esta estrutura:
 
    ```markdown
@@ -61,29 +65,32 @@ nunca cria migrations de verdade, nunca edita entidades ou controllers — apena
 
    ## Etapas
 
-   ### 1. api-dev-entidade
+   ### 1. api-dev
+
+   #### Entidade
    - Entidade: [nome]
    - Campos: [nome (tipo), ...]
    - Relacionamentos: [se houver]
 
-   ### 2. api-dev-migration
-   - Depende da etapa 1
+   #### Migration
+   - Necessária: [sim/não]
 
-   ### 3. api-dev-controller
+   #### Controller
    - Endpoints: [MÉTODO /rota, ...]
    - DTOs: [nomes]
 
-   ### 4. api-dev-doc
-   - Depende da etapa 3
+   ### 2. api-dev-doc
+   - Depende da etapa 1
 
-   ### 5. api-dev-codereviewer
+   ### 3. api-dev-codereviewer
    - Revisar tudo acima
    ```
 
-   - Preencha cada etapa com os detalhes concretos levantados nos passos 4 e 5.
-   - Se uma etapa não se aplicar (ex.: demanda não cria entidade nova, só altera
-     controller), explicite isso na própria etapa em vez de omiti-la — mantenha
-     sempre as 5 etapas na estrutura.
+   - Preencha cada subseção com os detalhes concretos levantados nos passos 4 e 5.
+   - Se uma subseção não se aplicar (ex.: demanda não cria entidade nova, só altera
+     controller), explicite isso na própria subseção em vez de omiti-la — mantenha
+     sempre as três subseções ("Entidade", "Migration", "Controller") dentro da etapa
+     "1. api-dev".
 
 ## Regras importantes
 

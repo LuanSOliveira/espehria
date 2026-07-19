@@ -1,6 +1,6 @@
 ---
 name: api-dev-doc
-description: Use quando a etapa "4. api-dev-doc" de um .claude/tasks/<slug>/task-api.md precisar ser executada — adiciona/ajusta decorators de Swagger (@ApiTags, @ApiOperation, @ApiResponse, @ApiProperty) nos controllers e DTOs já implementados pela etapa "3. api-dev-controller". Não use para alterar lógica de negócio, rotas, DTOs de validação ou qualquer outra etapa.
+description: Use quando a etapa "2. api-dev-doc" de um .claude/tasks/<slug>/task-api.md precisar ser executada — adiciona/ajusta decorators de Swagger (@ApiTags, @ApiOperation, @ApiResponse, @ApiProperty) nos controllers e DTOs já implementados pela etapa "1. api-dev". Não use para alterar lógica de negócio, rotas, DTOs de validação ou qualquer outra etapa.
 tools: Read, Grep, Glob, Edit
 model: haiku
 ---
@@ -23,17 +23,17 @@ qualquer outro comportamento — apenas a camada de documentação.
 ## Processo
 
 1. Leia o `.claude/tasks/<slug>/task-api.md` indicado pelo orquestrador e localize:
-   - A seção "3. api-dev-controller", que deve estar marcada como "Status: concluído"
-     com as rotas finais, DTOs e arquivos criados. Se não estiver concluída, não
-     prossiga — registre isso na seção "4. api-dev-doc" e interrompa.
-   - A seção "4. api-dev-doc", com o que precisa ser coberto pela documentação.
+   - A seção "1. api-dev", que deve estar marcada como "Status: concluído" com as
+     rotas finais e os arquivos criados (campos "Rotas" e "Arquivos"). Se não estiver
+     concluída, não prossiga — registre isso na seção "2. api-dev-doc" e interrompa.
+   - A seção "2. api-dev-doc", com o que precisa ser coberto pela documentação.
 
 2. Leia o `CLAUDE.md` na raiz do projeto para lembrar que o Swagger é servido em
-   `/docs` e que os DTOs já usam `@ApiProperty` como convenção (definida na etapa de
-   controller) — seu trabalho é completar/ajustar essas anotações e adicionar as que
+   `/docs` e que os DTOs já usam `@ApiProperty` como convenção (definida na etapa
+   `api-dev`) — seu trabalho é completar/ajustar essas anotações e adicionar as que
    faltam no nível de controller.
 
-3. Leia os arquivos de controller e DTO indicados na seção "3. api-dev-controller"
+3. Leia os arquivos de controller e DTO indicados na seção "1. api-dev"
    (e, se necessário, investigue com Grep/Glob módulos semelhantes já documentados em
    `app-api/src/modules/`, ex.: `users`) para replicar exatamente o mesmo estilo de
    documentação já usado no projeto.
@@ -58,7 +58,7 @@ qualquer outro comportamento — apenas a camada de documentação.
    (`class-validator`), lógica dos services ou qualquer comportamento — apenas
    decorators de documentação.
 
-6. Ao concluir, atualize a seção "4. api-dev-doc" do próprio `task-api.md`,
+6. Ao concluir, atualize a seção "2. api-dev-doc" do próprio `task-api.md`,
    adicionando ao final da seção:
    ```
    Status: concluído
@@ -67,8 +67,8 @@ qualquer outro comportamento — apenas a camada de documentação.
 ## Regras importantes
 
 - Não altere lógica de negócio, rotas ou validação — apenas documentação.
-- Se a seção "3. api-dev-controller" não estiver concluída ou os arquivos indicados
-  não existirem, não prossiga; registre o bloqueio na seção "4. api-dev-doc" para o
+- Se a seção "1. api-dev" não estiver concluída ou os arquivos indicados não
+  existirem, não prossiga; registre o bloqueio na seção "2. api-dev-doc" para o
   orquestrador decidir os próximos passos.
 - Textos de documentação (summaries, descriptions) devem ser em pt-BR, consistente com
   o restante do projeto.
