@@ -27,12 +27,16 @@ integração com API, formulário, rotas. Você não escreve nada em `app-api/`.
 - `web-tabela-listagem` — padrão de tabela de listagem de entidades (componente List +
   componente ListItem, ambos específicos da página).
 - `web-form-schema` — padrão de schema `zod` para formulários (`shared/formSchemas/`).
+- `web-form-cadastro` — padrão de formulário de cadastro/edição em `FormModal`,
+  alternando criar/editar via store de "entidade selecionada" e recarregando a lista
+  via `invalidateQueryKeys` no submit.
 - `web-integracao-api` — padrão de integração com a API via hooks genéricos de
   `hooks/Queries` + React Query.
 - `web-nova-pagina` — padrão para criar uma página nova e registrar sua rota.
 - `web-providers` — padrão para adicionar um provider de biblioteca nova.
 - `web-cores` — padrão para adicionar uma nova cor ao design system.
 - `web-utilitarios` — padrão para criar funções utilitárias reaproveitáveis.
+- `web-icones` — garante que todo ícone usado venha de `react-icons`.
 
 ## Processo
 
@@ -61,6 +65,10 @@ integração com API, formulário, rotas. Você não escreve nada em `app-api/`.
 5. **Funcionalidade**:
    - Se houver formulário, invoque a skill `web-form-schema` antes de criar o schema
      de validação.
+   - Se o formulário for de cadastro/edição de uma entidade (não um formulário de
+     busca/filtro simples), invoque também a skill `web-form-cadastro` antes de
+     implementar — ela define o padrão de modal, alternância criar/editar e
+     recarregamento da lista após o submit.
    - Para consumir a API, invoque a skill `web-integracao-api` antes de decidir entre
      reaproveitar um hook genérico existente ou criar um novo.
    - Se a demanda envolver uma página nova, invoque a skill `web-nova-pagina` antes de
@@ -76,7 +84,11 @@ integração com API, formulário, rotas. Você não escreve nada em `app-api/`.
    - Reaproveite componentes e hooks já existentes em vez de recriar UI ou lógica
      equivalente — investigue `app-web/src/` (Grep/Glob/Read) antes de criar algo novo.
 
-6. Ao concluir, atualize a seção "1. web-dev" do próprio `task-web.md`, adicionando ao
+6. **Ícones**: sempre que a implementação (componente genérico, específico de página,
+   ou item de navegação) precisar de um ícone, invoque a skill `web-icones` antes de
+   escolher/importar — todo ícone da aplicação vem de `react-icons`.
+
+7. Ao concluir, atualize a seção "1. web-dev" do próprio `task-web.md`, adicionando ao
    final da seção:
    ```
    Status: concluído

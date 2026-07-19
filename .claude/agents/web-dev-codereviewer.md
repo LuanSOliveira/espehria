@@ -46,11 +46,20 @@ diretamente — apenas analisa e documenta os achados.
    - **Formulários**: uso correto de `react-hook-form` + `zod` (não Yup — confirme que
      o schema segue a convenção `shared/formSchemas/` do projeto), mensagens de
      validação em pt-BR, variante de edição tratada quando aplicável (ex.: senha
-     opcional).
+     opcional). Formulários de cadastro/edição de entidade devem seguir o padrão
+     `web-form-cadastro`: renderizados dentro de `FormModal`, modo criar/editar
+     derivado de uma store de "entidade selecionada" (não de uma prop manual), e — o
+     ponto mais crítico — a mutation de submit com sucesso deve ter
+     `invalidateQueryKeys` apontando para a query da listagem correspondente, para que
+     a lista recarregue sozinha (nunca um `refetch()` manual ou reload de página).
    - **React Query**: uso dos hooks genéricos de `hooks/Queries` em vez de
      `useQuery`/`useMutation` bespoke; tratamento de estado de loading e erro nas
      chamadas (feedback visual ao usuário, não apenas ausência de crash);
      `invalidateQueryKeys` configurados corretamente após mutações.
+   - **Ícones**: todo ícone importado de `react-icons` (verifique se não há
+     `@mui/icons-material`, outra lib de ícones, SVG customizado ou emoji usado como
+     ícone funcional); ícones dentro de `IconButton` sem texto visível têm
+     `aria-label` em pt-BR.
    - **Acessibilidade básica**: labels associados a inputs, textos alternativos em
      ícones/imagens quando aplicável, contraste/uso de componentes MUI acessíveis por
      padrão, foco navegável em modais.
