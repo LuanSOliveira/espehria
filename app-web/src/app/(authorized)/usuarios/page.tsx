@@ -4,6 +4,7 @@ import { SubmitEvent, useState } from 'react';
 import { FiSearch } from 'react-icons/fi';
 
 import { PageContainer } from '@/shared/components/Containers';
+import { FormModal } from '@/shared/components/Modals';
 import { Label, Title } from '@/shared/components/Texts';
 import { DefaultTextInput } from '@/shared/components/Inputs';
 import { PrimaryButton } from '@/shared/components/Buttons';
@@ -12,9 +13,11 @@ import { IUser, IUserListFilters } from '@/shared/interfaces';
 import { APP_DEFAULT_PAGE_SIZE } from '@/shared/constants';
 import { showToast } from '@/shared/util';
 import { UsersList } from './components/UsersList';
+import { UserCreateForm } from './components/UserCreateForm';
 
 export default function UsersPage() {
   const [emailInput, setEmailInput] = useState('');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [filters, setFilters] = useState<IUserListFilters>({
     page: 1,
     perPage: APP_DEFAULT_PAGE_SIZE,
@@ -47,9 +50,18 @@ export default function UsersPage() {
 
   return (
     <PageContainer>
-      <Title component="h1" sx={{ textAlign: 'left' }}>
-        Usuários
-      </Title>
+      <div className="flex items-center justify-between gap-4">
+        <Title component="h1" sx={{ textAlign: 'left' }}>
+          Usuários
+        </Title>
+        <PrimaryButton
+          type="button"
+          onClick={() => setIsCreateModalOpen(true)}
+          sx={{ width: 'auto', padding: '10px 20px' }}
+        >
+          Novo
+        </PrimaryButton>
+      </div>
 
       <form
         onSubmit={handleSearch}
@@ -82,6 +94,14 @@ export default function UsersPage() {
         onEdit={notImplemented}
         onDelete={notImplemented}
       />
+
+      <FormModal
+        open={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        title="Novo usuário"
+      >
+        <UserCreateForm onCreated={() => setIsCreateModalOpen(false)} />
+      </FormModal>
     </PageContainer>
   );
 }
