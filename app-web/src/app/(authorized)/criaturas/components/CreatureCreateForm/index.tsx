@@ -11,6 +11,7 @@ import {
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
 import {
+  useCreatureCategoriesQuery,
   useGetEntityById,
   usePostEntity,
   usePutEntity,
@@ -23,7 +24,6 @@ import {
 import { ICreature, ICreatureCategory } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedCreatureStore } from '@/store';
-import { useCreatureCategoriesQuery } from '../../hooks/useCreatureCategoriesQuery';
 
 export interface CreatureCreateFormProps {
   onSaved: () => void;
@@ -181,233 +181,237 @@ export const CreatureCreateForm = ({ onSaved }: CreatureCreateFormProps) => {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      <FormTextInput
-        id="creature-form-name"
-        name="name"
-        control={control}
-        label="Nome"
-        placeholder="Digite o nome"
-      />
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <FormTextInput
+          id="creature-form-name"
+          name="name"
+          control={control}
+          label="Nome"
+          placeholder="Digite o nome"
+        />
 
-      <FormTextInput
-        id="creature-form-reference-image-url"
-        name="referenceImageUrl"
-        control={control}
-        label="Imagem Referência"
-        placeholder="https://exemplo.com/imagem.jpg"
-      />
+        <FormTextInput
+          id="creature-form-reference-image-url"
+          name="referenceImageUrl"
+          control={control}
+          label="Imagem Referência"
+          placeholder="https://exemplo.com/imagem.jpg"
+        />
 
-      <FormTextInput
-        id="creature-form-other-names"
-        name="otherNames"
-        control={control}
-        label="Outros nomes"
-        placeholder="Digite outros nomes conhecidos"
-      />
+        <FormTextInput
+          id="creature-form-other-names"
+          name="otherNames"
+          control={control}
+          label="Outros nomes"
+          placeholder="Digite outros nomes conhecidos"
+        />
 
-      <FormAutocompleteInput<CreatureFormData, ICreatureCategory>
-        id="creature-form-category"
-        name="categoryId"
-        control={control}
-        label="Categoria"
-        options={categories ?? []}
-        getOptionLabel={(category) => category.name}
-        getOptionValue={(category) => category.id}
-        placeholder="Selecione a categoria"
-      />
+        <FormAutocompleteInput<CreatureFormData, ICreatureCategory>
+          id="creature-form-category"
+          name="categoryId"
+          control={control}
+          label="Categoria"
+          options={categories ?? []}
+          getOptionLabel={(category) => category.name}
+          getOptionValue={(category) => category.id}
+          placeholder="Selecione a categoria"
+        />
 
-      <FormTextInput
-        id="creature-form-threat-level"
-        name="threatLevel"
-        control={control}
-        label="Nível de Ameaça"
-        placeholder="Digite o nível de ameaça"
-      />
+        <FormTextInput
+          id="creature-form-threat-level"
+          name="threatLevel"
+          control={control}
+          label="Nível de Ameaça"
+          placeholder="Digite o nível de ameaça"
+        />
 
-      <FormTextInput
-        id="creature-form-average-life-expectancy"
-        name="averageLifeExpectancy"
-        control={control}
-        label="Expectativa de vida média"
-        placeholder="Digite a expectativa de vida média"
-      />
+        <FormTextInput
+          id="creature-form-average-life-expectancy"
+          name="averageLifeExpectancy"
+          control={control}
+          label="Expectativa de vida média"
+          placeholder="Digite a expectativa de vida média"
+        />
+      </div>
 
-      <FormRichTextInput
-        id="creature-form-physical-characteristics"
-        name="physicalCharacteristics"
-        control={control}
-        label="Características Físicas"
-        placeholder="Descreva as características físicas"
-      />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <FormRichTextInput
+          id="creature-form-physical-characteristics"
+          name="physicalCharacteristics"
+          control={control}
+          label="Características Físicas"
+          placeholder="Descreva as características físicas"
+        />
 
-      <FormRichTextInput
-        id="creature-form-habitat"
-        name="habitat"
-        control={control}
-        label="Habitat"
-        placeholder="Descreva o habitat"
-      />
+        <FormRichTextInput
+          id="creature-form-habitat"
+          name="habitat"
+          control={control}
+          label="Habitat"
+          placeholder="Descreva o habitat"
+        />
 
-      <FormRichTextInput
-        id="creature-form-behavior"
-        name="behavior"
-        control={control}
-        label="Comportamento"
-        placeholder="Descreva o comportamento"
-      />
+        <FormRichTextInput
+          id="creature-form-behavior"
+          name="behavior"
+          control={control}
+          label="Comportamento"
+          placeholder="Descreva o comportamento"
+        />
 
-      <FormRichTextInput
-        id="creature-form-diet"
-        name="diet"
-        control={control}
-        label="Alimentação"
-        placeholder="Descreva a alimentação"
-      />
+        <FormRichTextInput
+          id="creature-form-diet"
+          name="diet"
+          control={control}
+          label="Alimentação"
+          placeholder="Descreva a alimentação"
+        />
 
-      <FormRichTextInput
-        id="creature-form-life-cycle"
-        name="lifeCycle"
-        control={control}
-        label="Ciclo de Vida"
-        placeholder="Descreva o ciclo de vida"
-      />
+        <FormRichTextInput
+          id="creature-form-life-cycle"
+          name="lifeCycle"
+          control={control}
+          label="Ciclo de Vida"
+          placeholder="Descreva o ciclo de vida"
+        />
 
-      <FormRichTextInput
-        id="creature-form-life-stage-infant"
-        name="lifeStageInfant"
-        control={control}
-        label="Estágio de Vida - Filhote"
-        placeholder="Descreva o estágio filhote"
-      />
+        <FormRichTextInput
+          id="creature-form-life-stage-infant"
+          name="lifeStageInfant"
+          control={control}
+          label="Estágio de Vida - Filhote"
+          placeholder="Descreva o estágio filhote"
+        />
 
-      <FormRichTextInput
-        id="creature-form-life-stage-young"
-        name="lifeStageYoung"
-        control={control}
-        label="Estágio de Vida - Jovem"
-        placeholder="Descreva o estágio jovem"
-      />
+        <FormRichTextInput
+          id="creature-form-life-stage-young"
+          name="lifeStageYoung"
+          control={control}
+          label="Estágio de Vida - Jovem"
+          placeholder="Descreva o estágio jovem"
+        />
 
-      <FormRichTextInput
-        id="creature-form-life-stage-adult"
-        name="lifeStageAdult"
-        control={control}
-        label="Estágio de Vida - Adulto"
-        placeholder="Descreva o estágio adulto"
-      />
+        <FormRichTextInput
+          id="creature-form-life-stage-adult"
+          name="lifeStageAdult"
+          control={control}
+          label="Estágio de Vida - Adulto"
+          placeholder="Descreva o estágio adulto"
+        />
 
-      <FormRichTextInput
-        id="creature-form-life-stage-elder"
-        name="lifeStageElder"
-        control={control}
-        label="Estágio de Vida - Ancião"
-        placeholder="Descreva o estágio ancião"
-      />
+        <FormRichTextInput
+          id="creature-form-life-stage-elder"
+          name="lifeStageElder"
+          control={control}
+          label="Estágio de Vida - Ancião"
+          placeholder="Descreva o estágio ancião"
+        />
 
-      <FormRichTextInput
-        id="creature-form-abilities-and-powers"
-        name="abilitiesAndPowers"
-        control={control}
-        label="Habilidades e Poderes"
-        placeholder="Descreva as habilidades e poderes"
-      />
+        <FormRichTextInput
+          id="creature-form-abilities-and-powers"
+          name="abilitiesAndPowers"
+          control={control}
+          label="Habilidades e Poderes"
+          placeholder="Descreva as habilidades e poderes"
+        />
 
-      <FormRichTextInput
-        id="creature-form-resistances"
-        name="resistances"
-        control={control}
-        label="Resistências"
-        placeholder="Descreva as resistências"
-      />
+        <FormRichTextInput
+          id="creature-form-resistances"
+          name="resistances"
+          control={control}
+          label="Resistências"
+          placeholder="Descreva as resistências"
+        />
 
-      <FormRichTextInput
-        id="creature-form-weaknesses"
-        name="weaknesses"
-        control={control}
-        label="Fraquezas"
-        placeholder="Descreva as fraquezas"
-      />
+        <FormRichTextInput
+          id="creature-form-weaknesses"
+          name="weaknesses"
+          control={control}
+          label="Fraquezas"
+          placeholder="Descreva as fraquezas"
+        />
 
-      <FormRichTextInput
-        id="creature-form-combat"
-        name="combat"
-        control={control}
-        label="Combate"
-        placeholder="Descreva o combate"
-      />
+        <FormRichTextInput
+          id="creature-form-combat"
+          name="combat"
+          control={control}
+          label="Combate"
+          placeholder="Descreva o combate"
+        />
 
-      <FormRichTextInput
-        id="creature-form-attack-methods"
-        name="attackMethods"
-        control={control}
-        label="Métodos de Ataque"
-        placeholder="Descreva os métodos de ataque"
-      />
+        <FormRichTextInput
+          id="creature-form-attack-methods"
+          name="attackMethods"
+          control={control}
+          label="Métodos de Ataque"
+          placeholder="Descreva os métodos de ataque"
+        />
 
-      <FormRichTextInput
-        id="creature-form-strategy"
-        name="strategy"
-        control={control}
-        label="Estratégia"
-        placeholder="Descreva a estratégia"
-      />
+        <FormRichTextInput
+          id="creature-form-strategy"
+          name="strategy"
+          control={control}
+          label="Estratégia"
+          placeholder="Descreva a estratégia"
+        />
 
-      <FormRichTextInput
-        id="creature-form-danger-degree"
-        name="dangerDegree"
-        control={control}
-        label="Grau de Perigo"
-        placeholder="Descreva o grau de perigo"
-      />
+        <FormRichTextInput
+          id="creature-form-danger-degree"
+          name="dangerDegree"
+          control={control}
+          label="Grau de Perigo"
+          placeholder="Descreva o grau de perigo"
+        />
 
-      <FormRichTextInput
-        id="creature-form-obtained-resources"
-        name="obtainedResources"
-        control={control}
-        label="Recursos Obtidos"
-        placeholder="Descreva os recursos obtidos"
-      />
+        <FormRichTextInput
+          id="creature-form-obtained-resources"
+          name="obtainedResources"
+          control={control}
+          label="Recursos Obtidos"
+          placeholder="Descreva os recursos obtidos"
+        />
 
-      <FormRichTextInput
-        id="creature-form-commercial-value"
-        name="commercialValue"
-        control={control}
-        label="Valor Comercial"
-        placeholder="Descreva o valor comercial"
-      />
+        <FormRichTextInput
+          id="creature-form-commercial-value"
+          name="commercialValue"
+          control={control}
+          label="Valor Comercial"
+          placeholder="Descreva o valor comercial"
+        />
 
-      <FormRichTextInput
-        id="creature-form-relation-with-civilizations"
-        name="relationWithCivilizations"
-        control={control}
-        label="Relação com Civilizações"
-        placeholder="Descreva a relação com civilizações"
-      />
+        <FormRichTextInput
+          id="creature-form-relation-with-civilizations"
+          name="relationWithCivilizations"
+          control={control}
+          label="Relação com Civilizações"
+          placeholder="Descreva a relação com civilizações"
+        />
 
-      <FormRichTextInput
-        id="creature-form-mythology-and-folklore"
-        name="mythologyAndFolklore"
-        control={control}
-        label="Mitologia e Folclore"
-        placeholder="Descreva a mitologia e o folclore"
-      />
+        <FormRichTextInput
+          id="creature-form-mythology-and-folklore"
+          name="mythologyAndFolklore"
+          control={control}
+          label="Mitologia e Folclore"
+          placeholder="Descreva a mitologia e o folclore"
+        />
 
-      <FormRichTextInput
-        id="creature-form-encounter-record"
-        name="encounterRecord"
-        control={control}
-        label="Registro de Encontro"
-        placeholder="Descreva o registro de encontro"
-      />
+        <FormRichTextInput
+          id="creature-form-encounter-record"
+          name="encounterRecord"
+          control={control}
+          label="Registro de Encontro"
+          placeholder="Descreva o registro de encontro"
+        />
 
-      <FormRichTextInput
-        id="creature-form-scholars-curiosity"
-        name="scholarsCuriosity"
-        control={control}
-        label="Curiosidade dos Estudiosos"
-        placeholder="Descreva a curiosidade dos estudiosos"
-      />
+        <FormRichTextInput
+          id="creature-form-scholars-curiosity"
+          name="scholarsCuriosity"
+          control={control}
+          label="Curiosidade dos Estudiosos"
+          placeholder="Descreva a curiosidade dos estudiosos"
+        />
+      </div>
 
       <PrimaryButton
         type="submit"

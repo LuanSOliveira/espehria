@@ -42,6 +42,7 @@ export const DefaultAutocompleteInput = <TOption,>({
             variant="outlined"
             sx={[
               APP_INPUT_STYLES.textField,
+              APP_INPUT_STYLES.autocompleteField,
               { '& .MuiOutlinedInput-input': { fontSize } },
             ]}
           />

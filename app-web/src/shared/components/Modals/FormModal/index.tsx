@@ -11,6 +11,12 @@ export interface FormModalProps {
   onClose: () => void;
   title: string;
   children: ReactNode;
+  /**
+   * 'wide' para formulários com mais de 4 campos ou com FormRichTextInput,
+   * onde os campos são organizados em grid (4 colunas para inputs padrão,
+   * 2 colunas para FormRichTextInput). Default: 'default' (coluna única).
+   */
+  size?: 'default' | 'wide';
 }
 
 export const FormModal = ({
@@ -18,6 +24,7 @@ export const FormModal = ({
   onClose,
   title,
   children,
+  size = 'default',
 }: FormModalProps) => {
   return (
     <Dialog
@@ -30,7 +37,7 @@ export const FormModal = ({
         },
       }}
     >
-      <Card>
+      <Card sizeClassName={size === 'wide' ? 'w-[min(1152px,92vw)]' : undefined}>
         <button
           type="button"
           aria-label="Fechar"

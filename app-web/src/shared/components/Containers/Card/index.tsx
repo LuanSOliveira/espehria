@@ -6,6 +6,14 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   showCorners?: boolean;
   component?: ElementType;
   style?: CSSProperties;
+  /**
+   * Classe(s) Tailwind que definem a largura do card, substituindo o default
+   * por completo. Use uma largura explícita (ex.: `w-[min(1152px,92vw)]`), não
+   * só um `max-w-*` — o Card fica dentro de um MUI Dialog cuja Paper encolhe
+   * para caber no conteúdo (`width: auto`), então um `max-w-*` sozinho nunca é
+   * alcançado se o conteúdo natural já for menor que o teto.
+   */
+  sizeClassName?: string;
 }
 
 const CORNER_BASE_CLASSNAME = 'absolute w-[22px] h-[22px] border-2 border-gold';
@@ -16,13 +24,14 @@ export const Card = ({
   component = 'div',
   className,
   style,
+  sizeClassName = 'w-full max-w-105',
   ...rest
 }: CardProps) => {
   const Component = component;
 
   return (
     <Component
-      className={`relative w-full max-w-105 pt-10 px-8 pb-8 rounded-md ${className ?? ''}`}
+      className={`relative ${sizeClassName} pt-10 px-8 pb-8 rounded-md ${className ?? ''}`}
       style={{ ...APP_CONTAINER_STYLES.card, ...style }}
       {...rest}
     >

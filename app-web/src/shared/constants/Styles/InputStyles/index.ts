@@ -12,6 +12,7 @@ export const APP_INPUT_STYLES: Record<string, SystemStyleObject<Theme>> = {
       backgroundImage: `linear-gradient(180deg, ${APP_COLORS.inputBg} 0%, ${APP_COLORS.inputBgDark} 100%)`,
       borderRadius: '3px',
       boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.5)',
+      minHeight: '48px',
       '& fieldset': {
         borderColor: APP_COLORS.goldDark,
       },
@@ -34,6 +35,18 @@ export const APP_INPUT_STYLES: Record<string, SystemStyleObject<Theme>> = {
     '& .MuiFormHelperText-root': {
       marginLeft: 0,
       color: APP_COLORS.goldDeep,
+    },
+  },
+  autocompleteField: {
+    // O MUI Autocomplete aplica padding próprio na raiz (9px) e no input
+    // (7.5px 4px), somando uma altura maior que a do TextField comum (12px
+    // 14px). !important garante a mesma altura mesmo com a especificidade
+    // maior das regras internas do componente.
+    '& .MuiOutlinedInput-root': {
+      padding: '0 !important',
+    },
+    '& .MuiAutocomplete-input': {
+      padding: '12px 14px !important',
     },
   },
   startIcon: {

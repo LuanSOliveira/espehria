@@ -49,7 +49,8 @@ const RichTextEditorField = ({
 
   const isEmpty = useEditorState({
     editor,
-    selector: ({ editor: currentEditor }) => !currentEditor || currentEditor.isEmpty,
+    selector: ({ editor: currentEditor }) =>
+      !currentEditor || currentEditor.isEmpty,
   });
 
   useEffect(() => {

@@ -11,7 +11,11 @@ import {
   DefaultTextInput,
 } from '@/shared/components/Inputs';
 import { PrimaryButton } from '@/shared/components/Buttons';
-import { useDeleteEntity, useGetEntityList } from '@/hooks/Queries';
+import {
+  useCreatureCategoriesQuery,
+  useDeleteEntity,
+  useGetEntityList,
+} from '@/hooks/Queries';
 import {
   ICreatureCategory,
   ICreatureListFilters,
@@ -22,7 +26,6 @@ import { showToast } from '@/shared/util';
 import { useSelectedCreatureStore } from '@/store';
 import { CreaturesList } from './components/CreaturesList';
 import { CreatureCreateForm } from './components/CreatureCreateForm';
-import { useCreatureCategoriesQuery } from './hooks/useCreatureCategoriesQuery';
 
 export default function CreaturesPage() {
   const [nameInput, setNameInput] = useState('');
@@ -160,6 +163,7 @@ export default function CreaturesPage() {
         open={isFormModalOpen}
         onClose={handleCloseFormModal}
         title={selectedCreature ? 'Editar criatura' : 'Nova criatura'}
+        size="wide"
       >
         <CreatureCreateForm onSaved={handleCloseFormModal} />
       </FormModal>

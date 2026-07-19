@@ -33,6 +33,47 @@ do modal é a **página**, não o formulário:
 O formulário recebe só um `onSaved: () => void` como prop — ele não sabe fechar o modal
 sozinho, apenas avisa a página quando terminou com sucesso.
 
+### Largura do modal e organização dos campos (formulários com muitos campos)
+
+`FormModal` aceita uma prop `size?: 'default' | 'wide'` (default: `'default'`, modal
+estreito de coluna única — ver `UserCreateForm`, 3 campos). Use `size="wide"` sempre
+que o formulário tiver **mais de 4 campos** ou **qualquer `FormRichTextInput`**:
+
+```tsx
+<FormModal
+  open={isFormModalOpen}
+  onClose={handleCloseFormModal}
+  title={selectedEntity ? 'Editar <entidade>' : 'Novo <entidade>'}
+  size="wide"
+>
+  <EntityCreateForm onSaved={handleCloseFormModal} />
+</FormModal>
+```
+
+Dentro do formulário, agrupe os campos em duas grids separadas (nesta ordem), em vez
+da antiga coluna única (`flex flex-col gap-4`) — ver `CreatureCreateForm` como
+referência completa:
+
+```tsx
+<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    {/* FormTextInput, FormAutocompleteInput, FormPasswordInput, etc — 4 colunas */}
+  </div>
+
+  <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+    {/* FormRichTextInput — até 2 colunas, cada um ocupando uma célula da grid */}
+  </div>
+
+  <PrimaryButton type="submit" isLoading={isPending}>...</PrimaryButton>
+</form>
+```
+
+- Primeira grid: todos os campos "padrão" (texto, autocomplete, senha) em até 4
+  colunas (`lg:grid-cols-4`, colapsando para 2 em telas médias e 1 em telas pequenas).
+- Segunda grid: todos os `FormRichTextInput`, em até 2 colunas (`lg:grid-cols-2`).
+- Não misture os dois tipos de campo na mesma grid — separar em duas seções deixa a
+  leitura do formulário mais previsível quando há muitos campos.
+
 ## 2. Modo criar vs. editar é decidido por uma store de "entidade selecionada"
 
 Siga o padrão de `useSelectedUserStore` (`store/PageStore/<Feature>Store`):

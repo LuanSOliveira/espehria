@@ -63,6 +63,7 @@ export const FormAutocompleteInput = <
                 helperText={fieldState.error?.message}
                 sx={[
                   APP_INPUT_STYLES.textField,
+                  APP_INPUT_STYLES.autocompleteField,
                   { '& .MuiOutlinedInput-input': { fontSize } },
                 ]}
               />

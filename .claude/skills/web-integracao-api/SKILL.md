@@ -5,9 +5,31 @@ description: Use sempre que for necessário integrar o app-web com um endpoint d
 
 # Padrão de integração com a API (app-web)
 
-Referência completa no código: `app-web/src/hooks/Queries/` (`useGetEntityList`,
-`usePostEntity`, `usePutEntity`, `useDeleteEntity`) e uso em
+Referência completa no código: `app-web/src/hooks/Queries/` (`DefaultQueries/`:
+`useGetEntityList`, `usePostEntity`, `usePutEntity`, `useDeleteEntity`;
+`EntityQueries/`: `useCreatureCategoriesQuery`) e uso em
 `app-web/src/app/(authorized)/usuarios/`.
+
+## Toda integração com API mora em `hooks/Queries` — nunca dentro da página
+
+Nenhum hook de integração (`useQuery`/`useMutation`) deve ser criado dentro do
+diretório de uma página (`app/(<grupo>)/<pagina>/hooks/...`) ou de qualquer outro
+lugar fora de `hooks/Queries`. `hooks/Queries` tem duas subpastas:
+
+- **`hooks/Queries/DefaultQueries/`** — os hooks genéricos reaproveitáveis por
+  qualquer entidade (`useGetEntityList`, `useGetEntityById`, `usePostEntity`,
+  `usePutEntity`, `useDeleteEntity`). Só mexa aqui se estiver criando um novo hook
+  genérico que sirva para qualquer entidade, não apenas uma.
+- **`hooks/Queries/EntityQueries/`** — hooks específicos de uma entidade que não se
+  encaixam nos 4 verbos genéricos (ex.: `useCreatureCategoriesQuery`, que busca uma
+  lista auxiliar fixa em vez de uma listagem paginada). É aqui que vive um hook novo
+  criado pela seção abaixo.
+
+Cada hook mantém sua própria pasta (`<subpasta>/<useNomeDoHook>/index.ts`),
+reexportada pelo barrel da subpasta (`DefaultQueries/index.ts` ou
+`EntityQueries/index.ts`), que por sua vez é reexportado pelo barrel raiz
+`hooks/Queries/index.ts`. O import no componente é sempre `@/hooks/Queries`,
+independente de qual das duas subpastas o hook vem.
 
 ## Primeiro: os 4 hooks genéricos quase sempre resolvem
 
@@ -56,14 +78,16 @@ Pontos que sempre devem ser seguidos:
 - `useGetEntityList` já preserva `placeholderData` entre trocas de filtro/página —
   não implemente loading manual para isso.
 
-## Quando criar um hook novo em `hooks/Queries`
+## Quando criar um hook novo em `hooks/Queries/EntityQueries`
 
 Só crie um hook novo quando a interação **não** for um CRUD padrão via um dos quatro
-verbos acima (ex.: uma ação específica tipo `/users/:id/activate`, ou um retorno que não
-é nem entidade única nem lista paginada). Nesse caso, siga exatamente a mesma
-estrutura dos hooks existentes:
-- Pasta própria em `hooks/Queries/<useNomeDoHook>/index.ts`, reexportada pelo barrel
-  `hooks/Queries/index.ts`.
+verbos acima (ex.: uma ação específica tipo `/users/:id/activate`, ou uma lista
+auxiliar de apoio tipo `/creatures/categories`, ou um retorno que não é nem entidade
+única nem lista paginada). Nesse caso, siga exatamente a mesma estrutura dos hooks
+existentes:
+- Pasta própria em `hooks/Queries/EntityQueries/<useNomeDoHook>/index.ts`,
+  reexportada pelo barrel `hooks/Queries/EntityQueries/index.ts` (que já é
+  reexportado pelo barrel raiz — não precisa mexer em `hooks/Queries/index.ts`).
 - Parâmetros de entrada tipados via generics (`TResponse`, `TPayload`, `TFilters`),
   incluindo `url` e, se for mutação, `invalidateQueryKeys?`/`onSuccess?`/`onError?`.
 - `ApiFactory(getAuthToken())` para chamada autenticada (ou `ApiAuthFactory()` só para
@@ -71,6 +95,7 @@ estrutura dos hooks existentes:
 - Erro tipado como `AxiosError<IAxioDataError>` (de `shared/interfaces`).
 - `'use client'` no topo do arquivo.
 
-Não escreva `useQuery`/`useMutation` diretamente dentro de um componente de página —
-mesmo para um caso não coberto pelos 4 genéricos, a chamada de API deve morar em um
-hook dedicado em `hooks/Queries`, nunca inline.
+Não escreva `useQuery`/`useMutation` diretamente dentro de um componente de página nem
+em uma pasta `hooks/` dentro do diretório da página — mesmo para um caso não coberto
+pelos 4 genéricos, a chamada de API deve morar em um hook dedicado em
+`hooks/Queries/EntityQueries`, nunca inline nem fora de `hooks/Queries`.
