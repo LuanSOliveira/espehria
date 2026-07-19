@@ -1,50 +1,48 @@
-import { Box, BoxProps } from '@mui/material';
+import { CSSProperties, ElementType, HTMLAttributes, ReactNode } from 'react';
 import { APP_CONTAINER_STYLES } from '@/shared/constants';
 
-export interface CardProps extends BoxProps {
+export interface CardProps extends HTMLAttributes<HTMLElement> {
+  children: ReactNode;
   showCorners?: boolean;
+  component?: ElementType;
+  style?: CSSProperties;
 }
+
+const CORNER_BASE_CLASSNAME = 'absolute w-[22px] h-[22px] border-2 border-gold';
 
 export const Card = ({
   children,
-  sx,
   showCorners = true,
+  component = 'div',
+  className,
+  style,
   ...rest
 }: CardProps) => {
+  const Component = component;
+
   return (
-    <Box
-      sx={[APP_CONTAINER_STYLES.card, ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]}
+    <Component
+      className={`relative w-full max-w-105 pt-10 px-8 pb-8 rounded-md ${className ?? ''}`}
+      style={{ ...APP_CONTAINER_STYLES.card, ...style }}
       {...rest}
     >
       {showCorners && (
         <>
-          <Box
-            sx={[
-              APP_CONTAINER_STYLES.cardCorner,
-              APP_CONTAINER_STYLES.cardCornerTopLeft,
-            ]}
+          <div
+            className={`${CORNER_BASE_CLASSNAME} top-1.5 left-1.5 border-r-0 border-b-0`}
           />
-          <Box
-            sx={[
-              APP_CONTAINER_STYLES.cardCorner,
-              APP_CONTAINER_STYLES.cardCornerTopRight,
-            ]}
+          <div
+            className={`${CORNER_BASE_CLASSNAME} top-1.5 right-1.5 border-l-0 border-b-0`}
           />
-          <Box
-            sx={[
-              APP_CONTAINER_STYLES.cardCorner,
-              APP_CONTAINER_STYLES.cardCornerBottomLeft,
-            ]}
+          <div
+            className={`${CORNER_BASE_CLASSNAME} bottom-1.5 left-1.5 border-r-0 border-t-0`}
           />
-          <Box
-            sx={[
-              APP_CONTAINER_STYLES.cardCorner,
-              APP_CONTAINER_STYLES.cardCornerBottomRight,
-            ]}
+          <div
+            className={`${CORNER_BASE_CLASSNAME} bottom-1.5 right-1.5 border-l-0 border-t-0`}
           />
         </>
       )}
       {children}
-    </Box>
+    </Component>
   );
 };

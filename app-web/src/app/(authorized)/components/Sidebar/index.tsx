@@ -2,15 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Box, Divider } from '@mui/material';
+import { Divider } from '@mui/material';
 import { FiHome, FiUsers } from 'react-icons/fi';
 import { IconType } from 'react-icons';
 import { DefaultText, Label } from '@/shared/components/Texts';
 import { useAccessibleFontSize } from '@/hooks/FontAccessibility';
 import { APP_BUTTON_BASE_FONT_SIZE, APP_COLORS } from '@/shared/constants';
 import { APP_ROUTES } from '@/shared/routes';
-
-export const SIDEBAR_WIDTH = 240;
 
 interface NavItem {
   label: string;
@@ -44,35 +42,19 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
   const iconFontSize = useAccessibleFontSize(APP_BUTTON_BASE_FONT_SIZE.icon);
 
   return (
-    <Box
-      component="aside"
-      sx={{
-        width: isOpen ? SIDEBAR_WIDTH : 0,
-        minWidth: isOpen ? SIDEBAR_WIDTH : 0,
-        height: '100%',
-        overflow: 'hidden',
-        flexShrink: 0,
-        transition: 'width 0.25s ease, min-width 0.25s ease',
+    <aside
+      className={`h-full shrink-0 overflow-hidden border-r-2 border-gold transition-[width,min-width] duration-250 ease-in-out ${
+        isOpen ? 'w-60 min-w-60' : 'w-0 min-w-0'
+      }`}
+      style={{
         backgroundImage: `linear-gradient(180deg, ${APP_COLORS.woodLight} 0%, ${APP_COLORS.wood} 100%)`,
-        borderRight: `2px solid ${APP_COLORS.gold}`,
       }}
     >
-      <Box
-        component="nav"
-        sx={{
-          width: SIDEBAR_WIDTH,
-          height: '100%',
-          padding: '16px 12px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '4px',
-          overflowY: 'auto',
-        }}
-      >
+      <nav className="flex h-full w-60 flex-col gap-1 overflow-y-auto py-4 px-3">
         {NAV_SECTIONS.map((section, sectionIndex) => (
-          <Box
+          <div
             key={section.title ?? `section-${sectionIndex}`}
-            sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}
+            className="flex flex-col gap-1"
           >
             {sectionIndex > 0 && (
               <Divider
@@ -106,30 +88,16 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
                   href={item.href}
                   style={{ textDecoration: 'none' }}
                 >
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '10px 14px',
-                      borderRadius: '4px',
-                      border: '1px solid transparent',
-                      backgroundColor: isActive
-                        ? 'rgba(184,147,63,0.25)'
-                        : 'transparent',
-                      borderColor: isActive ? APP_COLORS.gold : 'transparent',
-                      transition: 'background-color 0.15s ease',
-                      '&:hover': {
-                        backgroundColor: 'rgba(184,147,63,0.15)',
-                      },
-                    }}
+                  <div
+                    className={`flex items-center gap-3 rounded border py-2.5 px-3.5 transition-colors duration-150 ease-in-out hover:bg-gold/15 ${
+                      isActive
+                        ? 'border-gold bg-gold/25'
+                        : 'border-transparent bg-transparent'
+                    }`}
                   >
                     <Icon
-                      style={{
-                        fontSize: iconFontSize,
-                        color: APP_COLORS.goldSoft,
-                        flexShrink: 0,
-                      }}
+                      className="shrink-0 text-gold-soft"
+                      style={{ fontSize: iconFontSize }}
                     />
                     <DefaultText
                       component="span"
@@ -140,13 +108,13 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
                     >
                       {item.label}
                     </DefaultText>
-                  </Box>
+                  </div>
                 </Link>
               );
             })}
-          </Box>
+          </div>
         ))}
-      </Box>
-    </Box>
+      </nav>
+    </aside>
   );
 };

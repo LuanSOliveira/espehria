@@ -1,12 +1,16 @@
 'use client';
 
-import { Box, IconButton, Tooltip } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
 import { FiLogOut, FiMenu } from 'react-icons/fi';
 import { DefaultText } from '@/shared/components/Texts';
 import { FontAccessibilityControls } from '@/shared/components/FontAccessibilityControls';
 import { useAccessibleFontSize } from '@/hooks/FontAccessibility';
 import { useLogout, useMeQuery } from '@/hooks/Auth';
-import { APP_BUTTON_STYLES, APP_BUTTON_BASE_FONT_SIZE, APP_COLORS } from '@/shared/constants';
+import {
+  APP_BUTTON_STYLES,
+  APP_BUTTON_BASE_FONT_SIZE,
+  APP_COLORS,
+} from '@/shared/constants';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -18,17 +22,10 @@ export const Header = ({ onToggleSidebar }: HeaderProps) => {
   const iconFontSize = useAccessibleFontSize(APP_BUTTON_BASE_FONT_SIZE.icon);
 
   return (
-    <Box
-      component="header"
-      sx={{
-        flexShrink: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '16px',
-        padding: '10px 20px',
+    <header
+      className="flex shrink-0 items-center justify-between gap-4 border-b-2 border-gold px-5 py-2.5"
+      style={{
         backgroundImage: `linear-gradient(180deg, ${APP_COLORS.woodLight} 0%, ${APP_COLORS.wood} 100%)`,
-        borderBottom: `2px solid ${APP_COLORS.gold}`,
       }}
     >
       <IconButton
@@ -39,7 +36,7 @@ export const Header = ({ onToggleSidebar }: HeaderProps) => {
         <FiMenu />
       </IconButton>
 
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div className="flex items-center gap-4">
         <DefaultText
           component="span"
           sx={{ color: APP_COLORS.goldSoft, whiteSpace: 'nowrap' }}
@@ -58,7 +55,7 @@ export const Header = ({ onToggleSidebar }: HeaderProps) => {
             <FiLogOut />
           </IconButton>
         </Tooltip>
-      </Box>
-    </Box>
+      </div>
+    </header>
   );
 };

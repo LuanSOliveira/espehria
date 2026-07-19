@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Box } from '@mui/material';
 import { Header } from '../Header';
 import { Sidebar } from '../Sidebar';
 
@@ -13,33 +12,14 @@ export const AuthorizedShell = ({ children }: AuthorizedShellProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   return (
-    <Box
-      sx={{
-        position: 'relative',
-        height: '100vh',
-        width: '100vw',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
+    <div className="relative flex h-screen w-screen flex-col overflow-hidden">
       <Header onToggleSidebar={() => setIsSidebarOpen((current) => !current)} />
 
-      <Box sx={{ flex: 1, display: 'flex', minHeight: 0 }}>
+      <div className="flex min-h-0 flex-1">
         <Sidebar isOpen={isSidebarOpen} />
 
-        <Box
-          component="main"
-          sx={{
-            flex: 1,
-            minWidth: 0,
-            minHeight: 0,
-            position: 'relative',
-          }}
-        >
-          {children}
-        </Box>
-      </Box>
-    </Box>
+        <main className="relative min-h-0 min-w-0 flex-1">{children}</main>
+      </div>
+    </div>
   );
 };

@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import { useForm } from 'react-hook-form';
-import { Box } from '@mui/material';
 import { FiLock, FiMail } from 'react-icons/fi';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 
@@ -53,33 +52,13 @@ export default function LoginPage() {
   };
 
   return (
-    <Box
-      component="main"
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '40px 16px',
-        backgroundImage: 'url(/app-bg.png)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-    >
-      <Box sx={{ position: 'fixed', top: 16, right: 16, zIndex: 50 }}>
+    <main className="flex min-h-screen items-center justify-center bg-[url(/app-bg.png)] bg-cover bg-center px-4 py-10">
+      <div className="fixed top-4 right-4 z-50">
         <FontAccessibilityControls />
-      </Box>
+      </div>
 
       <Card component="form" onSubmit={handleSubmit(onSubmit)}>
-        <Box
-          sx={{
-            position: 'relative',
-            width: '100%',
-            maxWidth: 220,
-            aspectRatio: '3 / 2',
-            margin: '0 auto',
-          }}
-        >
+        <div className="relative mx-auto aspect-3/2 w-full max-w-55">
           <Image
             src="/app-logo.png"
             alt="Espehria"
@@ -87,18 +66,14 @@ export default function LoginPage() {
             style={{ objectFit: 'contain' }}
             priority
           />
-        </Box>
+        </div>
 
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '10px',
-            margin: '24px 0 20px',
-          }}
-        >
-          <DefaultText component="span" baseFontSize={10} sx={{ color: APP_COLORS.gold }}>
+        <div className="mt-6 mb-5 flex items-center justify-center gap-2.5">
+          <DefaultText
+            component="span"
+            baseFontSize={10}
+            sx={{ color: APP_COLORS.gold }}
+          >
             ◆
           </DefaultText>
           <DefaultText
@@ -111,10 +86,14 @@ export default function LoginPage() {
           >
             Acesse sua conta
           </DefaultText>
-          <DefaultText component="span" baseFontSize={10} sx={{ color: APP_COLORS.gold }}>
+          <DefaultText
+            component="span"
+            baseFontSize={10}
+            sx={{ color: APP_COLORS.gold }}
+          >
             ◆
           </DefaultText>
-        </Box>
+        </div>
 
         <Label htmlFor="email">E-mail</Label>
         <FormTextInput
@@ -126,7 +105,7 @@ export default function LoginPage() {
           icon={<FiMail />}
         />
 
-        <Box sx={{ marginTop: '16px' }}>
+        <div className="mt-4">
           <Label htmlFor="password">Senha</Label>
           <FormPasswordInput
             id="password"
@@ -135,19 +114,18 @@ export default function LoginPage() {
             placeholder="Digite sua senha"
             icon={<FiLock />}
           />
-        </Box>
+        </div>
 
-        <Box sx={{ marginTop: '22px' }}>
+        <div className="mt-5.5">
           <PrimaryButton type="submit" isLoading={loginMutation.isPending}>
             Entrar
           </PrimaryButton>
-        </Box>
+        </div>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '18px 0' }}>
-          <Box
-            sx={{
-              flex: 1,
-              height: '1px',
+        <div className="my-4.5 flex items-center gap-2.5">
+          <div
+            className="h-px flex-1"
+            style={{
               backgroundImage: `linear-gradient(90deg, transparent, ${APP_COLORS.gold}, transparent)`,
             }}
           />
@@ -158,16 +136,15 @@ export default function LoginPage() {
           >
             OU
           </DefaultText>
-          <Box
-            sx={{
-              flex: 1,
-              height: '1px',
+          <div
+            className="h-px flex-1"
+            style={{
               backgroundImage: `linear-gradient(90deg, transparent, ${APP_COLORS.gold}, transparent)`,
             }}
           />
-        </Box>
+        </div>
 
-        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        <div className="flex justify-center">
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={handleGoogleError}
@@ -176,8 +153,8 @@ export default function LoginPage() {
             text="continue_with"
             width="356"
           />
-        </Box>
+        </div>
       </Card>
-    </Box>
+    </main>
   );
 }

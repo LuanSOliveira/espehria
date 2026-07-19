@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, IconButton, Tooltip, TooltipProps } from '@mui/material';
+import { IconButton, Tooltip, TooltipProps } from '@mui/material';
 import { FiMinus, FiPlus, FiRotateCcw } from 'react-icons/fi';
 import { useFontAccessibilityStore } from '@/store';
 import { useAccessibleFontSize } from '@/hooks/FontAccessibility';
@@ -28,12 +28,7 @@ export const FontAccessibilityControls = () => {
   const iconFontSize = useAccessibleFontSize(APP_BUTTON_BASE_FONT_SIZE.icon);
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        gap: '8px',
-      }}
-    >
+    <div className="flex gap-2">
       <Tooltip title="Diminuir fonte" slotProps={tooltipSlotProps}>
         <IconButton
           aria-label="Diminuir fonte"
@@ -65,6 +60,6 @@ export const FontAccessibilityControls = () => {
           <FiPlus />
         </IconButton>
       </Tooltip>
-    </Box>
+    </div>
   );
 };

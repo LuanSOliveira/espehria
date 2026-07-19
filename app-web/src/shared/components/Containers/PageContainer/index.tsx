@@ -1,15 +1,24 @@
-import { Box, BoxProps } from '@mui/material';
+import { CSSProperties, HTMLAttributes, ReactNode } from 'react';
 import { APP_CONTAINER_STYLES } from '@/shared/constants';
 
-export type PageContainerProps = BoxProps;
+export interface PageContainerProps extends HTMLAttributes<HTMLDivElement> {
+  children: ReactNode;
+  style?: CSSProperties;
+}
 
-export const PageContainer = ({ children, sx, ...rest }: PageContainerProps) => {
+export const PageContainer = ({
+  children,
+  className,
+  style,
+  ...rest
+}: PageContainerProps) => {
   return (
-    <Box
-      sx={[APP_CONTAINER_STYLES.page, ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]}
+    <div
+      className={`w-full h-full p-8 overflow-y-auto overflow-x-hidden rounded-md border border-gold ${className ?? ''}`}
+      style={{ ...APP_CONTAINER_STYLES.page, ...style }}
       {...rest}
     >
       {children}
-    </Box>
+    </div>
   );
 };
