@@ -4,28 +4,60 @@ import { SubmitEvent, useState } from 'react';
 import { FiSearch } from 'react-icons/fi';
 
 import { PageContainer } from '@/shared/components/Containers';
-import { FormModal } from '@/shared/components/Modals';
+import { ConfirmationModal, FormModal } from '@/shared/components/Modals';
 import { Label, Title } from '@/shared/components/Texts';
 import { DefaultTextInput } from '@/shared/components/Inputs';
 import { PrimaryButton } from '@/shared/components/Buttons';
-import { useGetEntityList } from '@/hooks/Queries';
+import { useDeleteEntity, useGetEntityList } from '@/hooks/Queries';
 import { IUser, IUserListFilters } from '@/shared/interfaces';
 import { APP_DEFAULT_PAGE_SIZE } from '@/shared/constants';
 import { showToast } from '@/shared/util';
+import { useSelectedUserStore } from '@/store';
 import { UsersList } from './components/UsersList';
 import { UserCreateForm } from './components/UserCreateForm';
 
 export default function UsersPage() {
   const [emailInput, setEmailInput] = useState('');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [userPendingDelete, setUserPendingDelete] = useState<IUser | null>(
+    null,
+  );
   const [filters, setFilters] = useState<IUserListFilters>({
     page: 1,
     perPage: APP_DEFAULT_PAGE_SIZE,
   });
 
+  const selectedUser = useSelectedUserStore((state) => state.selectedUser);
+  const setSelectedUser = useSelectedUserStore(
+    (state) => state.setSelectedUser,
+  );
+  const resetSelectedUser = useSelectedUserStore(
+    (state) => state.resetSelectedUser,
+  );
+
   const { data, isLoading } = useGetEntityList<IUser, IUserListFilters>({
     url: '/users',
     filters,
+  });
+
+  const deleteUserMutation = useDeleteEntity({
+    url: `/users/${userPendingDelete?.id}`,
+    invalidateQueryKeys: [['/users']],
+    onSuccess: () => {
+      showToast({
+        message: 'Usuário excluído com sucesso.',
+        type: 'success',
+      });
+      setUserPendingDelete(null);
+    },
+    onError: (error) => {
+      showToast({
+        message:
+          error.response?.data?.message ??
+          'Não foi possível excluir o usuário.',
+        type: 'error',
+      });
+    },
   });
 
   const handleSearch = (event: SubmitEvent<HTMLFormElement>) => {
@@ -41,11 +73,19 @@ export default function UsersPage() {
     setFilters((current) => ({ ...current, page: newPage }));
   };
 
-  const notImplemented = () => {
-    showToast({
-      message: 'Funcionalidade em desenvolvimento.',
-      type: 'info',
-    });
+  const handleOpenCreateModal = () => {
+    resetSelectedUser();
+    setIsFormModalOpen(true);
+  };
+
+  const handleEdit = (user: IUser) => {
+    setSelectedUser(user);
+    setIsFormModalOpen(true);
+  };
+
+  const handleCloseFormModal = () => {
+    setIsFormModalOpen(false);
+    resetSelectedUser();
   };
 
   return (
@@ -56,7 +96,7 @@ export default function UsersPage() {
         </Title>
         <PrimaryButton
           type="button"
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={handleOpenCreateModal}
           sx={{ width: 'auto', padding: '10px 20px' }}
         >
           Novo
@@ -91,17 +131,27 @@ export default function UsersPage() {
         page={filters.page ?? 1}
         isLoading={isLoading}
         onPageChange={handlePageChange}
-        onEdit={notImplemented}
-        onDelete={notImplemented}
+        onEdit={handleEdit}
+        onDelete={setUserPendingDelete}
       />
 
       <FormModal
-        open={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        title="Novo usuário"
+        open={isFormModalOpen}
+        onClose={handleCloseFormModal}
+        title={selectedUser ? 'Editar usuário' : 'Novo usuário'}
       >
-        <UserCreateForm onCreated={() => setIsCreateModalOpen(false)} />
+        <UserCreateForm onSaved={handleCloseFormModal} />
       </FormModal>
+
+      <ConfirmationModal
+        open={!!userPendingDelete}
+        title="Excluir usuário"
+        message={`Tem certeza que deseja excluir o usuário "${userPendingDelete?.email}"?`}
+        confirmLabel="Excluir"
+        isLoading={deleteUserMutation.isPending}
+        onConfirm={() => deleteUserMutation.mutate()}
+        onCancel={() => setUserPendingDelete(null)}
+      />
     </PageContainer>
   );
 }
