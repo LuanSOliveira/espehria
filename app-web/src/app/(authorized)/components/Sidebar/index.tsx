@@ -2,10 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Box } from '@mui/material';
-import { FiHome } from 'react-icons/fi';
+import { Box, Divider } from '@mui/material';
+import { FiHome, FiUsers } from 'react-icons/fi';
 import { IconType } from 'react-icons';
-import { DefaultText } from '@/shared/components/Texts';
+import { DefaultText, Label } from '@/shared/components/Texts';
 import { useAccessibleFontSize } from '@/hooks/FontAccessibility';
 import { APP_BUTTON_BASE_FONT_SIZE, APP_COLORS } from '@/shared/constants';
 import { APP_ROUTES } from '@/shared/routes';
@@ -18,8 +18,21 @@ interface NavItem {
   icon: IconType;
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { label: 'Home', href: APP_ROUTES.private.home, icon: FiHome },
+interface NavSection {
+  title?: string;
+  items: NavItem[];
+}
+
+const NAV_SECTIONS: NavSection[] = [
+  {
+    items: [{ label: 'Home', href: APP_ROUTES.private.home, icon: FiHome }],
+  },
+  {
+    title: 'Gerenciamento',
+    items: [
+      { label: 'Usuários', href: APP_ROUTES.private.users, icon: FiUsers },
+    ],
+  },
 ];
 
 interface SidebarProps {
@@ -53,52 +66,86 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
           display: 'flex',
           flexDirection: 'column',
           gap: '4px',
+          overflowY: 'auto',
         }}
       >
-        {NAV_ITEMS.map((item) => {
-          const isActive = pathname === item.href;
-          const Icon = item.icon;
-
-          return (
-            <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
-              <Box
+        {NAV_SECTIONS.map((section, sectionIndex) => (
+          <Box
+            key={section.title ?? `section-${sectionIndex}`}
+            sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}
+          >
+            {sectionIndex > 0 && (
+              <Divider
                 sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 14px',
-                  borderRadius: '4px',
-                  border: '1px solid transparent',
-                  backgroundColor: isActive
-                    ? 'rgba(184,147,63,0.25)'
-                    : 'transparent',
-                  borderColor: isActive ? APP_COLORS.gold : 'transparent',
-                  transition: 'background-color 0.15s ease',
-                  '&:hover': {
-                    backgroundColor: 'rgba(184,147,63,0.15)',
-                  },
+                  borderColor: APP_COLORS.gold,
+                  opacity: 0.35,
+                  margin: '12px 0 8px',
+                }}
+              />
+            )}
+
+            {section.title && (
+              <Label
+                sx={{
+                  color: APP_COLORS.gold,
+                  marginBottom: '4px',
+                  paddingLeft: '14px',
                 }}
               >
-                <Icon
-                  style={{
-                    fontSize: iconFontSize,
-                    color: APP_COLORS.goldSoft,
-                    flexShrink: 0,
-                  }}
-                />
-                <DefaultText
-                  component="span"
-                  sx={{
-                    color: APP_COLORS.goldSoft,
-                    whiteSpace: 'nowrap',
-                  }}
+                {section.title}
+              </Label>
+            )}
+
+            {section.items.map((item) => {
+              const isActive = pathname === item.href;
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  style={{ textDecoration: 'none' }}
                 >
-                  {item.label}
-                </DefaultText>
-              </Box>
-            </Link>
-          );
-        })}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '10px 14px',
+                      borderRadius: '4px',
+                      border: '1px solid transparent',
+                      backgroundColor: isActive
+                        ? 'rgba(184,147,63,0.25)'
+                        : 'transparent',
+                      borderColor: isActive ? APP_COLORS.gold : 'transparent',
+                      transition: 'background-color 0.15s ease',
+                      '&:hover': {
+                        backgroundColor: 'rgba(184,147,63,0.15)',
+                      },
+                    }}
+                  >
+                    <Icon
+                      style={{
+                        fontSize: iconFontSize,
+                        color: APP_COLORS.goldSoft,
+                        flexShrink: 0,
+                      }}
+                    />
+                    <DefaultText
+                      component="span"
+                      sx={{
+                        color: APP_COLORS.goldSoft,
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {item.label}
+                    </DefaultText>
+                  </Box>
+                </Link>
+              );
+            })}
+          </Box>
+        ))}
       </Box>
     </Box>
   );

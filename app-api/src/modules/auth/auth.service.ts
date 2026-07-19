@@ -10,9 +10,6 @@ import { OAuth2Client } from 'google-auth-library';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
-
-const SALT_ROUNDS = 10;
 
 export interface AuthResult {
   accessToken: string;
@@ -31,22 +28,6 @@ export class AuthService {
     this.googleClient = new OAuth2Client(
       this.configService.get<string>('google.clientId'),
     );
-  }
-
-  async register(dto: RegisterDto): Promise<AuthResult> {
-    const existing = await this.usersService.findByEmail(dto.email);
-    if (existing) {
-      throw new ConflictException('Este e-mail já está em uso.');
-    }
-
-    const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
-    const user = await this.usersService.createLocalUser({
-      email: dto.email,
-      name: dto.name,
-      passwordHash,
-    });
-
-    return this.buildAuthResult(user);
   }
 
   async login(dto: LoginDto): Promise<AuthResult> {

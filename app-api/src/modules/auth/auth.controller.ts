@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -20,21 +19,12 @@ import { CurrentUser } from './decorators/current-user.decorator';
 import { AuthResponseDto, AuthUserDto } from './dto/auth-response.dto';
 import { GoogleLoginDto } from './dto/google-login.dto';
 import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
-  @Post('register')
-  @ApiOperation({ summary: 'Cria uma conta com e-mail e senha' })
-  @ApiCreatedResponse({ type: AuthResponseDto })
-  async register(@Body() dto: RegisterDto): Promise<AuthResponseDto> {
-    const { accessToken, user } = await this.authService.register(dto);
-    return { accessToken, user: AuthUserDto.fromEntity(user) };
-  }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
