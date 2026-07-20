@@ -50,6 +50,9 @@ produção, nunca cria componentes ou páginas de verdade — apenas planeja.
    - Se algum componente pequeno reutilizável precisa ser criado (inputs, cards,
      botões etc.) — só inclua a subseção de componentes se algo realmente não existir
      ainda em `shared/components/`; se tudo já existir, não crie essa subseção.
+   - Se a página tiver uma listagem com campos de filtro/busca, inclua na subseção de
+     componentes um `<Entidade>sFilterSection` específico da página (padrão
+     `web-secao-filtros`) — os inputs de filtro nunca ficam inline em `page.tsx`.
    - Quais páginas/rotas e funcionalidades precisam ser criadas ou alteradas,
      incluindo quais endpoints da API serão consumidos e quais campos/regras de
      validação o formulário (se houver) deve cobrir.

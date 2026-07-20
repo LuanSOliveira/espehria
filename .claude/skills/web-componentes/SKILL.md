@@ -1,6 +1,6 @@
 ---
 name: web-componentes
-description: Use sempre que for necessário criar um componente React novo no app-web. Decide se o componente é genérico (reaproveitável em toda a aplicação) e deve ir em shared/components/, ou se é específico de uma página e deve ir na pasta components/ dentro do diretório da própria página — e como estruturá-lo em cada caso. Não use para decidir sobre tabelas de listagem de entidades (essa decisão já é coberta pela skill web-tabela-listagem).
+description: Use sempre que for necessário criar um componente React novo no app-web. Decide se o componente é genérico (reaproveitável em toda a aplicação) e deve ir em shared/components/, ou se é específico de uma página e deve ir na pasta components/ dentro do diretório da própria página — e como estruturá-lo em cada caso. Não use para decidir sobre tabelas de listagem de entidades (essa decisão já é coberta pela skill web-tabela-listagem) nem sobre seção de filtros de listagem (skill web-secao-filtros).
 ---
 
 # Decisão de local e estrutura de componentes (app-web)

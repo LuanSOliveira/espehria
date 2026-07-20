@@ -1,15 +1,10 @@
 'use client';
 
 import { SubmitEvent, useState } from 'react';
-import { FiSearch } from 'react-icons/fi';
 
 import { PageContainer } from '@/shared/components/Containers';
 import { ConfirmationModal, FormModal } from '@/shared/components/Modals';
 import { Title } from '@/shared/components/Texts';
-import {
-  DefaultAutocompleteInput,
-  DefaultTextInput,
-} from '@/shared/components/Inputs';
 import { PrimaryButton } from '@/shared/components/Buttons';
 import {
   useCreatureCategoriesQuery,
@@ -26,6 +21,7 @@ import { showToast } from '@/shared/util';
 import { useSelectedCreatureStore } from '@/store';
 import { CreaturesList } from './components/CreaturesList';
 import { CreatureCreateForm } from './components/CreatureCreateForm';
+import { CreaturesFilterSection } from './components/CreaturesFilterSection';
 
 export default function CreaturesPage() {
   const [nameInput, setNameInput] = useState('');
@@ -116,38 +112,14 @@ export default function CreaturesPage() {
         </PrimaryButton>
       </div>
 
-      <form
+      <CreaturesFilterSection
+        nameValue={nameInput}
+        onNameChange={setNameInput}
+        categoryValue={categoryFilter}
+        onCategoryChange={setCategoryFilter}
+        categories={categories ?? []}
         onSubmit={handleSearch}
-        className="mt-6 flex max-w-160 flex-wrap items-end gap-3"
-      >
-        <div className="min-w-50 flex-1">
-          <DefaultTextInput
-            id="creatures-name-filter"
-            label="Nome"
-            placeholder="Buscar por nome"
-            value={nameInput}
-            onChange={(event) => setNameInput(event.target.value)}
-            icon={<FiSearch />}
-          />
-        </div>
-        <div className="min-w-50 flex-1">
-          <DefaultAutocompleteInput<ICreatureCategory>
-            id="creatures-category-filter"
-            label="Categoria"
-            options={categories ?? []}
-            getOptionLabel={(category) => category.name}
-            value={categoryFilter}
-            onChange={setCategoryFilter}
-            placeholder="Todas as categorias"
-          />
-        </div>
-        <PrimaryButton
-          type="submit"
-          sx={{ width: 'auto', padding: '12px 24px' }}
-        >
-          Filtrar
-        </PrimaryButton>
-      </form>
+      />
 
       <CreaturesList
         creatures={data?.data ?? []}

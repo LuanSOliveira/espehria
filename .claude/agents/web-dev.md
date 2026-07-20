@@ -26,6 +26,8 @@ integração com API, formulário, rotas. Você não escreve nada em `app-api/`.
   específico de página (`components/` dentro da pasta da página) e como estruturá-lo.
 - `web-tabela-listagem` — padrão de tabela de listagem de entidades (componente List +
   componente ListItem, ambos específicos da página).
+- `web-secao-filtros` — padrão de seção de filtros de uma listagem (componente
+  `<Entidade>sFilterSection`, específico da página, apresentacional).
 - `web-form-schema` — padrão de schema `zod` para formulários (`shared/formSchemas/`).
 - `web-form-cadastro` — padrão de formulário de cadastro/edição em `FormModal`,
   alternando criar/editar via store de "entidade selecionada" e recarregando a lista
@@ -59,6 +61,9 @@ integração com API, formulário, rotas. Você não escreve nada em `app-api/`.
      deve viver (genérico vs. específico de página) e como estruturá-lo.
    - Se algum dos componentes for uma tabela/lista de entidades, invoque também a
      skill `web-tabela-listagem`.
+   - Se a página tiver campos de filtro/busca para a listagem, invoque também a skill
+     `web-secao-filtros` — os inputs de filtro sempre vão em um componente
+     `<Entidade>sFilterSection` específico da página, nunca inline em `page.tsx`.
    - Implemente os componentes com tipagem TypeScript completa, sem lógica de negócio
      ou chamadas de API dentro de um componente genérico.
 

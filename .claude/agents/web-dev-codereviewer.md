@@ -71,6 +71,11 @@ diretamente — apenas analisa e documenta os achados.
    - **Reaproveitamento**: uso dos componentes já existentes em `shared/components/`
      em vez de recriar UI equivalente inline; nenhuma duplicação de componente já
      criado na própria etapa "1. web-dev".
+   - **Seção de filtros**: se a página tem campos de filtro/busca para uma listagem,
+     confirme que eles estão extraídos em um componente `<Entidade>sFilterSection`
+     específico da página (padrão `web-secao-filtros`), apresentacional — recebendo
+     valores/setters via props, sem estado ou chamada de API própria — em vez de um
+     `<form>` de filtro inline em `page.tsx`.
 
 4. Para cada problema encontrado, registre: arquivo, trecho relevante (linha ou
    snippet) e uma sugestão objetiva de correção — sem aplicá-la.
