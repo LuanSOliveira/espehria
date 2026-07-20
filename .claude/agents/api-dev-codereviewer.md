@@ -42,6 +42,12 @@ nunca corrige código diretamente — apenas analisa e documenta os achados.
    pt-BR, `synchronize: false` (schema só via migration).
 
 3. Leia todos os arquivos coletados no passo 1 e analise:
+   - **Erros de código**: bugs de lógica, tipagem incorreta ou incompatível, imports
+     quebrados/não utilizados, referências a símbolos inexistentes, código que não
+     compila, `await`/`async` ausente ou incorreto, condições e tratamentos de retorno
+     que não cobrem o comportamento esperado — qualquer coisa que faria o código falhar
+     em tempo de compilação ou execução, independente de estar de acordo com o padrão
+     do projeto.
    - **Nomenclatura e estrutura**: nomes de arquivos/classes/variáveis seguem a
      convenção do projeto; arquivos estão nas pastas corretas do módulo.
    - **DTOs e validação**: decorators `class-validator` corretos e suficientes para

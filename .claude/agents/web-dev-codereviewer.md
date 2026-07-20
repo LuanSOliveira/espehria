@@ -38,6 +38,11 @@ diretamente — apenas analisa e documenta os achados.
    `FormInputs`, Modals, Containers, Texts) sobre MUI, alias `@/*`, textos em pt-BR.
 
 3. Leia todos os arquivos coletados no passo 1 e analise:
+   - **Erros de código**: bugs de lógica, tipagem incorreta ou incompatível com os
+     dados/props usados, imports quebrados/não utilizados, referências a símbolos
+     inexistentes, hooks usados fora das regras do React (condicional, loop), código
+     que não compila — qualquer coisa que faria o código falhar em tempo de compilação
+     ou execução, independente de estar de acordo com o padrão do projeto.
    - **Nomenclatura e estrutura de pastas**: componentes em `shared/components/` na
      categoria correta; páginas no grupo de rota certo (`(public)`/`(authorized)`);
      hooks/stores/schemas nos diretórios convencionados do projeto.
