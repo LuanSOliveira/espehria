@@ -126,6 +126,42 @@ export const APP_INPUT_STYLES: Record<string, SystemStyleObject<Theme>> = {
       listStyleType: 'decimal',
     },
   },
+  richTextContentLight: {
+    color: APP_COLORS.textBrown,
+    minHeight: 'unset',
+    '& .ProseMirror': {
+      outline: 'none',
+    },
+    '& .ProseMirror p': {
+      margin: '0.25em 0',
+    },
+    '& .ProseMirror h1': {
+      fontSize: '1.5em',
+      fontWeight: 700,
+      margin: '0.5em 0',
+      color: APP_COLORS.textBrownDark,
+    },
+    '& .ProseMirror h2': {
+      fontSize: '1.25em',
+      fontWeight: 700,
+      margin: '0.5em 0',
+      color: APP_COLORS.textBrownDark,
+    },
+    '& .ProseMirror h3': {
+      fontSize: '1.1em',
+      fontWeight: 700,
+      margin: '0.5em 0',
+      color: APP_COLORS.textBrownDark,
+    },
+    '& .ProseMirror ul': {
+      paddingLeft: '1.5em',
+      listStyleType: 'disc',
+    },
+    '& .ProseMirror ol': {
+      paddingLeft: '1.5em',
+      listStyleType: 'decimal',
+    },
+  },
   richTextViewFrame: {
     backgroundImage: `linear-gradient(180deg, ${APP_COLORS.inputBg} 0%, ${APP_COLORS.inputBgDark} 100%)`,
     borderRadius: '3px',

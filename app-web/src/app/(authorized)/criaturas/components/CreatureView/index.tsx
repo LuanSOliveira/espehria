@@ -18,8 +18,10 @@ import {
   FiImage,
   FiMap,
   FiPackage,
+  FiPlusCircle,
   FiRepeat,
   FiShield,
+  FiTag,
   FiTarget,
   FiUser,
   FiUsers,
@@ -29,7 +31,7 @@ import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { useGetEntityById } from '@/hooks/Queries';
 import { ICreature } from '@/shared/interfaces';
 import { isRichTextEmpty, showToast } from '@/shared/util';
-import { APP_COLORS, APP_INPUT_STYLES } from '@/shared/constants';
+import { APP_COLORS, APP_CONTAINER_STYLES, APP_INPUT_STYLES } from '@/shared/constants';
 
 export interface CreatureViewProps {
   creatureId: string;
@@ -43,30 +45,54 @@ interface CreatureSectionData {
   value?: string | null;
 }
 
-const CreatureSectionBlock = ({ label, icon: Icon, value }: CreatureSectionData) => {
-  return (
-    <div>
-      <div className="flex items-center gap-2 mb-2">
-        <Icon style={{ fontSize: 18, color: APP_COLORS.gold }} />
-        <Label component="span" sx={{ margin: 0 }}>
-          {label}
-        </Label>
-      </div>
-      <Box sx={APP_INPUT_STYLES.richTextViewFrame}>
-        {!isRichTextEmpty(value ?? undefined) ? (
-          <Box sx={APP_INPUT_STYLES.richTextContent}>
-            <div
-              className="ProseMirror"
-              dangerouslySetInnerHTML={{ __html: value as string }}
-            />
-          </Box>
-        ) : (
-          <DefaultText>{NOT_INFORMED}</DefaultText>
-        )}
-      </Box>
-    </div>
+const SectionHeaderLabel = ({
+  label,
+  icon: Icon,
+  onDark = false,
+}: {
+  label: string;
+  icon: IconType;
+  onDark?: boolean;
+}) => (
+  <div className="flex items-center gap-2">
+    <Icon
+      style={{ fontSize: 16, color: onDark ? APP_COLORS.goldSoft : APP_COLORS.gold }}
+    />
+    <Label
+      component="span"
+      sx={{ margin: 0, color: onDark ? APP_COLORS.goldSoft : undefined }}
+    >
+      {label}
+    </Label>
+  </div>
+);
+
+const RichTextValue = ({ value }: { value?: string | null }) =>
+  !isRichTextEmpty(value ?? undefined) ? (
+    <Box sx={APP_INPUT_STYLES.richTextContentLight}>
+      <div className="ProseMirror" dangerouslySetInnerHTML={{ __html: value as string }} />
+    </Box>
+  ) : (
+    <DefaultText>{NOT_INFORMED}</DefaultText>
   );
-};
+
+const CreaturePlainSection = ({ label, icon, value }: CreatureSectionData) => (
+  <div className="flex flex-col gap-2">
+    <SectionHeaderLabel label={label} icon={icon} />
+    <RichTextValue value={value} />
+  </div>
+);
+
+const CreatureBoxedSection = ({ label, icon, value }: CreatureSectionData) => (
+  <div style={APP_CONTAINER_STYLES.detailSectionBox}>
+    <div className="px-3 py-2" style={APP_CONTAINER_STYLES.detailSectionBoxHeader}>
+      <SectionHeaderLabel label={label} icon={icon} onDark />
+    </div>
+    <div className="px-3 py-3">
+      <RichTextValue value={value} />
+    </div>
+  </div>
+);
 
 export const CreatureView = ({ creatureId }: CreatureViewProps) => {
   const {
@@ -103,22 +129,14 @@ export const CreatureView = ({ creatureId }: CreatureViewProps) => {
   }
 
   const sideInfo = [
-    { label: 'Outros Nomes', value: creature.otherNames },
-    { label: 'Categoria', value: creature.category.name },
-    { label: 'Nível de Ameaça', value: creature.threatLevel },
-    { label: 'Expectativa de Vida', value: creature.averageLifeExpectancy },
-  ];
-
-  const sectionsBeforeLifeStage: CreatureSectionData[] = [
+    { label: 'Outros Nomes', icon: FiPlusCircle, value: creature.otherNames },
+    { label: 'Categoria', icon: FiTag, value: creature.category.name },
+    { label: 'Nível de Ameaça', icon: FiShield, value: creature.threatLevel },
     {
-      label: 'Características Físicas',
-      icon: FiUser,
-      value: creature.physicalCharacteristics,
+      label: 'Expectativa de Vida',
+      icon: FiClock,
+      value: creature.averageLifeExpectancy,
     },
-    { label: 'Habitat', icon: FiMap, value: creature.habitat },
-    { label: 'Comportamento', icon: FiActivity, value: creature.behavior },
-    { label: 'Alimentação', icon: FiCoffee, value: creature.diet },
-    { label: 'Ciclo de Vida', icon: FiRepeat, value: creature.lifeCycle },
   ];
 
   const lifeStages = [
@@ -128,12 +146,14 @@ export const CreatureView = ({ creatureId }: CreatureViewProps) => {
     { label: 'Ancião', value: creature.lifeStageElder },
   ];
 
-  const sectionsAfterLifeStage: CreatureSectionData[] = [
-    {
-      label: 'Habilidades e Poderes',
-      icon: FiZap,
-      value: creature.abilitiesAndPowers,
-    },
+  const leftColumnBoxedSections: CreatureSectionData[] = [
+    { label: 'Habitat', icon: FiMap, value: creature.habitat },
+    { label: 'Comportamento', icon: FiActivity, value: creature.behavior },
+    { label: 'Alimentação', icon: FiCoffee, value: creature.diet },
+    { label: 'Ciclo de Vida', icon: FiRepeat, value: creature.lifeCycle },
+  ];
+
+  const rightColumnBoxedSections: CreatureSectionData[] = [
     { label: 'Resistências', icon: FiShield, value: creature.resistances },
     { label: 'Fraquezas', icon: FiAlertTriangle, value: creature.weaknesses },
     { label: 'Combate', icon: FiCrosshair, value: creature.combat },
@@ -163,6 +183,9 @@ export const CreatureView = ({ creatureId }: CreatureViewProps) => {
       icon: FiUsers,
       value: creature.relationWithCivilizations,
     },
+  ];
+
+  const fullWidthBoxedSections: CreatureSectionData[] = [
     {
       label: 'Mitologia e Folclore',
       icon: FiBookOpen,
@@ -182,10 +205,6 @@ export const CreatureView = ({ creatureId }: CreatureViewProps) => {
 
   return (
     <div className="flex flex-col gap-6">
-      <Title component="h3" sx={{ textAlign: 'left' }}>
-        {creature.name}
-      </Title>
-
       <div className="flex flex-col gap-4 sm:flex-row">
         {creature.referenceImageUrl ? (
           <Box
@@ -193,24 +212,26 @@ export const CreatureView = ({ creatureId }: CreatureViewProps) => {
             src={creature.referenceImageUrl}
             alt={creature.name}
             sx={{
-              width: 300,
-              height: 300,
+              width: 220,
+              height: 220,
               objectFit: 'cover',
-              borderRadius: '4px',
+              borderRadius: '6px',
+              border: `2px solid ${APP_COLORS.gold}`,
               flexShrink: 0,
             }}
           />
         ) : (
           <Box
             sx={{
-              width: 300,
-              height: 300,
+              width: 220,
+              height: 220,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               backgroundColor: APP_COLORS.wood,
               color: APP_COLORS.gold,
-              borderRadius: '4px',
+              borderRadius: '6px',
+              border: `2px solid ${APP_COLORS.gold}`,
               flexShrink: 0,
             }}
           >
@@ -218,59 +239,93 @@ export const CreatureView = ({ creatureId }: CreatureViewProps) => {
           </Box>
         )}
 
-        <div
-          className="flex flex-col justify-between gap-2 w-full"
-          style={{ height: 300 }}
-        >
-          {sideInfo.map((info) => (
-            <div key={info.label}>
-              <Label component="span" sx={{ margin: 0 }}>
-                {info.label}
-              </Label>
-              <DefaultText>{info.value || NOT_INFORMED}</DefaultText>
-            </div>
-          ))}
-        </div>
-      </div>
+        <div className="flex w-full flex-col gap-3">
+          <Title
+            component="h3"
+            sx={{
+              textAlign: 'left',
+              textTransform: 'none',
+              backgroundImage: 'none',
+              color: APP_COLORS.textBrownDark,
+              WebkitTextFillColor: APP_COLORS.textBrownDark,
+              letterSpacing: 'normal',
+              filter: 'none',
+            }}
+          >
+            {creature.name}
+          </Title>
 
-      {sectionsBeforeLifeStage.map((section) => (
-        <CreatureSectionBlock key={section.label} {...section} />
-      ))}
-
-      <div>
-        <Label component="span" sx={{ margin: 0, marginBottom: '10px' }}>
-          Estágio de Vida
-        </Label>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mt-2">
-          {lifeStages.map((stage) => (
-            <div key={stage.label}>
-              <div className="flex items-center gap-2 mb-2">
-                <FiClock style={{ fontSize: 16, color: APP_COLORS.gold }} />
-                <Label component="span" sx={{ margin: 0 }}>
-                  {stage.label}
-                </Label>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {sideInfo.map((info) => (
+              <div
+                key={info.label}
+                className="flex items-start gap-2 px-3 py-2"
+                style={APP_CONTAINER_STYLES.detailInfoField}
+              >
+                <info.icon
+                  style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+                />
+                <div>
+                  <Label component="span" sx={{ margin: 0 }}>
+                    {info.label}
+                  </Label>
+                  <DefaultText>{info.value || NOT_INFORMED}</DefaultText>
+                </div>
               </div>
-              <Box sx={APP_INPUT_STYLES.richTextViewFrame}>
-                {!isRichTextEmpty(stage.value ?? undefined) ? (
-                  <Box sx={APP_INPUT_STYLES.richTextContent}>
-                    <div
-                      className="ProseMirror"
-                      dangerouslySetInnerHTML={{
-                        __html: stage.value as string,
-                      }}
-                    />
-                  </Box>
-                ) : (
-                  <DefaultText>{NOT_INFORMED}</DefaultText>
-                )}
-              </Box>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <CreaturePlainSection
+        label="Características Físicas"
+        icon={FiUser}
+        value={creature.physicalCharacteristics}
+      />
+
+      <div className="grid grid-cols-1 gap-x-8 gap-y-6 lg:grid-cols-2">
+        <div className="flex flex-col gap-4">
+          {leftColumnBoxedSections.map((section) => (
+            <CreatureBoxedSection key={section.label} {...section} />
+          ))}
+
+          <div className="flex flex-col gap-2">
+            <SectionHeaderLabel label="Estágios de Vida" icon={FiClock} />
+            <div className="grid grid-cols-2 gap-3">
+              {lifeStages.map((stage) => (
+                <div key={stage.label} style={APP_CONTAINER_STYLES.detailSectionBox}>
+                  <div
+                    className="border-b px-3 py-2"
+                    style={{ borderColor: APP_COLORS.goldDark }}
+                  >
+                    <Label component="span" sx={{ margin: 0 }}>
+                      {stage.label}
+                    </Label>
+                  </div>
+                  <div className="px-3 py-2">
+                    <RichTextValue value={stage.value} />
+                  </div>
+                </div>
+              ))}
             </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <CreaturePlainSection
+            label="Habilidades e Poderes"
+            icon={FiZap}
+            value={creature.abilitiesAndPowers}
+          />
+
+          {rightColumnBoxedSections.map((section) => (
+            <CreatureBoxedSection key={section.label} {...section} />
           ))}
         </div>
       </div>
 
-      {sectionsAfterLifeStage.map((section) => (
-        <CreatureSectionBlock key={section.label} {...section} />
+      {fullWidthBoxedSections.map((section) => (
+        <CreatureBoxedSection key={section.label} {...section} />
       ))}
     </div>
   );

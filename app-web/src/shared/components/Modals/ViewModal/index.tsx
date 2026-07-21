@@ -10,7 +10,7 @@ import { FiExternalLink, FiX } from 'react-icons/fi';
 import { Card, PageContainer } from '@/shared/components/Containers';
 import { Title } from '@/shared/components/Texts';
 import { theme } from '@/providers/mui-theme-provider';
-import { APP_COLORS } from '@/shared/constants';
+import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 import { showToast } from '@/shared/util';
 
 export interface ViewModalProps {
@@ -137,7 +137,7 @@ export const ViewModal = ({
       ? createPortal(
           <CacheProvider value={emotionCacheRef.current}>
             <ThemeProvider theme={theme}>
-              <PageContainer className="!h-screen !w-screen !rounded-none !border-0">
+              <PageContainer className="h-screen! w-screen! rounded-none! border-0!">
                 <Title component="h2" sx={{ textAlign: 'left', marginBottom: '20px' }}>
                   {title}
                 </Title>
@@ -163,36 +163,76 @@ export const ViewModal = ({
           }}
         >
           <Card sizeClassName={size === 'wide' ? 'w-[min(1152px,92vw)]' : undefined}>
-            <div className="absolute top-3 right-3 flex items-center gap-1">
-              <Tooltip title="Abrir em nova janela">
-                <IconButton
-                  aria-label="Abrir em nova janela"
-                  onClick={handlePopOut}
-                  size="small"
+            <div
+              className="relative -mx-8 -mt-10 mb-6 flex items-center justify-center rounded-t-md px-12 py-4"
+              style={APP_CONTAINER_STYLES.detailModalHeaderBar}
+            >
+              <div className="flex items-center gap-3">
+                <span style={{ color: APP_COLORS.gold, fontSize: 16 }}>◇</span>
+                <Title
+                  component="h2"
                   sx={{
-                    padding: '2px',
-                    color: APP_COLORS.goldDark,
-                    '&:hover': { color: APP_COLORS.gold },
+                    margin: 0,
+                    backgroundImage: 'none',
+                    color: APP_COLORS.goldSoft,
+                    WebkitTextFillColor: APP_COLORS.goldSoft,
+                    filter: 'none',
                   }}
                 >
-                  <FiExternalLink style={{ fontSize: 18 }} />
-                </IconButton>
-              </Tooltip>
+                  {title}
+                </Title>
+                <span style={{ color: APP_COLORS.gold, fontSize: 16 }}>◇</span>
+              </div>
 
-              <button
-                type="button"
-                aria-label="Fechar"
-                onClick={onClose}
-                className="cursor-pointer text-gold-dark hover:text-gold"
-                style={{ fontSize: 20, lineHeight: 0 }}
+              <div
+                className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center overflow-hidden rounded-md"
+                style={{ border: `1px solid ${APP_COLORS.gold}` }}
               >
-                <FiX />
-              </button>
-            </div>
+                <Tooltip title="Abrir em nova janela">
+                  <IconButton
+                    aria-label="Abrir em nova janela"
+                    onClick={handlePopOut}
+                    size="small"
+                    sx={{
+                      borderRadius: 0,
+                      padding: '6px',
+                      color: APP_COLORS.gold,
+                      '&:hover': {
+                        color: APP_COLORS.goldLight,
+                        backgroundColor: APP_COLORS.woodLight,
+                      },
+                    }}
+                  >
+                    <FiExternalLink style={{ fontSize: 16 }} />
+                  </IconButton>
+                </Tooltip>
 
-            <Title component="h2" sx={{ marginBottom: '20px' }}>
-              {title}
-            </Title>
+                <div
+                  style={{
+                    width: 1,
+                    alignSelf: 'stretch',
+                    backgroundColor: APP_COLORS.gold,
+                  }}
+                />
+
+                <IconButton
+                  aria-label="Fechar"
+                  onClick={onClose}
+                  size="small"
+                  sx={{
+                    borderRadius: 0,
+                    padding: '6px',
+                    color: APP_COLORS.gold,
+                    '&:hover': {
+                      color: APP_COLORS.goldLight,
+                      backgroundColor: APP_COLORS.woodLight,
+                    },
+                  }}
+                >
+                  <FiX style={{ fontSize: 16 }} />
+                </IconButton>
+              </div>
+            </div>
 
             {children}
           </Card>
