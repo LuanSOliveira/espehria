@@ -29,17 +29,20 @@ import {
 } from 'react-icons/fi';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
+import { RichTextViewer } from '@/shared/components/RichTextViewer';
 import { useGetEntityById } from '@/hooks/Queries';
 import { ICreature } from '@/shared/interfaces';
-import { isRichTextEmpty, showToast } from '@/shared/util';
-import {
-  APP_COLORS,
-  APP_CONTAINER_STYLES,
-  APP_INPUT_STYLES,
-} from '@/shared/constants';
+import { showToast } from '@/shared/util';
+import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 
 export interface CreatureViewProps {
   creatureId: string;
+  /**
+   * Chamado quando a criatura não é encontrada (404) — usado pelo
+   * EntityMentionViewDispatcher para fechar o modal aberto a partir de uma
+   * menção órfã (entidade excluída).
+   */
+  onNotFound?: () => void;
 }
 
 const NOT_INFORMED = 'Não informado';
@@ -49,18 +52,6 @@ interface CreatureSectionData {
   icon: IconType;
   value?: string | null;
 }
-
-const RichTextValue = ({ value }: { value?: string | null }) =>
-  !isRichTextEmpty(value ?? undefined) ? (
-    <Box sx={APP_INPUT_STYLES.richTextContentLight}>
-      <div
-        className="ProseMirror"
-        dangerouslySetInnerHTML={{ __html: value as string }}
-      />
-    </Box>
-  ) : (
-    <DefaultText>{NOT_INFORMED}</DefaultText>
-  );
 
 const CreatureSectionBox = ({
   label,
@@ -78,12 +69,12 @@ const CreatureSectionBox = ({
       </Label>
     </div>
     <div className="px-3 py-3">
-      <RichTextValue value={value} />
+      <RichTextViewer value={value} emptyLabel={NOT_INFORMED} />
     </div>
   </div>
 );
 
-export const CreatureView = ({ creatureId }: CreatureViewProps) => {
+export const CreatureView = ({ creatureId, onNotFound }: CreatureViewProps) => {
   const {
     data: creature,
     isLoading,
@@ -98,13 +89,20 @@ export const CreatureView = ({ creatureId }: CreatureViewProps) => {
       return;
     }
 
+    const isNotFound = error?.response?.status === 404;
+
     showToast({
-      message:
-        error?.response?.data?.message ??
-        'Não foi possível carregar os dados da criatura.',
+      message: isNotFound
+        ? 'Entidade não encontrada.'
+        : (error?.response?.data?.message ??
+          'Não foi possível carregar os dados da criatura.'),
       type: 'error',
     });
-  }, [isError, error]);
+
+    if (isNotFound) {
+      onNotFound?.();
+    }
+  }, [isError, error, onNotFound]);
 
   if (isLoading) {
     return (

@@ -125,6 +125,12 @@ export const APP_INPUT_STYLES: Record<string, SystemStyleObject<Theme>> = {
       paddingLeft: '1.5em',
       listStyleType: 'decimal',
     },
+    '& [data-type="mention"]': {
+      color: APP_COLORS.goldSoft,
+      fontWeight: 600,
+      borderRadius: '3px',
+      padding: '0 2px',
+    },
   },
   richTextContentLight: {
     color: APP_COLORS.textBrown,
@@ -161,6 +167,20 @@ export const APP_INPUT_STYLES: Record<string, SystemStyleObject<Theme>> = {
       paddingLeft: '1.5em',
       listStyleType: 'decimal',
     },
+    '& [data-type="mention"]': {
+      color: APP_COLORS.goldDeep,
+      fontWeight: 600,
+      textDecoration: 'underline',
+      textDecorationColor: APP_COLORS.gold,
+      borderRadius: '3px',
+      padding: '0 2px',
+    },
+    '& [data-type="mention"][data-clickable="true"]': {
+      cursor: 'pointer',
+    },
+    '& [data-type="mention"][data-clickable="true"]:hover': {
+      backgroundColor: APP_COLORS.parchmentMid,
+    },
   },
   richTextViewFrame: {
     backgroundImage: `linear-gradient(180deg, ${APP_COLORS.inputBg} 0%, ${APP_COLORS.inputBgDark} 100%)`,
@@ -180,5 +200,27 @@ export const APP_INPUT_STYLES: Record<string, SystemStyleObject<Theme>> = {
     marginTop: '4px',
     fontSize: '12px',
     color: APP_COLORS.goldDeep,
+  },
+  mentionSuggestionMenu: {
+    backgroundImage: `linear-gradient(180deg, ${APP_COLORS.inputBg} 0%, ${APP_COLORS.inputBgDark} 100%)`,
+    border: `1px solid ${APP_COLORS.goldDark}`,
+    borderRadius: '3px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+    padding: '4px',
+    minWidth: '220px',
+    maxWidth: '320px',
+  },
+  mentionSuggestionItem: {
+    padding: '6px 10px',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    color: APP_COLORS.inputText,
+    '&:hover': {
+      backgroundColor: APP_COLORS.woodLight,
+    },
+  },
+  mentionSuggestionItemActive: {
+    backgroundColor: APP_COLORS.woodLight,
+    color: APP_COLORS.goldLight,
   },
 };

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import '../globals.css';
 import { Providers } from '@/providers';
 import ThemeInitializer from '@/shared/components/ThemeInitializer';
+import { EntityMentionViewDispatcher } from '@/shared/components/EntityMentionViewDispatcher';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthorizedShell } from './components/AuthorizedShell';
@@ -35,6 +36,7 @@ export default function AuthorizedLayout({
       <body>
         <Providers>
           <ThemeInitializer />
+          <EntityMentionViewDispatcher />
           <ToastContainer className="toast-container" />
           <div
             style={{

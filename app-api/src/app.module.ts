@@ -11,6 +11,7 @@ import { validate } from './config/env.validation';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { CreaturesModule } from './modules/creatures/creatures.module';
+import { SearchModule } from './modules/search/search.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { CreaturesModule } from './modules/creatures/creatures.module';
     UsersModule,
     AuthModule,
     CreaturesModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
