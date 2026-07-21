@@ -126,6 +126,13 @@ export const APP_INPUT_STYLES: Record<string, SystemStyleObject<Theme>> = {
       listStyleType: 'decimal',
     },
   },
+  richTextViewFrame: {
+    backgroundImage: `linear-gradient(180deg, ${APP_COLORS.inputBg} 0%, ${APP_COLORS.inputBgDark} 100%)`,
+    borderRadius: '3px',
+    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.5)',
+    border: `1px solid ${APP_COLORS.goldDark}`,
+    padding: '8px 12px',
+  },
   richTextPlaceholder: {
     position: 'absolute',
     top: 0,

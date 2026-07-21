@@ -1,5 +1,5 @@
 import { IconButton, TableCell, TableRow, Tooltip } from '@mui/material';
-import { FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { FiEdit2, FiEye, FiTrash2 } from 'react-icons/fi';
 import { DefaultText } from '@/shared/components/Texts';
 import { ImageAvatarPreview } from '@/shared/components/ImageAvatarPreview';
 import { ICreatureListItem } from '@/shared/interfaces';
@@ -7,12 +7,14 @@ import { APP_COLORS } from '@/shared/constants';
 
 export interface CreaturesListItemProps {
   creature: ICreatureListItem;
+  onView: (creature: ICreatureListItem) => void;
   onEdit: (creature: ICreatureListItem) => void;
   onDelete: (creature: ICreatureListItem) => void;
 }
 
 export const CreaturesListItem = ({
   creature,
+  onView,
   onEdit,
   onDelete,
 }: CreaturesListItemProps) => {
@@ -31,6 +33,15 @@ export const CreaturesListItem = ({
         <DefaultText>{creature.category.name}</DefaultText>
       </TableCell>
       <TableCell align="right" sx={{ borderColor: APP_COLORS.gold }}>
+        <Tooltip title="Visualizar">
+          <IconButton
+            aria-label="Visualizar"
+            onClick={() => onView(creature)}
+            sx={{ color: APP_COLORS.textBrownDark }}
+          >
+            <FiEye />
+          </IconButton>
+        </Tooltip>
         <Tooltip title="Editar">
           <IconButton
             aria-label="Editar"

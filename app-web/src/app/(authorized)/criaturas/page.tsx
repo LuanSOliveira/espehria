@@ -3,7 +3,7 @@
 import { SubmitEvent, useState } from 'react';
 
 import { PageContainer } from '@/shared/components/Containers';
-import { ConfirmationModal, FormModal } from '@/shared/components/Modals';
+import { ConfirmationModal, FormModal, ViewModal } from '@/shared/components/Modals';
 import { Title } from '@/shared/components/Texts';
 import { PrimaryButton } from '@/shared/components/Buttons';
 import {
@@ -22,6 +22,7 @@ import { useSelectedCreatureStore } from '@/store';
 import { CreaturesList } from './components/CreaturesList';
 import { CreatureCreateForm } from './components/CreatureCreateForm';
 import { CreaturesFilterSection } from './components/CreaturesFilterSection';
+import { CreatureView } from './components/CreatureView';
 
 export default function CreaturesPage() {
   const [nameInput, setNameInput] = useState('');
@@ -29,6 +30,8 @@ export default function CreaturesPage() {
     useState<ICreatureCategory | null>(null);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [creaturePendingDelete, setCreaturePendingDelete] =
+    useState<ICreatureListItem | null>(null);
+  const [creaturePendingView, setCreaturePendingView] =
     useState<ICreatureListItem | null>(null);
   const [filters, setFilters] = useState<ICreatureListFilters>({
     page: 1,
@@ -92,6 +95,10 @@ export default function CreaturesPage() {
     setIsFormModalOpen(true);
   };
 
+  const handleView = (creature: ICreatureListItem) => {
+    setCreaturePendingView(creature);
+  };
+
   const handleCloseFormModal = () => {
     setIsFormModalOpen(false);
     resetSelectedCreature();
@@ -127,6 +134,7 @@ export default function CreaturesPage() {
         page={filters.page ?? 1}
         isLoading={isLoading}
         onPageChange={handlePageChange}
+        onView={handleView}
         onEdit={handleEdit}
         onDelete={setCreaturePendingDelete}
       />
@@ -139,6 +147,17 @@ export default function CreaturesPage() {
       >
         <CreatureCreateForm onSaved={handleCloseFormModal} />
       </FormModal>
+
+      <ViewModal
+        open={!!creaturePendingView}
+        onClose={() => setCreaturePendingView(null)}
+        title="Detalhes da Criatura"
+        size="wide"
+      >
+        {creaturePendingView && (
+          <CreatureView creatureId={creaturePendingView.id} />
+        )}
+      </ViewModal>
 
       <ConfirmationModal
         open={!!creaturePendingDelete}

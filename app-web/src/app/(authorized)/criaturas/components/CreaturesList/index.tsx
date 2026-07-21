@@ -18,6 +18,7 @@ export interface CreaturesListProps {
   page: number;
   isLoading: boolean;
   onPageChange: (newPage: number) => void;
+  onView: (creature: ICreatureListItem) => void;
   onEdit: (creature: ICreatureListItem) => void;
   onDelete: (creature: ICreatureListItem) => void;
 }
@@ -28,6 +29,7 @@ export const CreaturesList = ({
   page,
   isLoading,
   onPageChange,
+  onView,
   onEdit,
   onDelete,
 }: CreaturesListProps) => {
@@ -71,6 +73,7 @@ export const CreaturesList = ({
             <CreaturesListItem
               key={creature.id}
               creature={creature}
+              onView={onView}
               onEdit={onEdit}
               onDelete={onDelete}
             />
