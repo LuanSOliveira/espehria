@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, CircularProgress } from '@mui/material';
 import { IconType } from 'react-icons';
 import {
@@ -28,10 +28,15 @@ import {
   FiZap,
 } from 'react-icons/fi';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
+import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { useGetEntityById } from '@/hooks/Queries';
 import { ICreature } from '@/shared/interfaces';
 import { isRichTextEmpty, showToast } from '@/shared/util';
-import { APP_COLORS, APP_CONTAINER_STYLES, APP_INPUT_STYLES } from '@/shared/constants';
+import {
+  APP_COLORS,
+  APP_CONTAINER_STYLES,
+  APP_INPUT_STYLES,
+} from '@/shared/constants';
 
 export interface CreatureViewProps {
   creatureId: string;
@@ -45,48 +50,32 @@ interface CreatureSectionData {
   value?: string | null;
 }
 
-const SectionHeaderLabel = ({
-  label,
-  icon: Icon,
-  onDark = false,
-}: {
-  label: string;
-  icon: IconType;
-  onDark?: boolean;
-}) => (
-  <div className="flex items-center gap-2">
-    <Icon
-      style={{ fontSize: 16, color: onDark ? APP_COLORS.goldSoft : APP_COLORS.gold }}
-    />
-    <Label
-      component="span"
-      sx={{ margin: 0, color: onDark ? APP_COLORS.goldSoft : undefined }}
-    >
-      {label}
-    </Label>
-  </div>
-);
-
 const RichTextValue = ({ value }: { value?: string | null }) =>
   !isRichTextEmpty(value ?? undefined) ? (
     <Box sx={APP_INPUT_STYLES.richTextContentLight}>
-      <div className="ProseMirror" dangerouslySetInnerHTML={{ __html: value as string }} />
+      <div
+        className="ProseMirror"
+        dangerouslySetInnerHTML={{ __html: value as string }}
+      />
     </Box>
   ) : (
     <DefaultText>{NOT_INFORMED}</DefaultText>
   );
 
-const CreaturePlainSection = ({ label, icon, value }: CreatureSectionData) => (
-  <div className="flex flex-col gap-2">
-    <SectionHeaderLabel label={label} icon={icon} />
-    <RichTextValue value={value} />
-  </div>
-);
-
-const CreatureBoxedSection = ({ label, icon, value }: CreatureSectionData) => (
-  <div style={APP_CONTAINER_STYLES.detailSectionBox}>
-    <div className="px-3 py-2" style={APP_CONTAINER_STYLES.detailSectionBoxHeader}>
-      <SectionHeaderLabel label={label} icon={icon} onDark />
+const CreatureSectionBox = ({
+  label,
+  icon: Icon,
+  value,
+}: CreatureSectionData) => (
+  <div className="flex-1 min-w-0" style={APP_CONTAINER_STYLES.detailSectionBox}>
+    <div
+      className="flex items-center gap-2 px-3 py-2"
+      style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
+    >
+      <Icon style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
+      <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
+        {label}
+      </Label>
     </div>
     <div className="px-3 py-3">
       <RichTextValue value={value} />
@@ -101,6 +90,8 @@ export const CreatureView = ({ creatureId }: CreatureViewProps) => {
     isError,
     error,
   } = useGetEntityById<ICreature>({ url: `/creatures/${creatureId}` });
+
+  const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
 
   useEffect(() => {
     if (!isError) {
@@ -139,92 +130,131 @@ export const CreatureView = ({ creatureId }: CreatureViewProps) => {
     },
   ];
 
-  const lifeStages = [
-    { label: 'Filhote', value: creature.lifeStageInfant },
-    { label: 'Jovem', value: creature.lifeStageYoung },
-    { label: 'Adulto', value: creature.lifeStageAdult },
-    { label: 'Ancião', value: creature.lifeStageElder },
-  ];
-
-  const leftColumnBoxedSections: CreatureSectionData[] = [
-    { label: 'Habitat', icon: FiMap, value: creature.habitat },
-    { label: 'Comportamento', icon: FiActivity, value: creature.behavior },
-    { label: 'Alimentação', icon: FiCoffee, value: creature.diet },
-    { label: 'Ciclo de Vida', icon: FiRepeat, value: creature.lifeCycle },
-  ];
-
-  const rightColumnBoxedSections: CreatureSectionData[] = [
-    { label: 'Resistências', icon: FiShield, value: creature.resistances },
-    { label: 'Fraquezas', icon: FiAlertTriangle, value: creature.weaknesses },
-    { label: 'Combate', icon: FiCrosshair, value: creature.combat },
-    {
-      label: 'Métodos de Ataque',
-      icon: FiTarget,
-      value: creature.attackMethods,
-    },
-    { label: 'Estratégia', icon: FiCompass, value: creature.strategy },
-    {
-      label: 'Grau de Perigo',
-      icon: FiAlertOctagon,
-      value: creature.dangerDegree,
-    },
-    {
-      label: 'Recursos Obtidos',
-      icon: FiPackage,
-      value: creature.obtainedResources,
-    },
-    {
-      label: 'Valor Comercial',
-      icon: FiDollarSign,
-      value: creature.commercialValue,
-    },
-    {
-      label: 'Relação com Civilizações',
-      icon: FiUsers,
-      value: creature.relationWithCivilizations,
-    },
-  ];
-
-  const fullWidthBoxedSections: CreatureSectionData[] = [
-    {
-      label: 'Mitologia e Folclore',
-      icon: FiBookOpen,
-      value: creature.mythologyAndFolklore,
-    },
-    {
-      label: 'Registro de Encontro',
-      icon: FiFileText,
-      value: creature.encounterRecord,
-    },
-    {
-      label: 'Curiosidade dos Estudiosos',
-      icon: FiHelpCircle,
-      value: creature.scholarsCuriosity,
-    },
+  const sectionRows: CreatureSectionData[][] = [
+    [
+      {
+        label: 'Características Físicas',
+        icon: FiUser,
+        value: creature.physicalCharacteristics,
+      },
+    ],
+    [
+      { label: 'Habitat', icon: FiMap, value: creature.habitat },
+      {
+        label: 'Habilidades e Poderes',
+        icon: FiZap,
+        value: creature.abilitiesAndPowers,
+      },
+    ],
+    [{ label: 'Comportamento', icon: FiActivity, value: creature.behavior }],
+    [
+      { label: 'Resistências', icon: FiShield, value: creature.resistances },
+      { label: 'Fraquezas', icon: FiAlertTriangle, value: creature.weaknesses },
+    ],
+    [{ label: 'Alimentação', icon: FiCoffee, value: creature.diet }],
+    [
+      { label: 'Combate', icon: FiCrosshair, value: creature.combat },
+      {
+        label: 'Métodos de Ataque',
+        icon: FiTarget,
+        value: creature.attackMethods,
+      },
+      { label: 'Estratégia', icon: FiCompass, value: creature.strategy },
+    ],
+    [{ label: 'Ciclo de Vida', icon: FiRepeat, value: creature.lifeCycle }],
+    [
+      { label: 'Filhote', icon: FiClock, value: creature.lifeStageInfant },
+      { label: 'Jovem', icon: FiClock, value: creature.lifeStageYoung },
+      { label: 'Adulto', icon: FiClock, value: creature.lifeStageAdult },
+      { label: 'Ancião', icon: FiClock, value: creature.lifeStageElder },
+    ],
+    [
+      {
+        label: 'Grau de Perigo',
+        icon: FiAlertOctagon,
+        value: creature.dangerDegree,
+      },
+    ],
+    [
+      {
+        label: 'Recursos Obtidos',
+        icon: FiPackage,
+        value: creature.obtainedResources,
+      },
+      {
+        label: 'Valor Comercial',
+        icon: FiDollarSign,
+        value: creature.commercialValue,
+      },
+    ],
+    [
+      {
+        label: 'Relação com Civilizações',
+        icon: FiUsers,
+        value: creature.relationWithCivilizations,
+      },
+    ],
+    [
+      {
+        label: 'Mitologia e Folclore',
+        icon: FiBookOpen,
+        value: creature.mythologyAndFolklore,
+      },
+    ],
+    [
+      {
+        label: 'Registro de Encontro',
+        icon: FiFileText,
+        value: creature.encounterRecord,
+      },
+    ],
+    [
+      {
+        label: 'Curiosidade dos Estudiosos',
+        icon: FiHelpCircle,
+        value: creature.scholarsCuriosity,
+      },
+    ],
   ];
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row">
         {creature.referenceImageUrl ? (
-          <Box
-            component="img"
-            src={creature.referenceImageUrl}
-            alt={creature.name}
-            sx={{
-              width: 220,
-              height: 220,
-              objectFit: 'cover',
-              borderRadius: '6px',
-              border: `2px solid ${APP_COLORS.gold}`,
-              flexShrink: 0,
-            }}
-          />
+          <>
+            <button
+              type="button"
+              aria-label={`Ampliar imagem de ${creature.name}`}
+              onClick={() => setIsImagePreviewOpen(true)}
+              className="cursor-pointer border-0 bg-transparent p-0"
+              style={{ flexShrink: 0 }}
+            >
+              <Box
+                component="img"
+                src={creature.referenceImageUrl}
+                alt={creature.name}
+                sx={{
+                  width: 400,
+                  height: 400,
+                  objectFit: 'cover',
+                  borderRadius: '6px',
+                  border: `2px solid ${APP_COLORS.gold}`,
+                }}
+              />
+            </button>
+
+            <ImagePreviewDialog
+              open={isImagePreviewOpen}
+              onClose={() => setIsImagePreviewOpen(false)}
+              imageUrl={creature.referenceImageUrl}
+              alt={creature.name}
+            />
+          </>
         ) : (
           <Box
             sx={{
-              width: 220,
-              height: 220,
+              width: 400,
+              height: 400,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -277,55 +307,12 @@ export const CreatureView = ({ creatureId }: CreatureViewProps) => {
         </div>
       </div>
 
-      <CreaturePlainSection
-        label="Características Físicas"
-        icon={FiUser}
-        value={creature.physicalCharacteristics}
-      />
-
-      <div className="grid grid-cols-1 gap-x-8 gap-y-6 lg:grid-cols-2">
-        <div className="flex flex-col gap-4">
-          {leftColumnBoxedSections.map((section) => (
-            <CreatureBoxedSection key={section.label} {...section} />
-          ))}
-
-          <div className="flex flex-col gap-2">
-            <SectionHeaderLabel label="Estágios de Vida" icon={FiClock} />
-            <div className="grid grid-cols-2 gap-3">
-              {lifeStages.map((stage) => (
-                <div key={stage.label} style={APP_CONTAINER_STYLES.detailSectionBox}>
-                  <div
-                    className="border-b px-3 py-2"
-                    style={{ borderColor: APP_COLORS.goldDark }}
-                  >
-                    <Label component="span" sx={{ margin: 0 }}>
-                      {stage.label}
-                    </Label>
-                  </div>
-                  <div className="px-3 py-2">
-                    <RichTextValue value={stage.value} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <CreaturePlainSection
-            label="Habilidades e Poderes"
-            icon={FiZap}
-            value={creature.abilitiesAndPowers}
-          />
-
-          {rightColumnBoxedSections.map((section) => (
-            <CreatureBoxedSection key={section.label} {...section} />
+      {sectionRows.map((row, index) => (
+        <div key={index} className="flex flex-col gap-4 sm:flex-row">
+          {row.map((section) => (
+            <CreatureSectionBox key={section.label} {...section} />
           ))}
         </div>
-      </div>
-
-      {fullWidthBoxedSections.map((section) => (
-        <CreatureBoxedSection key={section.label} {...section} />
       ))}
     </div>
   );

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Avatar, Box, Dialog, IconButton } from '@mui/material';
+import { Avatar, IconButton } from '@mui/material';
 import { FiImage } from 'react-icons/fi';
-import { Card } from '@/shared/components/Containers';
+import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { APP_COLORS } from '@/shared/constants';
 
 export interface ImageAvatarPreviewProps {
@@ -47,28 +47,12 @@ export const ImageAvatarPreview = ({
         <Avatar alt={alt} src={imageUrl} sx={avatarSx} />
       </IconButton>
 
-      <Dialog
+      <ImagePreviewDialog
         open={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
-        maxWidth={false}
-        slotProps={{
-          paper: { className: 'bg-transparent shadow-none m-4' },
-        }}
-      >
-        <Card className="flex items-center justify-center">
-          <Box
-            component="img"
-            src={imageUrl}
-            alt={alt}
-            sx={{
-              maxHeight: '70vh',
-              maxWidth: '100%',
-              borderRadius: '4px',
-              display: 'block',
-            }}
-          />
-        </Card>
-      </Dialog>
+        imageUrl={imageUrl}
+        alt={alt}
+      />
     </>
   );
 };
