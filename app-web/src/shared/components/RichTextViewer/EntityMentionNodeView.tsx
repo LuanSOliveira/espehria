@@ -66,7 +66,7 @@ const EntityMentionNodeView = ({ node }: NodeViewProps) => {
       onKeyDown={isClickable ? handleKeyDown : undefined}
       aria-label={isClickable ? `Ver detalhes de ${displayName}` : undefined}
     >
-      @{displayName}
+      {displayName}
     </NodeViewWrapper>
   );
 };
