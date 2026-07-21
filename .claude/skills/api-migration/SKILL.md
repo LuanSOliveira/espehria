@@ -13,6 +13,15 @@ Referência completa no código: `app-api/src/database/migrations/1784305251976-
 config) — **toda** alteração de schema precisa de uma migration correspondente e
 escrita à mão. Nunca trate `synchronize` como alternativa, nem em ambiente local.
 
+## Executar a migration no banco
+
+Escrever o arquivo de migration não atualiza o banco por si só — é preciso rodar
+`npm run migration:run` (dentro de `app-api`) para aplicá-la. **Nunca execute esse
+comando automaticamente.** Sempre que uma migration nova (ou pendente) precisar ser
+aplicada para o banco ficar consistente com o código, pergunte ao usuário se deve
+executar `npm run migration:run` antes de rodar — e só prossiga após confirmação
+explícita. O mesmo vale para `migration:revert`.
+
 ## Nome do arquivo e da classe
 
 `src/database/migrations/<timestamp>-<NomeDescritivo>.ts`, onde `<timestamp>` é

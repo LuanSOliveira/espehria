@@ -6,18 +6,18 @@ export class SearchResultItemResponseDto {
     format: 'uuid',
     description: 'Identificador único da entidade',
   })
-  id: string;
+  id!: string;
 
   @ApiProperty({
     description: 'Nome da entidade',
   })
-  name: string;
+  name!: string;
 
   @ApiProperty({
     enum: LinkableEntityType,
     description: 'Tipo de entidade linkável (usuário ou criatura)',
   })
-  entityType: LinkableEntityType;
+  entityType!: LinkableEntityType;
 
   static fromEntity(
     entity: { id: string; name: string },
