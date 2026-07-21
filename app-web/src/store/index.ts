@@ -5,3 +5,4 @@ export * from './EntityMentionViewStore';
 //PAGE STORIES
 export * from './PageStore/UsersStore';
 export * from './PageStore/CreaturesStore';
+export * from './PageStore/TagsStore';

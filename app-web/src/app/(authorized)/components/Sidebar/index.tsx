@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Divider } from '@mui/material';
-import { FiFeather, FiHome, FiUsers } from 'react-icons/fi';
+import { FiFeather, FiHome, FiTag, FiUsers } from 'react-icons/fi';
 import { IconType } from 'react-icons';
 import { DefaultText, Label } from '@/shared/components/Texts';
 import { useAccessibleFontSize } from '@/hooks/FontAccessibility';
@@ -39,6 +39,7 @@ const NAV_SECTIONS: NavSection[] = [
     title: 'Gerenciamento',
     items: [
       { label: 'Usuários', href: APP_ROUTES.private.users, icon: FiUsers },
+      { label: 'Tags', href: APP_ROUTES.private.tags, icon: FiTag },
     ],
   },
 ];

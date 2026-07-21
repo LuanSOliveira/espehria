@@ -12,6 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { CreaturesModule } from './modules/creatures/creatures.module';
 import { SearchModule } from './modules/search/search.module';
+import { TagsModule } from './modules/tags/tags.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { SearchModule } from './modules/search/search.module';
     AuthModule,
     CreaturesModule,
     SearchModule,
+    TagsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
