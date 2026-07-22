@@ -257,6 +257,7 @@ export const CreatureCreateForm = ({ onSaved }: CreatureCreateFormProps) => {
           options={tagOptions}
           getOptionLabel={(tag) => tag.name}
           getOptionValue={(tag) => tag.id}
+          getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"
         />
       </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, CircularProgress } from '@mui/material';
+import { Box, Chip, CircularProgress } from '@mui/material';
 import { IconType } from 'react-icons';
 import {
   FiActivity,
@@ -32,7 +32,7 @@ import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
 import { useGetEntityById } from '@/hooks/Queries';
 import { ICreature } from '@/shared/interfaces';
-import { showToast } from '@/shared/util';
+import { getContrastTextColor, showToast } from '@/shared/util';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 
 export interface CreatureViewProps {
@@ -302,6 +302,22 @@ export const CreatureView = ({ creatureId, onNotFound }: CreatureViewProps) => {
               </div>
             ))}
           </div>
+
+          {creature.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {creature.tags.map((tag) => (
+                <Chip
+                  key={tag.id}
+                  label={tag.name}
+                  size="small"
+                  sx={{
+                    backgroundColor: tag.color,
+                    color: getContrastTextColor(tag.color),
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
