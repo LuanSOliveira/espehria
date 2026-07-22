@@ -26,4 +26,6 @@ export const APP_COLORS = {
   buttonBg: '#4a3218',
   buttonBgDark: '#2e1d0c',
   buttonText: '#f0d488',
+
+  white: '#ffffff',
 } as const;

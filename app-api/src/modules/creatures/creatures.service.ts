@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
@@ -14,6 +14,7 @@ import { UpdateCreatureDto } from './dto/update-creature.dto';
 import { FindCreaturesQueryDto } from './dto/find-creatures-query.dto';
 import { Creature } from './entities/creature.entity';
 import { CreatureCategory } from './entities/creature-category.entity';
+import { Tag } from '../tags/entities/tag.entity';
 
 export interface PaginatedCreatures {
   data: Creature[];
@@ -29,6 +30,8 @@ export class CreaturesService {
     private readonly creaturesRepository: Repository<Creature>,
     @InjectRepository(CreatureCategory)
     private readonly creatureCategoriesRepository: Repository<CreatureCategory>,
+    @InjectRepository(Tag)
+    private readonly tagsRepository: Repository<Tag>,
   ) {}
 
   findByName(name: string): Promise<Creature | null> {
@@ -38,7 +41,7 @@ export class CreaturesService {
   findById(id: string): Promise<Creature | null> {
     return this.creaturesRepository.findOne({
       where: { id },
-      relations: { category: true },
+      relations: { category: true, tags: true },
     });
   }
 
@@ -52,6 +55,15 @@ export class CreaturesService {
     });
   }
 
+  private async findTagsByIds(tagIds: string[]): Promise<Tag[]> {
+    const uniqueIds = [...new Set(tagIds)];
+    const tags = await this.tagsRepository.findBy({ id: In(uniqueIds) });
+    if (tags.length !== uniqueIds.length) {
+      throw new NotFoundException('Uma ou mais tags não foram encontradas.');
+    }
+    return tags;
+  }
+
   async create(dto: CreateCreatureDto): Promise<Creature> {
     const existing = await this.findByName(dto.name);
     if (existing) {
@@ -62,6 +74,11 @@ export class CreaturesService {
     if (!category) {
       throw new NotFoundException('Categoria não encontrada.');
     }
+
+    const tags =
+      dto.tagIds && dto.tagIds.length > 0
+        ? await this.findTagsByIds(dto.tagIds)
+        : [];
 
     const creature = this.creaturesRepository.create({
       name: dto.name,
@@ -92,6 +109,7 @@ export class CreaturesService {
       mythologyAndFolklore: dto.mythologyAndFolklore ?? null,
       encounterRecord: dto.encounterRecord ?? null,
       scholarsCuriosity: dto.scholarsCuriosity ?? null,
+      tags,
     });
 
     return this.creaturesRepository.save(creature);
@@ -105,7 +123,7 @@ export class CreaturesService {
 
     const queryBuilder = this.creaturesRepository
       .createQueryBuilder('creature')
-      .leftJoinAndSelect('creature.category', 'category');
+      .leftJoin('creature.category', 'category');
 
     if (query.name) {
       queryBuilder.andWhere('creature.name ILIKE :name', {
@@ -119,11 +137,28 @@ export class CreaturesService {
       });
     }
 
-    const [data, total] = await queryBuilder
+    const [ids, total] = await queryBuilder
+      .select(['creature.id', 'creature.name'])
       .orderBy('creature.name', 'ASC')
       .skip((page - 1) * perPage)
       .take(perPage)
       .getManyAndCount();
+
+    if (ids.length === 0) {
+      return { data: [], total, page, perPage };
+    }
+
+    const creatures = await this.creaturesRepository.find({
+      where: { id: In(ids.map((creature) => creature.id)) },
+      relations: { category: true, tags: true },
+    });
+
+    const creaturesById = new Map(
+      creatures.map((creature) => [creature.id, creature]),
+    );
+    const data = ids
+      .map((creature) => creaturesById.get(creature.id))
+      .filter((creature): creature is Creature => creature !== undefined);
 
     return { data, total, page, perPage };
   }
@@ -227,6 +262,10 @@ export class CreaturesService {
     }
     if (dto.scholarsCuriosity !== undefined) {
       creature.scholarsCuriosity = dto.scholarsCuriosity;
+    }
+    if (dto.tagIds !== undefined) {
+      creature.tags =
+        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
     }
 
     return this.creaturesRepository.save(creature);

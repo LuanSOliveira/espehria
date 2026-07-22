@@ -5,11 +5,18 @@ export interface ICreatureCategory {
   name: string;
 }
 
+export interface ICreatureTag {
+  id: string;
+  name: string;
+  color: string;
+}
+
 export interface ICreatureListItem {
   id: string;
   referenceImageUrl?: string | null;
   name: string;
   category: ICreatureCategory;
+  tags: ICreatureTag[];
 }
 
 export interface ICreature extends IEntity {
@@ -41,6 +48,7 @@ export interface ICreature extends IEntity {
   mythologyAndFolklore?: string | null;
   encounterRecord?: string | null;
   scholarsCuriosity?: string | null;
+  tags: ICreatureTag[];
 }
 
 export interface ICreatureListFilters {

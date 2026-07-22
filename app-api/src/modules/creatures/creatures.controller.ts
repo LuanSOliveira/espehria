@@ -45,7 +45,7 @@ export class CreaturesController {
   @ApiOperation({ summary: 'Cria uma criatura' })
   @ApiCreatedResponse({ type: CreatureResponseDto })
   @ApiConflictResponse({ description: 'Nome da criatura já existe' })
-  @ApiNotFoundResponse({ description: 'Categoria não encontrada' })
+  @ApiNotFoundResponse({ description: 'Categoria não encontrada ou uma ou mais tags não encontradas' })
   @ApiBadRequestResponse({ description: 'URL de imagem de referência inválida ou dados obrigatórios ausentes' })
   async create(@Body() dto: CreateCreatureDto): Promise<CreatureResponseDto> {
     const creature = await this.creaturesService.create(dto);
@@ -101,7 +101,7 @@ export class CreaturesController {
   @Put(':id')
   @ApiOperation({ summary: 'Atualiza uma criatura' })
   @ApiOkResponse({ type: CreatureResponseDto })
-  @ApiNotFoundResponse({ description: 'Criatura ou categoria não encontrada' })
+  @ApiNotFoundResponse({ description: 'Criatura, categoria ou uma ou mais tags não encontradas' })
   @ApiConflictResponse({ description: 'Nome da criatura já existe' })
   @ApiBadRequestResponse({ description: 'URL de imagem de referência inválida ou ID em formato inválido' })
   async update(

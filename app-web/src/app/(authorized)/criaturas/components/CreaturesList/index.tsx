@@ -53,6 +53,11 @@ export const CreaturesList = ({
                 Categoria
               </Label>
             </TableCell>
+            <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+              <Label component="span" sx={{ margin: 0 }}>
+                Tags
+              </Label>
+            </TableCell>
             <TableCell align="right" sx={{ borderColor: APP_COLORS.gold }}>
               <Label component="span" sx={{ margin: 0 }}>
                 Ações
@@ -63,7 +68,7 @@ export const CreaturesList = ({
         <TableBody>
           {!isLoading && creatures.length === 0 && (
             <TableRow>
-              <TableCell colSpan={4} sx={{ borderColor: APP_COLORS.gold }}>
+              <TableCell colSpan={5} sx={{ borderColor: APP_COLORS.gold }}>
                 <DefaultText>Nenhuma criatura encontrada.</DefaultText>
               </TableCell>
             </TableRow>

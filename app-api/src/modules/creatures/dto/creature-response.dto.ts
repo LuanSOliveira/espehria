@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Creature } from '../entities/creature.entity';
 import { CreatureCategoryResponseDto } from './creature-category-response.dto';
+import { TagResponseDto } from '../../tags/dto/tag-response.dto';
 
 export class CreatureResponseDto {
   @ApiProperty({ format: 'uuid', description: 'Identificador único da criatura' })
@@ -90,6 +91,9 @@ export class CreatureResponseDto {
   @ApiPropertyOptional({ description: 'Curiosidades dos estudiosos sobre a criatura (HTML)' })
   scholarsCuriosity: string | null;
 
+  @ApiProperty({ type: () => [TagResponseDto], description: 'Tags associadas à criatura' })
+  tags: TagResponseDto[];
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -127,6 +131,7 @@ export class CreatureResponseDto {
     dto.mythologyAndFolklore = creature.mythologyAndFolklore;
     dto.encounterRecord = creature.encounterRecord;
     dto.scholarsCuriosity = creature.scholarsCuriosity;
+    dto.tags = (creature.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
     dto.createdAt = creature.createdAt;
     dto.updatedAt = creature.updatedAt;
     return dto;

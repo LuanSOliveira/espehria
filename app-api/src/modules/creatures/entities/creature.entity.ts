@@ -1,7 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+} from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { CreatureCategory } from './creature-category.entity';
+import { Tag } from '../../tags/entities/tag.entity';
 
 @Entity('creatures')
 export class Creature extends BaseEntity {
@@ -14,6 +23,15 @@ export class Creature extends BaseEntity {
   @ManyToOne(() => CreatureCategory, { nullable: false, onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'category_id' })
   category!: CreatureCategory;
+
+  @ApiProperty({ type: () => [Tag], description: 'Tags associadas à criatura' })
+  @ManyToMany(() => Tag)
+  @JoinTable({
+    name: 'creature_tags',
+    joinColumn: { name: 'creature_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'tag_id', referencedColumnName: 'id' },
+  })
+  tags!: Tag[];
 
   @Column({ type: 'varchar', nullable: true, name: 'reference_image_url' })
   referenceImageUrl!: string | null;

@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import {
   FormAutocompleteInput,
+  FormMultiAutocompleteInput,
   FormRichTextInput,
   FormTextInput,
 } from '@/shared/components/Inputs';
@@ -13,6 +14,7 @@ import { DefaultText } from '@/shared/components/Texts';
 import {
   useCreatureCategoriesQuery,
   useGetEntityById,
+  useGetEntityList,
   usePostEntity,
   usePutEntity,
 } from '@/hooks/Queries';
@@ -21,7 +23,12 @@ import {
   creatureFormDefaultValues,
   creatureFormResolver,
 } from '@/shared/formSchemas';
-import { ICreature, ICreatureCategory } from '@/shared/interfaces';
+import {
+  ICreature,
+  ICreatureCategory,
+  ITag,
+  ITagListFilters,
+} from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedCreatureStore } from '@/store';
 
@@ -40,6 +47,12 @@ export const CreatureCreateForm = ({ onSaved }: CreatureCreateFormProps) => {
   const isEditMode = !!selectedCreature;
 
   const { data: categories } = useCreatureCategoriesQuery();
+
+  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
+    url: '/tags',
+    filters: { perPage: 100 },
+  });
+  const tagOptions = tagsData?.data ?? [];
 
   const {
     data: creatureDetail,
@@ -95,6 +108,7 @@ export const CreatureCreateForm = ({ onSaved }: CreatureCreateFormProps) => {
       mythologyAndFolklore: creatureDetail.mythologyAndFolklore ?? '',
       encounterRecord: creatureDetail.encounterRecord ?? '',
       scholarsCuriosity: creatureDetail.scholarsCuriosity ?? '',
+      tagIds: creatureDetail.tags?.map((tag) => tag.id) ?? [],
     });
   }, [isEditMode, creatureDetail, reset]);
 
@@ -114,6 +128,7 @@ export const CreatureCreateForm = ({ onSaved }: CreatureCreateFormProps) => {
   const buildPayload = (data: CreatureFormData): CreaturePayload => ({
     ...data,
     referenceImageUrl: data.referenceImageUrl || undefined,
+    tagIds: data.tagIds ?? [],
   });
 
   const createCreatureMutation = usePostEntity<ICreature, CreaturePayload>({
@@ -232,6 +247,17 @@ export const CreatureCreateForm = ({ onSaved }: CreatureCreateFormProps) => {
           control={control}
           label="Expectativa de vida média"
           placeholder="Digite a expectativa de vida média"
+        />
+
+        <FormMultiAutocompleteInput<CreatureFormData, ITag>
+          id="creature-form-tags"
+          name="tagIds"
+          control={control}
+          label="Tags"
+          options={tagOptions}
+          getOptionLabel={(tag) => tag.name}
+          getOptionValue={(tag) => tag.id}
+          placeholder="Selecione as tags"
         />
       </div>
 
