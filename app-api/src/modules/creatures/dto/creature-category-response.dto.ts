@@ -2,7 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { CreatureCategory } from '../entities/creature-category.entity';
 
 export class CreatureCategoryResponseDto {
-  @ApiProperty({ format: 'uuid', description: 'Identificador único da categoria' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Identificador único da categoria',
+  })
   id: string;
 
   @ApiProperty({ description: 'Nome da categoria', example: 'Monstro' })

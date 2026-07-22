@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddElementalCreatureCategory1784305390000
-  implements MigrationInterface
-{
+export class AddElementalCreatureCategory1784305390000 implements MigrationInterface {
   name = 'AddElementalCreatureCategory1784305390000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

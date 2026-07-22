@@ -4,6 +4,7 @@ const MENU_ROUTES = {
   users: '/usuarios',
   creatures: '/criaturas',
   tags: '/tags',
+  locations: '/locais',
 };
 
 export const APP_ROUTES = {
@@ -12,6 +13,7 @@ export const APP_ROUTES = {
     users: MENU_ROUTES.users,
     creatures: MENU_ROUTES.creatures,
     tags: MENU_ROUTES.tags,
+    locations: MENU_ROUTES.locations,
   },
   public: {
     login: MENU_ROUTES.login,

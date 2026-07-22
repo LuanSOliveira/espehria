@@ -4,4 +4,5 @@ export * from './Auth';
 export * from './User';
 export * from './Creature';
 export * from './Tag';
+export * from './Location';
 export * from './SearchResult';

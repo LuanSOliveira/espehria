@@ -45,8 +45,13 @@ export class CreaturesController {
   @ApiOperation({ summary: 'Cria uma criatura' })
   @ApiCreatedResponse({ type: CreatureResponseDto })
   @ApiConflictResponse({ description: 'Nome da criatura já existe' })
-  @ApiNotFoundResponse({ description: 'Categoria não encontrada ou uma ou mais tags não encontradas' })
-  @ApiBadRequestResponse({ description: 'URL de imagem de referência inválida ou dados obrigatórios ausentes' })
+  @ApiNotFoundResponse({
+    description: 'Categoria não encontrada ou uma ou mais tags não encontradas',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'URL de imagem de referência inválida ou dados obrigatórios ausentes',
+  })
   async create(@Body() dto: CreateCreatureDto): Promise<CreatureResponseDto> {
     const creature = await this.creaturesService.create(dto);
     return CreatureResponseDto.fromEntity(creature);
@@ -55,7 +60,9 @@ export class CreaturesController {
   @Get()
   @ApiOperation({ summary: 'Lista criaturas com paginação e filtro' })
   @ApiOkResponse({ type: PaginatedCreaturesResponseDto })
-  @ApiBadRequestResponse({ description: 'Parâmetros de paginação ou filtro inválidos' })
+  @ApiBadRequestResponse({
+    description: 'Parâmetros de paginação ou filtro inválidos',
+  })
   async findAll(
     @Query() query: FindCreaturesQueryDto,
   ): Promise<PaginatedCreaturesResponseDto> {
@@ -101,9 +108,14 @@ export class CreaturesController {
   @Put(':id')
   @ApiOperation({ summary: 'Atualiza uma criatura' })
   @ApiOkResponse({ type: CreatureResponseDto })
-  @ApiNotFoundResponse({ description: 'Criatura, categoria ou uma ou mais tags não encontradas' })
+  @ApiNotFoundResponse({
+    description: 'Criatura, categoria ou uma ou mais tags não encontradas',
+  })
   @ApiConflictResponse({ description: 'Nome da criatura já existe' })
-  @ApiBadRequestResponse({ description: 'URL de imagem de referência inválida ou ID em formato inválido' })
+  @ApiBadRequestResponse({
+    description:
+      'URL de imagem de referência inválida ou ID em formato inválido',
+  })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateCreatureDto,

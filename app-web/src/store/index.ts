@@ -6,3 +6,4 @@ export * from './EntityMentionViewStore';
 export * from './PageStore/UsersStore';
 export * from './PageStore/CreaturesStore';
 export * from './PageStore/TagsStore';
+export * from './PageStore/LocationsStore';

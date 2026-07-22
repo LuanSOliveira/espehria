@@ -13,6 +13,8 @@ export interface DefaultAutocompleteInputProps<TOption> {
   value: TOption | null;
   onChange: (value: TOption | null) => void;
   placeholder?: string;
+  inputValue?: string;
+  onInputChange?: (value: string) => void;
 }
 
 export const DefaultAutocompleteInput = <TOption,>({
@@ -23,6 +25,8 @@ export const DefaultAutocompleteInput = <TOption,>({
   value,
   onChange,
   placeholder,
+  inputValue,
+  onInputChange,
 }: DefaultAutocompleteInputProps<TOption>) => {
   const fontSize = useAccessibleFontSize(APP_INPUT_BASE_FONT_SIZE.text);
 
@@ -35,6 +39,12 @@ export const DefaultAutocompleteInput = <TOption,>({
         getOptionLabel={getOptionLabel}
         value={value}
         onChange={(_event, newValue) => onChange(newValue)}
+        inputValue={inputValue}
+        onInputChange={
+          onInputChange
+            ? (_event, newInputValue) => onInputChange(newInputValue)
+            : undefined
+        }
         renderInput={(params) => (
           <TextField
             {...params}

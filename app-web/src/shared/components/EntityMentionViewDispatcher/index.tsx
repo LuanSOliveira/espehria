@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { ViewModal } from '@/shared/components/Modals';
 import { useEntityMentionViewStore } from '@/store';
 import { CreatureView } from '@/app/(authorized)/criaturas/components/CreatureView';
+import { LocationView } from '@/app/(authorized)/locais/components/LocationView';
 
 interface EntityMentionViewRendererParams {
   entityId: string;
@@ -21,6 +22,9 @@ const ENTITY_MENTION_VIEW_REGISTRY: Record<
 > = {
   creature: ({ entityId, onNotFound }) => (
     <CreatureView creatureId={entityId} onNotFound={onNotFound} />
+  ),
+  location: ({ entityId, onNotFound }) => (
+    <LocationView locationId={entityId} onNotFound={onNotFound} />
   ),
 };
 

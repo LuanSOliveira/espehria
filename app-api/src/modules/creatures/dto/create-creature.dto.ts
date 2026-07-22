@@ -14,7 +14,10 @@ export class CreateCreatureDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ format: 'uuid', example: '550e8400-e29b-41d4-a716-446655440000' })
+  @ApiProperty({
+    format: 'uuid',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
   @IsUUID()
   categoryId: string;
 
@@ -38,12 +41,16 @@ export class CreateCreatureDto {
   @IsString()
   averageLifeExpectancy?: string;
 
-  @ApiProperty({ example: '<p>Corpo alargado coberto de escamas vermelhas brilhantes</p>' })
+  @ApiProperty({
+    example: '<p>Corpo alargado coberto de escamas vermelhas brilhantes</p>',
+  })
   @IsString()
   @IsNotEmpty()
   physicalCharacteristics: string;
 
-  @ApiPropertyOptional({ example: '<p>Montanhas vulcânicas e cavernas subterrâneas</p>' })
+  @ApiPropertyOptional({
+    example: '<p>Montanhas vulcânicas e cavernas subterrâneas</p>',
+  })
   @IsOptional()
   @IsString()
   habitat?: string;
@@ -58,32 +65,44 @@ export class CreateCreatureDto {
   @IsString()
   diet?: string;
 
-  @ApiPropertyOptional({ example: '<p>Longevidade extrema com fases bem definidas</p>' })
+  @ApiPropertyOptional({
+    example: '<p>Longevidade extrema com fases bem definidas</p>',
+  })
   @IsOptional()
   @IsString()
   lifeCycle?: string;
 
-  @ApiPropertyOptional({ example: '<p>Filhotes medem 2 metros, sem capacidade de voo</p>' })
+  @ApiPropertyOptional({
+    example: '<p>Filhotes medem 2 metros, sem capacidade de voo</p>',
+  })
   @IsOptional()
   @IsString()
   lifeStageInfant?: string;
 
-  @ApiPropertyOptional({ example: '<p>Adolescentes de 10-15 metros começam a voar</p>' })
+  @ApiPropertyOptional({
+    example: '<p>Adolescentes de 10-15 metros começam a voar</p>',
+  })
   @IsOptional()
   @IsString()
   lifeStageYoung?: string;
 
-  @ApiPropertyOptional({ example: '<p>Adultos de 20 metros completamente maduros</p>' })
+  @ApiPropertyOptional({
+    example: '<p>Adultos de 20 metros completamente maduros</p>',
+  })
   @IsOptional()
   @IsString()
   lifeStageAdult?: string;
 
-  @ApiPropertyOptional({ example: '<p>Anciões com mais de 400 anos, menos ativos</p>' })
+  @ApiPropertyOptional({
+    example: '<p>Anciões com mais de 400 anos, menos ativos</p>',
+  })
   @IsOptional()
   @IsString()
   lifeStageElder?: string;
 
-  @ApiPropertyOptional({ example: '<p>Voo impossível de alcançar, expele fogo</p>' })
+  @ApiPropertyOptional({
+    example: '<p>Voo impossível de alcançar, expele fogo</p>',
+  })
   @IsOptional()
   @IsString()
   abilitiesAndPowers?: string;
@@ -103,17 +122,23 @@ export class CreateCreatureDto {
   @IsString()
   combat?: string;
 
-  @ApiPropertyOptional({ example: '<p>Investida com garras, ataque com fogo</p>' })
+  @ApiPropertyOptional({
+    example: '<p>Investida com garras, ataque com fogo</p>',
+  })
   @IsOptional()
   @IsString()
   attackMethods?: string;
 
-  @ApiPropertyOptional({ example: '<p>Estratégia de intimidação e dominação</p>' })
+  @ApiPropertyOptional({
+    example: '<p>Estratégia de intimidação e dominação</p>',
+  })
   @IsOptional()
   @IsString()
   strategy?: string;
 
-  @ApiPropertyOptional({ example: '<p>Perigo extremo, evitar confronto direto</p>' })
+  @ApiPropertyOptional({
+    example: '<p>Perigo extremo, evitar confronto direto</p>',
+  })
   @IsOptional()
   @IsString()
   dangerDegree?: string;
@@ -123,27 +148,37 @@ export class CreateCreatureDto {
   @IsString()
   obtainedResources?: string;
 
-  @ApiPropertyOptional({ example: '<p>Altíssimo valor pelas escamas e ouro</p>' })
+  @ApiPropertyOptional({
+    example: '<p>Altíssimo valor pelas escamas e ouro</p>',
+  })
   @IsOptional()
   @IsString()
   commercialValue?: string;
 
-  @ApiPropertyOptional({ example: '<p>Símbolo de poder e riqueza nas civilizações</p>' })
+  @ApiPropertyOptional({
+    example: '<p>Símbolo de poder e riqueza nas civilizações</p>',
+  })
   @IsOptional()
   @IsString()
   relationWithCivilizations?: string;
 
-  @ApiPropertyOptional({ example: '<p>Mencionado em lendas heróicas e épicos antigos</p>' })
+  @ApiPropertyOptional({
+    example: '<p>Mencionado em lendas heróicas e épicos antigos</p>',
+  })
   @IsOptional()
   @IsString()
   mythologyAndFolklore?: string;
 
-  @ApiPropertyOptional({ example: '<p>Avistamentos frequentes na região norte</p>' })
+  @ApiPropertyOptional({
+    example: '<p>Avistamentos frequentes na região norte</p>',
+  })
   @IsOptional()
   @IsString()
   encounterRecord?: string;
 
-  @ApiPropertyOptional({ example: '<p>Estudos indicam inteligência comparável à humana</p>' })
+  @ApiPropertyOptional({
+    example: '<p>Estudos indicam inteligência comparável à humana</p>',
+  })
   @IsOptional()
   @IsString()
   scholarsCuriosity?: string;
