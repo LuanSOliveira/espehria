@@ -5,6 +5,7 @@ const MENU_ROUTES = {
   creatures: '/criaturas',
   tags: '/tags',
   locations: '/locais',
+  races: '/racas',
 };
 
 export const APP_ROUTES = {
@@ -14,6 +15,7 @@ export const APP_ROUTES = {
     creatures: MENU_ROUTES.creatures,
     tags: MENU_ROUTES.tags,
     locations: MENU_ROUTES.locations,
+    races: MENU_ROUTES.races,
   },
   public: {
     login: MENU_ROUTES.login,

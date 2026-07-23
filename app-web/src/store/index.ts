@@ -7,3 +7,4 @@ export * from './PageStore/UsersStore';
 export * from './PageStore/CreaturesStore';
 export * from './PageStore/TagsStore';
 export * from './PageStore/LocationsStore';
+export * from './PageStore/RacesStore';

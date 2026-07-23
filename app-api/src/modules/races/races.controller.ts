@@ -1,0 +1,134 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CreateRaceDto } from './dto/create-race.dto';
+import { UpdateRaceDto } from './dto/update-race.dto';
+import { FindRacesQueryDto } from './dto/find-races-query.dto';
+import { RaceResponseDto } from './dto/race-response.dto';
+import { RaceListItemResponseDto } from './dto/race-list-item-response.dto';
+import { PaginatedRacesResponseDto } from './dto/paginated-races-response.dto';
+import { RaceCategoryResponseDto } from './dto/race-category-response.dto';
+import { RacesService } from './races.service';
+
+@ApiTags('races')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+@Controller('races')
+export class RacesController {
+  constructor(private readonly racesService: RacesService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Cria uma raça' })
+  @ApiCreatedResponse({ type: RaceResponseDto })
+  @ApiConflictResponse({ description: 'Nome da raça já existe' })
+  @ApiNotFoundResponse({
+    description: 'Categoria não encontrada ou uma ou mais tags não encontradas',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'URL de imagem de referência inválida ou dados obrigatórios ausentes',
+  })
+  async create(@Body() dto: CreateRaceDto): Promise<RaceResponseDto> {
+    const race = await this.racesService.create(dto);
+    return RaceResponseDto.fromEntity(race);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Lista raças com paginação e filtro' })
+  @ApiOkResponse({ type: PaginatedRacesResponseDto })
+  @ApiBadRequestResponse({
+    description: 'Parâmetros de paginação ou filtro inválidos',
+  })
+  async findAll(
+    @Query() query: FindRacesQueryDto,
+  ): Promise<PaginatedRacesResponseDto> {
+    const { data, total, page, perPage } =
+      await this.racesService.findAllPaginated(query);
+
+    return {
+      data: data.map((race) => RaceListItemResponseDto.fromEntity(race)),
+      total,
+      page,
+      perPage,
+      totalPages: Math.ceil(total / perPage),
+    };
+  }
+
+  @Get('categories')
+  @ApiOperation({ summary: 'Lista todas as categorias de raças' })
+  @ApiOkResponse({ type: [RaceCategoryResponseDto] })
+  async findAllCategories(): Promise<RaceCategoryResponseDto[]> {
+    const categories = await this.racesService.findAllCategories();
+    return categories.map((category) =>
+      RaceCategoryResponseDto.fromEntity(category),
+    );
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Busca uma raça pelo id' })
+  @ApiOkResponse({ type: RaceResponseDto })
+  @ApiNotFoundResponse({ description: 'Raça não encontrada' })
+  @ApiBadRequestResponse({ description: 'ID de raça em formato inválido' })
+  async findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<RaceResponseDto> {
+    const race = await this.racesService.findById(id);
+    if (!race) {
+      throw new NotFoundException('Raça não encontrada.');
+    }
+    return RaceResponseDto.fromEntity(race);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Atualiza uma raça' })
+  @ApiOkResponse({ type: RaceResponseDto })
+  @ApiNotFoundResponse({
+    description: 'Raça, categoria ou uma ou mais tags não encontradas',
+  })
+  @ApiConflictResponse({ description: 'Nome da raça já existe' })
+  @ApiBadRequestResponse({
+    description:
+      'URL de imagem de referência inválida ou ID em formato inválido',
+  })
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateRaceDto,
+  ): Promise<RaceResponseDto> {
+    const race = await this.racesService.update(id, dto);
+    return RaceResponseDto.fromEntity(race);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Remove uma raça' })
+  @ApiNoContentResponse({ description: 'Raça removida com sucesso' })
+  @ApiNotFoundResponse({ description: 'Raça não encontrada' })
+  @ApiBadRequestResponse({ description: 'ID de raça em formato inválido' })
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    await this.racesService.remove(id);
+  }
+}

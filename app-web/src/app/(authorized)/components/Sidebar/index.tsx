@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Divider } from '@mui/material';
 import { FiFeather, FiHome, FiMapPin, FiTag, FiUsers } from 'react-icons/fi';
+import { MdOutlineFace } from 'react-icons/md';
 import { IconType } from 'react-icons';
 import { DefaultText, Label } from '@/shared/components/Texts';
 import { useAccessibleFontSize } from '@/hooks/FontAccessibility';
@@ -37,6 +38,11 @@ const NAV_SECTIONS: NavSection[] = [
         label: 'Locais',
         href: APP_ROUTES.private.locations,
         icon: FiMapPin,
+      },
+      {
+        label: 'Raças',
+        href: APP_ROUTES.private.races,
+        icon: MdOutlineFace,
       },
     ],
   },
