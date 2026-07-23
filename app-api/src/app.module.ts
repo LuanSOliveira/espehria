@@ -15,6 +15,8 @@ import { SearchModule } from './modules/search/search.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { LocationsModule } from './modules/locations/locations.module';
 import { RacesModule } from './modules/races/races.module';
+import { ErasModule } from './modules/eras/eras.module';
+import { EventsModule } from './modules/events/events.module';
 
 @Module({
   imports: [
@@ -51,6 +53,8 @@ import { RacesModule } from './modules/races/races.module';
     TagsModule,
     LocationsModule,
     RacesModule,
+    ErasModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

@@ -6,6 +6,8 @@ const MENU_ROUTES = {
   tags: '/tags',
   locations: '/locais',
   races: '/racas',
+  eras: '/eras',
+  events: '/eventos',
 };
 
 export const APP_ROUTES = {
@@ -16,6 +18,8 @@ export const APP_ROUTES = {
     tags: MENU_ROUTES.tags,
     locations: MENU_ROUTES.locations,
     races: MENU_ROUTES.races,
+    eras: MENU_ROUTES.eras,
+    events: MENU_ROUTES.events,
   },
   public: {
     login: MENU_ROUTES.login,

@@ -1,4 +1,12 @@
-import { FiFeather, FiHome, FiMapPin, FiTag, FiUsers } from 'react-icons/fi';
+import {
+  FiCalendar,
+  FiClock,
+  FiFeather,
+  FiHome,
+  FiMapPin,
+  FiTag,
+  FiUsers,
+} from 'react-icons/fi';
 import { MdOutlineFace } from 'react-icons/md';
 import { IconType } from 'react-icons';
 import { APP_ROUTES } from '@/shared/routes';
@@ -36,6 +44,13 @@ export const NAV_SECTIONS: NavSection[] = [
         href: APP_ROUTES.private.races,
         icon: MdOutlineFace,
       },
+    ],
+  },
+  {
+    title: 'História',
+    items: [
+      { label: 'Eras', href: APP_ROUTES.private.eras, icon: FiClock },
+      { label: 'Eventos', href: APP_ROUTES.private.events, icon: FiCalendar },
     ],
   },
   {

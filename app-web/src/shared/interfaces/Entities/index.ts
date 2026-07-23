@@ -6,4 +6,6 @@ export * from './Creature';
 export * from './Tag';
 export * from './Location';
 export * from './Race';
+export * from './Era';
+export * from './Event';
 export * from './SearchResult';

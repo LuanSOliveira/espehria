@@ -4,3 +4,5 @@ export * from './CreatureFormSchema';
 export * from './TagFormSchema';
 export * from './LocationFormSchema';
 export * from './RaceFormSchema';
+export * from './EraFormSchema';
+export * from './EventFormSchema';

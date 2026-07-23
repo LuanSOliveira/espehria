@@ -1,0 +1,31 @@
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+export const eventFormSchema = z.object({
+  name: z.string().min(1, 'Informe o nome'),
+  referenceImageUrl: z
+    .string()
+    .refine(
+      (value) => value === '' || z.string().url().safeParse(value).success,
+      'Informe uma URL de imagem válida',
+    ),
+  startYear: z.string(),
+  endYear: z.string(),
+  description: z.string(),
+  tagIds: z.array(z.string()).optional(),
+  eraId: z.string(),
+});
+
+export type EventFormData = z.infer<typeof eventFormSchema>;
+
+export const eventFormResolver = zodResolver(eventFormSchema);
+
+export const eventFormDefaultValues: EventFormData = {
+  name: '',
+  referenceImageUrl: '',
+  startYear: '',
+  endYear: '',
+  description: '',
+  tagIds: [],
+  eraId: '',
+};
