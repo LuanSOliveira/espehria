@@ -81,8 +81,8 @@ export default function EventsPage() {
     setFilters((current) => ({
       ...current,
       name: nameInput.trim() || undefined,
-      startYear: startYearInput.trim() || undefined,
-      endYear: endYearInput.trim() || undefined,
+      startYear: startYearInput.trim() ? Number(startYearInput.trim()) : undefined,
+      endYear: endYearInput.trim() ? Number(endYearInput.trim()) : undefined,
       eraId: eraFilter?.id,
       page: 1,
     }));

@@ -9,8 +9,18 @@ export const eventFormSchema = z.object({
       (value) => value === '' || z.string().url().safeParse(value).success,
       'Informe uma URL de imagem válida',
     ),
-  startYear: z.string(),
-  endYear: z.string(),
+  startYear: z
+    .string()
+    .refine(
+      (value) => value === '' || /^\d+$/.test(value),
+      'Informe apenas números inteiros',
+    ),
+  endYear: z
+    .string()
+    .refine(
+      (value) => value === '' || /^\d+$/.test(value),
+      'Informe apenas números inteiros',
+    ),
   description: z.string(),
   tagIds: z.array(z.string()).optional(),
   eraId: z.string(),

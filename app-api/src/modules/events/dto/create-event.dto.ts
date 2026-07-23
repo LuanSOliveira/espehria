@@ -1,6 +1,7 @@
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -26,22 +27,20 @@ export class CreateEventDto {
   referenceImageUrl?: string;
 
   @ApiPropertyOptional({
-    example: 'Ano 800 da Era Antiga',
-    description:
-      'Ano de início do evento (texto livre, não numérico; não representa uma data real)',
+    example: 800,
+    description: 'Ano de início do evento (número inteiro, opcional)',
   })
   @IsOptional()
-  @IsString()
-  startYear?: string;
+  @IsInt({ message: 'O ano de início deve ser um número inteiro.' })
+  startYear?: number;
 
   @ApiPropertyOptional({
-    example: 'Ano 812 da Era Antiga',
-    description:
-      'Ano de término do evento (texto livre, não numérico; não representa uma data real)',
+    example: 812,
+    description: 'Ano de término do evento (número inteiro, opcional)',
   })
   @IsOptional()
-  @IsString()
-  endYear?: string;
+  @IsInt({ message: 'O ano de término deve ser um número inteiro.' })
+  endYear?: number;
 
   @ApiPropertyOptional({
     example: '<p>Confronto decisivo entre os reinos do norte e do sul</p>',

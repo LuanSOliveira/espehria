@@ -95,15 +95,15 @@ export class EventsService {
       queryBuilder.andWhere('event.era = :eraId', { eraId: query.eraId });
     }
 
-    if (query.startYear) {
-      queryBuilder.andWhere('event.startYear ILIKE :startYear', {
-        startYear: `%${query.startYear}%`,
+    if (query.startYear !== undefined) {
+      queryBuilder.andWhere('event.startYear = :startYear', {
+        startYear: query.startYear,
       });
     }
 
-    if (query.endYear) {
-      queryBuilder.andWhere('event.endYear ILIKE :endYear', {
-        endYear: `%${query.endYear}%`,
+    if (query.endYear !== undefined) {
+      queryBuilder.andWhere('event.endYear = :endYear', {
+        endYear: query.endYear,
       });
     }
 

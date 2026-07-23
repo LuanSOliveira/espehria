@@ -22,9 +22,6 @@ export const ErasListItem = ({
   return (
     <TableRow>
       <TableCell sx={{ borderColor: APP_COLORS.gold }}>
-        <DefaultText>{era.order}</DefaultText>
-      </TableCell>
-      <TableCell sx={{ borderColor: APP_COLORS.gold }}>
         <ImageAvatarPreview imageUrl={era.referenceImageUrl} alt={era.name} />
       </TableCell>
       <TableCell sx={{ borderColor: APP_COLORS.gold }}>

@@ -40,11 +40,6 @@ export const ErasList = ({
           <TableRow>
             <TableCell sx={{ borderColor: APP_COLORS.gold }}>
               <Label component="span" sx={{ margin: 0 }}>
-                Ordem
-              </Label>
-            </TableCell>
-            <TableCell sx={{ borderColor: APP_COLORS.gold }}>
-              <Label component="span" sx={{ margin: 0 }}>
                 Imagem
               </Label>
             </TableCell>
@@ -68,7 +63,7 @@ export const ErasList = ({
         <TableBody>
           {!isLoading && eras.length === 0 && (
             <TableRow>
-              <TableCell colSpan={5} sx={{ borderColor: APP_COLORS.gold }}>
+              <TableCell colSpan={4} sx={{ borderColor: APP_COLORS.gold }}>
                 <DefaultText>Nenhuma era encontrada.</DefaultText>
               </TableCell>
             </TableRow>

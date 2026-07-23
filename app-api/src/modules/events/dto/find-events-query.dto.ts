@@ -21,22 +21,22 @@ export class FindEventsQueryDto {
   eraId?: string;
 
   @ApiPropertyOptional({
-    description:
-      'Filtro por ano de início (busca parcial, case-insensitive; comparação puramente textual, sem interpretação cronológica, já que o campo é texto livre)',
-    example: '800',
+    description: 'Filtro por ano de início (igualdade exata)',
+    example: 800,
   })
   @IsOptional()
-  @IsString()
-  startYear?: string;
+  @Type(() => Number)
+  @IsInt({ message: 'O ano de início deve ser um número inteiro.' })
+  startYear?: number;
 
   @ApiPropertyOptional({
-    description:
-      'Filtro por ano de término (busca parcial, case-insensitive; comparação puramente textual, sem interpretação cronológica, já que o campo é texto livre)',
-    example: '812',
+    description: 'Filtro por ano de término (igualdade exata)',
+    example: 812,
   })
   @IsOptional()
-  @IsString()
-  endYear?: string;
+  @Type(() => Number)
+  @IsInt({ message: 'O ano de término deve ser um número inteiro.' })
+  endYear?: number;
 
   @ApiPropertyOptional({
     minimum: 1,

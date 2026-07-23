@@ -20,11 +20,11 @@ export class Event extends BaseEntity {
   @Column({ type: 'varchar', nullable: true, name: 'reference_image_url' })
   referenceImageUrl!: string | null;
 
-  @Column({ type: 'varchar', nullable: true, name: 'start_year' })
-  startYear!: string | null;
+  @Column({ type: 'int', nullable: true, name: 'start_year' })
+  startYear!: number | null;
 
-  @Column({ type: 'varchar', nullable: true, name: 'end_year' })
-  endYear!: string | null;
+  @Column({ type: 'int', nullable: true, name: 'end_year' })
+  endYear!: number | null;
 
   @Column({ type: 'text', nullable: true })
   description!: string | null;

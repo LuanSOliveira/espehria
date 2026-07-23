@@ -26,17 +26,17 @@ export class EventResponseDto {
 
   @ApiPropertyOptional({
     description:
-      'Ano de início do evento (texto livre, pode ser nulo se não informado)',
-    example: 'Ano 800 da Era Antiga',
+      'Ano de início do evento (número inteiro, pode ser nulo se não informado)',
+    example: 800,
   })
-  startYear: string | null;
+  startYear: number | null;
 
   @ApiPropertyOptional({
     description:
-      'Ano de término do evento (texto livre, pode ser nulo se não informado)',
-    example: 'Ano 812 da Era Antiga',
+      'Ano de término do evento (número inteiro, pode ser nulo se não informado)',
+    example: 812,
   })
-  endYear: string | null;
+  endYear: number | null;
 
   @ApiPropertyOptional({
     description: 'Descrição do evento em HTML (pode ser nula se não informada)',

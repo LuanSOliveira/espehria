@@ -42,8 +42,8 @@ interface EventPayload
     'referenceImageUrl' | 'startYear' | 'endYear' | 'eraId'
   > {
   referenceImageUrl?: string;
-  startYear?: string;
-  endYear?: string;
+  startYear?: number;
+  endYear?: number;
   eraId?: string;
 }
 
@@ -87,8 +87,14 @@ export const EventCreateForm = ({ onSaved }: EventCreateFormProps) => {
     reset({
       name: eventDetail.name,
       referenceImageUrl: eventDetail.referenceImageUrl ?? '',
-      startYear: eventDetail.startYear ?? '',
-      endYear: eventDetail.endYear ?? '',
+      startYear:
+        eventDetail.startYear !== null && eventDetail.startYear !== undefined
+          ? String(eventDetail.startYear)
+          : '',
+      endYear:
+        eventDetail.endYear !== null && eventDetail.endYear !== undefined
+          ? String(eventDetail.endYear)
+          : '',
       description: eventDetail.description ?? '',
       tagIds: eventDetail.tags?.map((tag) => tag.id) ?? [],
       eraId: eventDetail.era?.id ?? '',
@@ -111,8 +117,8 @@ export const EventCreateForm = ({ onSaved }: EventCreateFormProps) => {
   const buildPayload = (data: EventFormData): EventPayload => ({
     ...data,
     referenceImageUrl: data.referenceImageUrl || undefined,
-    startYear: data.startYear || undefined,
-    endYear: data.endYear || undefined,
+    startYear: data.startYear ? Number(data.startYear) : undefined,
+    endYear: data.endYear ? Number(data.endYear) : undefined,
     eraId: data.eraId || undefined,
     tagIds: data.tagIds ?? [],
   });
@@ -209,6 +215,8 @@ export const EventCreateForm = ({ onSaved }: EventCreateFormProps) => {
           control={control}
           label="Ano Início"
           placeholder="Digite o ano de início"
+          type="number"
+          slotProps={{ htmlInput: { min: 0, step: 1, inputMode: 'numeric' } }}
         />
 
         <FormTextInput
@@ -217,6 +225,8 @@ export const EventCreateForm = ({ onSaved }: EventCreateFormProps) => {
           control={control}
           label="Ano Fim"
           placeholder="Digite o ano de fim"
+          type="number"
+          slotProps={{ htmlInput: { min: 0, step: 1, inputMode: 'numeric' } }}
         />
 
         <FormTextInput

@@ -6,8 +6,8 @@ export interface IEventListItem {
   id: string;
   referenceImageUrl?: string | null;
   name: string;
-  startYear?: string | null;
-  endYear?: string | null;
+  startYear?: number | null;
+  endYear?: number | null;
   era: IEraSummary | null;
   tags: ITag[];
 }
@@ -15,8 +15,8 @@ export interface IEventListItem {
 export interface IEvent extends IEntity {
   name: string;
   referenceImageUrl?: string | null;
-  startYear?: string | null;
-  endYear?: string | null;
+  startYear?: number | null;
+  endYear?: number | null;
   description?: string | null;
   era: IEraSummary | null;
   tags: ITag[];
@@ -27,8 +27,8 @@ export interface IEvent extends IEntity {
 export interface IEventListFilters {
   name?: string;
   eraId?: string;
-  startYear?: string;
-  endYear?: string;
+  startYear?: number;
+  endYear?: number;
   page?: number;
   perPage?: number;
 }

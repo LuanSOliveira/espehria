@@ -52,6 +52,8 @@ export const EventsFilterSection = ({
           placeholder="Ano início"
           value={startYearValue}
           onChange={(event) => onStartYearChange(event.target.value)}
+          type="number"
+          slotProps={{ htmlInput: { min: 0, step: 1, inputMode: 'numeric' } }}
         />
       </div>
       <div className="min-w-40 flex-1">
@@ -61,6 +63,8 @@ export const EventsFilterSection = ({
           placeholder="Ano fim"
           value={endYearValue}
           onChange={(event) => onEndYearChange(event.target.value)}
+          type="number"
+          slotProps={{ htmlInput: { min: 0, step: 1, inputMode: 'numeric' } }}
         />
       </div>
       <div className="min-w-50 flex-1">
