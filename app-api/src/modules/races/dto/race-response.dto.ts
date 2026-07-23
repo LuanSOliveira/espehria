@@ -38,8 +38,7 @@ export class RaceResponseDto {
   physicalCharacteristics: string | null;
 
   @ApiPropertyOptional({
-    description:
-      'Descrição da raça em HTML (pode ser nula se não informada)',
+    description: 'Descrição da raça em HTML (pode ser nula se não informada)',
     example: '<p>Povo antigo, ligado à natureza e à magia</p>',
   })
   description: string | null;

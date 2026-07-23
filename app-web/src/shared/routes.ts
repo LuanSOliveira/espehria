@@ -8,6 +8,7 @@ const MENU_ROUTES = {
   races: '/racas',
   eras: '/eras',
   events: '/eventos',
+  divinities: '/divindades',
 };
 
 export const APP_ROUTES = {
@@ -20,6 +21,7 @@ export const APP_ROUTES = {
     races: MENU_ROUTES.races,
     eras: MENU_ROUTES.eras,
     events: MENU_ROUTES.events,
+    divinities: MENU_ROUTES.divinities,
   },
   public: {
     login: MENU_ROUTES.login,

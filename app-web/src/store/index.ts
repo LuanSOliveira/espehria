@@ -10,3 +10,4 @@ export * from './PageStore/LocationsStore';
 export * from './PageStore/RacesStore';
 export * from './PageStore/ErasStore';
 export * from './PageStore/EventsStore';
+export * from './PageStore/DivinitiesStore';

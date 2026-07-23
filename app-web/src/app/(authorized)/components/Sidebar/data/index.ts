@@ -4,6 +4,7 @@ import {
   FiFeather,
   FiHome,
   FiMapPin,
+  FiSun,
   FiTag,
   FiUsers,
 } from 'react-icons/fi';
@@ -33,6 +34,11 @@ export const NAV_SECTIONS: NavSection[] = [
         label: 'Criaturas',
         href: APP_ROUTES.private.creatures,
         icon: FiFeather,
+      },
+      {
+        label: 'Divindades',
+        href: APP_ROUTES.private.divinities,
+        icon: FiSun,
       },
       {
         label: 'Locais',

@@ -6,3 +6,4 @@ export * from './LocationFormSchema';
 export * from './RaceFormSchema';
 export * from './EraFormSchema';
 export * from './EventFormSchema';
+export * from './DivinityFormSchema';

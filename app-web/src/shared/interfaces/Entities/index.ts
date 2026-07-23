@@ -8,4 +8,5 @@ export * from './Location';
 export * from './Race';
 export * from './Era';
 export * from './Event';
+export * from './Divinity';
 export * from './SearchResult';

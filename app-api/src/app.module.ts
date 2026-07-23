@@ -17,6 +17,7 @@ import { LocationsModule } from './modules/locations/locations.module';
 import { RacesModule } from './modules/races/races.module';
 import { ErasModule } from './modules/eras/eras.module';
 import { EventsModule } from './modules/events/events.module';
+import { DivinitiesModule } from './modules/divinities/divinities.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { EventsModule } from './modules/events/events.module';
     RacesModule,
     ErasModule,
     EventsModule,
+    DivinitiesModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
