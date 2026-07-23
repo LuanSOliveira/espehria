@@ -1,4 +1,5 @@
 import { IconButton, TableCell, TableRow, Tooltip } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { DefaultText } from '@/shared/components/Texts';
 import { IUser } from '@/shared/interfaces';
@@ -16,7 +17,12 @@ export const UsersListItem = ({
   onDelete,
 }: UsersListItemProps) => {
   return (
-    <TableRow>
+    <TableRow
+      sx={{
+        transition: 'background-color 0.2s ease',
+        '&:hover': { backgroundColor: alpha(APP_COLORS.gold, 0.12) },
+      }}
+    >
       <TableCell sx={{ borderColor: APP_COLORS.gold }}>
         <DefaultText>{user.email}</DefaultText>
       </TableCell>

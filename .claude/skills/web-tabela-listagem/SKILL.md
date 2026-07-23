@@ -44,6 +44,16 @@ app/(authorized)/<pagina>/components/
   para 1-indexed (`newPage + 1`).
 - Estiliza bordas de célula e cores com `APP_COLORS` (nunca hex direto), consistente
   com o restante da tabela.
+- Cabeçalho sempre em negrito: cada `Label` de coluna no `TableHead` leva
+  `fontWeight: 700` no `sx`, junto do `margin: 0` já usado para remover o espaçamento
+  padrão do `Label`:
+  ```tsx
+  <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+    <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
+      Nome
+    </Label>
+  </TableCell>
+  ```
 
 ### `<Entidade>sListItem` (linha)
 
@@ -54,6 +64,19 @@ app/(authorized)/<pagina>/components/
 - Ações (editar, excluir, etc.) em `IconButton` + `Tooltip` da MUI, com `aria-label`
   descritivo em pt-BR (acessibilidade — leitor de tela precisa do rótulo já que o
   ícone sozinho não é texto).
+- Hover suave para indicar a linha em evidência: a `TableRow` sempre leva um `sx` com
+  transição e fundo de destaque em cima de `APP_COLORS.gold` via `alpha` (de
+  `@mui/material/styles`), nunca uma cor hex direta:
+  ```tsx
+  import { alpha } from '@mui/material/styles';
+  // ...
+  <TableRow
+    sx={{
+      transition: 'background-color 0.2s ease',
+      '&:hover': { backgroundColor: alpha(APP_COLORS.gold, 0.12) },
+    }}
+  >
+  ```
 
 ## Integração com a página
 

@@ -1,4 +1,5 @@
 import { Box, IconButton, TableCell, TableRow, Tooltip } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { DefaultText } from '@/shared/components/Texts';
 import { ITag } from '@/shared/interfaces';
@@ -12,7 +13,12 @@ export interface TagsListItemProps {
 
 export const TagsListItem = ({ tag, onEdit, onDelete }: TagsListItemProps) => {
   return (
-    <TableRow>
+    <TableRow
+      sx={{
+        transition: 'background-color 0.2s ease',
+        '&:hover': { backgroundColor: alpha(APP_COLORS.gold, 0.12) },
+      }}
+    >
       <TableCell sx={{ borderColor: APP_COLORS.gold }}>
         <DefaultText>{tag.name}</DefaultText>
       </TableCell>

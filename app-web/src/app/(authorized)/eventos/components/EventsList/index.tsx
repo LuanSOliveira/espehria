@@ -39,37 +39,37 @@ export const EventsList = ({
         <TableHead>
           <TableRow>
             <TableCell sx={{ borderColor: APP_COLORS.gold }}>
-              <Label component="span" sx={{ margin: 0 }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
                 Imagem
               </Label>
             </TableCell>
             <TableCell sx={{ borderColor: APP_COLORS.gold }}>
-              <Label component="span" sx={{ margin: 0 }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
                 Nome
               </Label>
             </TableCell>
             <TableCell sx={{ borderColor: APP_COLORS.gold }}>
-              <Label component="span" sx={{ margin: 0 }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
                 Era
               </Label>
             </TableCell>
             <TableCell sx={{ borderColor: APP_COLORS.gold }}>
-              <Label component="span" sx={{ margin: 0 }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
                 Ano Início
               </Label>
             </TableCell>
             <TableCell sx={{ borderColor: APP_COLORS.gold }}>
-              <Label component="span" sx={{ margin: 0 }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
                 Ano Fim
               </Label>
             </TableCell>
             <TableCell sx={{ borderColor: APP_COLORS.gold }}>
-              <Label component="span" sx={{ margin: 0 }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
                 Tags
               </Label>
             </TableCell>
             <TableCell align="right" sx={{ borderColor: APP_COLORS.gold }}>
-              <Label component="span" sx={{ margin: 0 }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
                 Ações
               </Label>
             </TableCell>
