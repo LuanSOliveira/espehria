@@ -24,14 +24,16 @@ export const ImagePreviewDialog = ({
       paper: { className: 'bg-transparent shadow-none m-4' },
     }}
   >
-    <Card className="flex items-center justify-center">
+    <Card className="flex items-center justify-center" sizeClassName="w-auto">
       <Box
         component="img"
         src={imageUrl}
         alt={alt}
         sx={{
           maxHeight: '70vh',
-          maxWidth: '100%',
+          maxWidth: '70vw',
+          width: 'auto',
+          height: 'auto',
           borderRadius: '4px',
           display: 'block',
         }}
