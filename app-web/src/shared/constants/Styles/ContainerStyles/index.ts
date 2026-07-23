@@ -31,4 +31,18 @@ export const APP_CONTAINER_STYLES: Record<string, CSSProperties> = {
   detailSectionBoxHeader: {
     backgroundImage: `linear-gradient(180deg, ${APP_COLORS.woodLight} 0%, ${APP_COLORS.wood} 100%)`,
   },
+  referenceImageBanner: {
+    position: 'relative',
+    overflow: 'hidden',
+    borderRadius: '6px',
+    border: `2px solid ${APP_COLORS.gold}`,
+  },
+  referenceImageBannerFade: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundImage: `linear-gradient(to bottom, transparent, ${APP_COLORS.parchmentDark})`,
+    pointerEvents: 'none',
+  },
 };

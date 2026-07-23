@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Box, Chip, CircularProgress } from '@mui/material';
-import { FiFileText, FiImage, FiTag } from 'react-icons/fi';
+import { useEffect } from 'react';
+import { Chip, CircularProgress } from '@mui/material';
+import { FiFileText, FiTag } from 'react-icons/fi';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
-import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
+import { ReferenceImageBanner } from '@/shared/components/ReferenceImageBanner';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
 import { useGetEntityById } from '@/hooks/Queries';
 import { ILocation } from '@/shared/interfaces';
@@ -29,8 +29,6 @@ export const LocationView = ({ locationId, onNotFound }: LocationViewProps) => {
     isError,
     error,
   } = useGetEntityById<ILocation>({ url: `/locations/${locationId}` });
-
-  const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
 
   useEffect(() => {
     if (!isError) {
@@ -110,52 +108,11 @@ export const LocationView = ({ locationId, onNotFound }: LocationViewProps) => {
         )}
       </div>
 
-      {location.referenceImageUrl ? (
-        <>
-          <button
-            type="button"
-            aria-label={`Ampliar imagem de ${location.name}`}
-            onClick={() => setIsImagePreviewOpen(true)}
-            className="w-full cursor-pointer border-0 bg-transparent p-0"
-          >
-            <Box
-              component="img"
-              src={location.referenceImageUrl}
-              alt={location.name}
-              sx={{
-                width: '100%',
-                height: 320,
-                objectFit: 'cover',
-                borderRadius: '6px',
-                border: `2px solid ${APP_COLORS.gold}`,
-              }}
-            />
-          </button>
-
-          <ImagePreviewDialog
-            open={isImagePreviewOpen}
-            onClose={() => setIsImagePreviewOpen(false)}
-            imageUrl={location.referenceImageUrl}
-            alt={location.name}
-          />
-        </>
-      ) : (
-        <Box
-          sx={{
-            width: '100%',
-            height: 320,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: APP_COLORS.wood,
-            color: APP_COLORS.gold,
-            borderRadius: '6px',
-            border: `2px solid ${APP_COLORS.gold}`,
-          }}
-        >
-          <FiImage style={{ fontSize: 64 }} />
-        </Box>
-      )}
+      <ReferenceImageBanner
+        imageUrl={location.referenceImageUrl}
+        alt={location.name}
+        height={380}
+      />
 
       <div style={APP_CONTAINER_STYLES.detailSectionBox}>
         <div

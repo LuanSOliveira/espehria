@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Box, Chip, CircularProgress } from '@mui/material';
+import { useEffect } from 'react';
+import { Chip, CircularProgress } from '@mui/material';
 import { IconType } from 'react-icons';
-import { FiCalendar, FiClock, FiFileText, FiImage } from 'react-icons/fi';
+import { FiCalendar, FiClock, FiFileText } from 'react-icons/fi';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
-import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
+import { ReferenceImageBanner } from '@/shared/components/ReferenceImageBanner';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
 import { useGetEntityById } from '@/hooks/Queries';
 import { IEvent } from '@/shared/interfaces';
@@ -48,8 +48,6 @@ export const EventView = ({ eventId }: EventViewProps) => {
     isError,
     error,
   } = useGetEntityById<IEvent>({ url: `/events/${eventId}` });
-
-  const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
 
   useEffect(() => {
     if (!isError) {
@@ -160,52 +158,11 @@ export const EventView = ({ eventId }: EventViewProps) => {
         </div>
       </div>
 
-      {event.referenceImageUrl ? (
-        <>
-          <button
-            type="button"
-            aria-label={`Ampliar imagem de ${event.name}`}
-            onClick={() => setIsImagePreviewOpen(true)}
-            className="w-full cursor-pointer border-0 bg-transparent p-0"
-          >
-            <Box
-              component="img"
-              src={event.referenceImageUrl}
-              alt={event.name}
-              sx={{
-                width: '100%',
-                height: 360,
-                objectFit: 'cover',
-                borderRadius: '6px',
-                border: `2px solid ${APP_COLORS.gold}`,
-              }}
-            />
-          </button>
-
-          <ImagePreviewDialog
-            open={isImagePreviewOpen}
-            onClose={() => setIsImagePreviewOpen(false)}
-            imageUrl={event.referenceImageUrl}
-            alt={event.name}
-          />
-        </>
-      ) : (
-        <Box
-          sx={{
-            width: '100%',
-            height: 360,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: APP_COLORS.wood,
-            color: APP_COLORS.gold,
-            borderRadius: '6px',
-            border: `2px solid ${APP_COLORS.gold}`,
-          }}
-        >
-          <FiImage style={{ fontSize: 64 }} />
-        </Box>
-      )}
+      <ReferenceImageBanner
+        imageUrl={event.referenceImageUrl}
+        alt={event.name}
+        height={420}
+      />
 
       <div className="flex flex-col gap-4 sm:flex-row">
         <EventSectionBox
