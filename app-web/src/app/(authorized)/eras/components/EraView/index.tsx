@@ -76,52 +76,56 @@ export const EraView = ({ eraId }: EraViewProps) => {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col items-center gap-3">
-        <Title
-          component="h3"
-          sx={{
-            textTransform: 'none',
-            backgroundImage: 'none',
-            color: APP_COLORS.textBrownDark,
-            WebkitTextFillColor: APP_COLORS.textBrownDark,
-            letterSpacing: 'normal',
-            filter: 'none',
-          }}
-        >
-          {era.name}
-        </Title>
-
-        {era.tags.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-2">
-            {era.tags.map((tag) => (
-              <Chip
-                key={tag.id}
-                label={tag.name}
-                size="small"
-                sx={{
-                  backgroundColor: tag.color,
-                  color: getContrastTextColor(tag.color),
-                }}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      <ReferenceImageBanner
-        imageUrl={era.referenceImageUrl}
-        alt={era.name}
-        height={420}
-      />
-
-      <div className="flex flex-col gap-4 sm:flex-row">
-        <EraSectionBox
-          label="Descrição"
-          icon={FiFileText}
-          value={era.description}
+    <>
+      <div className="-mx-8 -mt-6 mb-6">
+        <ReferenceImageBanner
+          imageUrl={era.referenceImageUrl}
+          alt={era.name}
+          height={420}
         />
       </div>
-    </div>
+
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col items-center gap-3">
+          <Title
+            component="h3"
+            sx={{
+              textTransform: 'none',
+              backgroundImage: 'none',
+              color: APP_COLORS.textBrownDark,
+              WebkitTextFillColor: APP_COLORS.textBrownDark,
+              letterSpacing: 'normal',
+              filter: 'none',
+            }}
+          >
+            {era.name}
+          </Title>
+
+          {era.tags.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-2">
+              {era.tags.map((tag) => (
+                <Chip
+                  key={tag.id}
+                  label={tag.name}
+                  size="small"
+                  sx={{
+                    backgroundColor: tag.color,
+                    color: getContrastTextColor(tag.color),
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <EraSectionBox
+            label="Descrição"
+            icon={FiFileText}
+            value={era.description}
+          />
+        </div>
+      </div>
+    </>
   );
 };

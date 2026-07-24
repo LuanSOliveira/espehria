@@ -64,96 +64,100 @@ export const LocationView = ({ locationId, onNotFound }: LocationViewProps) => {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col items-center gap-3">
-        <Title
-          component="h3"
-          sx={{
-            textAlign: 'center',
-            textTransform: 'none',
-            backgroundImage: 'none',
-            color: APP_COLORS.textBrownDark,
-            WebkitTextFillColor: APP_COLORS.textBrownDark,
-            letterSpacing: 'normal',
-            filter: 'none',
-          }}
-        >
-          {location.name}
-        </Title>
+    <>
+      <div className="-mx-8 -mt-6 mb-6">
+        <ReferenceImageBanner
+          imageUrl={location.referenceImageUrl}
+          alt={location.name}
+          height={380}
+        />
+      </div>
 
-        {location.type && (
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col items-center gap-3">
+          <Title
+            component="h3"
+            sx={{
+              textAlign: 'center',
+              textTransform: 'none',
+              backgroundImage: 'none',
+              color: APP_COLORS.textBrownDark,
+              WebkitTextFillColor: APP_COLORS.textBrownDark,
+              letterSpacing: 'normal',
+              filter: 'none',
+            }}
+          >
+            {location.name}
+          </Title>
+
+          {location.type && (
+            <div
+              className="flex items-center gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiTag style={{ fontSize: 16, color: APP_COLORS.gold }} />
+              <DefaultText sx={{ margin: 0 }}>{location.type}</DefaultText>
+            </div>
+          )}
+
+          {location.tags.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-2">
+              {location.tags.map((tag) => (
+                <Chip
+                  key={tag.id}
+                  label={tag.name}
+                  size="small"
+                  sx={{
+                    backgroundColor: tag.color,
+                    color: getContrastTextColor(tag.color),
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div style={APP_CONTAINER_STYLES.detailSectionBox}>
           <div
             className="flex items-center gap-2 px-3 py-2"
-            style={APP_CONTAINER_STYLES.detailInfoField}
+            style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
           >
-            <FiTag style={{ fontSize: 16, color: APP_COLORS.gold }} />
-            <DefaultText sx={{ margin: 0 }}>{location.type}</DefaultText>
+            <FiFileText style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
+            <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
+              Descrição
+            </Label>
           </div>
-        )}
-
-        {location.tags.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-2">
-            {location.tags.map((tag) => (
-              <Chip
-                key={tag.id}
-                label={tag.name}
-                size="small"
-                sx={{
-                  backgroundColor: tag.color,
-                  color: getContrastTextColor(tag.color),
-                }}
-              />
-            ))}
+          <div className="px-3 py-3">
+            <RichTextViewer value={location.description} />
           </div>
-        )}
-      </div>
-
-      <ReferenceImageBanner
-        imageUrl={location.referenceImageUrl}
-        alt={location.name}
-        height={380}
-      />
-
-      <div style={APP_CONTAINER_STYLES.detailSectionBox}>
-        <div
-          className="flex items-center gap-2 px-3 py-2"
-          style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
-        >
-          <FiFileText style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
-          <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
-            Descrição
-          </Label>
-        </div>
-        <div className="px-3 py-3">
-          <RichTextViewer value={location.description} />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="flex flex-col gap-2">
-          <Label sx={{ margin: 0 }}>Pontos de Interesse</Label>
-          {location.pointsOfInterest.length === 0 ? (
-            <DefaultText>Nenhum ponto de interesse cadastrado.</DefaultText>
-          ) : (
-            location.pointsOfInterest.map((poi) => (
-              <LocationPointOfInterestCard key={poi.id} location={poi} />
-            ))
-          )}
         </div>
 
-        <div className="flex flex-col gap-2">
-          <Label sx={{ margin: 0 }}>Pontos de Interesse de</Label>
-          {location.pointsOfInterestOf.length === 0 ? (
-            <DefaultText>
-              Nenhum local relaciona este como ponto de interesse.
-            </DefaultText>
-          ) : (
-            location.pointsOfInterestOf.map((poi) => (
-              <LocationPointOfInterestCard key={poi.id} location={poi} />
-            ))
-          )}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-2">
+            <Label sx={{ margin: 0 }}>Pontos de Interesse</Label>
+            {location.pointsOfInterest.length === 0 ? (
+              <DefaultText>Nenhum ponto de interesse cadastrado.</DefaultText>
+            ) : (
+              location.pointsOfInterest.map((poi) => (
+                <LocationPointOfInterestCard key={poi.id} location={poi} />
+              ))
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label sx={{ margin: 0 }}>Pontos de Interesse de</Label>
+            {location.pointsOfInterestOf.length === 0 ? (
+              <DefaultText>
+                Nenhum local relaciona este como ponto de interesse.
+              </DefaultText>
+            ) : (
+              location.pointsOfInterestOf.map((poi) => (
+                <LocationPointOfInterestCard key={poi.id} location={poi} />
+              ))
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };

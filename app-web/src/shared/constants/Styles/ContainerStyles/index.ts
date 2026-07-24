@@ -34,8 +34,6 @@ export const APP_CONTAINER_STYLES: Record<string, CSSProperties> = {
   referenceImageBanner: {
     position: 'relative',
     overflow: 'hidden',
-    borderRadius: '6px',
-    border: `2px solid ${APP_COLORS.gold}`,
   },
   referenceImageBannerFade: {
     position: 'absolute',
