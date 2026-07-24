@@ -1,7 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, Index, JoinTable, ManyToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+} from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Tag } from '../../tags/entities/tag.entity';
+import { LocationSection } from './location-section.entity';
 
 @Entity('locations')
 export class Location extends BaseEntity {
@@ -41,4 +49,14 @@ export class Location extends BaseEntity {
 
   @ManyToMany(() => Location, (location) => location.pointsOfInterest)
   pointsOfInterestOf!: Location[];
+
+  @ApiProperty({
+    type: () => [LocationSection],
+    description: 'Seções do local',
+  })
+  @OneToMany(() => LocationSection, (section) => section.location, {
+    cascade: true,
+    orphanedRowAction: 'delete',
+  })
+  sections!: LocationSection[];
 }

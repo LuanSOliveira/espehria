@@ -11,6 +11,7 @@ import { ILocation } from '@/shared/interfaces';
 import { getContrastTextColor, showToast } from '@/shared/util';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 import { LocationPointOfInterestCard } from '../LocationPointOfInterestCard';
+import { LocationSectionCard } from '../LocationSectionCard';
 
 export interface LocationViewProps {
   locationId: string;
@@ -131,6 +132,14 @@ export const LocationView = ({ locationId, onNotFound }: LocationViewProps) => {
             <RichTextViewer value={location.description} />
           </div>
         </div>
+
+        {location.sections.length > 0 && (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {location.sections.map((section) => (
+              <LocationSectionCard key={section.id} section={section} />
+            ))}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-2">

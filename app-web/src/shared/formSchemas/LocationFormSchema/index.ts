@@ -12,6 +12,12 @@ export const locationFormSchema = z.object({
     ),
   description: z.string(),
   tagIds: z.array(z.string()).optional(),
+  sections: z.array(
+    z.object({
+      label: z.string().min(1, 'Informe o label'),
+      description: z.string().optional(),
+    }),
+  ),
 });
 
 export type LocationFormData = z.infer<typeof locationFormSchema>;
@@ -24,4 +30,5 @@ export const locationFormDefaultValues: LocationFormData = {
   referenceImageUrl: '',
   description: '',
   tagIds: [],
+  sections: [],
 };

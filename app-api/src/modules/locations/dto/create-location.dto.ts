@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsNotEmpty,
@@ -6,7 +7,9 @@ import {
   IsString,
   IsUrl,
   IsUUID,
+  ValidateNested,
 } from 'class-validator';
+import { LocationSectionInputDto } from './location-section-input.dto';
 
 export class CreateLocationDto {
   @ApiProperty({
@@ -60,4 +63,14 @@ export class CreateLocationDto {
   @IsArray()
   @IsUUID('4', { each: true })
   pointsOfInterestIds?: string[];
+
+  @ApiPropertyOptional({
+    type: () => [LocationSectionInputDto],
+    description: 'Seções do local, criadas na ordem fornecida (array de seções)',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => LocationSectionInputDto)
+  sections?: LocationSectionInputDto[];
 }

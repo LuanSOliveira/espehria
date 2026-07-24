@@ -15,6 +15,13 @@ export interface ILocationListItem {
   tags: ITag[];
 }
 
+export interface ILocationSection {
+  id: string;
+  label: string;
+  description?: string | null;
+  order: number;
+}
+
 export interface ILocation extends IEntity {
   name: string;
   type?: string | null;
@@ -23,6 +30,7 @@ export interface ILocation extends IEntity {
   tags: ITag[];
   pointsOfInterest: ILocationSummary[];
   pointsOfInterestOf: ILocationSummary[];
+  sections: ILocationSection[];
   createdAt: string;
   updatedAt: string;
 }

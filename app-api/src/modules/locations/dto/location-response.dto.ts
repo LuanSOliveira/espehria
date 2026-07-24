@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Location } from '../entities/location.entity';
 import { TagResponseDto } from '../../tags/dto/tag-response.dto';
 import { LocationShallowResponseDto } from './location-shallow-response.dto';
+import { LocationSectionResponseDto } from './location-section-response.dto';
 
 export class LocationResponseDto {
   @ApiProperty({
@@ -47,6 +48,12 @@ export class LocationResponseDto {
   })
   pointsOfInterestOf: LocationShallowResponseDto[];
 
+  @ApiProperty({
+    type: () => [LocationSectionResponseDto],
+    description: 'Seções do local',
+  })
+  sections: LocationSectionResponseDto[];
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -69,6 +76,10 @@ export class LocationResponseDto {
     dto.pointsOfInterestOf = (location.pointsOfInterestOf ?? []).map((poi) =>
       LocationShallowResponseDto.fromEntity(poi),
     );
+    dto.sections = (location.sections ?? [])
+      .slice()
+      .sort((a, b) => a.order - b.order)
+      .map((section) => LocationSectionResponseDto.fromEntity(section));
     dto.createdAt = location.createdAt;
     dto.updatedAt = location.updatedAt;
     return dto;

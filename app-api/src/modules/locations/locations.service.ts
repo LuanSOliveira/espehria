@@ -12,7 +12,9 @@ import {
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { FindLocationsQueryDto } from './dto/find-locations-query.dto';
+import { LocationSectionInputDto } from './dto/location-section-input.dto';
 import { Location } from './entities/location.entity';
+import { LocationSection } from './entities/location-section.entity';
 import { Tag } from '../tags/entities/tag.entity';
 
 export interface PaginatedLocations {
@@ -29,6 +31,8 @@ export class LocationsService {
     private readonly locationsRepository: Repository<Location>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
+    @InjectRepository(LocationSection)
+    private readonly locationSectionsRepository: Repository<LocationSection>,
   ) {}
 
   findByName(name: string): Promise<Location | null> {
@@ -42,8 +46,21 @@ export class LocationsService {
         tags: true,
         pointsOfInterest: true,
         pointsOfInterestOf: true,
+        sections: true,
       },
     });
+  }
+
+  private buildSections(
+    sections: LocationSectionInputDto[],
+  ): LocationSection[] {
+    return sections.map((section, index) =>
+      this.locationSectionsRepository.create({
+        label: section.label,
+        description: section.description ?? null,
+        order: index,
+      }),
+    );
   }
 
   private async findTagsByIds(tagIds: string[]): Promise<Tag[]> {
@@ -84,6 +101,11 @@ export class LocationsService {
         ? await this.findLocationsByIds(dto.pointsOfInterestIds)
         : [];
 
+    const sections =
+      dto.sections && dto.sections.length > 0
+        ? this.buildSections(dto.sections)
+        : [];
+
     const location = this.locationsRepository.create({
       name: dto.name,
       type: dto.type ?? null,
@@ -91,6 +113,7 @@ export class LocationsService {
       description: dto.description ?? null,
       tags,
       pointsOfInterest,
+      sections,
     });
 
     return this.locationsRepository.save(location);
@@ -175,6 +198,10 @@ export class LocationsService {
         dto.pointsOfInterestIds.length > 0
           ? await this.findLocationsByIds(dto.pointsOfInterestIds)
           : [];
+    }
+    if (dto.sections !== undefined) {
+      location.sections =
+        dto.sections.length > 0 ? this.buildSections(dto.sections) : [];
     }
 
     return this.locationsRepository.save(location);

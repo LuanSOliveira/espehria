@@ -30,14 +30,22 @@ import {
 import { showToast } from '@/shared/util';
 import { useSelectedLocationStore } from '@/store';
 import { LocationPointsOfInterestField } from '../LocationPointsOfInterestField';
+import { LocationSectionsField } from '../LocationSectionsField';
 
 export interface LocationCreateFormProps {
   onSaved: () => void;
 }
 
-interface LocationPayload extends Omit<LocationFormData, 'referenceImageUrl'> {
+interface LocationSectionPayload {
+  label: string;
+  description?: string;
+}
+
+interface LocationPayload
+  extends Omit<LocationFormData, 'referenceImageUrl' | 'sections'> {
   referenceImageUrl?: string;
   pointsOfInterestIds: string[];
+  sections: LocationSectionPayload[];
 }
 
 export const LocationCreateForm = ({ onSaved }: LocationCreateFormProps) => {
@@ -87,6 +95,11 @@ export const LocationCreateForm = ({ onSaved }: LocationCreateFormProps) => {
       referenceImageUrl: locationDetail.referenceImageUrl ?? '',
       description: locationDetail.description ?? '',
       tagIds: locationDetail.tags?.map((tag) => tag.id) ?? [],
+      sections:
+        locationDetail.sections?.map((section) => ({
+          label: section.label,
+          description: section.description ?? '',
+        })) ?? [],
     });
     setPointsOfInterest(locationDetail.pointsOfInterest ?? []);
   }, [isEditMode, locationDetail, reset]);
@@ -112,6 +125,10 @@ export const LocationCreateForm = ({ onSaved }: LocationCreateFormProps) => {
     referenceImageUrl: data.referenceImageUrl || undefined,
     tagIds: data.tagIds ?? [],
     pointsOfInterestIds: pointsOfInterest.map((location) => location.id),
+    sections: data.sections.map((section) => ({
+      label: section.label,
+      description: section.description || undefined,
+    })),
   });
 
   const createLocationMutation = usePostEntity<ILocation, LocationPayload>({
@@ -226,6 +243,8 @@ export const LocationCreateForm = ({ onSaved }: LocationCreateFormProps) => {
         label="Descrição"
         placeholder="Descreva o local"
       />
+
+      <LocationSectionsField control={control} />
 
       <LocationPointsOfInterestField
         value={pointsOfInterest}
