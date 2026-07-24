@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Divinity } from '../entities/divinity.entity';
+import { DivinityCategoryResponseDto } from './divinity-category-response.dto';
 import { TagResponseDto } from '../../tags/dto/tag-response.dto';
 
 export class DivinityResponseDto {
@@ -15,6 +16,12 @@ export class DivinityResponseDto {
     example: 'Zeus',
   })
   name: string;
+
+  @ApiProperty({
+    type: () => DivinityCategoryResponseDto,
+    description: 'Categoria da divindade',
+  })
+  category: DivinityCategoryResponseDto;
 
   @ApiPropertyOptional({
     description:
@@ -52,6 +59,7 @@ export class DivinityResponseDto {
     const dto = new DivinityResponseDto();
     dto.id = divinity.id;
     dto.name = divinity.name;
+    dto.category = DivinityCategoryResponseDto.fromEntity(divinity.category);
     dto.referenceImage = divinity.referenceImage;
     dto.description = divinity.description;
     dto.tags = (divinity.tags ?? []).map((tag) =>

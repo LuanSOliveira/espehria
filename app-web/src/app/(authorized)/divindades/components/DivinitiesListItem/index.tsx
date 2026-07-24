@@ -37,6 +37,9 @@ export const DivinitiesListItem = ({
         <DefaultText>{divinity.name}</DefaultText>
       </TableCell>
       <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+        <DefaultText>{divinity.category.name}</DefaultText>
+      </TableCell>
+      <TableCell sx={{ borderColor: APP_COLORS.gold }}>
         <div className="flex flex-wrap items-center gap-1">
           {divinity.tags.map((tag) => (
             <TagBadge key={tag.id} name={tag.name} color={tag.color} />

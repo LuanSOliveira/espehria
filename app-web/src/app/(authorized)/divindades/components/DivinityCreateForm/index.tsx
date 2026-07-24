@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import {
+  FormAutocompleteInput,
   FormMultiAutocompleteInput,
   FormRichTextInput,
   FormTextInput,
@@ -11,6 +12,7 @@ import {
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
 import {
+  useDivinityCategoriesQuery,
   useGetEntityById,
   useGetEntityList,
   usePostEntity,
@@ -21,7 +23,12 @@ import {
   divinityFormDefaultValues,
   divinityFormResolver,
 } from '@/shared/formSchemas';
-import { IDivinity, ITag, ITagListFilters } from '@/shared/interfaces';
+import {
+  IDivinity,
+  IDivinityCategory,
+  ITag,
+  ITagListFilters,
+} from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedDivinityStore } from '@/store';
 
@@ -38,6 +45,8 @@ export const DivinityCreateForm = ({ onSaved }: DivinityCreateFormProps) => {
     (state) => state.selectedDivinity,
   );
   const isEditMode = !!selectedDivinity;
+
+  const { data: categories } = useDivinityCategoriesQuery();
 
   const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
     url: '/tags',
@@ -72,6 +81,7 @@ export const DivinityCreateForm = ({ onSaved }: DivinityCreateFormProps) => {
 
     reset({
       name: divinityDetail.name,
+      categoryId: divinityDetail.category.id,
       referenceImage: divinityDetail.referenceImage ?? '',
       description: divinityDetail.description ?? '',
       tagIds: divinityDetail.tags?.map((tag) => tag.id) ?? [],
@@ -163,13 +173,24 @@ export const DivinityCreateForm = ({ onSaved }: DivinityCreateFormProps) => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <FormTextInput
           id="divinity-form-name"
           name="name"
           control={control}
           label="Nome"
           placeholder="Digite o nome"
+        />
+
+        <FormAutocompleteInput<DivinityFormData, IDivinityCategory>
+          id="divinity-form-category"
+          name="categoryId"
+          control={control}
+          label="Categoria"
+          options={categories ?? []}
+          getOptionLabel={(category) => category.name}
+          getOptionValue={(category) => category.id}
+          placeholder="Selecione a categoria"
         />
 
         <FormTextInput

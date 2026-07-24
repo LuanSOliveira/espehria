@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Box, Chip, CircularProgress } from '@mui/material';
 import { IconType } from 'react-icons';
-import { FiFileText, FiImage } from 'react-icons/fi';
+import { FiFileText, FiImage, FiTag } from 'react-icons/fi';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
@@ -150,6 +150,21 @@ export const DivinityView = ({ divinityId }: DivinityViewProps) => {
         >
           {divinity.name}
         </Title>
+
+        <div
+          className="flex items-start gap-2 px-3 py-2"
+          style={APP_CONTAINER_STYLES.detailInfoField}
+        >
+          <FiTag
+            style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+          />
+          <div>
+            <Label component="span" sx={{ margin: 0 }}>
+              Categoria
+            </Label>
+            <DefaultText>{divinity.category.name}</DefaultText>
+          </div>
+        </div>
 
         {divinity.tags.length > 0 && (
           <div className="flex flex-wrap gap-2">

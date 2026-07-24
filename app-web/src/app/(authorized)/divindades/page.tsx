@@ -10,8 +10,16 @@ import {
 } from '@/shared/components/Modals';
 import { Title } from '@/shared/components/Texts';
 import { PrimaryButton } from '@/shared/components/Buttons';
-import { useDeleteEntity, useGetEntityList } from '@/hooks/Queries';
-import { IDivinityListFilters, IDivinityListItem } from '@/shared/interfaces';
+import {
+  useDeleteEntity,
+  useDivinityCategoriesQuery,
+  useGetEntityList,
+} from '@/hooks/Queries';
+import {
+  IDivinityCategory,
+  IDivinityListFilters,
+  IDivinityListItem,
+} from '@/shared/interfaces';
 import { APP_DEFAULT_PAGE_SIZE } from '@/shared/constants';
 import { showToast } from '@/shared/util';
 import { useSelectedDivinityStore } from '@/store';
@@ -22,6 +30,8 @@ import { DivinityView } from './components/DivinityView';
 
 export default function DivinitiesPage() {
   const [nameInput, setNameInput] = useState('');
+  const [categoryFilter, setCategoryFilter] =
+    useState<IDivinityCategory | null>(null);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [divinityPendingDelete, setDivinityPendingDelete] =
     useState<IDivinityListItem | null>(null);
@@ -34,6 +44,8 @@ export default function DivinitiesPage() {
 
   const { selectedDivinity, resetSelectedDivinity, setSelectedDivinity } =
     useSelectedDivinityStore();
+
+  const { data: categories } = useDivinityCategoriesQuery();
 
   const { data, isLoading } = useGetEntityList<
     IDivinityListItem,
@@ -68,6 +80,7 @@ export default function DivinitiesPage() {
     setFilters((current) => ({
       ...current,
       name: nameInput.trim() || undefined,
+      categoryId: categoryFilter?.id,
       page: 1,
     }));
   };
@@ -113,6 +126,9 @@ export default function DivinitiesPage() {
       <DivinitiesFilterSection
         nameValue={nameInput}
         onNameChange={setNameInput}
+        categoryValue={categoryFilter}
+        onCategoryChange={setCategoryFilter}
+        categories={categories ?? []}
         onSubmit={handleSearch}
       />
 

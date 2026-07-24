@@ -50,6 +50,11 @@ export const DivinitiesList = ({
             </TableCell>
             <TableCell sx={{ borderColor: APP_COLORS.gold }}>
               <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
+                Categoria
+              </Label>
+            </TableCell>
+            <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
                 Tags
               </Label>
             </TableCell>
@@ -63,7 +68,7 @@ export const DivinitiesList = ({
         <TableBody>
           {!isLoading && divinities.length === 0 && (
             <TableRow>
-              <TableCell colSpan={4} sx={{ borderColor: APP_COLORS.gold }}>
+              <TableCell colSpan={5} sx={{ borderColor: APP_COLORS.gold }}>
                 <DefaultText>Nenhuma divindade encontrada.</DefaultText>
               </TableCell>
             </TableRow>

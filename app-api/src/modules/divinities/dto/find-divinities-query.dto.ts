@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsInt, IsOptional, IsString, IsUUID, Min } from 'class-validator';
 
 export class FindDivinitiesQueryDto {
   @ApiPropertyOptional({
@@ -10,6 +10,15 @@ export class FindDivinitiesQueryDto {
   @IsOptional()
   @IsString()
   name?: string;
+
+  @ApiPropertyOptional({
+    description: 'Filtro por id da categoria (igualdade exata)',
+    format: 'uuid',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
 
   @ApiPropertyOptional({
     minimum: 1,

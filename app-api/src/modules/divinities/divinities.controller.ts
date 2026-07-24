@@ -31,6 +31,7 @@ import { FindDivinitiesQueryDto } from './dto/find-divinities-query.dto';
 import { DivinityResponseDto } from './dto/divinity-response.dto';
 import { DivinityListItemResponseDto } from './dto/divinity-list-item-response.dto';
 import { PaginatedDivinitiesResponseDto } from './dto/paginated-divinities-response.dto';
+import { DivinityCategoryResponseDto } from './dto/divinity-category-response.dto';
 import { DivinitiesService } from './divinities.service';
 
 @ApiTags('divinities')
@@ -45,7 +46,7 @@ export class DivinitiesController {
   @ApiCreatedResponse({ type: DivinityResponseDto })
   @ApiConflictResponse({ description: 'Nome da divindade já existe' })
   @ApiNotFoundResponse({
-    description: 'Uma ou mais tags não foram encontradas',
+    description: 'Categoria não encontrada ou uma ou mais tags não encontradas',
   })
   @ApiBadRequestResponse({
     description:
@@ -79,6 +80,16 @@ export class DivinitiesController {
     };
   }
 
+  @Get('categories')
+  @ApiOperation({ summary: 'Lista todas as categorias de divindades' })
+  @ApiOkResponse({ type: [DivinityCategoryResponseDto] })
+  async findAllCategories(): Promise<DivinityCategoryResponseDto[]> {
+    const categories = await this.divinitiesService.findAllCategories();
+    return categories.map((category) =>
+      DivinityCategoryResponseDto.fromEntity(category),
+    );
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Busca uma divindade pelo id' })
   @ApiOkResponse({ type: DivinityResponseDto })
@@ -99,7 +110,7 @@ export class DivinitiesController {
   @ApiOkResponse({ type: DivinityResponseDto })
   @ApiConflictResponse({ description: 'Nome da divindade já existe' })
   @ApiNotFoundResponse({
-    description: 'Divindade ou uma ou mais tags não encontradas',
+    description: 'Divindade, categoria ou uma ou mais tags não encontradas',
   })
   @ApiBadRequestResponse({
     description:

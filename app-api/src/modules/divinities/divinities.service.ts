@@ -13,6 +13,7 @@ import { CreateDivinityDto } from './dto/create-divinity.dto';
 import { UpdateDivinityDto } from './dto/update-divinity.dto';
 import { FindDivinitiesQueryDto } from './dto/find-divinities-query.dto';
 import { Divinity } from './entities/divinity.entity';
+import { DivinityCategory } from './entities/divinity-category.entity';
 import { Tag } from '../tags/entities/tag.entity';
 
 export interface PaginatedDivinities {
@@ -27,6 +28,8 @@ export class DivinitiesService {
   constructor(
     @InjectRepository(Divinity)
     private readonly divinitiesRepository: Repository<Divinity>,
+    @InjectRepository(DivinityCategory)
+    private readonly divinityCategoriesRepository: Repository<DivinityCategory>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
   ) {}
@@ -38,7 +41,17 @@ export class DivinitiesService {
   findById(id: string): Promise<Divinity | null> {
     return this.divinitiesRepository.findOne({
       where: { id },
-      relations: { tags: true },
+      relations: { category: true, tags: true },
+    });
+  }
+
+  findCategoryById(id: string): Promise<DivinityCategory | null> {
+    return this.divinityCategoriesRepository.findOneBy({ id });
+  }
+
+  findAllCategories(): Promise<DivinityCategory[]> {
+    return this.divinityCategoriesRepository.find({
+      order: { name: 'ASC' },
     });
   }
 
@@ -57,6 +70,11 @@ export class DivinitiesService {
       throw new ConflictException('Já existe uma divindade com este nome.');
     }
 
+    const category = await this.findCategoryById(dto.categoryId);
+    if (!category) {
+      throw new NotFoundException('Categoria não encontrada.');
+    }
+
     const tags =
       dto.tagIds && dto.tagIds.length > 0
         ? await this.findTagsByIds(dto.tagIds)
@@ -64,6 +82,7 @@ export class DivinitiesService {
 
     const divinity = this.divinitiesRepository.create({
       name: dto.name,
+      category,
       referenceImage: dto.referenceImage ?? null,
       description: dto.description ?? null,
       tags,
@@ -78,8 +97,9 @@ export class DivinitiesService {
     const page = query.page ?? DEFAULT_PAGE;
     const perPage = query.perPage ?? DEFAULT_PER_PAGE;
 
-    const queryBuilder =
-      this.divinitiesRepository.createQueryBuilder('divinity');
+    const queryBuilder = this.divinitiesRepository
+      .createQueryBuilder('divinity')
+      .leftJoin('divinity.category', 'category');
 
     if (query.name) {
       queryBuilder.andWhere('divinity.name ILIKE :name', {
@@ -87,8 +107,14 @@ export class DivinitiesService {
       });
     }
 
+    if (query.categoryId) {
+      queryBuilder.andWhere('divinity.category = :categoryId', {
+        categoryId: query.categoryId,
+      });
+    }
+
     const [ids, total] = await queryBuilder
-      .select(['divinity.id'])
+      .select(['divinity.id', 'divinity.name'])
       .orderBy('divinity.name', 'ASC')
       .skip((page - 1) * perPage)
       .take(perPage)
@@ -100,7 +126,7 @@ export class DivinitiesService {
 
     const divinities = await this.divinitiesRepository.find({
       where: { id: In(ids.map((divinity) => divinity.id)) },
-      relations: { tags: true },
+      relations: { category: true, tags: true },
       order: { name: 'ASC' },
     });
 
@@ -117,7 +143,7 @@ export class DivinitiesService {
   async update(id: string, dto: UpdateDivinityDto): Promise<Divinity> {
     const divinity = await this.divinitiesRepository.findOne({
       where: { id },
-      relations: { tags: true },
+      relations: { category: true, tags: true },
     });
     if (!divinity) {
       throw new NotFoundException('Divindade não encontrada.');
@@ -129,6 +155,14 @@ export class DivinitiesService {
         throw new ConflictException('Já existe uma divindade com este nome.');
       }
       divinity.name = dto.name;
+    }
+
+    if (dto.categoryId && dto.categoryId !== divinity.category.id) {
+      const category = await this.findCategoryById(dto.categoryId);
+      if (!category) {
+        throw new NotFoundException('Categoria não encontrada.');
+      }
+      divinity.category = category;
     }
 
     if (dto.referenceImage !== undefined) {
