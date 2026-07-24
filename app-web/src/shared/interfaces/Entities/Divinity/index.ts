@@ -20,6 +20,27 @@ export interface IDivinity extends IEntity {
   referenceImage?: string | null;
   description?: string | null;
   tags: ITag[];
+  titles?: string | null;
+  alignment?: string | null;
+  domainSphere?: string | null;
+  primaryElement?: string | null;
+  sacredSymbol?: string | null;
+  sacredAnimal?: string | null;
+  sacredColor?: string | null;
+  personality?: string | null;
+  divineDomains?: string | null;
+  powers?: string | null;
+  worldInfluence?: string | null;
+  divineAppearance?: string | null;
+  avatars?: string | null;
+  church?: string | null;
+  cult?: string | null;
+  blessings?: string | null;
+  curses?: string | null;
+  legends?: string | null;
+  commandments?: string | null;
+  oaths?: string | null;
+  curiosities?: string | null;
   createdAt: string;
   updatedAt: string;
 }

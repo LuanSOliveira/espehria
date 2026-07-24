@@ -36,8 +36,10 @@ export interface DivinityCreateFormProps {
   onSaved: () => void;
 }
 
-interface DivinityPayload extends Omit<DivinityFormData, 'referenceImage'> {
+interface DivinityPayload
+  extends Omit<DivinityFormData, 'referenceImage' | 'sacredSymbol'> {
   referenceImage?: string;
+  sacredSymbol?: string;
 }
 
 export const DivinityCreateForm = ({ onSaved }: DivinityCreateFormProps) => {
@@ -85,6 +87,27 @@ export const DivinityCreateForm = ({ onSaved }: DivinityCreateFormProps) => {
       referenceImage: divinityDetail.referenceImage ?? '',
       description: divinityDetail.description ?? '',
       tagIds: divinityDetail.tags?.map((tag) => tag.id) ?? [],
+      titles: divinityDetail.titles ?? '',
+      alignment: divinityDetail.alignment ?? '',
+      domainSphere: divinityDetail.domainSphere ?? '',
+      primaryElement: divinityDetail.primaryElement ?? '',
+      sacredSymbol: divinityDetail.sacredSymbol ?? '',
+      sacredAnimal: divinityDetail.sacredAnimal ?? '',
+      sacredColor: divinityDetail.sacredColor ?? '',
+      personality: divinityDetail.personality ?? '',
+      divineDomains: divinityDetail.divineDomains ?? '',
+      powers: divinityDetail.powers ?? '',
+      worldInfluence: divinityDetail.worldInfluence ?? '',
+      divineAppearance: divinityDetail.divineAppearance ?? '',
+      avatars: divinityDetail.avatars ?? '',
+      church: divinityDetail.church ?? '',
+      cult: divinityDetail.cult ?? '',
+      blessings: divinityDetail.blessings ?? '',
+      curses: divinityDetail.curses ?? '',
+      legends: divinityDetail.legends ?? '',
+      commandments: divinityDetail.commandments ?? '',
+      oaths: divinityDetail.oaths ?? '',
+      curiosities: divinityDetail.curiosities ?? '',
     });
   }, [isEditMode, divinityDetail, reset]);
 
@@ -104,6 +127,7 @@ export const DivinityCreateForm = ({ onSaved }: DivinityCreateFormProps) => {
   const buildPayload = (data: DivinityFormData): DivinityPayload => ({
     ...data,
     referenceImage: data.referenceImage || undefined,
+    sacredSymbol: data.sacredSymbol || undefined,
     tagIds: data.tagIds ?? [],
   });
 
@@ -182,6 +206,14 @@ export const DivinityCreateForm = ({ onSaved }: DivinityCreateFormProps) => {
           placeholder="Digite o nome"
         />
 
+        <FormTextInput
+          id="divinity-form-titles"
+          name="titles"
+          control={control}
+          label="Títulos"
+          placeholder="Digite os títulos"
+        />
+
         <FormAutocompleteInput<DivinityFormData, IDivinityCategory>
           id="divinity-form-category"
           name="categoryId"
@@ -191,14 +223,6 @@ export const DivinityCreateForm = ({ onSaved }: DivinityCreateFormProps) => {
           getOptionLabel={(category) => category.name}
           getOptionValue={(category) => category.id}
           placeholder="Selecione a categoria"
-        />
-
-        <FormTextInput
-          id="divinity-form-reference-image"
-          name="referenceImage"
-          control={control}
-          label="Imagem Referência"
-          placeholder="https://exemplo.com/imagem.jpg"
         />
 
         <FormMultiAutocompleteInput<DivinityFormData, ITag>
@@ -214,15 +238,197 @@ export const DivinityCreateForm = ({ onSaved }: DivinityCreateFormProps) => {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
-        <FormRichTextInput
-          id="divinity-form-description"
-          name="description"
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <FormTextInput
+          id="divinity-form-reference-image"
+          name="referenceImage"
           control={control}
-          label="Descrição"
-          placeholder="Descreva a divindade"
+          label="Imagem Referência"
+          placeholder="https://exemplo.com/imagem.jpg"
+        />
+
+        <FormTextInput
+          id="divinity-form-sacred-symbol"
+          name="sacredSymbol"
+          control={control}
+          label="Símbolo Sagrado"
+          placeholder="https://exemplo.com/simbolo.jpg"
+        />
+
+        <FormTextInput
+          id="divinity-form-alignment"
+          name="alignment"
+          control={control}
+          label="Alinhamento"
+          placeholder="Digite o alinhamento"
+        />
+
+        <FormTextInput
+          id="divinity-form-domain-sphere"
+          name="domainSphere"
+          control={control}
+          label="Esfera de Domínio"
+          placeholder="Digite a esfera de domínio"
         />
       </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <FormTextInput
+          id="divinity-form-primary-element"
+          name="primaryElement"
+          control={control}
+          label="Elemento Primário"
+          placeholder="Digite o elemento primário"
+        />
+
+        <FormTextInput
+          id="divinity-form-sacred-animal"
+          name="sacredAnimal"
+          control={control}
+          label="Animal Sagrado"
+          placeholder="Digite o animal sagrado"
+        />
+
+        <FormTextInput
+          id="divinity-form-sacred-color"
+          name="sacredColor"
+          control={control}
+          label="Cor Sagrada"
+          placeholder="Digite a cor sagrada"
+        />
+
+        <div />
+      </div>
+
+      <FormRichTextInput
+        id="divinity-form-description"
+        name="description"
+        control={control}
+        label="Descrição"
+        placeholder="Descreva a divindade"
+      />
+
+      <FormRichTextInput
+        id="divinity-form-personality"
+        name="personality"
+        control={control}
+        label="Personalidade"
+        placeholder="Descreva a personalidade"
+      />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <FormRichTextInput
+          id="divinity-form-divine-domains"
+          name="divineDomains"
+          control={control}
+          label="Domínios Divinos"
+          placeholder="Descreva os domínios divinos"
+        />
+
+        <FormRichTextInput
+          id="divinity-form-powers"
+          name="powers"
+          control={control}
+          label="Poderes"
+          placeholder="Descreva os poderes"
+        />
+      </div>
+
+      <FormRichTextInput
+        id="divinity-form-world-influence"
+        name="worldInfluence"
+        control={control}
+        label="Influência no Mundo"
+        placeholder="Descreva a influência no mundo"
+      />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <FormRichTextInput
+          id="divinity-form-divine-appearance"
+          name="divineAppearance"
+          control={control}
+          label="Aparência Divina"
+          placeholder="Descreva a aparência divina"
+        />
+
+        <FormRichTextInput
+          id="divinity-form-avatars"
+          name="avatars"
+          control={control}
+          label="Avatares"
+          placeholder="Descreva os avatares"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <FormRichTextInput
+          id="divinity-form-church"
+          name="church"
+          control={control}
+          label="Igreja"
+          placeholder="Descreva a igreja"
+        />
+
+        <FormRichTextInput
+          id="divinity-form-cult"
+          name="cult"
+          control={control}
+          label="Culto"
+          placeholder="Descreva o culto"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <FormRichTextInput
+          id="divinity-form-blessings"
+          name="blessings"
+          control={control}
+          label="Bênçãos"
+          placeholder="Descreva as bênçãos"
+        />
+
+        <FormRichTextInput
+          id="divinity-form-curses"
+          name="curses"
+          control={control}
+          label="Maldições"
+          placeholder="Descreva as maldições"
+        />
+      </div>
+
+      <FormRichTextInput
+        id="divinity-form-legends"
+        name="legends"
+        control={control}
+        label="Lendas"
+        placeholder="Descreva as lendas"
+      />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <FormRichTextInput
+          id="divinity-form-commandments"
+          name="commandments"
+          control={control}
+          label="Mandamentos"
+          placeholder="Descreva os mandamentos"
+        />
+
+        <FormRichTextInput
+          id="divinity-form-oaths"
+          name="oaths"
+          control={control}
+          label="Juramentos"
+          placeholder="Descreva os juramentos"
+        />
+      </div>
+
+      <FormRichTextInput
+        id="divinity-form-curiosities"
+        name="curiosities"
+        control={control}
+        label="Curiosidades"
+        placeholder="Descreva as curiosidades"
+      />
 
       <PrimaryButton
         type="submit"

@@ -85,6 +85,27 @@ export class DivinitiesService {
       category,
       referenceImage: dto.referenceImage ?? null,
       description: dto.description ?? null,
+      titles: dto.titles ?? null,
+      alignment: dto.alignment ?? null,
+      domainSphere: dto.domainSphere ?? null,
+      primaryElement: dto.primaryElement ?? null,
+      sacredSymbol: dto.sacredSymbol ?? null,
+      sacredAnimal: dto.sacredAnimal ?? null,
+      sacredColor: dto.sacredColor ?? null,
+      personality: dto.personality ?? null,
+      divineDomains: dto.divineDomains ?? null,
+      powers: dto.powers ?? null,
+      worldInfluence: dto.worldInfluence ?? null,
+      divineAppearance: dto.divineAppearance ?? null,
+      avatars: dto.avatars ?? null,
+      church: dto.church ?? null,
+      cult: dto.cult ?? null,
+      blessings: dto.blessings ?? null,
+      curses: dto.curses ?? null,
+      legends: dto.legends ?? null,
+      commandments: dto.commandments ?? null,
+      oaths: dto.oaths ?? null,
+      curiosities: dto.curiosities ?? null,
       tags,
     });
 
@@ -170,6 +191,69 @@ export class DivinitiesService {
     }
     if (dto.description !== undefined) {
       divinity.description = dto.description;
+    }
+    if (dto.titles !== undefined) {
+      divinity.titles = dto.titles;
+    }
+    if (dto.alignment !== undefined) {
+      divinity.alignment = dto.alignment;
+    }
+    if (dto.domainSphere !== undefined) {
+      divinity.domainSphere = dto.domainSphere;
+    }
+    if (dto.primaryElement !== undefined) {
+      divinity.primaryElement = dto.primaryElement;
+    }
+    if (dto.sacredSymbol !== undefined) {
+      divinity.sacredSymbol = dto.sacredSymbol;
+    }
+    if (dto.sacredAnimal !== undefined) {
+      divinity.sacredAnimal = dto.sacredAnimal;
+    }
+    if (dto.sacredColor !== undefined) {
+      divinity.sacredColor = dto.sacredColor;
+    }
+    if (dto.personality !== undefined) {
+      divinity.personality = dto.personality;
+    }
+    if (dto.divineDomains !== undefined) {
+      divinity.divineDomains = dto.divineDomains;
+    }
+    if (dto.powers !== undefined) {
+      divinity.powers = dto.powers;
+    }
+    if (dto.worldInfluence !== undefined) {
+      divinity.worldInfluence = dto.worldInfluence;
+    }
+    if (dto.divineAppearance !== undefined) {
+      divinity.divineAppearance = dto.divineAppearance;
+    }
+    if (dto.avatars !== undefined) {
+      divinity.avatars = dto.avatars;
+    }
+    if (dto.church !== undefined) {
+      divinity.church = dto.church;
+    }
+    if (dto.cult !== undefined) {
+      divinity.cult = dto.cult;
+    }
+    if (dto.blessings !== undefined) {
+      divinity.blessings = dto.blessings;
+    }
+    if (dto.curses !== undefined) {
+      divinity.curses = dto.curses;
+    }
+    if (dto.legends !== undefined) {
+      divinity.legends = dto.legends;
+    }
+    if (dto.commandments !== undefined) {
+      divinity.commandments = dto.commandments;
+    }
+    if (dto.oaths !== undefined) {
+      divinity.oaths = dto.oaths;
+    }
+    if (dto.curiosities !== undefined) {
+      divinity.curiosities = dto.curiosities;
     }
     if (dto.tagIds !== undefined) {
       divinity.tags =
