@@ -14,6 +14,12 @@ import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 
 export interface EraViewProps {
   eraId: string;
+  /**
+   * Chamado quando a era não é encontrada (404) — usado pelo
+   * EntityMentionViewDispatcher para fechar o modal aberto a partir de uma
+   * menção órfã (entidade excluída).
+   */
+  onNotFound?: () => void;
 }
 
 const NOT_INFORMED = 'Não informado';
@@ -41,7 +47,7 @@ const EraSectionBox = ({ label, icon: Icon, value }: EraSectionData) => (
   </div>
 );
 
-export const EraView = ({ eraId }: EraViewProps) => {
+export const EraView = ({ eraId, onNotFound }: EraViewProps) => {
   const {
     data: era,
     isLoading,
@@ -54,13 +60,20 @@ export const EraView = ({ eraId }: EraViewProps) => {
       return;
     }
 
+    const isNotFound = error?.response?.status === 404;
+
     showToast({
-      message:
-        error?.response?.data?.message ??
-        'Não foi possível carregar os dados da era.',
+      message: isNotFound
+        ? 'Entidade não encontrada.'
+        : (error?.response?.data?.message ??
+          'Não foi possível carregar os dados da era.'),
       type: 'error',
     });
-  }, [isError, error]);
+
+    if (isNotFound) {
+      onNotFound?.();
+    }
+  }, [isError, error, onNotFound]);
 
   if (isLoading) {
     return (

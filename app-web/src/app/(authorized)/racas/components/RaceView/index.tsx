@@ -14,6 +14,12 @@ import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 
 export interface RaceViewProps {
   raceId: string;
+  /**
+   * Chamado quando a raça não é encontrada (404) — usado pelo
+   * EntityMentionViewDispatcher para fechar o modal aberto a partir de uma
+   * menção órfã (entidade excluída).
+   */
+  onNotFound?: () => void;
 }
 
 const NOT_INFORMED = 'Não informado';
@@ -41,7 +47,7 @@ const RaceSectionBox = ({ label, icon: Icon, value }: RaceSectionData) => (
   </div>
 );
 
-export const RaceView = ({ raceId }: RaceViewProps) => {
+export const RaceView = ({ raceId, onNotFound }: RaceViewProps) => {
   const {
     data: race,
     isLoading,
@@ -56,13 +62,20 @@ export const RaceView = ({ raceId }: RaceViewProps) => {
       return;
     }
 
+    const isNotFound = error?.response?.status === 404;
+
     showToast({
-      message:
-        error?.response?.data?.message ??
-        'Não foi possível carregar os dados da raça.',
+      message: isNotFound
+        ? 'Entidade não encontrada.'
+        : (error?.response?.data?.message ??
+          'Não foi possível carregar os dados da raça.'),
       type: 'error',
     });
-  }, [isError, error]);
+
+    if (isNotFound) {
+      onNotFound?.();
+    }
+  }, [isError, error, onNotFound]);
 
   if (isLoading) {
     return (

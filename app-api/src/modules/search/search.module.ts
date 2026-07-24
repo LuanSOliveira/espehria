@@ -2,11 +2,28 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
 import { Creature } from '../creatures/entities/creature.entity';
+import { Tag } from '../tags/entities/tag.entity';
+import { Location } from '../locations/entities/location.entity';
+import { Race } from '../races/entities/race.entity';
+import { Era } from '../eras/entities/era.entity';
+import { Event } from '../events/entities/event.entity';
+import { Divinity } from '../divinities/entities/divinity.entity';
 import { SearchController } from './search.controller';
 import { SearchService } from './search.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Creature])],
+  imports: [
+    TypeOrmModule.forFeature([
+      User,
+      Creature,
+      Tag,
+      Location,
+      Race,
+      Era,
+      Event,
+      Divinity,
+    ]),
+  ],
   controllers: [SearchController],
   providers: [SearchService],
 })

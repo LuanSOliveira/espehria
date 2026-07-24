@@ -36,6 +36,12 @@ import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 
 export interface DivinityViewProps {
   divinityId: string;
+  /**
+   * Chamado quando a divindade não é encontrada (404) — usado pelo
+   * EntityMentionViewDispatcher para fechar o modal aberto a partir de uma
+   * menção órfã (entidade excluída).
+   */
+  onNotFound?: () => void;
 }
 
 const NOT_INFORMED = 'Não informado';
@@ -70,7 +76,7 @@ const DivinitySectionBox = ({
   </div>
 );
 
-export const DivinityView = ({ divinityId }: DivinityViewProps) => {
+export const DivinityView = ({ divinityId, onNotFound }: DivinityViewProps) => {
   const {
     data: divinity,
     isLoading,
@@ -87,13 +93,20 @@ export const DivinityView = ({ divinityId }: DivinityViewProps) => {
       return;
     }
 
+    const isNotFound = error?.response?.status === 404;
+
     showToast({
-      message:
-        error?.response?.data?.message ??
-        'Não foi possível carregar os dados da divindade.',
+      message: isNotFound
+        ? 'Entidade não encontrada.'
+        : (error?.response?.data?.message ??
+          'Não foi possível carregar os dados da divindade.'),
       type: 'error',
     });
-  }, [isError, error]);
+
+    if (isNotFound) {
+      onNotFound?.();
+    }
+  }, [isError, error, onNotFound]);
 
   if (isLoading) {
     return (
@@ -113,26 +126,33 @@ export const DivinityView = ({ divinityId }: DivinityViewProps) => {
       <div className="flex flex-col gap-4 sm:flex-row">
         {divinity.referenceImage ? (
           <>
-            <button
+            <Box
+              component="button"
               type="button"
               aria-label={`Ampliar imagem de ${divinity.name}`}
               onClick={() => setIsImagePreviewOpen(true)}
               className="cursor-pointer border-0 bg-transparent p-0"
-              style={{ flexShrink: 0 }}
+              sx={{
+                flexShrink: 0,
+                width: 300,
+                minWidth: 300,
+                minHeight: 400,
+                height: { xs: 400, sm: '100%' },
+              }}
             >
               <Box
                 component="img"
                 src={divinity.referenceImage}
                 alt={divinity.name}
                 sx={{
-                  width: 300,
-                  height: 400,
+                  width: '100%',
+                  height: '100%',
                   objectFit: 'cover',
                   borderRadius: '6px',
                   border: `2px solid ${APP_COLORS.gold}`,
                 }}
               />
-            </button>
+            </Box>
 
             <ImagePreviewDialog
               open={isImagePreviewOpen}
@@ -145,7 +165,9 @@ export const DivinityView = ({ divinityId }: DivinityViewProps) => {
           <Box
             sx={{
               width: 300,
-              height: 400,
+              minWidth: 300,
+              minHeight: 400,
+              height: { xs: 400, sm: '100%' },
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -161,53 +183,6 @@ export const DivinityView = ({ divinityId }: DivinityViewProps) => {
         )}
 
         <div className="flex w-full flex-col gap-3">
-          {divinity.sacredSymbol ? (
-            <>
-              <button
-                type="button"
-                aria-label={`Ampliar símbolo sagrado de ${divinity.name}`}
-                onClick={() => setIsSacredSymbolPreviewOpen(true)}
-                className="cursor-pointer self-start border-0 bg-transparent p-0"
-              >
-                <Box
-                  component="img"
-                  src={divinity.sacredSymbol}
-                  alt={`Símbolo sagrado de ${divinity.name}`}
-                  sx={{
-                    width: 96,
-                    height: 96,
-                    objectFit: 'cover',
-                    borderRadius: '6px',
-                    border: `2px solid ${APP_COLORS.gold}`,
-                  }}
-                />
-              </button>
-
-              <ImagePreviewDialog
-                open={isSacredSymbolPreviewOpen}
-                onClose={() => setIsSacredSymbolPreviewOpen(false)}
-                imageUrl={divinity.sacredSymbol}
-                alt={`Símbolo sagrado de ${divinity.name}`}
-              />
-            </>
-          ) : (
-            <Box
-              sx={{
-                width: 96,
-                height: 96,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: APP_COLORS.wood,
-                color: APP_COLORS.gold,
-                borderRadius: '6px',
-                border: `2px solid ${APP_COLORS.gold}`,
-              }}
-            >
-              <FiImage style={{ fontSize: 32 }} />
-            </Box>
-          )}
-
           <Title
             component="h3"
             sx={{
@@ -222,6 +197,59 @@ export const DivinityView = ({ divinityId }: DivinityViewProps) => {
           >
             {divinity.name}
           </Title>
+
+          <div className="flex flex-col items-start gap-1">
+            <Label component="span" sx={{ margin: 0 }}>
+              Símbolo Sagrado
+            </Label>
+
+            {divinity.sacredSymbol ? (
+              <>
+                <button
+                  type="button"
+                  aria-label={`Ampliar símbolo sagrado de ${divinity.name}`}
+                  onClick={() => setIsSacredSymbolPreviewOpen(true)}
+                  className="cursor-pointer self-start border-0 bg-transparent p-0"
+                >
+                  <Box
+                    component="img"
+                    src={divinity.sacredSymbol}
+                    alt={`Símbolo sagrado de ${divinity.name}`}
+                    sx={{
+                      width: 96,
+                      height: 96,
+                      objectFit: 'cover',
+                      borderRadius: '6px',
+                      border: `2px solid ${APP_COLORS.gold}`,
+                    }}
+                  />
+                </button>
+
+                <ImagePreviewDialog
+                  open={isSacredSymbolPreviewOpen}
+                  onClose={() => setIsSacredSymbolPreviewOpen(false)}
+                  imageUrl={divinity.sacredSymbol}
+                  alt={`Símbolo sagrado de ${divinity.name}`}
+                />
+              </>
+            ) : (
+              <Box
+                sx={{
+                  width: 96,
+                  height: 96,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: APP_COLORS.wood,
+                  color: APP_COLORS.gold,
+                  borderRadius: '6px',
+                  border: `2px solid ${APP_COLORS.gold}`,
+                }}
+              >
+                <FiImage style={{ fontSize: 32 }} />
+              </Box>
+            )}
+          </div>
 
           {divinity.titles && (
             <div
