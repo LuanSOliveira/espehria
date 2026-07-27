@@ -1,4 +1,5 @@
 import {
+  FiBriefcase,
   FiCalendar,
   FiClock,
   FiFeather,
@@ -6,6 +7,7 @@ import {
   FiMapPin,
   FiSun,
   FiTag,
+  FiUser,
   FiUsers,
 } from 'react-icons/fi';
 import { MdOutlineFace } from 'react-icons/md';
@@ -49,6 +51,16 @@ export const NAV_SECTIONS: NavSection[] = [
         label: 'Raças',
         href: APP_ROUTES.private.races,
         icon: MdOutlineFace,
+      },
+      {
+        label: 'Personagens',
+        href: APP_ROUTES.private.characters,
+        icon: FiUser,
+      },
+      {
+        label: 'Organizações',
+        href: APP_ROUTES.private.organizations,
+        icon: FiBriefcase,
       },
     ],
   },

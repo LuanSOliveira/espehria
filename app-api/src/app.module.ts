@@ -18,6 +18,8 @@ import { RacesModule } from './modules/races/races.module';
 import { ErasModule } from './modules/eras/eras.module';
 import { EventsModule } from './modules/events/events.module';
 import { DivinitiesModule } from './modules/divinities/divinities.module';
+import { CharactersModule } from './modules/characters/characters.module';
+import { OrganizationsModule } from './modules/organizations/organizations.module';
 
 @Module({
   imports: [
@@ -57,6 +59,8 @@ import { DivinitiesModule } from './modules/divinities/divinities.module';
     ErasModule,
     EventsModule,
     DivinitiesModule,
+    CharactersModule,
+    OrganizationsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

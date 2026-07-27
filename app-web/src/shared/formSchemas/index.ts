@@ -7,3 +7,5 @@ export * from './RaceFormSchema';
 export * from './EraFormSchema';
 export * from './EventFormSchema';
 export * from './DivinityFormSchema';
+export * from './CharacterFormSchema';
+export * from './OrganizationFormSchema';

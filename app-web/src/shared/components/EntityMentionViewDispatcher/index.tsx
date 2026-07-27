@@ -9,6 +9,8 @@ import { RaceView } from '@/app/(authorized)/racas/components/RaceView';
 import { EraView } from '@/app/(authorized)/eras/components/EraView';
 import { EventView } from '@/app/(authorized)/eventos/components/EventView';
 import { DivinityView } from '@/app/(authorized)/divindades/components/DivinityView';
+import { CharacterView } from '@/app/(authorized)/personagens/components/CharacterView';
+import { OrganizationView } from '@/app/(authorized)/organizacoes/components/OrganizationView';
 
 interface EntityMentionViewRendererParams {
   entityId: string;
@@ -42,6 +44,12 @@ const ENTITY_MENTION_VIEW_REGISTRY: Record<
   ),
   divinity: ({ entityId, onNotFound }) => (
     <DivinityView divinityId={entityId} onNotFound={onNotFound} />
+  ),
+  character: ({ entityId, onNotFound }) => (
+    <CharacterView characterId={entityId} onNotFound={onNotFound} />
+  ),
+  organization: ({ entityId, onNotFound }) => (
+    <OrganizationView organizationId={entityId} onNotFound={onNotFound} />
   ),
 };
 

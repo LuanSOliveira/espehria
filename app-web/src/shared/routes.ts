@@ -9,6 +9,8 @@ const MENU_ROUTES = {
   eras: '/eras',
   events: '/eventos',
   divinities: '/divindades',
+  characters: '/personagens',
+  organizations: '/organizacoes',
 };
 
 export const APP_ROUTES = {
@@ -22,6 +24,8 @@ export const APP_ROUTES = {
     eras: MENU_ROUTES.eras,
     events: MENU_ROUTES.events,
     divinities: MENU_ROUTES.divinities,
+    characters: MENU_ROUTES.characters,
+    organizations: MENU_ROUTES.organizations,
   },
   public: {
     login: MENU_ROUTES.login,

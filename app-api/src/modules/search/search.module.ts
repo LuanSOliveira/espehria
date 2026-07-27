@@ -8,6 +8,8 @@ import { Race } from '../races/entities/race.entity';
 import { Era } from '../eras/entities/era.entity';
 import { Event } from '../events/entities/event.entity';
 import { Divinity } from '../divinities/entities/divinity.entity';
+import { Character } from '../characters/entities/character.entity';
+import { Organization } from '../organizations/entities/organization.entity';
 import { SearchController } from './search.controller';
 import { SearchService } from './search.service';
 
@@ -22,6 +24,8 @@ import { SearchService } from './search.service';
       Era,
       Event,
       Divinity,
+      Character,
+      Organization,
     ]),
   ],
   controllers: [SearchController],

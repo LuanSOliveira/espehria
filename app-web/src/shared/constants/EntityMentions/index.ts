@@ -9,6 +9,8 @@ export const ENTITY_MENTION_TYPE_LABELS: Record<string, string> = {
   era: 'era',
   event: 'evento',
   divinity: 'divindade',
+  character: 'personagem',
+  organization: 'organização',
 };
 
 // Endpoint de detalhe usado para resolver o nome atual de uma entidade mencionada
@@ -26,6 +28,8 @@ export const ENTITY_MENTION_DETAIL_URL_BY_TYPE: Record<
   era: (id) => `/eras/${id}`,
   event: (id) => `/events/${id}`,
   divinity: (id) => `/divinities/${id}`,
+  character: (id) => `/characters/${id}`,
+  organization: (id) => `/organizations/${id}`,
 };
 
 // Tipos de entidade com view registrada no EntityMentionViewDispatcher — usado pelo
@@ -38,4 +42,6 @@ export const ENTITY_MENTION_VIEWABLE_TYPES: string[] = [
   'era',
   'event',
   'divinity',
+  'character',
+  'organization',
 ];

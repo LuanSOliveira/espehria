@@ -7,4 +7,6 @@ export enum LinkableEntityType {
   ERA = 'era',
   EVENT = 'event',
   DIVINITY = 'divinity',
+  CHARACTER = 'character',
+  ORGANIZATION = 'organization',
 }
