@@ -111,6 +111,73 @@ export class OrganizationsService {
     });
   }
 
+  // Reassigning `organization.members` inteiro e deixando o cascade save cuidar
+  // da remoção via orphanedRowAction falha com violação de not-null: o TypeORM
+  // tenta primeiro um UPDATE setando "character_id" = NULL nas linhas órfãs
+  // antes de excluí-las, o que quebra a coluna NOT NULL. Por isso os membros
+  // removidos, atualizados e adicionados são sincronizados diretamente pelo
+  // repositório (mesmo problema e mesma solução usada em CharactersService).
+  private async syncMembers(
+    organization: Organization,
+    members: OrganizationMemberInputDto[],
+  ): Promise<void> {
+    this.assertNoDuplicateMembers(members);
+
+    const characterIds = members.map((member) => member.characterId);
+    const characters =
+      characterIds.length > 0
+        ? await this.findCharactersByIds(characterIds)
+        : [];
+    const charactersById = new Map(
+      characters.map((character) => [character.id, character]),
+    );
+
+    const existingByCharacterId = new Map(
+      organization.members.map((member) => [member.character.id, member]),
+    );
+
+    const keptIds = new Set<string>();
+    const toSave: OrganizationMember[] = [];
+
+    for (const input of members) {
+      const character = charactersById.get(input.characterId);
+      if (!character) {
+        throw new NotFoundException(
+          'Um ou mais personagens membros não foram encontrados.',
+        );
+      }
+
+      const existing = existingByCharacterId.get(input.characterId);
+      if (existing) {
+        keptIds.add(existing.id);
+        if (existing.role !== input.role) {
+          existing.role = input.role;
+          toSave.push(existing);
+        }
+        continue;
+      }
+
+      toSave.push(
+        this.organizationMembersRepository.create({
+          role: input.role,
+          organization,
+          character,
+        }),
+      );
+    }
+
+    const toRemove = organization.members.filter(
+      (member) => !keptIds.has(member.id),
+    );
+
+    if (toRemove.length > 0) {
+      await this.organizationMembersRepository.remove(toRemove);
+    }
+    if (toSave.length > 0) {
+      await this.organizationMembersRepository.save(toSave);
+    }
+  }
+
   async create(dto: CreateOrganizationDto): Promise<Organization> {
     const existing = await this.findByName(dto.name);
     if (existing) {
@@ -183,10 +250,7 @@ export class OrganizationsService {
     return { data, total, page, perPage };
   }
 
-  async update(
-    id: string,
-    dto: UpdateOrganizationDto,
-  ): Promise<Organization> {
+  async update(id: string, dto: UpdateOrganizationDto): Promise<Organization> {
     const organization = await this.findById(id);
     if (!organization) {
       throw new NotFoundException('Organização não encontrada.');
@@ -195,9 +259,7 @@ export class OrganizationsService {
     if (dto.name && dto.name !== organization.name) {
       const existing = await this.findByName(dto.name);
       if (existing) {
-        throw new ConflictException(
-          'Já existe uma organização com este nome.',
-        );
+        throw new ConflictException('Já existe uma organização com este nome.');
       }
       organization.name = dto.name;
     }
@@ -212,12 +274,18 @@ export class OrganizationsService {
       organization.tags =
         dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
     }
+
+    await this.organizationsRepository.save(organization);
+
     if (dto.members !== undefined) {
-      organization.members =
-        dto.members.length > 0 ? await this.buildMembers(dto.members) : [];
+      await this.syncMembers(organization, dto.members);
     }
 
-    return this.organizationsRepository.save(organization);
+    const updated = await this.findById(id);
+    if (!updated) {
+      throw new NotFoundException('Organização não encontrada.');
+    }
+    return updated;
   }
 
   async remove(id: string): Promise<void> {

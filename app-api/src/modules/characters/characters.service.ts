@@ -133,9 +133,7 @@ export class CharactersService {
 
     const relativeIds = kinships.map((kinship) => kinship.relativeId);
     const relatives =
-      relativeIds.length > 0
-        ? await this.findCharactersByIds(relativeIds)
-        : [];
+      relativeIds.length > 0 ? await this.findCharactersByIds(relativeIds) : [];
     const relativesById = new Map(
       relatives.map((relative) => [relative.id, relative]),
     );
@@ -152,6 +150,71 @@ export class CharactersService {
         relative,
       });
     });
+  }
+
+  // Reassigning `character.kinships` inteiro e deixando o cascade save cuidar da
+  // remoção via orphanedRowAction falha com violação de not-null: o TypeORM tenta
+  // primeiro um UPDATE setando "character_id" = NULL nas linhas órfãs antes de
+  // excluí-las, o que quebra a coluna NOT NULL. Por isso os parentescos removidos,
+  // atualizados e adicionados são sincronizados diretamente pelo repositório.
+  private async syncKinships(
+    character: Character,
+    kinships: CharacterKinshipInputDto[],
+  ): Promise<void> {
+    this.assertNoDuplicateRelatives(kinships);
+    this.assertNoSelfKinship(character.id, kinships);
+
+    const relativeIds = kinships.map((kinship) => kinship.relativeId);
+    const relatives =
+      relativeIds.length > 0 ? await this.findCharactersByIds(relativeIds) : [];
+    const relativesById = new Map(
+      relatives.map((relative) => [relative.id, relative]),
+    );
+
+    const existingByRelativeId = new Map(
+      character.kinships.map((kinship) => [kinship.relative.id, kinship]),
+    );
+
+    const keptIds = new Set<string>();
+    const toSave: CharacterKinship[] = [];
+
+    for (const input of kinships) {
+      const relative = relativesById.get(input.relativeId);
+      if (!relative) {
+        throw new NotFoundException(
+          'Um ou mais personagens parentes não foram encontrados.',
+        );
+      }
+
+      const existing = existingByRelativeId.get(input.relativeId);
+      if (existing) {
+        keptIds.add(existing.id);
+        if (existing.kinship !== input.kinship) {
+          existing.kinship = input.kinship;
+          toSave.push(existing);
+        }
+        continue;
+      }
+
+      toSave.push(
+        this.characterKinshipsRepository.create({
+          kinship: input.kinship,
+          character,
+          relative,
+        }),
+      );
+    }
+
+    const toRemove = character.kinships.filter(
+      (kinship) => !keptIds.has(kinship.id),
+    );
+
+    if (toRemove.length > 0) {
+      await this.characterKinshipsRepository.remove(toRemove);
+    }
+    if (toSave.length > 0) {
+      await this.characterKinshipsRepository.save(toSave);
+    }
   }
 
   async create(dto: CreateCharacterDto): Promise<Character> {
@@ -247,14 +310,18 @@ export class CharactersService {
       character.tags =
         dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
     }
+
+    await this.charactersRepository.save(character);
+
     if (dto.kinships !== undefined) {
-      character.kinships =
-        dto.kinships.length > 0
-          ? await this.buildKinships(id, dto.kinships)
-          : [];
+      await this.syncKinships(character, dto.kinships);
     }
 
-    return this.charactersRepository.save(character);
+    const updated = await this.findById(id);
+    if (!updated) {
+      throw new NotFoundException('Personagem não encontrado.');
+    }
+    return updated;
   }
 
   async remove(id: string): Promise<void> {
