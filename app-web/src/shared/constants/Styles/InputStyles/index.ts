@@ -60,6 +60,21 @@ export const APP_INPUT_STYLES: Record<string, SystemStyleObject<Theme>> = {
       color: APP_COLORS.goldLight,
     },
   },
+  checkbox: {
+    color: APP_COLORS.goldDark,
+    '&:hover': {
+      backgroundColor: 'rgba(184, 147, 63, 0.12)',
+    },
+    '&.Mui-checked': {
+      color: APP_COLORS.gold,
+    },
+    '&.Mui-disabled': {
+      color: APP_COLORS.parchmentDark,
+    },
+  },
+  checkboxLabel: {
+    color: APP_COLORS.textBrown,
+  },
   richTextField: {
     backgroundImage: `linear-gradient(180deg, ${APP_COLORS.inputBg} 0%, ${APP_COLORS.inputBgDark} 100%)`,
     borderRadius: '3px',
