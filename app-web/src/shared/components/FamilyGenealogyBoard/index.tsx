@@ -257,6 +257,11 @@ const FamilyGenealogyBoardInner = ({
         draggable: isEditable,
         connectable: isEditable,
         deletable: false,
+        // React Flow zera `pointerEvents` no wrapper do node quando ele não é
+        // draggable/connectable/selectable (caso do modo readOnly), o que
+        // bloquearia até o clique no botão de visualizar do card. `node.style`
+        // é aplicado por cima desse cálculo interno, então força de volta.
+        style: { pointerEvents: 'all' },
       })),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
