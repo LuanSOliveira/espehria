@@ -20,6 +20,7 @@ import { EventsModule } from './modules/events/events.module';
 import { DivinitiesModule } from './modules/divinities/divinities.module';
 import { CharactersModule } from './modules/characters/characters.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
+import { FamiliesModule } from './modules/families/families.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { OrganizationsModule } from './modules/organizations/organizations.modul
     DivinitiesModule,
     CharactersModule,
     OrganizationsModule,
+    FamiliesModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

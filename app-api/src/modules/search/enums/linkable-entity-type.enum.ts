@@ -9,4 +9,5 @@ export enum LinkableEntityType {
   DIVINITY = 'divinity',
   CHARACTER = 'character',
   ORGANIZATION = 'organization',
+  FAMILY = 'family',
 }

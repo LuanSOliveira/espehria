@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import {
@@ -25,6 +25,8 @@ import {
 } from '@/shared/formSchemas';
 import {
   ICharacter,
+  IFamilyListFilters,
+  IFamilyListItem,
   IRaceListFilters,
   IRaceListItem,
   ITag,
@@ -32,25 +34,20 @@ import {
 } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedCharacterStore } from '@/store';
-import {
-  CharacterKinshipDraft,
-  CharacterKinshipField,
-} from '../CharacterKinshipField';
 
 export interface CharacterCreateFormProps {
   onSaved: () => void;
 }
 
-interface CharacterKinshipPayload {
-  relativeId: string;
-  kinship: string;
-}
-
 interface CharacterPayload
-  extends Omit<CharacterFormData, 'referenceImage' | 'raceId'> {
+  extends Omit<
+    CharacterFormData,
+    'referenceImage' | 'raceId' | 'familyId' | 'secondaryFamilyId'
+  > {
   referenceImage?: string;
   raceId?: string;
-  kinships: CharacterKinshipPayload[];
+  familyId?: string;
+  secondaryFamilyId?: string;
 }
 
 export const CharacterCreateForm = ({ onSaved }: CharacterCreateFormProps) => {
@@ -58,8 +55,6 @@ export const CharacterCreateForm = ({ onSaved }: CharacterCreateFormProps) => {
     (state) => state.selectedCharacter,
   );
   const isEditMode = !!selectedCharacter;
-
-  const [kinships, setKinships] = useState<CharacterKinshipDraft[]>([]);
 
   const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
     url: '/tags',
@@ -72,6 +67,15 @@ export const CharacterCreateForm = ({ onSaved }: CharacterCreateFormProps) => {
     filters: { perPage: 100 },
   });
   const raceOptions = racesData?.data ?? [];
+
+  const { data: familiesData } = useGetEntityList<
+    IFamilyListItem,
+    IFamilyListFilters
+  >({
+    url: '/families',
+    filters: { perPage: 100 },
+  });
+  const familyOptions = familiesData?.data ?? [];
 
   const {
     data: characterDetail,
@@ -91,7 +95,6 @@ export const CharacterCreateForm = ({ onSaved }: CharacterCreateFormProps) => {
   useEffect(() => {
     if (!isEditMode) {
       reset(characterFormDefaultValues);
-      setKinships([]);
       return;
     }
 
@@ -105,14 +108,10 @@ export const CharacterCreateForm = ({ onSaved }: CharacterCreateFormProps) => {
       tagIds: characterDetail.tags?.map((tag) => tag.id) ?? [],
       isDead: characterDetail.isDead,
       raceId: characterDetail.race?.id ?? '',
+      familyId: characterDetail.family?.id ?? '',
+      secondaryFamilyId: characterDetail.secondaryFamily?.id ?? '',
       description: characterDetail.description ?? '',
     });
-    setKinships(
-      characterDetail.kinships?.map((kinship) => ({
-        relative: kinship.relative,
-        kinship: kinship.kinship,
-      })) ?? [],
-    );
   }, [isEditMode, characterDetail, reset]);
 
   useEffect(() => {
@@ -128,19 +127,14 @@ export const CharacterCreateForm = ({ onSaved }: CharacterCreateFormProps) => {
     });
   }, [isCharacterDetailError, characterDetailError]);
 
-  const buildPayload = (
-    data: CharacterFormData,
-    kinships: CharacterKinshipDraft[],
-  ): CharacterPayload => ({
+  const buildPayload = (data: CharacterFormData): CharacterPayload => ({
     ...data,
     referenceImage: data.referenceImage || undefined,
     tagIds: data.tagIds ?? [],
     raceId: data.raceId || undefined,
+    familyId: data.familyId || undefined,
+    secondaryFamilyId: data.secondaryFamilyId || undefined,
     description: data.description || undefined,
-    kinships: kinships.map((kinship) => ({
-      relativeId: kinship.relative.id,
-      kinship: kinship.kinship,
-    })),
   });
 
   const createCharacterMutation = usePostEntity<ICharacter, CharacterPayload>({
@@ -152,7 +146,6 @@ export const CharacterCreateForm = ({ onSaved }: CharacterCreateFormProps) => {
         type: 'success',
       });
       reset(characterFormDefaultValues);
-      setKinships([]);
       onSaved();
     },
     onError: (error) => {
@@ -186,7 +179,7 @@ export const CharacterCreateForm = ({ onSaved }: CharacterCreateFormProps) => {
   });
 
   const onSubmit = (data: CharacterFormData) => {
-    const payload = buildPayload(data, kinships);
+    const payload = buildPayload(data);
 
     if (isEditMode) {
       updateCharacterMutation.mutate(payload);
@@ -256,6 +249,28 @@ export const CharacterCreateForm = ({ onSaved }: CharacterCreateFormProps) => {
           control={control}
           label="Morto?"
         />
+
+        <FormAutocompleteInput<CharacterFormData, IFamilyListItem>
+          id="character-form-family"
+          name="familyId"
+          control={control}
+          label="Família"
+          options={familyOptions}
+          getOptionLabel={(family) => family.name}
+          getOptionValue={(family) => family.id}
+          placeholder="Selecione a família"
+        />
+
+        <FormAutocompleteInput<CharacterFormData, IFamilyListItem>
+          id="character-form-secondary-family"
+          name="secondaryFamilyId"
+          control={control}
+          label="Família Secundária"
+          options={familyOptions}
+          getOptionLabel={(family) => family.name}
+          getOptionValue={(family) => family.id}
+          placeholder="Selecione a família secundária"
+        />
       </div>
 
       <FormRichTextInput
@@ -264,12 +279,6 @@ export const CharacterCreateForm = ({ onSaved }: CharacterCreateFormProps) => {
         control={control}
         label="Descrição"
         placeholder="Descreva o personagem"
-      />
-
-      <CharacterKinshipField
-        value={kinships}
-        onChange={setKinships}
-        excludeCharacterId={selectedCharacter?.id}
       />
 
       <PrimaryButton

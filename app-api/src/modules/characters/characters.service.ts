@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
@@ -12,13 +12,14 @@ import {
 import { CreateCharacterDto } from './dto/create-character.dto';
 import { UpdateCharacterDto } from './dto/update-character.dto';
 import { FindCharactersQueryDto } from './dto/find-characters-query.dto';
-import { CharacterKinshipInputDto } from './dto/character-kinship-input.dto';
 import { Character } from './entities/character.entity';
-import { CharacterKinship } from './entities/character-kinship.entity';
 import { Race } from '../races/entities/race.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { OrganizationMember } from '../organizations/entities/organization-member.entity';
 import { Organization } from '../organizations/entities/organization.entity';
+import { Family } from '../families/entities/family.entity';
+import { FamilyMember } from '../families/entities/family-member.entity';
+import { FamilyRelationship } from '../families/entities/family-relationship.entity';
 
 export interface PaginatedCharacters {
   data: Character[];
@@ -32,14 +33,19 @@ export class CharactersService {
   constructor(
     @InjectRepository(Character)
     private readonly charactersRepository: Repository<Character>,
-    @InjectRepository(CharacterKinship)
-    private readonly characterKinshipsRepository: Repository<CharacterKinship>,
     @InjectRepository(Race)
     private readonly racesRepository: Repository<Race>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     @InjectRepository(OrganizationMember)
     private readonly organizationMembersRepository: Repository<OrganizationMember>,
+    @InjectRepository(Family)
+    private readonly familiesRepository: Repository<Family>,
+    @InjectRepository(FamilyMember)
+    private readonly familyMembersRepository: Repository<FamilyMember>,
+    @InjectRepository(FamilyRelationship)
+    private readonly familyRelationshipsRepository: Repository<FamilyRelationship>,
+    private readonly dataSource: DataSource,
   ) {}
 
   findById(id: string): Promise<Character | null> {
@@ -48,7 +54,8 @@ export class CharactersService {
       relations: {
         race: { category: true, tags: true },
         tags: true,
-        kinships: { relative: true },
+        family: true,
+        secondaryFamily: true,
       },
     });
   }
@@ -63,8 +70,11 @@ export class CharactersService {
     return memberships.map((membership) => membership.organization);
   }
 
-  private async findRaceById(id: string): Promise<Race> {
-    const race = await this.racesRepository.findOne({
+  private async findRaceById(
+    id: string,
+    repository: Repository<Race> = this.racesRepository,
+  ): Promise<Race> {
+    const race = await repository.findOne({
       where: { id },
       relations: { category: true, tags: true },
     });
@@ -74,147 +84,64 @@ export class CharactersService {
     return race;
   }
 
-  private async findTagsByIds(tagIds: string[]): Promise<Tag[]> {
+  private async findFamilyById(
+    id: string,
+    repository: Repository<Family> = this.familiesRepository,
+  ): Promise<Family> {
+    const family = await repository.findOneBy({ id });
+    if (!family) {
+      throw new NotFoundException('Família não encontrada.');
+    }
+    return family;
+  }
+
+  private async findTagsByIds(
+    tagIds: string[],
+    repository: Repository<Tag> = this.tagsRepository,
+  ): Promise<Tag[]> {
     const uniqueIds = [...new Set(tagIds)];
-    const tags = await this.tagsRepository.findBy({ id: In(uniqueIds) });
+    const tags = await repository.findBy({ id: In(uniqueIds) });
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
     return tags;
   }
 
-  private async findCharactersByIds(ids: string[]): Promise<Character[]> {
-    const uniqueIds = [...new Set(ids)];
-    const characters = await this.charactersRepository.findBy({
-      id: In(uniqueIds),
-    });
-    if (characters.length !== uniqueIds.length) {
-      throw new NotFoundException(
-        'Um ou mais personagens parentes não foram encontrados.',
-      );
-    }
-    return characters;
-  }
-
-  private assertNoDuplicateRelatives(
-    kinships: CharacterKinshipInputDto[],
+  private assertFamiliesAreDifferent(
+    familyId: string | null,
+    secondaryFamilyId: string | null,
   ): void {
-    const relativeIds = kinships.map((kinship) => kinship.relativeId);
-    if (new Set(relativeIds).size !== relativeIds.length) {
+    if (familyId && secondaryFamilyId && familyId === secondaryFamilyId) {
       throw new BadRequestException(
-        'Não é permitido cadastrar o mesmo parente mais de uma vez para o personagem.',
+        'A família secundária não pode ser a mesma da família primária.',
       );
     }
   }
 
-  private assertNoSelfKinship(
-    characterId: string | undefined,
-    kinships: CharacterKinshipInputDto[],
-  ): void {
-    if (!characterId) {
-      return;
-    }
-    const hasSelfReference = kinships.some(
-      (kinship) => kinship.relativeId === characterId,
-    );
-    if (hasSelfReference) {
-      throw new BadRequestException(
-        'Um personagem não pode ser cadastrado como parente de si mesmo.',
-      );
-    }
-  }
-
-  private async buildKinships(
-    characterId: string | undefined,
-    kinships: CharacterKinshipInputDto[],
-  ): Promise<CharacterKinship[]> {
-    this.assertNoDuplicateRelatives(kinships);
-    this.assertNoSelfKinship(characterId, kinships);
-
-    const relativeIds = kinships.map((kinship) => kinship.relativeId);
-    const relatives =
-      relativeIds.length > 0 ? await this.findCharactersByIds(relativeIds) : [];
-    const relativesById = new Map(
-      relatives.map((relative) => [relative.id, relative]),
-    );
-
-    return kinships.map((input) => {
-      const relative = relativesById.get(input.relativeId);
-      if (!relative) {
-        throw new NotFoundException(
-          'Um ou mais personagens parentes não foram encontrados.',
-        );
-      }
-      return this.characterKinshipsRepository.create({
-        kinship: input.kinship,
-        relative,
-      });
-    });
-  }
-
-  // Reassigning `character.kinships` inteiro e deixando o cascade save cuidar da
-  // remoção via orphanedRowAction falha com violação de not-null: o TypeORM tenta
-  // primeiro um UPDATE setando "character_id" = NULL nas linhas órfãs antes de
-  // excluí-las, o que quebra a coluna NOT NULL. Por isso os parentescos removidos,
-  // atualizados e adicionados são sincronizados diretamente pelo repositório.
-  private async syncKinships(
-    character: Character,
-    kinships: CharacterKinshipInputDto[],
+  // Fluxo inverso da árvore genealógica: quando a família (primária ou secundária) do
+  // personagem é alterada diretamente pela edição do personagem, remove o card
+  // (FamilyMember) e os vínculos (FamilyRelationship) desse personagem na família
+  // anterior, já que ele deixou de pertencer a ela.
+  private async detachCharacterFromFamily(
+    characterId: string,
+    familyId: string,
+    familyMembersRepository: Repository<FamilyMember> = this
+      .familyMembersRepository,
+    familyRelationshipsRepository: Repository<FamilyRelationship> = this
+      .familyRelationshipsRepository,
   ): Promise<void> {
-    this.assertNoDuplicateRelatives(kinships);
-    this.assertNoSelfKinship(character.id, kinships);
-
-    const relativeIds = kinships.map((kinship) => kinship.relativeId);
-    const relatives =
-      relativeIds.length > 0 ? await this.findCharactersByIds(relativeIds) : [];
-    const relativesById = new Map(
-      relatives.map((relative) => [relative.id, relative]),
-    );
-
-    const existingByRelativeId = new Map(
-      character.kinships.map((kinship) => [kinship.relative.id, kinship]),
-    );
-
-    const keptIds = new Set<string>();
-    const toSave: CharacterKinship[] = [];
-
-    for (const input of kinships) {
-      const relative = relativesById.get(input.relativeId);
-      if (!relative) {
-        throw new NotFoundException(
-          'Um ou mais personagens parentes não foram encontrados.',
-        );
-      }
-
-      const existing = existingByRelativeId.get(input.relativeId);
-      if (existing) {
-        keptIds.add(existing.id);
-        if (existing.kinship !== input.kinship) {
-          existing.kinship = input.kinship;
-          toSave.push(existing);
-        }
-        continue;
-      }
-
-      toSave.push(
-        this.characterKinshipsRepository.create({
-          kinship: input.kinship,
-          character,
-          relative,
-        }),
-      );
-    }
-
-    const toRemove = character.kinships.filter(
-      (kinship) => !keptIds.has(kinship.id),
-    );
-
-    if (toRemove.length > 0) {
-      await this.characterKinshipsRepository.remove(toRemove);
-    }
-    if (toSave.length > 0) {
-      await this.characterKinshipsRepository.save(toSave);
-    }
+    await familyMembersRepository.delete({
+      character: { id: characterId },
+      family: { id: familyId },
+    });
+    await familyRelationshipsRepository.delete({
+      family: { id: familyId },
+      sourceCharacter: { id: characterId },
+    });
+    await familyRelationshipsRepository.delete({
+      family: { id: familyId },
+      targetCharacter: { id: characterId },
+    });
   }
 
   async create(dto: CreateCharacterDto): Promise<Character> {
@@ -225,10 +152,15 @@ export class CharactersService {
         ? await this.findTagsByIds(dto.tagIds)
         : [];
 
-    const kinships =
-      dto.kinships && dto.kinships.length > 0
-        ? await this.buildKinships(undefined, dto.kinships)
-        : [];
+    this.assertFamiliesAreDifferent(
+      dto.familyId ?? null,
+      dto.secondaryFamilyId ?? null,
+    );
+
+    const family = dto.familyId ? await this.findFamilyById(dto.familyId) : null;
+    const secondaryFamily = dto.secondaryFamilyId
+      ? await this.findFamilyById(dto.secondaryFamilyId)
+      : null;
 
     const character = this.charactersRepository.create({
       name: dto.name,
@@ -237,7 +169,8 @@ export class CharactersService {
       isDead: dto.isDead ?? false,
       race,
       tags,
-      kinships,
+      family,
+      secondaryFamily,
     });
 
     return this.charactersRepository.save(character);
@@ -286,36 +219,100 @@ export class CharactersService {
   }
 
   async update(id: string, dto: UpdateCharacterDto): Promise<Character> {
-    const character = await this.findById(id);
-    if (!character) {
-      throw new NotFoundException('Personagem não encontrado.');
-    }
+    await this.dataSource.transaction(async (manager) => {
+      const charactersRepository = manager.getRepository(Character);
+      const racesRepository = manager.getRepository(Race);
+      const tagsRepository = manager.getRepository(Tag);
+      const familiesRepository = manager.getRepository(Family);
+      const familyMembersRepository = manager.getRepository(FamilyMember);
+      const familyRelationshipsRepository =
+        manager.getRepository(FamilyRelationship);
 
-    if (dto.name !== undefined) {
-      character.name = dto.name;
-    }
-    if (dto.referenceImage !== undefined) {
-      character.referenceImage = dto.referenceImage;
-    }
-    if (dto.description !== undefined) {
-      character.description = dto.description;
-    }
-    if (dto.isDead !== undefined) {
-      character.isDead = dto.isDead;
-    }
-    if (dto.raceId !== undefined) {
-      character.race = dto.raceId ? await this.findRaceById(dto.raceId) : null;
-    }
-    if (dto.tagIds !== undefined) {
-      character.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
-    }
+      const character = await charactersRepository.findOne({
+        where: { id },
+        relations: {
+          race: { category: true, tags: true },
+          tags: true,
+          family: true,
+          secondaryFamily: true,
+        },
+      });
+      if (!character) {
+        throw new NotFoundException('Personagem não encontrado.');
+      }
 
-    await this.charactersRepository.save(character);
+      if (dto.name !== undefined) {
+        character.name = dto.name;
+      }
+      if (dto.referenceImage !== undefined) {
+        character.referenceImage = dto.referenceImage;
+      }
+      if (dto.description !== undefined) {
+        character.description = dto.description;
+      }
+      if (dto.isDead !== undefined) {
+        character.isDead = dto.isDead;
+      }
+      if (dto.raceId !== undefined) {
+        character.race = dto.raceId
+          ? await this.findRaceById(dto.raceId, racesRepository)
+          : null;
+      }
+      if (dto.tagIds !== undefined) {
+        character.tags =
+          dto.tagIds.length > 0
+            ? await this.findTagsByIds(dto.tagIds, tagsRepository)
+            : [];
+      }
 
-    if (dto.kinships !== undefined) {
-      await this.syncKinships(character, dto.kinships);
-    }
+      const nextFamilyId =
+        dto.familyId !== undefined
+          ? (dto.familyId ?? null)
+          : (character.family?.id ?? null);
+      const nextSecondaryFamilyId =
+        dto.secondaryFamilyId !== undefined
+          ? (dto.secondaryFamilyId ?? null)
+          : (character.secondaryFamily?.id ?? null);
+      this.assertFamiliesAreDifferent(nextFamilyId, nextSecondaryFamilyId);
+
+      if (dto.familyId !== undefined) {
+        const newFamily = dto.familyId
+          ? await this.findFamilyById(dto.familyId, familiesRepository)
+          : null;
+        if (character.family?.id !== (newFamily?.id ?? null)) {
+          if (character.family) {
+            await this.detachCharacterFromFamily(
+              character.id,
+              character.family.id,
+              familyMembersRepository,
+              familyRelationshipsRepository,
+            );
+          }
+          character.family = newFamily;
+        }
+      }
+
+      if (dto.secondaryFamilyId !== undefined) {
+        const newSecondaryFamily = dto.secondaryFamilyId
+          ? await this.findFamilyById(dto.secondaryFamilyId, familiesRepository)
+          : null;
+        if (
+          character.secondaryFamily?.id !== (newSecondaryFamily?.id ?? null)
+        ) {
+          if (character.secondaryFamily) {
+            await this.detachCharacterFromFamily(
+              character.id,
+              character.secondaryFamily.id,
+              familyMembersRepository,
+              familyRelationshipsRepository,
+            );
+          }
+          character.secondaryFamily = newSecondaryFamily;
+        }
+      }
+
+      await charactersRepository.save(character);
+    });
 
     const updated = await this.findById(id);
     if (!updated) {

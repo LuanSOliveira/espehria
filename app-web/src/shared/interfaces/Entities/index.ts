@@ -11,4 +11,5 @@ export * from './Event';
 export * from './Divinity';
 export * from './Character';
 export * from './Organization';
+export * from './Family';
 export * from './SearchResult';

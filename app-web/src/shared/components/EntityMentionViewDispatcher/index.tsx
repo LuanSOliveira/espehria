@@ -11,6 +11,7 @@ import { EventView } from '@/app/(authorized)/eventos/components/EventView';
 import { DivinityView } from '@/app/(authorized)/divindades/components/DivinityView';
 import { CharacterView } from '@/app/(authorized)/personagens/components/CharacterView';
 import { OrganizationView } from '@/app/(authorized)/organizacoes/components/OrganizationView';
+import { FamilyView } from '@/app/(authorized)/familias/components/FamilyView';
 
 interface EntityMentionViewRendererParams {
   entityId: string;
@@ -50,6 +51,9 @@ const ENTITY_MENTION_VIEW_REGISTRY: Record<
   ),
   organization: ({ entityId, onNotFound }) => (
     <OrganizationView organizationId={entityId} onNotFound={onNotFound} />
+  ),
+  family: ({ entityId, onNotFound }) => (
+    <FamilyView familyId={entityId} onNotFound={onNotFound} />
   ),
 };
 

@@ -6,12 +6,11 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
-  OneToMany,
 } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Race } from '../../races/entities/race.entity';
 import { Tag } from '../../tags/entities/tag.entity';
-import { CharacterKinship } from './character-kinship.entity';
+import { Family } from '../../families/entities/family.entity';
 
 @Entity('characters')
 export class Character extends BaseEntity {
@@ -46,13 +45,13 @@ export class Character extends BaseEntity {
   })
   tags!: Tag[];
 
-  @ApiProperty({
-    type: () => [CharacterKinship],
-    description: 'Parentescos do personagem',
-  })
-  @OneToMany(() => CharacterKinship, (kinship) => kinship.character, {
-    cascade: true,
-    orphanedRowAction: 'delete',
-  })
-  kinships!: CharacterKinship[];
+  @ApiPropertyOptional({ type: () => Family })
+  @ManyToOne(() => Family, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'family_id' })
+  family!: Family | null;
+
+  @ApiPropertyOptional({ type: () => Family })
+  @ManyToOne(() => Family, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'secondary_family_id' })
+  secondaryFamily!: Family | null;
 }

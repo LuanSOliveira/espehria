@@ -11,6 +11,7 @@ const MENU_ROUTES = {
   divinities: '/divindades',
   characters: '/personagens',
   organizations: '/organizacoes',
+  families: '/familias',
 };
 
 export const APP_ROUTES = {
@@ -26,6 +27,7 @@ export const APP_ROUTES = {
     divinities: MENU_ROUTES.divinities,
     characters: MENU_ROUTES.characters,
     organizations: MENU_ROUTES.organizations,
+    families: MENU_ROUTES.families,
   },
   public: {
     login: MENU_ROUTES.login,

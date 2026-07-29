@@ -44,11 +44,11 @@ export class CharactersController {
   @ApiCreatedResponse({ type: CharacterResponseDto })
   @ApiNotFoundResponse({
     description:
-      'Raça não encontrada, uma ou mais tags não encontradas, ou personagem-relativo não encontrado',
+      'Raça não encontrada, uma ou mais tags não encontradas, família primária não encontrada, ou família secundária não encontrada',
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida, dados obrigatórios ausentes, personagem tentando referenciar a si mesmo como parente, ou duplicidade de par em parentescos (mesmo relativeId mais de uma vez)',
+      'URL de imagem de referência inválida, dados obrigatórios ausentes, ID em formato inválido, ou família primária e secundária são a mesma família',
   })
   async create(
     @Body() dto: CreateCharacterDto,
@@ -106,11 +106,11 @@ export class CharactersController {
   @ApiOkResponse({ type: CharacterResponseDto })
   @ApiNotFoundResponse({
     description:
-      'Personagem não encontrado, raça não encontrada, uma ou mais tags não encontradas, ou personagem-relativo não encontrado',
+      'Personagem não encontrado, raça não encontrada, uma ou mais tags não encontradas, família primária não encontrada, ou família secundária não encontrada',
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida, ID em formato inválido, personagem tentando referenciar a si mesmo como parente, ou duplicidade de par em parentescos (mesmo relativeId mais de uma vez)',
+      'URL de imagem de referência inválida, ID em formato inválido, ou família primária e secundária são a mesma família',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,

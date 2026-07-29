@@ -11,6 +11,7 @@ import { Event } from '../events/entities/event.entity';
 import { Divinity } from '../divinities/entities/divinity.entity';
 import { Character } from '../characters/entities/character.entity';
 import { Organization } from '../organizations/entities/organization.entity';
+import { Family } from '../families/entities/family.entity';
 import { LinkableEntityType } from './enums/linkable-entity-type.enum';
 import { SearchResultItemResponseDto } from './dto/search-result-item-response.dto';
 
@@ -39,6 +40,8 @@ export class SearchService {
     private readonly charactersRepository: Repository<Character>,
     @InjectRepository(Organization)
     private readonly organizationsRepository: Repository<Organization>,
+    @InjectRepository(Family)
+    private readonly familiesRepository: Repository<Family>,
   ) {}
 
   async search(query: string): Promise<SearchResultItemResponseDto[]> {
@@ -70,6 +73,10 @@ export class SearchService {
       {
         entityType: LinkableEntityType.ORGANIZATION,
         repository: this.organizationsRepository,
+      },
+      {
+        entityType: LinkableEntityType.FAMILY,
+        repository: this.familiesRepository,
       },
     ];
 

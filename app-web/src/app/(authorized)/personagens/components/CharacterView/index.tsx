@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Box, Chip, CircularProgress } from '@mui/material';
-import { FiBriefcase, FiFileText, FiImage, FiUsers } from 'react-icons/fi';
+import { FiBriefcase, FiFileText, FiImage } from 'react-icons/fi';
 import { GiDeathSkull } from 'react-icons/gi';
 import { MdOutlineFace } from 'react-icons/md';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
@@ -12,8 +12,8 @@ import { useGetEntityById } from '@/hooks/Queries';
 import { ICharacter } from '@/shared/interfaces';
 import { getContrastTextColor, showToast } from '@/shared/util';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
-import { CharacterKinshipCard } from '../CharacterKinshipCard';
 import { CharacterOrganizationCard } from '../CharacterOrganizationCard';
+import { CharacterFamilyTreeSection } from '../CharacterFamilyTreeSection';
 
 export interface CharacterViewProps {
   characterId: string;
@@ -212,60 +212,45 @@ export const CharacterView = ({ characterId, onNotFound }: CharacterViewProps) =
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div
+        className="flex-1 min-w-0 flex flex-col"
+        style={APP_CONTAINER_STYLES.detailSectionBox}
+      >
         <div
-          className="flex-1 min-w-0 flex flex-col"
-          style={APP_CONTAINER_STYLES.detailSectionBox}
+          className="flex items-center gap-2 px-3 py-2"
+          style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
         >
-          <div
-            className="flex items-center gap-2 px-3 py-2"
-            style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
-          >
-            <FiUsers style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
-            <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
-              Parentescos
-            </Label>
-          </div>
-          <div className="flex-1 flex flex-col gap-2 px-3 py-3">
-            {character.kinships.length === 0 && (
-              <DefaultText>Nenhum parentesco cadastrado.</DefaultText>
-            )}
-            {character.kinships.map((kinship) => (
-              <CharacterKinshipCard
-                key={kinship.id}
-                relative={kinship.relative}
-                kinship={kinship.kinship}
-              />
-            ))}
-          </div>
+          <FiBriefcase style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
+          <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
+            Organizações
+          </Label>
         </div>
-
-        <div
-          className="flex-1 min-w-0 flex flex-col"
-          style={APP_CONTAINER_STYLES.detailSectionBox}
-        >
-          <div
-            className="flex items-center gap-2 px-3 py-2"
-            style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
-          >
-            <FiBriefcase style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
-            <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
-              Organizações
-            </Label>
-          </div>
-          <div className="flex-1 flex flex-col gap-2 px-3 py-3">
-            {character.organizations.length === 0 && (
-              <DefaultText>Nenhuma organização cadastrada.</DefaultText>
-            )}
-            {character.organizations.map((organization) => (
-              <CharacterOrganizationCard
-                key={organization.id}
-                organization={organization}
-              />
-            ))}
-          </div>
+        <div className="flex-1 flex flex-col gap-2 px-3 py-3">
+          {character.organizations.length === 0 && (
+            <DefaultText>Nenhuma organização cadastrada.</DefaultText>
+          )}
+          {character.organizations.map((organization) => (
+            <CharacterOrganizationCard
+              key={organization.id}
+              organization={organization}
+            />
+          ))}
         </div>
       </div>
+
+      {character.family && (
+        <CharacterFamilyTreeSection
+          familyId={character.family.id}
+          familyName={character.family.name}
+        />
+      )}
+
+      {character.secondaryFamily && (
+        <CharacterFamilyTreeSection
+          familyId={character.secondaryFamily.id}
+          familyName={character.secondaryFamily.name}
+        />
+      )}
     </div>
   );
 };

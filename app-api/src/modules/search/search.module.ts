@@ -10,6 +10,7 @@ import { Event } from '../events/entities/event.entity';
 import { Divinity } from '../divinities/entities/divinity.entity';
 import { Character } from '../characters/entities/character.entity';
 import { Organization } from '../organizations/entities/organization.entity';
+import { Family } from '../families/entities/family.entity';
 import { SearchController } from './search.controller';
 import { SearchService } from './search.service';
 
@@ -26,6 +27,7 @@ import { SearchService } from './search.service';
       Divinity,
       Character,
       Organization,
+      Family,
     ]),
   ],
   controllers: [SearchController],

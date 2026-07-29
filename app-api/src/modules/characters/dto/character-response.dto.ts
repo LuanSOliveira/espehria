@@ -2,9 +2,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Character } from '../entities/character.entity';
 import { RaceResponseDto } from '../../races/dto/race-response.dto';
 import { TagResponseDto } from '../../tags/dto/tag-response.dto';
-import { CharacterKinshipResponseDto } from './character-kinship-response.dto';
 import { OrganizationShallowResponseDto } from '../../organizations/dto/organization-shallow-response.dto';
 import { Organization } from '../../organizations/entities/organization.entity';
+import { FamilyShallowResponseDto } from '../../families/dto/family-shallow-response.dto';
 
 export class CharacterResponseDto {
   @ApiProperty({
@@ -46,11 +46,19 @@ export class CharacterResponseDto {
   })
   tags: TagResponseDto[];
 
-  @ApiProperty({
-    type: () => [CharacterKinshipResponseDto],
-    description: 'Parentescos do personagem',
+  @ApiPropertyOptional({
+    type: () => FamilyShallowResponseDto,
+    description:
+      'Família primária do personagem (pode ser nula se não informada)',
   })
-  kinships: CharacterKinshipResponseDto[];
+  family: FamilyShallowResponseDto | null;
+
+  @ApiPropertyOptional({
+    type: () => FamilyShallowResponseDto,
+    description:
+      'Família secundária do personagem (pode ser nula se não informada)',
+  })
+  secondaryFamily: FamilyShallowResponseDto | null;
 
   @ApiProperty({
     type: () => [OrganizationShallowResponseDto],
@@ -81,9 +89,12 @@ export class CharacterResponseDto {
     dto.tags = (character.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),
     );
-    dto.kinships = (character.kinships ?? []).map((kinship) =>
-      CharacterKinshipResponseDto.fromEntity(kinship),
-    );
+    dto.family = character.family
+      ? FamilyShallowResponseDto.fromEntity(character.family)
+      : null;
+    dto.secondaryFamily = character.secondaryFamily
+      ? FamilyShallowResponseDto.fromEntity(character.secondaryFamily)
+      : null;
     dto.organizations = organizations.map((organization) =>
       OrganizationShallowResponseDto.fromEntity(organization),
     );

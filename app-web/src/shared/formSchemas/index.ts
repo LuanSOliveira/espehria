@@ -9,3 +9,4 @@ export * from './EventFormSchema';
 export * from './DivinityFormSchema';
 export * from './CharacterFormSchema';
 export * from './OrganizationFormSchema';
+export * from './FamilyFormSchema';

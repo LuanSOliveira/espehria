@@ -11,6 +11,7 @@ export const ENTITY_MENTION_TYPE_LABELS: Record<string, string> = {
   divinity: 'divindade',
   character: 'personagem',
   organization: 'organização',
+  family: 'família',
 };
 
 // Endpoint de detalhe usado para resolver o nome atual de uma entidade mencionada
@@ -30,6 +31,7 @@ export const ENTITY_MENTION_DETAIL_URL_BY_TYPE: Record<
   divinity: (id) => `/divinities/${id}`,
   character: (id) => `/characters/${id}`,
   organization: (id) => `/organizations/${id}`,
+  family: (id) => `/families/${id}`,
 };
 
 // Tipos de entidade com view registrada no EntityMentionViewDispatcher — usado pelo
@@ -44,4 +46,5 @@ export const ENTITY_MENTION_VIEWABLE_TYPES: string[] = [
   'divinity',
   'character',
   'organization',
+  'family',
 ];

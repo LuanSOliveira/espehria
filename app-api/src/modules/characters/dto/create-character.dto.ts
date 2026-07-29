@@ -1,5 +1,4 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -8,9 +7,7 @@ import {
   IsString,
   IsUrl,
   IsUUID,
-  ValidateNested,
 } from 'class-validator';
-import { CharacterKinshipInputDto } from './character-kinship-input.dto';
 
 export class CreateCharacterDto {
   @ApiProperty({
@@ -68,12 +65,20 @@ export class CreateCharacterDto {
   tagIds?: string[];
 
   @ApiPropertyOptional({
-    type: () => [CharacterKinshipInputDto],
-    description: 'Lista de parentescos do personagem',
+    format: 'uuid',
+    description: 'ID da família primária do personagem (opcional)',
+    example: '550e8400-e29b-41d4-a716-446655440000',
   })
   @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CharacterKinshipInputDto)
-  kinships?: CharacterKinshipInputDto[];
+  @IsUUID()
+  familyId?: string;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'ID da família secundária do personagem (opcional)',
+    example: '660e8400-e29b-41d4-a716-446655440000',
+  })
+  @IsOptional()
+  @IsUUID()
+  secondaryFamilyId?: string;
 }

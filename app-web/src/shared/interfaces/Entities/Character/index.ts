@@ -1,4 +1,5 @@
 import { IEntity } from '../Entity';
+import { IFamilySummary } from '../Family';
 import { IOrganizationSummary } from '../Organization';
 import { ITag } from '../Tag';
 
@@ -11,12 +12,6 @@ export interface ICharacterSummary {
 export interface ICharacterRace {
   id: string;
   name: string;
-}
-
-export interface ICharacterKinship {
-  id: string;
-  kinship: string;
-  relative: ICharacterSummary;
 }
 
 export interface ICharacterListItem {
@@ -35,7 +30,8 @@ export interface ICharacter extends IEntity {
   isDead: boolean;
   race?: ICharacterRace | null;
   tags: ITag[];
-  kinships: ICharacterKinship[];
+  family?: IFamilySummary | null;
+  secondaryFamily?: IFamilySummary | null;
   /**
    * Organizações das quais o personagem participa como membro. Campo
    * derivado/somente leitura, calculado pelo backend a partir dos vínculos de
