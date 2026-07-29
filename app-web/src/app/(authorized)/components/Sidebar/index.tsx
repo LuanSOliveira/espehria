@@ -1,20 +1,45 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Divider } from '@mui/material';
-import { DefaultText, Label } from '@/shared/components/Texts';
+import { DefaultText } from '@/shared/components/Texts';
 import { useAccessibleFontSize } from '@/hooks/FontAccessibility';
 import { APP_BUTTON_BASE_FONT_SIZE, APP_COLORS } from '@/shared/constants';
 import { NAV_SECTIONS } from './data';
+import { SidebarSectionAccordion } from './components/SidebarSectionAccordion';
 
 interface SidebarProps {
   isOpen: boolean;
 }
 
+const getSectionForPathname = (pathname: string): string | null => {
+  const activeSection = NAV_SECTIONS.find(
+    (section) =>
+      section.title &&
+      section.items.some((item) => item.href === pathname),
+  );
+
+  return activeSection?.title ?? null;
+};
+
 export const Sidebar = ({ isOpen }: SidebarProps) => {
   const pathname = usePathname();
   const iconFontSize = useAccessibleFontSize(APP_BUTTON_BASE_FONT_SIZE.icon);
+  const [expandedSection, setExpandedSection] = useState<string | null>(() =>
+    getSectionForPathname(pathname),
+  );
+
+  useEffect(() => {
+    setExpandedSection(getSectionForPathname(pathname));
+  }, [pathname]);
+
+  const handleToggleSection = (sectionTitle: string) => {
+    setExpandedSection((current) =>
+      current === sectionTitle ? null : sectionTitle,
+    );
+  };
 
   return (
     <aside
@@ -26,69 +51,72 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
       }}
     >
       <nav className="flex h-full w-60 flex-col gap-1 overflow-y-auto py-4 px-3">
-        {NAV_SECTIONS.map((section, sectionIndex) => (
-          <div
-            key={section.title ?? `section-${sectionIndex}`}
-            className="flex flex-col gap-1"
-          >
-            {sectionIndex > 0 && (
-              <Divider
-                sx={{
-                  borderColor: APP_COLORS.gold,
-                  opacity: 0.35,
-                  margin: '12px 0 8px',
-                }}
-              />
-            )}
+        {NAV_SECTIONS.map((section, sectionIndex) => {
+          const sectionTitle = section.title;
 
-            {section.title && (
-              <Label
-                sx={{
-                  color: APP_COLORS.gold,
-                  marginBottom: '4px',
-                  paddingLeft: '14px',
-                }}
-              >
-                {section.title}
-              </Label>
-            )}
+          return (
+            <div
+              key={sectionTitle ?? `section-${sectionIndex}`}
+              className="flex flex-col gap-1"
+            >
+              {sectionIndex > 0 && (
+                <Divider
+                  sx={{
+                    borderColor: APP_COLORS.gold,
+                    opacity: 0.35,
+                    margin: '12px 0 8px',
+                  }}
+                />
+              )}
 
-            {section.items.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
+              {sectionTitle ? (
+                <SidebarSectionAccordion
+                  title={sectionTitle}
+                  items={section.items}
+                  isExpanded={expandedSection === sectionTitle}
+                  onToggle={() => handleToggleSection(sectionTitle)}
+                  iconFontSize={iconFontSize}
+                  pathname={pathname}
+                />
+              ) : (
+                section.items.map((item) => {
+                  const isActive = pathname === item.href;
+                  const Icon = item.icon;
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  style={{ textDecoration: 'none' }}
-                >
-                  <div
-                    className={`flex items-center gap-3 rounded border py-2.5 px-3.5 transition-colors duration-150 ease-in-out hover:bg-gold/15 ${
-                      isActive
-                        ? 'border-gold bg-gold/25'
-                        : 'border-transparent bg-transparent'
-                    }`}
-                  >
-                    <Icon
-                      className="shrink-0 text-gold-soft"
-                      style={{ fontSize: iconFontSize }}
-                    />
-                    <DefaultText
-                      component="span"
-                      sx={{
-                        color: APP_COLORS.goldSoft,
-                        whiteSpace: 'nowrap',
-                      }}
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      style={{ textDecoration: 'none' }}
                     >
-                      {item.label}
-                    </DefaultText>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        ))}
+                      <div
+                        className={`flex items-center gap-3 rounded border py-2.5 px-3.5 transition-colors duration-150 ease-in-out hover:bg-gold/15 ${
+                          isActive
+                            ? 'border-gold bg-gold/25'
+                            : 'border-transparent bg-transparent'
+                        }`}
+                      >
+                        <Icon
+                          className="shrink-0 text-gold-soft"
+                          style={{ fontSize: iconFontSize }}
+                        />
+                        <DefaultText
+                          component="span"
+                          sx={{
+                            color: APP_COLORS.goldSoft,
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {item.label}
+                        </DefaultText>
+                      </div>
+                    </Link>
+                  );
+                })
+              )}
+            </div>
+          );
+        })}
       </nav>
     </aside>
   );
