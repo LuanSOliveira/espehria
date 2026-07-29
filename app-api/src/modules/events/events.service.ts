@@ -70,6 +70,7 @@ export class EventsService {
       startYear: dto.startYear ?? null,
       endYear: dto.endYear ?? null,
       description: dto.description ?? null,
+      privateInformation: dto.privateInformation ?? null,
       era,
       tags,
     });
@@ -151,6 +152,9 @@ export class EventsService {
     }
     if (dto.description !== undefined) {
       event.description = dto.description;
+    }
+    if (dto.privateInformation !== undefined) {
+      event.privateInformation = dto.privateInformation;
     }
 
     if (dto.eraId !== undefined) {

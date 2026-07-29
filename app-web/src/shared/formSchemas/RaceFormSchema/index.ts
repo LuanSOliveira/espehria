@@ -12,6 +12,7 @@ export const raceFormSchema = z.object({
     ),
   physicalCharacteristics: z.string(),
   description: z.string(),
+  privateInformation: z.string(),
   tagIds: z.array(z.string()).optional(),
 });
 
@@ -25,5 +26,6 @@ export const raceFormDefaultValues: RaceFormData = {
   referenceImageUrl: '',
   physicalCharacteristics: '',
   description: '',
+  privateInformation: '',
   tagIds: [],
 };

@@ -32,6 +32,11 @@ export class FamilyResponseDto {
   })
   description: string | null;
 
+  @ApiPropertyOptional({
+    description: 'Informações privadas da família em HTML',
+  })
+  privateInformation: string | null;
+
   @ApiProperty({
     enum: FamilyClassification,
     description: 'Classificação da família',
@@ -78,6 +83,7 @@ export class FamilyResponseDto {
     dto.name = family.name;
     dto.referenceImage = family.referenceImage;
     dto.description = family.description;
+    dto.privateInformation = family.privateInformation;
     dto.classification = family.classification;
     dto.tags = (family.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
     dto.members = (family.members ?? []).map((member) =>

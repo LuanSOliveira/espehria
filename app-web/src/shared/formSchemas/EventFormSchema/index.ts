@@ -22,6 +22,7 @@ export const eventFormSchema = z.object({
       'Informe apenas números inteiros',
     ),
   description: z.string(),
+  privateInformation: z.string(),
   tagIds: z.array(z.string()).optional(),
   eraId: z.string(),
 });
@@ -36,6 +37,7 @@ export const eventFormDefaultValues: EventFormData = {
   startYear: '',
   endYear: '',
   description: '',
+  privateInformation: '',
   tagIds: [],
   eraId: '',
 };

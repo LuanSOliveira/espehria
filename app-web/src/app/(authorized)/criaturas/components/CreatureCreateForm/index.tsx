@@ -108,6 +108,7 @@ export const CreatureCreateForm = ({ onSaved }: CreatureCreateFormProps) => {
       mythologyAndFolklore: creatureDetail.mythologyAndFolklore ?? '',
       encounterRecord: creatureDetail.encounterRecord ?? '',
       scholarsCuriosity: creatureDetail.scholarsCuriosity ?? '',
+      privateInformation: creatureDetail.privateInformation ?? '',
       tagIds: creatureDetail.tags?.map((tag) => tag.id) ?? [],
     });
   }, [isEditMode, creatureDetail, reset]);
@@ -439,6 +440,14 @@ export const CreatureCreateForm = ({ onSaved }: CreatureCreateFormProps) => {
           placeholder="Descreva a curiosidade dos estudiosos"
         />
       </div>
+
+      <FormRichTextInput
+        id="creature-form-private-information"
+        name="privateInformation"
+        control={control}
+        label="Informações Privadas"
+        placeholder="Anotações internas não destinadas ao público"
+      />
 
       <PrimaryButton
         type="submit"

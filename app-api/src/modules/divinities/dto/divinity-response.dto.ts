@@ -180,6 +180,11 @@ export class DivinityResponseDto {
   })
   curiosities: string | null;
 
+  @ApiPropertyOptional({
+    description: 'Informações privadas da divindade em HTML',
+  })
+  privateInformation: string | null;
+
   @ApiProperty({
     type: () => [TagResponseDto],
     description: 'Tags associadas à divindade',
@@ -226,6 +231,7 @@ export class DivinityResponseDto {
     dto.commandments = divinity.commandments;
     dto.oaths = divinity.oaths;
     dto.curiosities = divinity.curiosities;
+    dto.privateInformation = divinity.privateInformation;
     dto.tags = (divinity.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),
     );

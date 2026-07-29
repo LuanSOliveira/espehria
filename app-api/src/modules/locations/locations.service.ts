@@ -111,6 +111,7 @@ export class LocationsService {
       type: dto.type ?? null,
       referenceImageUrl: dto.referenceImageUrl ?? null,
       description: dto.description ?? null,
+      privateInformation: dto.privateInformation ?? null,
       tags,
       pointsOfInterest,
       sections,
@@ -188,6 +189,9 @@ export class LocationsService {
     }
     if (dto.description !== undefined) {
       location.description = dto.description;
+    }
+    if (dto.privateInformation !== undefined) {
+      location.privateInformation = dto.privateInformation;
     }
     if (dto.tagIds !== undefined) {
       location.tags =

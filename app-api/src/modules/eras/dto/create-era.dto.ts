@@ -36,6 +36,14 @@ export class CreateEraDto {
   @IsString()
   description?: string;
 
+  @ApiPropertyOptional({
+    example: '<p>Anotações internas não destinadas ao público</p>',
+    description: 'Informações privadas da era (suporta HTML, opcional)',
+  })
+  @IsOptional()
+  @IsString()
+  privateInformation?: string;
+
   @ApiProperty({
     example: 1,
     description:

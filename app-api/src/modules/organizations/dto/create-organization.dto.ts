@@ -37,6 +37,14 @@ export class CreateOrganizationDto {
   description?: string;
 
   @ApiPropertyOptional({
+    example: '<p>Anotações internas não destinadas ao público</p>',
+    description: 'Informações privadas da organização (suporta HTML, opcional)',
+  })
+  @IsOptional()
+  @IsString()
+  privateInformation?: string;
+
+  @ApiPropertyOptional({
     type: [String],
     format: 'uuid',
     description:

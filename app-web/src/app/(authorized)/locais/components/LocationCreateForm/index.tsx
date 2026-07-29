@@ -94,6 +94,7 @@ export const LocationCreateForm = ({ onSaved }: LocationCreateFormProps) => {
       type: locationDetail.type ?? '',
       referenceImageUrl: locationDetail.referenceImageUrl ?? '',
       description: locationDetail.description ?? '',
+      privateInformation: locationDetail.privateInformation ?? '',
       tagIds: locationDetail.tags?.map((tag) => tag.id) ?? [],
       sections:
         locationDetail.sections?.map((section) => ({
@@ -250,6 +251,14 @@ export const LocationCreateForm = ({ onSaved }: LocationCreateFormProps) => {
         value={pointsOfInterest}
         onChange={setPointsOfInterest}
         excludeLocationId={selectedLocation?.id}
+      />
+
+      <FormRichTextInput
+        id="location-form-private-information"
+        name="privateInformation"
+        control={control}
+        label="Informações Privadas"
+        placeholder="Anotações internas não destinadas ao público"
       />
 
       <PrimaryButton

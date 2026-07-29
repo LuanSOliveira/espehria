@@ -16,6 +16,7 @@ import {
   FiFileText,
   FiHelpCircle,
   FiImage,
+  FiLock,
   FiMap,
   FiPackage,
   FiPlusCircle,
@@ -27,6 +28,7 @@ import {
   FiUsers,
   FiZap,
 } from 'react-icons/fi';
+import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
@@ -82,6 +84,7 @@ export const CreatureView = ({ creatureId, onNotFound }: CreatureViewProps) => {
     error,
   } = useGetEntityById<ICreature>({ url: `/creatures/${creatureId}` });
 
+  const isGoogleUser = useIsGoogleUser();
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
 
   useEffect(() => {
@@ -213,6 +216,17 @@ export const CreatureView = ({ creatureId, onNotFound }: CreatureViewProps) => {
         value: creature.scholarsCuriosity,
       },
     ],
+    ...(isGoogleUser
+      ? []
+      : [
+          [
+            {
+              label: 'Informações Privadas',
+              icon: FiLock,
+              value: creature.privateInformation,
+            },
+          ],
+        ]),
   ];
 
   return (

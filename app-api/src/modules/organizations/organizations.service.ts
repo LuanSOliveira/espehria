@@ -198,6 +198,7 @@ export class OrganizationsService {
       name: dto.name,
       referenceImage: dto.referenceImage ?? null,
       description: dto.description ?? null,
+      privateInformation: dto.privateInformation ?? null,
       tags,
       members,
     });
@@ -269,6 +270,9 @@ export class OrganizationsService {
     }
     if (dto.description !== undefined) {
       organization.description = dto.description;
+    }
+    if (dto.privateInformation !== undefined) {
+      organization.privateInformation = dto.privateInformation;
     }
     if (dto.tagIds !== undefined) {
       organization.tags =

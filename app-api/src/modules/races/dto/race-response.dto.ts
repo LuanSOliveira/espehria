@@ -43,6 +43,11 @@ export class RaceResponseDto {
   })
   description: string | null;
 
+  @ApiPropertyOptional({
+    description: 'Informações privadas da raça em HTML',
+  })
+  privateInformation: string | null;
+
   @ApiProperty({
     type: () => [TagResponseDto],
     description: 'Tags associadas à raça',
@@ -69,6 +74,7 @@ export class RaceResponseDto {
     dto.referenceImageUrl = race.referenceImageUrl;
     dto.physicalCharacteristics = race.physicalCharacteristics;
     dto.description = race.description;
+    dto.privateInformation = race.privateInformation;
     dto.tags = (race.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
     dto.createdAt = race.createdAt;
     dto.updatedAt = race.updatedAt;

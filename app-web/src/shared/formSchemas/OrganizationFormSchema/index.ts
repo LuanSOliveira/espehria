@@ -11,6 +11,7 @@ export const organizationFormSchema = z.object({
     ),
   tagIds: z.array(z.string()).optional(),
   description: z.string(),
+  privateInformation: z.string(),
 });
 
 export type OrganizationFormData = z.infer<typeof organizationFormSchema>;
@@ -22,4 +23,5 @@ export const organizationFormDefaultValues: OrganizationFormData = {
   referenceImage: '',
   tagIds: [],
   description: '',
+  privateInformation: '',
 };

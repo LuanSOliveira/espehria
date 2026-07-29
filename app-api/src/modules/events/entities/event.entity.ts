@@ -29,6 +29,9 @@ export class Event extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   description!: string | null;
 
+  @Column({ type: 'text', nullable: true, name: 'private_information' })
+  privateInformation!: string | null;
+
   @ApiProperty({ type: () => [Tag], description: 'Tags associadas ao evento' })
   @ManyToMany(() => Tag)
   @JoinTable({

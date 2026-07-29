@@ -20,6 +20,7 @@ export interface IRace extends IEntity {
   referenceImageUrl?: string | null;
   physicalCharacteristics?: string | null;
   description?: string | null;
+  privateInformation?: string | null;
   tags: ITag[];
   createdAt: string;
   updatedAt: string;

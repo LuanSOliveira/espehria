@@ -25,6 +25,7 @@ export interface IOrganization extends IEntity {
   name: string;
   referenceImage?: string | null;
   description?: string | null;
+  privateInformation?: string | null;
   tags: ITag[];
   members: IOrganizationMember[];
   createdAt: string;

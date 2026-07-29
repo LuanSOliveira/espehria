@@ -106,6 +106,7 @@ export class DivinitiesService {
       commandments: dto.commandments ?? null,
       oaths: dto.oaths ?? null,
       curiosities: dto.curiosities ?? null,
+      privateInformation: dto.privateInformation ?? null,
       tags,
     });
 
@@ -254,6 +255,9 @@ export class DivinitiesService {
     }
     if (dto.curiosities !== undefined) {
       divinity.curiosities = dto.curiosities;
+    }
+    if (dto.privateInformation !== undefined) {
+      divinity.privateInformation = dto.privateInformation;
     }
     if (dto.tagIds !== undefined) {
       divinity.tags =

@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { Box, Chip, CircularProgress } from '@mui/material';
-import { FiBriefcase, FiFileText, FiImage } from 'react-icons/fi';
+import { FiBriefcase, FiFileText, FiImage, FiLock } from 'react-icons/fi';
 import { GiDeathSkull } from 'react-icons/gi';
 import { MdOutlineFace } from 'react-icons/md';
+import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
@@ -35,6 +36,7 @@ export const CharacterView = ({ characterId, onNotFound }: CharacterViewProps) =
     error,
   } = useGetEntityById<ICharacter>({ url: `/characters/${characterId}` });
 
+  const isGoogleUser = useIsGoogleUser();
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
 
   useEffect(() => {
@@ -250,6 +252,32 @@ export const CharacterView = ({ characterId, onNotFound }: CharacterViewProps) =
           familyId={character.secondaryFamily.id}
           familyName={character.secondaryFamily.name}
         />
+      )}
+
+      {!isGoogleUser && (
+        <div
+          className="flex-1 min-w-0 flex flex-col"
+          style={APP_CONTAINER_STYLES.detailSectionBox}
+        >
+          <div
+            className="flex items-center gap-2 px-3 py-2"
+            style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
+          >
+            <FiLock style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
+            <Label
+              component="span"
+              sx={{ margin: 0, color: APP_COLORS.goldSoft }}
+            >
+              Informações Privadas
+            </Label>
+          </div>
+          <div className="flex-1 px-3 py-3">
+            <RichTextViewer
+              value={character.privateInformation}
+              emptyLabel={NOT_INFORMED}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

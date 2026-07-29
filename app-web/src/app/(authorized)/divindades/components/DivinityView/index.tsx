@@ -18,6 +18,7 @@ import {
   FiHome,
   FiImage,
   FiList,
+  FiLock,
   FiSmile,
   FiTag,
   FiTrendingUp,
@@ -26,6 +27,7 @@ import {
   FiWind,
   FiZap,
 } from 'react-icons/fi';
+import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
@@ -84,6 +86,7 @@ export const DivinityView = ({ divinityId, onNotFound }: DivinityViewProps) => {
     error,
   } = useGetEntityById<IDivinity>({ url: `/divinities/${divinityId}` });
 
+  const isGoogleUser = useIsGoogleUser();
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
   const [isSacredSymbolPreviewOpen, setIsSacredSymbolPreviewOpen] =
     useState(false);
@@ -452,6 +455,14 @@ export const DivinityView = ({ divinityId, onNotFound }: DivinityViewProps) => {
           icon={FiHelpCircle}
           value={divinity.curiosities}
         />
+
+        {!isGoogleUser && (
+          <DivinitySectionBox
+            label="Informações Privadas"
+            icon={FiLock}
+            value={divinity.privateInformation}
+          />
+        )}
       </div>
     </div>
   );

@@ -3,7 +3,8 @@
 import { useEffect } from 'react';
 import { Chip, CircularProgress } from '@mui/material';
 import { IconType } from 'react-icons';
-import { FiFileText } from 'react-icons/fi';
+import { FiFileText, FiLock } from 'react-icons/fi';
+import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { ReferenceImageBanner } from '@/shared/components/ReferenceImageBanner';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
@@ -54,6 +55,8 @@ export const EraView = ({ eraId, onNotFound }: EraViewProps) => {
     isError,
     error,
   } = useGetEntityById<IEra>({ url: `/eras/${eraId}` });
+
+  const isGoogleUser = useIsGoogleUser();
 
   useEffect(() => {
     if (!isError) {
@@ -138,6 +141,16 @@ export const EraView = ({ eraId, onNotFound }: EraViewProps) => {
             value={era.description}
           />
         </div>
+
+        {!isGoogleUser && (
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <EraSectionBox
+              label="Informações Privadas"
+              icon={FiLock}
+              value={era.privateInformation}
+            />
+          </div>
+        )}
       </div>
     </>
   );

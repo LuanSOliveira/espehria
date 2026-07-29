@@ -96,6 +96,7 @@ export const EventCreateForm = ({ onSaved }: EventCreateFormProps) => {
           ? String(eventDetail.endYear)
           : '',
       description: eventDetail.description ?? '',
+      privateInformation: eventDetail.privateInformation ?? '',
       tagIds: eventDetail.tags?.map((tag) => tag.id) ?? [],
       eraId: eventDetail.era?.id ?? '',
     });
@@ -259,6 +260,14 @@ export const EventCreateForm = ({ onSaved }: EventCreateFormProps) => {
           placeholder="Descreva o evento"
         />
       </div>
+
+      <FormRichTextInput
+        id="event-form-private-information"
+        name="privateInformation"
+        control={control}
+        label="Informações Privadas"
+        placeholder="Anotações internas não destinadas ao público"
+      />
 
       <PrimaryButton
         type="submit"

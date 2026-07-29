@@ -142,6 +142,7 @@ export const FamilyCreateForm = ({ onSaved }: FamilyCreateFormProps) => {
       classification: familyDetail.classification,
       tagIds: familyDetail.tags?.map((tag) => tag.id) ?? [],
       description: familyDetail.description ?? '',
+      privateInformation: familyDetail.privateInformation ?? '',
     });
 
     const positionedMembers: FamilyMemberDraft[] = (
@@ -434,6 +435,14 @@ export const FamilyCreateForm = ({ onSaved }: FamilyCreateFormProps) => {
         onPositionChange={handlePositionChange}
         onCreateRelationship={handleCreateRelationship}
         onRemoveRelationship={handleRemoveRelationship}
+      />
+
+      <FormRichTextInput
+        id="family-form-private-information"
+        name="privateInformation"
+        control={control}
+        label="Informações Privadas"
+        placeholder="Anotações internas não destinadas ao público"
       />
 
       <PrimaryButton

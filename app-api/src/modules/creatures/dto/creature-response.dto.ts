@@ -129,6 +129,11 @@ export class CreatureResponseDto {
   })
   scholarsCuriosity: string | null;
 
+  @ApiPropertyOptional({
+    description: 'Informações privadas da criatura (HTML)',
+  })
+  privateInformation: string | null;
+
   @ApiProperty({
     type: () => [TagResponseDto],
     description: 'Tags associadas à criatura',
@@ -172,6 +177,7 @@ export class CreatureResponseDto {
     dto.mythologyAndFolklore = creature.mythologyAndFolklore;
     dto.encounterRecord = creature.encounterRecord;
     dto.scholarsCuriosity = creature.scholarsCuriosity;
+    dto.privateInformation = creature.privateInformation;
     dto.tags = (creature.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),
     );

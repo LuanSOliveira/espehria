@@ -11,6 +11,7 @@ export const locationFormSchema = z.object({
       'Informe uma URL de imagem válida',
     ),
   description: z.string(),
+  privateInformation: z.string(),
   tagIds: z.array(z.string()).optional(),
   sections: z.array(
     z.object({
@@ -29,6 +30,7 @@ export const locationFormDefaultValues: LocationFormData = {
   type: '',
   referenceImageUrl: '',
   description: '',
+  privateInformation: '',
   tagIds: [],
   sections: [],
 };

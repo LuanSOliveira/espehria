@@ -16,6 +16,7 @@ export const characterFormSchema = z
     familyId: z.string().optional(),
     secondaryFamilyId: z.string().optional(),
     description: z.string(),
+    privateInformation: z.string(),
   })
   .refine(
     (data) =>
@@ -39,4 +40,5 @@ export const characterFormDefaultValues: CharacterFormData = {
   familyId: '',
   secondaryFamilyId: '',
   description: '',
+  privateInformation: '',
 };

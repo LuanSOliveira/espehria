@@ -91,6 +91,7 @@ export const OrganizationCreateForm = ({
       referenceImage: organizationDetail.referenceImage ?? '',
       tagIds: organizationDetail.tags?.map((tag) => tag.id) ?? [],
       description: organizationDetail.description ?? '',
+      privateInformation: organizationDetail.privateInformation ?? '',
     });
     setMembers(
       organizationDetail.members?.map((member) => ({
@@ -239,6 +240,14 @@ export const OrganizationCreateForm = ({
       />
 
       <OrganizationMemberField value={members} onChange={setMembers} />
+
+      <FormRichTextInput
+        id="organization-form-private-information"
+        name="privateInformation"
+        control={control}
+        label="Informações Privadas"
+        placeholder="Anotações internas não destinadas ao público"
+      />
 
       <PrimaryButton
         type="submit"

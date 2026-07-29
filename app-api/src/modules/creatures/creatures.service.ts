@@ -109,6 +109,7 @@ export class CreaturesService {
       mythologyAndFolklore: dto.mythologyAndFolklore ?? null,
       encounterRecord: dto.encounterRecord ?? null,
       scholarsCuriosity: dto.scholarsCuriosity ?? null,
+      privateInformation: dto.privateInformation ?? null,
       tags,
     });
 
@@ -262,6 +263,9 @@ export class CreaturesService {
     }
     if (dto.scholarsCuriosity !== undefined) {
       creature.scholarsCuriosity = dto.scholarsCuriosity;
+    }
+    if (dto.privateInformation !== undefined) {
+      creature.privateInformation = dto.privateInformation;
     }
     if (dto.tagIds !== undefined) {
       creature.tags =

@@ -45,6 +45,11 @@ export class EventResponseDto {
   description: string | null;
 
   @ApiPropertyOptional({
+    description: 'Informações privadas do evento em HTML',
+  })
+  privateInformation: string | null;
+
+  @ApiPropertyOptional({
     type: () => EraSummaryResponseDto,
     nullable: true,
     description: 'Era vinculada ao evento (nula quando não vinculado)',
@@ -77,6 +82,7 @@ export class EventResponseDto {
     dto.startYear = event.startYear;
     dto.endYear = event.endYear;
     dto.description = event.description;
+    dto.privateInformation = event.privateInformation;
     dto.era = EraSummaryResponseDto.fromEntity(event.era);
     dto.tags = (event.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
     dto.createdAt = event.createdAt;

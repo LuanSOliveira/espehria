@@ -48,6 +48,7 @@ export interface ICreature extends IEntity {
   mythologyAndFolklore?: string | null;
   encounterRecord?: string | null;
   scholarsCuriosity?: string | null;
+  privateInformation?: string | null;
   tags: ICreatureTag[];
 }
 

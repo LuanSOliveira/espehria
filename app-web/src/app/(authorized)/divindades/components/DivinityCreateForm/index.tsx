@@ -108,6 +108,7 @@ export const DivinityCreateForm = ({ onSaved }: DivinityCreateFormProps) => {
       commandments: divinityDetail.commandments ?? '',
       oaths: divinityDetail.oaths ?? '',
       curiosities: divinityDetail.curiosities ?? '',
+      privateInformation: divinityDetail.privateInformation ?? '',
     });
   }, [isEditMode, divinityDetail, reset]);
 
@@ -428,6 +429,14 @@ export const DivinityCreateForm = ({ onSaved }: DivinityCreateFormProps) => {
         control={control}
         label="Curiosidades"
         placeholder="Descreva as curiosidades"
+      />
+
+      <FormRichTextInput
+        id="divinity-form-private-information"
+        name="privateInformation"
+        control={control}
+        label="Informações Privadas"
+        placeholder="Anotações internas não destinadas ao público"
       />
 
       <PrimaryButton

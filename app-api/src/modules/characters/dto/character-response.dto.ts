@@ -31,6 +31,11 @@ export class CharacterResponseDto {
   })
   description: string | null;
 
+  @ApiPropertyOptional({
+    description: 'Informações privadas do personagem em HTML',
+  })
+  privateInformation: string | null;
+
   @ApiProperty({ description: 'Indica se o personagem está morto' })
   isDead: boolean;
 
@@ -82,6 +87,7 @@ export class CharacterResponseDto {
     dto.name = character.name;
     dto.referenceImage = character.referenceImage;
     dto.description = character.description;
+    dto.privateInformation = character.privateInformation;
     dto.isDead = character.isDead;
     dto.race = character.race
       ? RaceResponseDto.fromEntity(character.race)

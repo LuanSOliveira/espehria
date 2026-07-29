@@ -49,6 +49,7 @@ export interface IFamily extends IEntity {
   classification: FamilyClassification;
   tags: ITag[];
   description?: string | null;
+  privateInformation?: string | null;
   members: IFamilyMember[];
   relationships: IFamilyRelationship[];
   /**

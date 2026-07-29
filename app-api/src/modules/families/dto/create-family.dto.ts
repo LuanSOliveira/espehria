@@ -39,6 +39,14 @@ export class CreateFamilyDto {
   @IsString()
   description?: string;
 
+  @ApiPropertyOptional({
+    example: '<p>Anotações internas não destinadas ao público</p>',
+    description: 'Informações privadas da família (suporta HTML, opcional)',
+  })
+  @IsOptional()
+  @IsString()
+  privateInformation?: string;
+
   @ApiProperty({
     enum: FamilyClassification,
     description: 'Classificação da família',

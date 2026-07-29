@@ -41,6 +41,7 @@ export const creatureFormSchema = z.object({
   mythologyAndFolklore: z.string(),
   encounterRecord: z.string(),
   scholarsCuriosity: z.string(),
+  privateInformation: z.string(),
   tagIds: z.array(z.string()).optional(),
 });
 
@@ -77,5 +78,6 @@ export const creatureFormDefaultValues: CreatureFormData = {
   mythologyAndFolklore: '',
   encounterRecord: '',
   scholarsCuriosity: '',
+  privateInformation: '',
   tagIds: [],
 };

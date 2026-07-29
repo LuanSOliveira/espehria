@@ -18,6 +18,7 @@ export interface IEvent extends IEntity {
   startYear?: number | null;
   endYear?: number | null;
   description?: string | null;
+  privateInformation?: string | null;
   era: IEraSummary | null;
   tags: ITag[];
   createdAt: string;

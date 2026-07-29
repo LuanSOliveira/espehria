@@ -24,6 +24,7 @@ export interface IEra extends IEntity {
   name: string;
   referenceImageUrl?: string | null;
   description?: string | null;
+  privateInformation?: string | null;
   order: number;
   tags: ITag[];
   createdAt: string;

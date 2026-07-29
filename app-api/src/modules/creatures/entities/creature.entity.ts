@@ -122,4 +122,7 @@ export class Creature extends BaseEntity {
 
   @Column({ type: 'text', nullable: true, name: 'scholars_curiosity' })
   scholarsCuriosity!: string | null;
+
+  @Column({ type: 'text', nullable: true, name: 'private_information' })
+  privateInformation!: string | null;
 }

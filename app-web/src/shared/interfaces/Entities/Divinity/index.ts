@@ -41,6 +41,7 @@ export interface IDivinity extends IEntity {
   commandments?: string | null;
   oaths?: string | null;
   curiosities?: string | null;
+  privateInformation?: string | null;
   createdAt: string;
   updatedAt: string;
 }

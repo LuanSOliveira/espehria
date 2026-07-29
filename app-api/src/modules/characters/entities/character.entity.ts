@@ -24,6 +24,9 @@ export class Character extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   description!: string | null;
 
+  @Column({ type: 'text', nullable: true, name: 'private_information' })
+  privateInformation!: string | null;
+
   @ApiProperty()
   @Column({ type: 'boolean', default: false, name: 'is_dead' })
   isDead!: boolean;

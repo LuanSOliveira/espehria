@@ -27,6 +27,7 @@ export interface ILocation extends IEntity {
   type?: string | null;
   referenceImageUrl?: string | null;
   description?: string | null;
+  privateInformation?: string | null;
   tags: ITag[];
   pointsOfInterest: ILocationSummary[];
   pointsOfInterestOf: ILocationSummary[];

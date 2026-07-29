@@ -184,6 +184,14 @@ export class CreateCreatureDto {
   scholarsCuriosity?: string;
 
   @ApiPropertyOptional({
+    example: '<p>Anotações internas não destinadas ao público</p>',
+    description: 'Informações privadas da criatura (suporta HTML, opcional)',
+  })
+  @IsOptional()
+  @IsString()
+  privateInformation?: string;
+
+  @ApiPropertyOptional({
     type: [String],
     format: 'uuid',
     description: 'IDs das tags associadas à criatura',

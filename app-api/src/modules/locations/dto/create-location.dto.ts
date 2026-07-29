@@ -42,6 +42,14 @@ export class CreateLocationDto {
   description?: string;
 
   @ApiPropertyOptional({
+    example: '<p>Anotações internas não destinadas ao público</p>',
+    description: 'Informações privadas do local (suporta HTML, opcional)',
+  })
+  @IsOptional()
+  @IsString()
+  privateInformation?: string;
+
+  @ApiPropertyOptional({
     type: [String],
     format: 'uuid',
     description: 'IDs das tags associadas ao local (array de UUIDs válidos)',

@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { Box, Chip, CircularProgress } from '@mui/material';
 import { IconType } from 'react-icons';
-import { FiFileText, FiImage, FiTag, FiUser } from 'react-icons/fi';
+import { FiFileText, FiImage, FiLock, FiTag, FiUser } from 'react-icons/fi';
+import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
@@ -55,6 +56,7 @@ export const RaceView = ({ raceId, onNotFound }: RaceViewProps) => {
     error,
   } = useGetEntityById<IRace>({ url: `/races/${raceId}` });
 
+  const isGoogleUser = useIsGoogleUser();
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
 
   useEffect(() => {
@@ -206,6 +208,16 @@ export const RaceView = ({ raceId, onNotFound }: RaceViewProps) => {
           value={race.description}
         />
       </div>
+
+      {!isGoogleUser && (
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <RaceSectionBox
+            label="Informações Privadas"
+            icon={FiLock}
+            value={race.privateInformation}
+          />
+        </div>
+      )}
     </div>
   );
 };

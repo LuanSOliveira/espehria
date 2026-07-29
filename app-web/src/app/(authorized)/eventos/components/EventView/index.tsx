@@ -3,7 +3,8 @@
 import { useEffect } from 'react';
 import { Chip, CircularProgress } from '@mui/material';
 import { IconType } from 'react-icons';
-import { FiCalendar, FiClock, FiFileText } from 'react-icons/fi';
+import { FiCalendar, FiClock, FiFileText, FiLock } from 'react-icons/fi';
+import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { ReferenceImageBanner } from '@/shared/components/ReferenceImageBanner';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
@@ -54,6 +55,8 @@ export const EventView = ({ eventId, onNotFound }: EventViewProps) => {
     isError,
     error,
   } = useGetEntityById<IEvent>({ url: `/events/${eventId}` });
+
+  const isGoogleUser = useIsGoogleUser();
 
   useEffect(() => {
     if (!isError) {
@@ -187,6 +190,16 @@ export const EventView = ({ eventId, onNotFound }: EventViewProps) => {
             value={event.description}
           />
         </div>
+
+        {!isGoogleUser && (
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <EventSectionBox
+              label="Informações Privadas"
+              icon={FiLock}
+              value={event.privateInformation}
+            />
+          </div>
+        )}
       </div>
     </>
   );

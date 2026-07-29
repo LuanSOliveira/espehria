@@ -546,6 +546,7 @@ export class FamiliesService {
         name: dto.name,
         referenceImage: dto.referenceImage ?? null,
         description: dto.description ?? null,
+        privateInformation: dto.privateInformation ?? null,
         classification: dto.classification,
         tags,
         members,
@@ -638,6 +639,9 @@ export class FamiliesService {
       }
       if (dto.description !== undefined) {
         family.description = dto.description;
+      }
+      if (dto.privateInformation !== undefined) {
+        family.privateInformation = dto.privateInformation;
       }
       if (dto.classification !== undefined) {
         family.classification = dto.classification;

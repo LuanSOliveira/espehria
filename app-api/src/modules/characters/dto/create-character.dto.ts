@@ -35,6 +35,14 @@ export class CreateCharacterDto {
   description?: string;
 
   @ApiPropertyOptional({
+    example: '<p>Anotações internas não destinadas ao público</p>',
+    description: 'Informações privadas do personagem (suporta HTML, opcional)',
+  })
+  @IsOptional()
+  @IsString()
+  privateInformation?: string;
+
+  @ApiPropertyOptional({
     default: false,
     example: false,
     description: 'Indica se o personagem está morto (padrão: false)',

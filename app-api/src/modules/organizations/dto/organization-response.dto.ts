@@ -28,6 +28,11 @@ export class OrganizationResponseDto {
   })
   description: string | null;
 
+  @ApiPropertyOptional({
+    description: 'Informações privadas da organização em HTML',
+  })
+  privateInformation: string | null;
+
   @ApiProperty({
     type: () => [TagResponseDto],
     description: 'Tags associadas à organização',
@@ -52,6 +57,7 @@ export class OrganizationResponseDto {
     dto.name = organization.name;
     dto.referenceImage = organization.referenceImage;
     dto.description = organization.description;
+    dto.privateInformation = organization.privateInformation;
     dto.tags = (organization.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),
     );

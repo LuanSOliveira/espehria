@@ -83,6 +83,7 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
       referenceImageUrl: raceDetail.referenceImageUrl ?? '',
       physicalCharacteristics: raceDetail.physicalCharacteristics ?? '',
       description: raceDetail.description ?? '',
+      privateInformation: raceDetail.privateInformation ?? '',
       tagIds: raceDetail.tags?.map((tag) => tag.id) ?? [],
     });
   }, [isEditMode, raceDetail, reset]);
@@ -228,6 +229,14 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
           placeholder="Descreva a raça"
         />
       </div>
+
+      <FormRichTextInput
+        id="race-form-private-information"
+        name="privateInformation"
+        control={control}
+        label="Informações Privadas"
+        placeholder="Anotações internas não destinadas ao público"
+      />
 
       <PrimaryButton
         type="submit"

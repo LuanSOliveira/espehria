@@ -51,6 +51,14 @@ export class CreateRaceDto {
   description?: string;
 
   @ApiPropertyOptional({
+    example: '<p>Anotações internas não destinadas ao público</p>',
+    description: 'Informações privadas da raça (suporta HTML, opcional)',
+  })
+  @IsOptional()
+  @IsString()
+  privateInformation?: string;
+
+  @ApiPropertyOptional({
     type: [String],
     format: 'uuid',
     description: 'IDs das tags associadas à raça (array de UUIDs válidos)',

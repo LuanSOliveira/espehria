@@ -86,6 +86,7 @@ export class RacesService {
       referenceImageUrl: dto.referenceImageUrl ?? null,
       physicalCharacteristics: dto.physicalCharacteristics ?? null,
       description: dto.description ?? null,
+      privateInformation: dto.privateInformation ?? null,
       tags,
     });
 
@@ -166,6 +167,9 @@ export class RacesService {
     }
     if (dto.description !== undefined) {
       race.description = dto.description;
+    }
+    if (dto.privateInformation !== undefined) {
+      race.privateInformation = dto.privateInformation;
     }
     if (dto.tagIds !== undefined) {
       race.tags =

@@ -51,6 +51,14 @@ export class CreateEventDto {
   description?: string;
 
   @ApiPropertyOptional({
+    example: '<p>Anotações internas não destinadas ao público</p>',
+    description: 'Informações privadas do evento (suporta HTML, opcional)',
+  })
+  @IsOptional()
+  @IsString()
+  privateInformation?: string;
+
+  @ApiPropertyOptional({
     format: 'uuid',
     description: 'ID da era vinculada ao evento (opcional)',
     example: '550e8400-e29b-41d4-a716-446655440000',

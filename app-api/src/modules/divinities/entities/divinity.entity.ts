@@ -96,6 +96,9 @@ export class Divinity extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   curiosities!: string | null;
 
+  @Column({ type: 'text', nullable: true, name: 'private_information' })
+  privateInformation!: string | null;
+
   @ApiProperty({
     type: () => [Tag],
     description: 'Tags associadas à divindade',

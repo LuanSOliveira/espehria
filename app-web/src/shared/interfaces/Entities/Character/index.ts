@@ -27,6 +27,7 @@ export interface ICharacter extends IEntity {
   name: string;
   referenceImage?: string | null;
   description?: string | null;
+  privateInformation?: string | null;
   isDead: boolean;
   race?: ICharacterRace | null;
   tags: ITag[];

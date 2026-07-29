@@ -212,6 +212,14 @@ export class CreateDivinityDto {
   curiosities?: string;
 
   @ApiPropertyOptional({
+    example: '<p>Anotações internas não destinadas ao público</p>',
+    description: 'Informações privadas da divindade (suporta HTML, opcional)',
+  })
+  @IsOptional()
+  @IsString()
+  privateInformation?: string;
+
+  @ApiPropertyOptional({
     type: [String],
     format: 'uuid',
     description: 'IDs das tags associadas à divindade (array de UUIDs válidos)',

@@ -12,6 +12,7 @@ export const familyFormSchema = z.object({
   classification: z.string().min(1, 'Informe a classificação'),
   tagIds: z.array(z.string()).optional(),
   description: z.string(),
+  privateInformation: z.string(),
 });
 
 export type FamilyFormData = z.infer<typeof familyFormSchema>;
@@ -24,4 +25,5 @@ export const familyFormDefaultValues: FamilyFormData = {
   classification: '',
   tagIds: [],
   description: '',
+  privateInformation: '',
 };

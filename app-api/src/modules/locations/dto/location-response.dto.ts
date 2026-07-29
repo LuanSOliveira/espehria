@@ -29,6 +29,11 @@ export class LocationResponseDto {
   })
   description: string | null;
 
+  @ApiPropertyOptional({
+    description: 'Informações privadas do local (HTML)',
+  })
+  privateInformation: string | null;
+
   @ApiProperty({
     type: () => [TagResponseDto],
     description: 'Tags associadas ao local',
@@ -67,6 +72,7 @@ export class LocationResponseDto {
     dto.type = location.type;
     dto.referenceImageUrl = location.referenceImageUrl;
     dto.description = location.description;
+    dto.privateInformation = location.privateInformation;
     dto.tags = (location.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),
     );

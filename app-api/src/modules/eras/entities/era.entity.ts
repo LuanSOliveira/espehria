@@ -16,6 +16,9 @@ export class Era extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   description!: string | null;
 
+  @Column({ type: 'text', nullable: true, name: 'private_information' })
+  privateInformation!: string | null;
+
   @ApiProperty({ type: () => [Tag], description: 'Tags associadas à era' })
   @ManyToMany(() => Tag)
   @JoinTable({

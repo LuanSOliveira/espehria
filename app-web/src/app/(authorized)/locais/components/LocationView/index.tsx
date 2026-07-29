@@ -2,7 +2,8 @@
 
 import { useEffect } from 'react';
 import { Chip, CircularProgress } from '@mui/material';
-import { FiFileText, FiTag } from 'react-icons/fi';
+import { FiFileText, FiLock, FiTag } from 'react-icons/fi';
+import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { ReferenceImageBanner } from '@/shared/components/ReferenceImageBanner';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
@@ -30,6 +31,8 @@ export const LocationView = ({ locationId, onNotFound }: LocationViewProps) => {
     isError,
     error,
   } = useGetEntityById<ILocation>({ url: `/locations/${locationId}` });
+
+  const isGoogleUser = useIsGoogleUser();
 
   useEffect(() => {
     if (!isError) {
@@ -166,6 +169,26 @@ export const LocationView = ({ locationId, onNotFound }: LocationViewProps) => {
             )}
           </div>
         </div>
+
+        {!isGoogleUser && (
+          <div style={APP_CONTAINER_STYLES.detailSectionBox}>
+            <div
+              className="flex items-center gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
+            >
+              <FiLock style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
+              <Label
+                component="span"
+                sx={{ margin: 0, color: APP_COLORS.goldSoft }}
+              >
+                Informações Privadas
+              </Label>
+            </div>
+            <div className="px-3 py-3">
+              <RichTextViewer value={location.privateInformation} />
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

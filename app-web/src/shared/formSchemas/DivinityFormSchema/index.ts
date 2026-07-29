@@ -38,6 +38,7 @@ export const divinityFormSchema = z.object({
   commandments: z.string(),
   oaths: z.string(),
   curiosities: z.string(),
+  privateInformation: z.string(),
 });
 
 export type DivinityFormData = z.infer<typeof divinityFormSchema>;
@@ -71,4 +72,5 @@ export const divinityFormDefaultValues: DivinityFormData = {
   commandments: '',
   oaths: '',
   curiosities: '',
+  privateInformation: '',
 };

@@ -18,6 +18,9 @@ export class Family extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   description!: string | null;
 
+  @Column({ type: 'text', nullable: true, name: 'private_information' })
+  privateInformation!: string | null;
+
   @ApiProperty({ enum: FamilyClassification })
   @Column({ type: 'enum', enum: FamilyClassification })
   classification!: FamilyClassification;

@@ -10,6 +10,7 @@ export const eraFormSchema = z.object({
       'Informe uma URL de imagem válida',
     ),
   description: z.string(),
+  privateInformation: z.string(),
   tagIds: z.array(z.string()).optional(),
   order: z.string().min(1, 'Selecione a ordenação'),
 });
@@ -22,6 +23,7 @@ export const eraFormDefaultValues: EraFormData = {
   name: '',
   referenceImageUrl: '',
   description: '',
+  privateInformation: '',
   tagIds: [],
   order: '',
 };

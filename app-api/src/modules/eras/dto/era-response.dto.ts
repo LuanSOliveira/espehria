@@ -30,6 +30,11 @@ export class EraResponseDto {
   })
   description: string | null;
 
+  @ApiPropertyOptional({
+    description: 'Informações privadas da era em HTML',
+  })
+  privateInformation: string | null;
+
   @ApiProperty({
     description: 'Posição de ordenação da era',
     example: 1,
@@ -60,6 +65,7 @@ export class EraResponseDto {
     dto.name = era.name;
     dto.referenceImageUrl = era.referenceImageUrl;
     dto.description = era.description;
+    dto.privateInformation = era.privateInformation;
     dto.order = era.order;
     dto.tags = (era.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
     dto.createdAt = era.createdAt;

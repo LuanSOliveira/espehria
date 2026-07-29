@@ -91,6 +91,7 @@ export class ErasService {
         name: dto.name,
         referenceImageUrl: dto.referenceImageUrl ?? null,
         description: dto.description ?? null,
+        privateInformation: dto.privateInformation ?? null,
         order: dto.order,
         tags,
       });
@@ -161,6 +162,9 @@ export class ErasService {
       }
       if (dto.description !== undefined) {
         era.description = dto.description;
+      }
+      if (dto.privateInformation !== undefined) {
+        era.privateInformation = dto.privateInformation;
       }
       if (dto.tagIds !== undefined) {
         era.tags =

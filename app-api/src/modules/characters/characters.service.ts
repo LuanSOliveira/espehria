@@ -166,6 +166,7 @@ export class CharactersService {
       name: dto.name,
       referenceImage: dto.referenceImage ?? null,
       description: dto.description ?? null,
+      privateInformation: dto.privateInformation ?? null,
       isDead: dto.isDead ?? false,
       race,
       tags,
@@ -249,6 +250,9 @@ export class CharactersService {
       }
       if (dto.description !== undefined) {
         character.description = dto.description;
+      }
+      if (dto.privateInformation !== undefined) {
+        character.privateInformation = dto.privateInformation;
       }
       if (dto.isDead !== undefined) {
         character.isDead = dto.isDead;

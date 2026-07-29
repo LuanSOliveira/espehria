@@ -111,6 +111,7 @@ export const CharacterCreateForm = ({ onSaved }: CharacterCreateFormProps) => {
       familyId: characterDetail.family?.id ?? '',
       secondaryFamilyId: characterDetail.secondaryFamily?.id ?? '',
       description: characterDetail.description ?? '',
+      privateInformation: characterDetail.privateInformation ?? '',
     });
   }, [isEditMode, characterDetail, reset]);
 
@@ -279,6 +280,14 @@ export const CharacterCreateForm = ({ onSaved }: CharacterCreateFormProps) => {
         control={control}
         label="Descrição"
         placeholder="Descreva o personagem"
+      />
+
+      <FormRichTextInput
+        id="character-form-private-information"
+        name="privateInformation"
+        control={control}
+        label="Informações Privadas"
+        placeholder="Anotações internas não destinadas ao público"
       />
 
       <PrimaryButton

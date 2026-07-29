@@ -83,6 +83,7 @@ export const EraCreateForm = ({ onSaved }: EraCreateFormProps) => {
       name: eraDetail.name,
       referenceImageUrl: eraDetail.referenceImageUrl ?? '',
       description: eraDetail.description ?? '',
+      privateInformation: eraDetail.privateInformation ?? '',
       tagIds: eraDetail.tags?.map((tag) => tag.id) ?? [],
       order: String(eraDetail.order),
     });
@@ -221,6 +222,14 @@ export const EraCreateForm = ({ onSaved }: EraCreateFormProps) => {
           placeholder="Descreva a era"
         />
       </div>
+
+      <FormRichTextInput
+        id="era-form-private-information"
+        name="privateInformation"
+        control={control}
+        label="Informações Privadas"
+        placeholder="Anotações internas não destinadas ao público"
+      />
 
       <PrimaryButton
         type="submit"
