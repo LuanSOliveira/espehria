@@ -204,6 +204,16 @@ export class LocationsService {
           : [];
     }
     if (dto.sections !== undefined) {
+      // Reatribuir `location.sections` inteiro e deixar o cascade save cuidar da
+      // remoção via orphanedRowAction falha com violação de not-null: o TypeORM
+      // tenta primeiro um UPDATE setando "location_id" = NULL nas linhas órfãs
+      // antes de excluí-las, o que quebra a coluna NOT NULL (mesmo problema e
+      // mesma solução usada em CharactersService/OrganizationsService/
+      // FamiliesService). Por isso as seções antigas são removidas explicitamente
+      // pelo repositório antes de atribuir as novas.
+      if (location.sections.length > 0) {
+        await this.locationSectionsRepository.remove(location.sections);
+      }
       location.sections =
         dto.sections.length > 0 ? this.buildSections(dto.sections) : [];
     }
