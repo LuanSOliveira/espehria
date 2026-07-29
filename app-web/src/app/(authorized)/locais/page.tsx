@@ -6,6 +6,7 @@ import { PageContainer } from '@/shared/components/Containers';
 import { ConfirmationModal, FormModal, ViewModal } from '@/shared/components/Modals';
 import { Title } from '@/shared/components/Texts';
 import { PrimaryButton } from '@/shared/components/Buttons';
+import { useIsGoogleUser } from '@/hooks/Auth';
 import { useDeleteEntity, useGetEntityList } from '@/hooks/Queries';
 import { ILocationListFilters, ILocationListItem } from '@/shared/interfaces';
 import { APP_DEFAULT_PAGE_SIZE } from '@/shared/constants';
@@ -17,6 +18,7 @@ import { LocationsFilterSection } from './components/LocationsFilterSection';
 import { LocationView } from './components/LocationView';
 
 export default function LocationsPage() {
+  const isGoogleUser = useIsGoogleUser();
   const [nameInput, setNameInput] = useState('');
   const [typeInput, setTypeInput] = useState('');
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -99,13 +101,15 @@ export default function LocationsPage() {
         <Title component="h1" sx={{ textAlign: 'left' }}>
           Locais
         </Title>
-        <PrimaryButton
-          type="button"
-          onClick={handleOpenCreateModal}
-          sx={{ width: 'auto', padding: '10px 20px' }}
-        >
-          Novo
-        </PrimaryButton>
+        {!isGoogleUser && (
+          <PrimaryButton
+            type="button"
+            onClick={handleOpenCreateModal}
+            sx={{ width: 'auto', padding: '10px 20px' }}
+          >
+            Novo
+          </PrimaryButton>
+        )}
       </div>
 
       <LocationsFilterSection

@@ -90,6 +90,11 @@ export const useMeQuery = () => {
   });
 };
 
+export const useIsGoogleUser = () => {
+  const { data } = useMeQuery();
+  return data?.provider === 'google';
+};
+
 export const useLogout = () => {
   const router = useRouter();
   const queryClient = useQueryClient();

@@ -1,6 +1,7 @@
 import { Box, IconButton, TableCell, TableRow, Tooltip } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText } from '@/shared/components/Texts';
 import { ITag } from '@/shared/interfaces';
 import { APP_COLORS } from '@/shared/constants';
@@ -12,6 +13,8 @@ export interface TagsListItemProps {
 }
 
 export const TagsListItem = ({ tag, onEdit, onDelete }: TagsListItemProps) => {
+  const isGoogleUser = useIsGoogleUser();
+
   return (
     <TableRow
       sx={{
@@ -37,24 +40,28 @@ export const TagsListItem = ({ tag, onEdit, onDelete }: TagsListItemProps) => {
         </div>
       </TableCell>
       <TableCell align="right" sx={{ borderColor: APP_COLORS.gold }}>
-        <Tooltip title="Editar">
-          <IconButton
-            aria-label="Editar"
-            onClick={() => onEdit(tag)}
-            sx={{ color: APP_COLORS.textBrownDark }}
-          >
-            <FiEdit2 />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Excluir">
-          <IconButton
-            aria-label="Excluir"
-            onClick={() => onDelete(tag)}
-            sx={{ color: APP_COLORS.textBrownDark }}
-          >
-            <FiTrash2 />
-          </IconButton>
-        </Tooltip>
+        {!isGoogleUser && (
+          <>
+            <Tooltip title="Editar">
+              <IconButton
+                aria-label="Editar"
+                onClick={() => onEdit(tag)}
+                sx={{ color: APP_COLORS.textBrownDark }}
+              >
+                <FiEdit2 />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Excluir">
+              <IconButton
+                aria-label="Excluir"
+                onClick={() => onDelete(tag)}
+                sx={{ color: APP_COLORS.textBrownDark }}
+              >
+                <FiTrash2 />
+              </IconButton>
+            </Tooltip>
+          </>
+        )}
       </TableCell>
     </TableRow>
   );

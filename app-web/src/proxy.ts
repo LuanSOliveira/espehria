@@ -31,6 +31,14 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  if (pathname === APP_ROUTES.private.users) {
+    const decoded = decodeToken(token);
+    if (decoded.provider === 'google') {
+      const homeUrl = new URL(APP_ROUTES.private.home, request.url);
+      return NextResponse.redirect(homeUrl);
+    }
+  }
+
   return NextResponse.next();
 }
 

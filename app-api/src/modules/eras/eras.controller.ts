@@ -24,7 +24,9 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { GoogleAccess } from '../auth/decorators/google-access.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { GoogleAccessGuard } from '../auth/guards/google-access.guard';
 import { CreateEraDto } from './dto/create-era.dto';
 import { UpdateEraDto } from './dto/update-era.dto';
 import { FindErasQueryDto } from './dto/find-eras-query.dto';
@@ -36,7 +38,8 @@ import { ErasService } from './eras.service';
 
 @ApiTags('eras')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, GoogleAccessGuard)
+@GoogleAccess('read-only')
 @Controller('eras')
 export class ErasController {
   constructor(private readonly erasService: ErasService) {}

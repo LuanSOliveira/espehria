@@ -6,7 +6,9 @@ import { usePathname } from 'next/navigation';
 import { Divider } from '@mui/material';
 import { DefaultText } from '@/shared/components/Texts';
 import { useAccessibleFontSize } from '@/hooks/FontAccessibility';
+import { useIsGoogleUser } from '@/hooks/Auth';
 import { APP_BUTTON_BASE_FONT_SIZE, APP_COLORS } from '@/shared/constants';
+import { APP_ROUTES } from '@/shared/routes';
 import { NAV_SECTIONS } from './data';
 import { SidebarSectionAccordion } from './components/SidebarSectionAccordion';
 
@@ -27,6 +29,7 @@ const getSectionForPathname = (pathname: string): string | null => {
 export const Sidebar = ({ isOpen }: SidebarProps) => {
   const pathname = usePathname();
   const iconFontSize = useAccessibleFontSize(APP_BUTTON_BASE_FONT_SIZE.icon);
+  const isGoogleUser = useIsGoogleUser();
   const [expandedSection, setExpandedSection] = useState<string | null>(() =>
     getSectionForPathname(pathname),
   );
@@ -41,6 +44,15 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
     );
   };
 
+  const navSections = isGoogleUser
+    ? NAV_SECTIONS.map((section) => ({
+        ...section,
+        items: section.items.filter(
+          (item) => item.href !== APP_ROUTES.private.users,
+        ),
+      }))
+    : NAV_SECTIONS;
+
   return (
     <aside
       className={`h-full shrink-0 overflow-hidden border-r-2 border-gold transition-[width,min-width] duration-250 ease-in-out ${
@@ -51,7 +63,7 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
       }}
     >
       <nav className="flex h-full w-60 flex-col gap-1 overflow-y-auto py-4 px-3">
-        {NAV_SECTIONS.map((section, sectionIndex) => {
+        {navSections.map((section, sectionIndex) => {
           const sectionTitle = section.title;
 
           return (

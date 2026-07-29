@@ -39,6 +39,8 @@ integração com API, formulário, rotas. Você não escreve nada em `app-api/`.
 - `web-cores` — padrão para adicionar uma nova cor ao design system.
 - `web-utilitarios` — padrão para criar funções utilitárias reaproveitáveis.
 - `web-icones` — garante que todo ícone usado venha de `react-icons`.
+- `web-permissao-google-readonly` — oculta ações de criar/editar/excluir (mantendo só
+  visualizar) para usuários `provider: 'google'`, via `useIsGoogleUser`.
 
 ## Processo
 
@@ -59,8 +61,10 @@ integração com API, formulário, rotas. Você não escreve nada em `app-api/`.
 4. **Componentes** (se a seção indicar necessidade):
    - Invoque a skill `web-componentes` para decidir corretamente onde cada componente
      deve viver (genérico vs. específico de página) e como estruturá-lo.
-   - Se algum dos componentes for uma tabela/lista de entidades, invoque também a
-     skill `web-tabela-listagem`.
+   - Se algum dos componentes for uma tabela/lista de entidades com ações de
+     criar/editar/excluir, invoque também as skills `web-tabela-listagem` e
+     `web-permissao-google-readonly` (esta última oculta as ações para usuários Google,
+     a menos que a task peça outro comportamento).
    - Se a página tiver campos de filtro/busca para a listagem, invoque também a skill
      `web-secao-filtros` — os inputs de filtro sempre vão em um componente
      `<Entidade>sFilterSection` específico da página, nunca inline em `page.tsx`.

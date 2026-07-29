@@ -33,6 +33,10 @@ do modal é a **página**, não o formulário:
 O formulário recebe só um `onSaved: () => void` como prop — ele não sabe fechar o modal
 sozinho, apenas avisa a página quando terminou com sucesso.
 
+O botão que abre este modal em modo criação (`Novo`, em `page.tsx`) deve ficar oculto
+para usuários `provider: 'google'` — use a skill `web-permissao-google-readonly`, a
+menos que a task peça outro comportamento.
+
 ### Largura do modal e organização dos campos (formulários com muitos campos)
 
 `FormModal` aceita uma prop `size?: 'default' | 'wide'` (default: `'default'`, modal

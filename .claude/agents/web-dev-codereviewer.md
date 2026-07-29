@@ -76,6 +76,11 @@ diretamente — apenas analisa e documenta os achados.
      específico da página (padrão `web-secao-filtros`), apresentacional — recebendo
      valores/setters via props, sem estado ou chamada de API própria — em vez de um
      `<form>` de filtro inline em `page.tsx`.
+   - **Acesso Google**: se a página tem listagem com ações de criar/editar/excluir,
+     confirme que o botão "Novo" (`page.tsx`) e as ações de editar/excluir (dentro do
+     próprio `ListItem`, via `useIsGoogleUser`) ficam ocultos para usuários
+     `provider: 'google'`, salvo indicação explícita em contrário na task — ver skill
+     `web-permissao-google-readonly`.
 
 4. Para cada problema encontrado, registre: arquivo, trecho relevante (linha ou
    snippet) e uma sugestão objetiva de correção — sem aplicá-la.

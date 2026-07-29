@@ -1,6 +1,7 @@
 import { IconButton, TableCell, TableRow, Tooltip } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { FiEdit2, FiEye, FiTrash2 } from 'react-icons/fi';
+import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText } from '@/shared/components/Texts';
 import { ImageAvatarPreview } from '@/shared/components/ImageAvatarPreview';
 import { TagBadge } from '@/shared/components/TagBadge';
@@ -20,6 +21,8 @@ export const RacesListItem = ({
   onEdit,
   onDelete,
 }: RacesListItemProps) => {
+  const isGoogleUser = useIsGoogleUser();
+
   return (
     <TableRow
       sx={{
@@ -53,24 +56,28 @@ export const RacesListItem = ({
             <FiEye />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Editar">
-          <IconButton
-            aria-label="Editar"
-            onClick={() => onEdit(race)}
-            sx={{ color: APP_COLORS.textBrownDark }}
-          >
-            <FiEdit2 />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Excluir">
-          <IconButton
-            aria-label="Excluir"
-            onClick={() => onDelete(race)}
-            sx={{ color: APP_COLORS.textBrownDark }}
-          >
-            <FiTrash2 />
-          </IconButton>
-        </Tooltip>
+        {!isGoogleUser && (
+          <>
+            <Tooltip title="Editar">
+              <IconButton
+                aria-label="Editar"
+                onClick={() => onEdit(race)}
+                sx={{ color: APP_COLORS.textBrownDark }}
+              >
+                <FiEdit2 />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Excluir">
+              <IconButton
+                aria-label="Excluir"
+                onClick={() => onDelete(race)}
+                sx={{ color: APP_COLORS.textBrownDark }}
+              >
+                <FiTrash2 />
+              </IconButton>
+            </Tooltip>
+          </>
+        )}
       </TableCell>
     </TableRow>
   );

@@ -10,6 +10,7 @@ import {
 } from '@/shared/components/Modals';
 import { Title } from '@/shared/components/Texts';
 import { PrimaryButton } from '@/shared/components/Buttons';
+import { useIsGoogleUser } from '@/hooks/Auth';
 import {
   useDeleteEntity,
   useErasAllQuery,
@@ -29,6 +30,7 @@ import { EventsFilterSection } from './components/EventsFilterSection';
 import { EventView } from './components/EventView';
 
 export default function EventsPage() {
+  const isGoogleUser = useIsGoogleUser();
   const [nameInput, setNameInput] = useState('');
   const [startYearInput, setStartYearInput] = useState('');
   const [endYearInput, setEndYearInput] = useState('');
@@ -117,13 +119,15 @@ export default function EventsPage() {
         <Title component="h1" sx={{ textAlign: 'left' }}>
           Eventos
         </Title>
-        <PrimaryButton
-          type="button"
-          onClick={handleOpenCreateModal}
-          sx={{ width: 'auto', padding: '10px 20px' }}
-        >
-          Novo
-        </PrimaryButton>
+        {!isGoogleUser && (
+          <PrimaryButton
+            type="button"
+            onClick={handleOpenCreateModal}
+            sx={{ width: 'auto', padding: '10px 20px' }}
+          >
+            Novo
+          </PrimaryButton>
+        )}
       </div>
 
       <EventsFilterSection

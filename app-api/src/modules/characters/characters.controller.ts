@@ -23,7 +23,9 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { GoogleAccess } from '../auth/decorators/google-access.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { GoogleAccessGuard } from '../auth/guards/google-access.guard';
 import { CreateCharacterDto } from './dto/create-character.dto';
 import { UpdateCharacterDto } from './dto/update-character.dto';
 import { FindCharactersQueryDto } from './dto/find-characters-query.dto';
@@ -34,7 +36,8 @@ import { CharactersService } from './characters.service';
 
 @ApiTags('characters')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, GoogleAccessGuard)
+@GoogleAccess('read-only')
 @Controller('characters')
 export class CharactersController {
   constructor(private readonly charactersService: CharactersService) {}

@@ -24,7 +24,9 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { GoogleAccess } from '../auth/decorators/google-access.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { GoogleAccessGuard } from '../auth/guards/google-access.guard';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { FindLocationsQueryDto } from './dto/find-locations-query.dto';
@@ -35,7 +37,8 @@ import { LocationsService } from './locations.service';
 
 @ApiTags('locations')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, GoogleAccessGuard)
+@GoogleAccess('read-only')
 @Controller('locations')
 export class LocationsController {
   constructor(private readonly locationsService: LocationsService) {}

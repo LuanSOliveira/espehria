@@ -23,7 +23,9 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { GoogleAccess } from '../auth/decorators/google-access.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { GoogleAccessGuard } from '../auth/guards/google-access.guard';
 import { CreateFamilyDto } from './dto/create-family.dto';
 import { UpdateFamilyDto } from './dto/update-family.dto';
 import { FindFamiliesQueryDto } from './dto/find-families-query.dto';
@@ -34,7 +36,8 @@ import { FamiliesService } from './families.service';
 
 @ApiTags('families')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, GoogleAccessGuard)
+@GoogleAccess('read-only')
 @Controller('families')
 export class FamiliesController {
   constructor(private readonly familiesService: FamiliesService) {}

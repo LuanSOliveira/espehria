@@ -10,6 +10,7 @@ import {
 } from '@/shared/components/Modals';
 import { Title } from '@/shared/components/Texts';
 import { PrimaryButton } from '@/shared/components/Buttons';
+import { useIsGoogleUser } from '@/hooks/Auth';
 import { useDeleteEntity, useGetEntityList } from '@/hooks/Queries';
 import { ICharacterListFilters, ICharacterListItem } from '@/shared/interfaces';
 import { APP_DEFAULT_PAGE_SIZE } from '@/shared/constants';
@@ -21,6 +22,7 @@ import { CharactersFilterSection } from './components/CharactersFilterSection';
 import { CharacterView } from './components/CharacterView';
 
 export default function CharactersPage() {
+  const isGoogleUser = useIsGoogleUser();
   const [nameInput, setNameInput] = useState('');
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [characterPendingDelete, setCharacterPendingDelete] =
@@ -101,13 +103,15 @@ export default function CharactersPage() {
         <Title component="h1" sx={{ textAlign: 'left' }}>
           Personagens
         </Title>
-        <PrimaryButton
-          type="button"
-          onClick={handleOpenCreateModal}
-          sx={{ width: 'auto', padding: '10px 20px' }}
-        >
-          Novo
-        </PrimaryButton>
+        {!isGoogleUser && (
+          <PrimaryButton
+            type="button"
+            onClick={handleOpenCreateModal}
+            sx={{ width: 'auto', padding: '10px 20px' }}
+          >
+            Novo
+          </PrimaryButton>
+        )}
       </div>
 
       <CharactersFilterSection

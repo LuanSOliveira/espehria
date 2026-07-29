@@ -64,6 +64,10 @@ app/(authorized)/<pagina>/components/
 - Ações (editar, excluir, etc.) em `IconButton` + `Tooltip` da MUI, com `aria-label`
   descritivo em pt-BR (acessibilidade — leitor de tela precisa do rótulo já que o
   ícone sozinho não é texto).
+- As ações de editar/excluir (nunca "visualizar") devem ficar ocultas para usuários
+  `provider: 'google'` — use a skill `web-permissao-google-readonly` (checagem feita
+  dentro do próprio `ListItem` via `useIsGoogleUser`, não como prop opcional vinda do
+  `List`/`page.tsx`), a menos que a task peça outro comportamento.
 - Hover suave para indicar a linha em evidência: a `TableRow` sempre leva um `sx` com
   transição e fundo de destaque em cima de `APP_COLORS.gold` via `alpha` (de
   `@mui/material/styles`), nunca uma cor hex direta:

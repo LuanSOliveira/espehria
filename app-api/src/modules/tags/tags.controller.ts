@@ -24,7 +24,9 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { GoogleAccess } from '../auth/decorators/google-access.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { GoogleAccessGuard } from '../auth/guards/google-access.guard';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { FindTagsQueryDto } from './dto/find-tags-query.dto';
@@ -34,7 +36,8 @@ import { TagsService } from './tags.service';
 
 @ApiTags('tags')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, GoogleAccessGuard)
+@GoogleAccess('read-only')
 @Controller('tags')
 export class TagsController {
   constructor(private readonly tagsService: TagsService) {}

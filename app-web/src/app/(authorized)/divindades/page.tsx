@@ -10,6 +10,7 @@ import {
 } from '@/shared/components/Modals';
 import { Title } from '@/shared/components/Texts';
 import { PrimaryButton } from '@/shared/components/Buttons';
+import { useIsGoogleUser } from '@/hooks/Auth';
 import {
   useDeleteEntity,
   useDivinityCategoriesQuery,
@@ -29,6 +30,7 @@ import { DivinitiesFilterSection } from './components/DivinitiesFilterSection';
 import { DivinityView } from './components/DivinityView';
 
 export default function DivinitiesPage() {
+  const isGoogleUser = useIsGoogleUser();
   const [nameInput, setNameInput] = useState('');
   const [categoryFilter, setCategoryFilter] =
     useState<IDivinityCategory | null>(null);
@@ -114,13 +116,15 @@ export default function DivinitiesPage() {
         <Title component="h1" sx={{ textAlign: 'left' }}>
           Divindades
         </Title>
-        <PrimaryButton
-          type="button"
-          onClick={handleOpenCreateModal}
-          sx={{ width: 'auto', padding: '10px 20px' }}
-        >
-          Novo
-        </PrimaryButton>
+        {!isGoogleUser && (
+          <PrimaryButton
+            type="button"
+            onClick={handleOpenCreateModal}
+            sx={{ width: 'auto', padding: '10px 20px' }}
+          >
+            Novo
+          </PrimaryButton>
+        )}
       </div>
 
       <DivinitiesFilterSection

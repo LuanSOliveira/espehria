@@ -6,6 +6,7 @@ import { PageContainer } from '@/shared/components/Containers';
 import { ConfirmationModal, FormModal, ViewModal } from '@/shared/components/Modals';
 import { Title } from '@/shared/components/Texts';
 import { PrimaryButton } from '@/shared/components/Buttons';
+import { useIsGoogleUser } from '@/hooks/Auth';
 import {
   useCreatureCategoriesQuery,
   useDeleteEntity,
@@ -25,6 +26,7 @@ import { CreaturesFilterSection } from './components/CreaturesFilterSection';
 import { CreatureView } from './components/CreatureView';
 
 export default function CreaturesPage() {
+  const isGoogleUser = useIsGoogleUser();
   const [nameInput, setNameInput] = useState('');
   const [categoryFilter, setCategoryFilter] =
     useState<ICreatureCategory | null>(null);
@@ -110,13 +112,15 @@ export default function CreaturesPage() {
         <Title component="h1" sx={{ textAlign: 'left' }}>
           Criaturas
         </Title>
-        <PrimaryButton
-          type="button"
-          onClick={handleOpenCreateModal}
-          sx={{ width: 'auto', padding: '10px 20px' }}
-        >
-          Novo
-        </PrimaryButton>
+        {!isGoogleUser && (
+          <PrimaryButton
+            type="button"
+            onClick={handleOpenCreateModal}
+            sx={{ width: 'auto', padding: '10px 20px' }}
+          >
+            Novo
+          </PrimaryButton>
+        )}
       </div>
 
       <CreaturesFilterSection

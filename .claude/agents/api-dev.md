@@ -30,6 +30,9 @@ documentação Swagger detalhada nem toca em `app-web/`.
   controller, module), incluindo paginação, guards e convenção `fromEntity`.
 - `api-migration` — padrão de migration TypeORM (nome de arquivo/classe, estilo de
   `up()`/`down()`, como refletir exatamente os campos e relacionamentos da entidade).
+- `api-permissao-google-readonly` — restringe usuários `provider: 'google'` a acesso
+  somente leitura (ou bloqueado, para recursos de gerenciamento) em controllers CRUD,
+  via `GoogleAccessGuard`.
 
 ## Processo
 
@@ -58,7 +61,9 @@ documentação Swagger detalhada nem toca em `app-web/`.
      negócio necessárias para cada endpoint.
    - Controller (`*.controller.ts`) com as rotas exatas especificadas (método +
      caminho), guards de autenticação quando a task indicar que o endpoint é
-     protegido.
+     protegido. Se o controller expuser CRUD completo, invoque também a skill
+     `api-permissao-google-readonly` e aplique `GoogleAccessGuard` + `@GoogleAccess(...)`
+     — a menos que a task especifique outro nível de acesso para usuários Google.
    - Module (`*.module.ts`) registrando controller, service e
      `TypeOrmModule.forFeature`; se for um módulo novo, garanta que ele seja importado
      em `app.module.ts` (ou módulo pai relevante).

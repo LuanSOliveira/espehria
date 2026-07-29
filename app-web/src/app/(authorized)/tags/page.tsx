@@ -6,6 +6,7 @@ import { PageContainer } from '@/shared/components/Containers';
 import { ConfirmationModal, FormModal } from '@/shared/components/Modals';
 import { Title } from '@/shared/components/Texts';
 import { PrimaryButton } from '@/shared/components/Buttons';
+import { useIsGoogleUser } from '@/hooks/Auth';
 import { useDeleteEntity, useGetEntityList } from '@/hooks/Queries';
 import { ITag, ITagListFilters } from '@/shared/interfaces';
 import { APP_DEFAULT_PAGE_SIZE } from '@/shared/constants';
@@ -16,6 +17,7 @@ import { TagCreateForm } from './components/TagCreateForm';
 import { TagsFilterSection } from './components/TagsFilterSection';
 
 export default function TagsPage() {
+  const isGoogleUser = useIsGoogleUser();
   const [nameInput, setNameInput] = useState('');
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [tagPendingDelete, setTagPendingDelete] = useState<ITag | null>(null);
@@ -85,13 +87,15 @@ export default function TagsPage() {
         <Title component="h1" sx={{ textAlign: 'left' }}>
           Tags
         </Title>
-        <PrimaryButton
-          type="button"
-          onClick={handleOpenCreateModal}
-          sx={{ width: 'auto', padding: '10px 20px' }}
-        >
-          Novo
-        </PrimaryButton>
+        {!isGoogleUser && (
+          <PrimaryButton
+            type="button"
+            onClick={handleOpenCreateModal}
+            sx={{ width: 'auto', padding: '10px 20px' }}
+          >
+            Novo
+          </PrimaryButton>
+        )}
       </div>
 
       <TagsFilterSection

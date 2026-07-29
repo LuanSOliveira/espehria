@@ -10,6 +10,7 @@ import {
 } from '@/shared/components/Modals';
 import { Title } from '@/shared/components/Texts';
 import { PrimaryButton } from '@/shared/components/Buttons';
+import { useIsGoogleUser } from '@/hooks/Auth';
 import { useDeleteEntity, useGetEntityList } from '@/hooks/Queries';
 import {
   IOrganizationListFilters,
@@ -24,6 +25,7 @@ import { OrganizationsFilterSection } from './components/OrganizationsFilterSect
 import { OrganizationView } from './components/OrganizationView';
 
 export default function OrganizationsPage() {
+  const isGoogleUser = useIsGoogleUser();
   const [nameInput, setNameInput] = useState('');
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [organizationPendingDelete, setOrganizationPendingDelete] =
@@ -107,13 +109,15 @@ export default function OrganizationsPage() {
         <Title component="h1" sx={{ textAlign: 'left' }}>
           Organizações
         </Title>
-        <PrimaryButton
-          type="button"
-          onClick={handleOpenCreateModal}
-          sx={{ width: 'auto', padding: '10px 20px' }}
-        >
-          Novo
-        </PrimaryButton>
+        {!isGoogleUser && (
+          <PrimaryButton
+            type="button"
+            onClick={handleOpenCreateModal}
+            sx={{ width: 'auto', padding: '10px 20px' }}
+          >
+            Novo
+          </PrimaryButton>
+        )}
       </div>
 
       <OrganizationsFilterSection

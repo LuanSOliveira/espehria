@@ -61,6 +61,10 @@ nunca corrige código diretamente — apenas analisa e documenta os achados.
      usuário validadas antes de uso; rotas que deveriam ser protegidas usam
      `@UseGuards(JwtAuthGuard)`; nenhuma query concatenando input do usuário sem
      parametrização.
+   - **Acesso Google**: se o controller expõe CRUD completo, confirme que usa
+     `@UseGuards(JwtAuthGuard, GoogleAccessGuard)` + `@GoogleAccess('read-only')` (ou
+     `'blocked'` para recursos de gerenciamento restrito), salvo indicação explícita em
+     contrário na task — ver skill `api-permissao-google-readonly`.
    - **Consistência migration ↔ entidade**: cada campo/relacionamento/tipo/constraint
      da entidade tem correspondência exata na migration (nome de coluna, tipo,
      nullable, chave estrangeira, índice), e o `down()` reverte corretamente o `up()`.

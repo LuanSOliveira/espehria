@@ -48,6 +48,10 @@ nunca cria migrations de verdade, nunca edita entidades ou controllers — apena
      `synchronize` fica `false`).
    - Quais controllers/endpoints são necessários (método + rota) e quais DTOs
      (request/response) eles exigem.
+   - Se o controller expuser CRUD completo, o nível de acesso para usuários
+     `provider: 'google'` (padrão: `read-only`; use `blocked` para recursos de
+     gerenciamento restrito, ou outro nível se a demanda pedir explicitamente) — ver
+     skill `api-permissao-google-readonly`.
    - O que a documentação Swagger deve cobrir (novos `@ApiProperty`, respostas,
      tags, etc.).
 
@@ -78,6 +82,7 @@ nunca cria migrations de verdade, nunca edita entidades ou controllers — apena
    #### Controller
    - Endpoints: [MÉTODO /rota, ...]
    - DTOs: [nomes]
+   - Acesso Google: [read-only (padrão) / blocked / outro — justifique se não for o padrão]
 
    ### 2. api-dev-doc
    - Depende da etapa 1

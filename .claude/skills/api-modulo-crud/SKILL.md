@@ -152,6 +152,9 @@ export class NomeController {
 - `@ApiTags`/`@ApiOperation`/`@ApiResponse` completos e finos ficam por conta da etapa
   `api-dev-doc` — aqui inclua só o mínimo estrutural (`@ApiTags`, `@ApiBearerAuth`
   quando protegido) necessário para o módulo funcionar.
+- Se o módulo expõe CRUD completo (create/list/findOne/update/remove), aplique também a
+  skill `api-permissao-google-readonly` para restringir usuários `provider: 'google'` a
+  acesso somente leitura por padrão — a menos que a task peça outro comportamento.
 
 ## 5. Module
 

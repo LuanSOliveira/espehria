@@ -10,6 +10,7 @@ import {
 } from '@/shared/components/Modals';
 import { Title } from '@/shared/components/Texts';
 import { PrimaryButton } from '@/shared/components/Buttons';
+import { useIsGoogleUser } from '@/hooks/Auth';
 import {
   useDeleteEntity,
   useGetEntityList,
@@ -29,6 +30,7 @@ import { RacesFilterSection } from './components/RacesFilterSection';
 import { RaceView } from './components/RaceView';
 
 export default function RacesPage() {
+  const isGoogleUser = useIsGoogleUser();
   const [nameInput, setNameInput] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<IRaceCategory | null>(
     null,
@@ -114,13 +116,15 @@ export default function RacesPage() {
         <Title component="h1" sx={{ textAlign: 'left' }}>
           Raças
         </Title>
-        <PrimaryButton
-          type="button"
-          onClick={handleOpenCreateModal}
-          sx={{ width: 'auto', padding: '10px 20px' }}
-        >
-          Novo
-        </PrimaryButton>
+        {!isGoogleUser && (
+          <PrimaryButton
+            type="button"
+            onClick={handleOpenCreateModal}
+            sx={{ width: 'auto', padding: '10px 20px' }}
+          >
+            Novo
+          </PrimaryButton>
+        )}
       </div>
 
       <RacesFilterSection

@@ -24,7 +24,9 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { GoogleAccess } from '../auth/decorators/google-access.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { GoogleAccessGuard } from '../auth/guards/google-access.guard';
 import { CreateDivinityDto } from './dto/create-divinity.dto';
 import { UpdateDivinityDto } from './dto/update-divinity.dto';
 import { FindDivinitiesQueryDto } from './dto/find-divinities-query.dto';
@@ -36,7 +38,8 @@ import { DivinitiesService } from './divinities.service';
 
 @ApiTags('divinities')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, GoogleAccessGuard)
+@GoogleAccess('read-only')
 @Controller('divinities')
 export class DivinitiesController {
   constructor(private readonly divinitiesService: DivinitiesService) {}

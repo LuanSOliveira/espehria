@@ -10,6 +10,7 @@ import {
 } from '@/shared/components/Modals';
 import { Title } from '@/shared/components/Texts';
 import { PrimaryButton } from '@/shared/components/Buttons';
+import { useIsGoogleUser } from '@/hooks/Auth';
 import { useDeleteEntity, useGetEntityList } from '@/hooks/Queries';
 import { IEraListFilters, IEraListItem } from '@/shared/interfaces';
 import { APP_DEFAULT_PAGE_SIZE } from '@/shared/constants';
@@ -21,6 +22,7 @@ import { ErasFilterSection } from './components/ErasFilterSection';
 import { EraView } from './components/EraView';
 
 export default function ErasPage() {
+  const isGoogleUser = useIsGoogleUser();
   const [nameInput, setNameInput] = useState('');
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [eraPendingDelete, setEraPendingDelete] =
@@ -98,13 +100,15 @@ export default function ErasPage() {
         <Title component="h1" sx={{ textAlign: 'left' }}>
           Eras
         </Title>
-        <PrimaryButton
-          type="button"
-          onClick={handleOpenCreateModal}
-          sx={{ width: 'auto', padding: '10px 20px' }}
-        >
-          Novo
-        </PrimaryButton>
+        {!isGoogleUser && (
+          <PrimaryButton
+            type="button"
+            onClick={handleOpenCreateModal}
+            sx={{ width: 'auto', padding: '10px 20px' }}
+          >
+            Novo
+          </PrimaryButton>
+        )}
       </div>
 
       <ErasFilterSection

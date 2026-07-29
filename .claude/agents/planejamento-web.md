@@ -56,6 +56,10 @@ produção, nunca cria componentes ou páginas de verdade — apenas planeja.
    - Quais páginas/rotas e funcionalidades precisam ser criadas ou alteradas,
      incluindo quais endpoints da API serão consumidos e quais campos/regras de
      validação o formulário (se houver) deve cobrir.
+   - Se a página tiver listagem com ações de criar/editar/excluir, o comportamento para
+     usuários `provider: 'google'` (padrão: ocultar essas ações, mantendo só
+     visualizar — ver skill `web-permissao-google-readonly`; sinalize se a demanda pedir
+     outro comportamento).
 
    A implementação de componentes e de funcionalidade é feita por um único agente
    (`web-dev`), então não é necessário modelar dependência entre etapas separadas —
@@ -83,6 +87,7 @@ produção, nunca cria componentes ou páginas de verdade — apenas planeja.
    - Páginas/rotas: [lista]
    - Integrações com API: [endpoints consumidos]
    - Formulário/validação: [campos e regras, se houver]
+   - Acesso Google: [ocultar criar/editar/excluir (padrão) / outro — justifique se não for o padrão]
 
    ### 2. web-dev-codereviewer
    - Revisar tudo acima
