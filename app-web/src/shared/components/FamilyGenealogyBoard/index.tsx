@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { IconButton, Menu, MenuItem } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
 import {
   Background,
   Connection,
@@ -18,17 +18,23 @@ import {
   useNodesState,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { FiTrash2 } from 'react-icons/fi';
+import { FiEye, FiTrash2 } from 'react-icons/fi';
 import { DefaultText, Label } from '@/shared/components/Texts';
 import { DefaultAutocompleteInput } from '@/shared/components/Inputs';
 import { SecondaryButton } from '@/shared/components/Buttons';
 import { ImageAvatarPreview } from '@/shared/components/ImageAvatarPreview';
+import { useEntityMentionViewStore } from '@/store';
 import {
   ICharacterListItem,
   ICharacterSummary,
   FamilyRelationshipType,
 } from '@/shared/interfaces';
 import { APP_COLORS } from '@/shared/constants';
+
+const PARENT_TARGET_HANDLE = 'parent-target';
+const PARENT_SOURCE_HANDLE = 'parent-source';
+const SPOUSE_TARGET_HANDLE = 'spouse-target';
+const SPOUSE_SOURCE_HANDLE = 'spouse-source';
 
 export interface FamilyGenealogyMember {
   character: ICharacterSummary;
@@ -81,6 +87,21 @@ type CharacterCardNode = Node<CharacterCardNodeData, 'characterCard'>;
 
 const CharacterCardNode = ({ data }: NodeProps<CharacterCardNode>) => {
   const { character, mode, onRemove } = data;
+  const openEntityView = useEntityMentionViewStore(
+    (state) => state.openEntityView,
+  );
+
+  const parentHandleStyle = {
+    background: APP_COLORS.goldDark,
+    opacity: mode === 'readOnly' ? 0 : 1,
+    pointerEvents: mode === 'readOnly' ? ('none' as const) : undefined,
+  };
+
+  const spouseHandleStyle = {
+    background: APP_COLORS.gold,
+    opacity: mode === 'readOnly' ? 0 : 1,
+    pointerEvents: mode === 'readOnly' ? ('none' as const) : undefined,
+  };
 
   return (
     <div
@@ -94,18 +115,32 @@ const CharacterCardNode = ({ data }: NodeProps<CharacterCardNode>) => {
     >
       <Handle
         type="target"
+        id={PARENT_TARGET_HANDLE}
         position={Position.Top}
-        style={{
-          background: APP_COLORS.goldDark,
-          opacity: mode === 'readOnly' ? 0 : 1,
-          pointerEvents: mode === 'readOnly' ? 'none' : undefined,
-        }}
+        style={parentHandleStyle}
+      />
+      <Handle
+        type="target"
+        id={SPOUSE_TARGET_HANDLE}
+        position={Position.Left}
+        style={spouseHandleStyle}
       />
       <ImageAvatarPreview
         imageUrl={character.referenceImage}
         alt={character.name}
       />
       <DefaultText className="flex-1">{character.name}</DefaultText>
+
+      <Tooltip title="Visualizar">
+        <IconButton
+          aria-label={`Visualizar ${character.name}`}
+          size="small"
+          onClick={() => openEntityView('character', character.id)}
+          sx={{ color: APP_COLORS.textBrownDark }}
+        >
+          <FiEye />
+        </IconButton>
+      </Tooltip>
       {mode === 'editable' && onRemove && (
         <IconButton
           aria-label={`Remover ${character.name} da árvore`}
@@ -118,12 +153,15 @@ const CharacterCardNode = ({ data }: NodeProps<CharacterCardNode>) => {
       )}
       <Handle
         type="source"
+        id={PARENT_SOURCE_HANDLE}
         position={Position.Bottom}
-        style={{
-          background: APP_COLORS.goldDark,
-          opacity: mode === 'readOnly' ? 0 : 1,
-          pointerEvents: mode === 'readOnly' ? 'none' : undefined,
-        }}
+        style={parentHandleStyle}
+      />
+      <Handle
+        type="source"
+        id={SPOUSE_SOURCE_HANDLE}
+        position={Position.Right}
+        style={spouseHandleStyle}
       />
     </div>
   );
@@ -151,6 +189,8 @@ const buildEdgeFromRelationship = (
     id,
     source: relationship.sourceCharacterId,
     target: relationship.targetCharacterId,
+    sourceHandle: isParent ? PARENT_SOURCE_HANDLE : SPOUSE_SOURCE_HANDLE,
+    targetHandle: isParent ? PARENT_TARGET_HANDLE : SPOUSE_TARGET_HANDLE,
     label: RELATIONSHIP_LABELS[relationship.type],
     type: isParent ? 'smoothstep' : 'straight',
     style: isParent
@@ -185,13 +225,6 @@ const FamilyGenealogyBoardInner = ({
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [selectedCharacter, setSelectedCharacter] =
     useState<ICharacterListItem | null>(null);
-  const [pendingConnection, setPendingConnection] = useState<Connection | null>(
-    null,
-  );
-  const [menuPosition, setMenuPosition] = useState<{
-    top: number;
-    left: number;
-  } | null>(null);
 
   const memberIdsKey = useMemo(
     () => members.map((member) => member.character.id).join(','),
@@ -266,33 +299,18 @@ const FamilyGenealogyBoardInner = ({
         return;
       }
 
-      setPendingConnection(connection);
-    },
-    [isEditable],
-  );
+      const isSpouseConnection =
+        connection.sourceHandle === SPOUSE_SOURCE_HANDLE ||
+        connection.targetHandle === SPOUSE_TARGET_HANDLE;
 
-  const handleConnectEnd = useCallback((event: MouseEvent | TouchEvent) => {
-    if ('clientX' in event && 'clientY' in event) {
-      setMenuPosition({ top: event.clientY, left: event.clientX });
-    }
-  }, []);
-
-  const handleChooseRelationshipType = (type: FamilyRelationshipType) => {
-    if (pendingConnection?.source && pendingConnection?.target) {
       onCreateRelationship?.({
-        sourceCharacterId: pendingConnection.source,
-        targetCharacterId: pendingConnection.target,
-        type,
+        sourceCharacterId: connection.source,
+        targetCharacterId: connection.target,
+        type: isSpouseConnection ? 'spouse' : 'parent',
       });
-    }
-    setPendingConnection(null);
-    setMenuPosition(null);
-  };
-
-  const handleCloseRelationshipMenu = () => {
-    setPendingConnection(null);
-    setMenuPosition(null);
-  };
+    },
+    [isEditable, onCreateRelationship],
+  );
 
   const handleEdgesDelete = useCallback(
     (deletedEdges: Edge[]) => {
@@ -345,7 +363,9 @@ const FamilyGenealogyBoardInner = ({
             </SecondaryButton>
           </div>
           <DefaultText>
-            Selecione um vínculo e pressione Delete para removê-lo.
+            Arraste da parte superior/inferior do card para criar um vínculo
+            de pai/mãe → filho(a), ou da lateral para criar um vínculo de
+            cônjuge. Selecione um vínculo e pressione Delete para removê-lo.
           </DefaultText>
         </div>
       )}
@@ -366,7 +386,6 @@ const FamilyGenealogyBoardInner = ({
           onEdgesChange={onEdgesChange}
           onNodeDragStop={handleNodeDragStop}
           onConnect={handleConnect}
-          onConnectEnd={handleConnectEnd}
           onEdgesDelete={handleEdgesDelete}
           nodesDraggable={isEditable}
           nodesConnectable={isEditable}
@@ -378,20 +397,6 @@ const FamilyGenealogyBoardInner = ({
           <Controls showInteractive={false} />
         </ReactFlow>
       </div>
-
-      <Menu
-        open={!!pendingConnection}
-        onClose={handleCloseRelationshipMenu}
-        anchorReference="anchorPosition"
-        anchorPosition={menuPosition ?? { top: 0, left: 0 }}
-      >
-        <MenuItem onClick={() => handleChooseRelationshipType('parent')}>
-          Pai/Mãe → Filho(a)
-        </MenuItem>
-        <MenuItem onClick={() => handleChooseRelationshipType('spouse')}>
-          Cônjuge
-        </MenuItem>
-      </Menu>
     </div>
   );
 };
