@@ -16,6 +16,8 @@ import { Material } from '../materials/entities/material.entity';
 import { Consumable } from '../consumables/entities/consumable.entity';
 import { Ammunition } from '../ammunition/entities/ammunition.entity';
 import { Rule } from '../rules/entities/rule.entity';
+import { Skill } from '../skills/entities/skill.entity';
+import { Condition } from '../conditions/entities/condition.entity';
 import { SearchController } from './search.controller';
 import { SearchService } from './search.service';
 
@@ -38,6 +40,8 @@ import { SearchService } from './search.service';
       Consumable,
       Ammunition,
       Rule,
+      Skill,
+      Condition,
     ]),
   ],
   controllers: [SearchController],

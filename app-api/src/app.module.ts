@@ -26,6 +26,8 @@ import { MaterialsModule } from './modules/materials/materials.module';
 import { ConsumablesModule } from './modules/consumables/consumables.module';
 import { AmmunitionModule } from './modules/ammunition/ammunition.module';
 import { RulesModule } from './modules/rules/rules.module';
+import { SkillsModule } from './modules/skills/skills.module';
+import { ConditionsModule } from './modules/conditions/conditions.module';
 
 @Module({
   imports: [
@@ -73,6 +75,8 @@ import { RulesModule } from './modules/rules/rules.module';
     ConsumablesModule,
     AmmunitionModule,
     RulesModule,
+    SkillsModule,
+    ConditionsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

@@ -21,7 +21,7 @@ export class SearchController {
   @Get()
   @ApiOperation({
     summary:
-      'Busca entidades linkáveis (usuários, criaturas, tags, locais, raças, eras, eventos, divindades, personagens, organizações, famílias, equipamentos, materiais, consumíveis, munições e regras) por nome, para uso em menções (@mention)',
+      'Busca entidades linkáveis (usuários, criaturas, tags, locais, raças, eras, eventos, divindades, personagens, organizações, famílias, equipamentos, materiais, consumíveis, munições, regras, perícias e condições) por nome, para uso em menções (@mention)',
   })
   @ApiOkResponse({ type: [SearchResultItemResponseDto] })
   @ApiBadRequestResponse({

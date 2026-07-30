@@ -16,6 +16,9 @@ import { EquipmentView } from '@/app/(authorized)/equipamentos/components/Equipm
 import { MaterialView } from '@/app/(authorized)/materiais/components/MaterialView';
 import { ConsumableView } from '@/app/(authorized)/consumiveis/components/ConsumableView';
 import { AmmunitionView } from '@/app/(authorized)/municoes/components/AmmunitionView';
+import { RuleView } from '@/app/(authorized)/regras/components/RuleView';
+import { SkillView } from '@/app/(authorized)/pericias/components/SkillView';
+import { ConditionView } from '@/app/(authorized)/condicoes/components/ConditionView';
 
 interface EntityMentionViewRendererParams {
   entityId: string;
@@ -70,6 +73,15 @@ const ENTITY_MENTION_VIEW_REGISTRY: Record<
   ),
   ammunition: ({ entityId, onNotFound }) => (
     <AmmunitionView ammunitionId={entityId} onNotFound={onNotFound} />
+  ),
+  rule: ({ entityId, onNotFound }) => (
+    <RuleView ruleId={entityId} onNotFound={onNotFound} />
+  ),
+  skill: ({ entityId, onNotFound }) => (
+    <SkillView skillId={entityId} onNotFound={onNotFound} />
+  ),
+  condition: ({ entityId, onNotFound }) => (
+    <ConditionView conditionId={entityId} onNotFound={onNotFound} />
   ),
 };
 

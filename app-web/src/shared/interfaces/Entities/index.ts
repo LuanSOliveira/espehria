@@ -17,4 +17,6 @@ export * from './Material';
 export * from './Consumable';
 export * from './Ammunition';
 export * from './Rule';
+export * from './Skill';
+export * from './Condition';
 export * from './SearchResult';

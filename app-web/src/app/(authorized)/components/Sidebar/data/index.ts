@@ -1,4 +1,5 @@
 import {
+  FiActivity,
   FiBookOpen,
   FiBriefcase,
   FiCalendar,
@@ -15,6 +16,7 @@ import {
   FiTool,
   FiUser,
   FiUsers,
+  FiZap,
 } from 'react-icons/fi';
 import { MdOutlineFace } from 'react-icons/md';
 import { IconType } from 'react-icons';
@@ -39,6 +41,12 @@ export const NAV_SECTIONS: NavSection[] = [
     title: 'JOGO',
     items: [
       { label: 'Regras', href: APP_ROUTES.private.rules, icon: FiBookOpen },
+      { label: 'Perícias', href: APP_ROUTES.private.skills, icon: FiZap },
+      {
+        label: 'Condições',
+        href: APP_ROUTES.private.conditions,
+        icon: FiActivity,
+      },
     ],
   },
   {

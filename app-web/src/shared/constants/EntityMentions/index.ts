@@ -16,6 +16,9 @@ export const ENTITY_MENTION_TYPE_LABELS: Record<string, string> = {
   material: 'material',
   consumable: 'consumível',
   ammunition: 'munição',
+  rule: 'regra',
+  skill: 'perícia',
+  condition: 'condição',
 };
 
 // Endpoint de detalhe usado para resolver o nome atual de uma entidade mencionada
@@ -40,6 +43,9 @@ export const ENTITY_MENTION_DETAIL_URL_BY_TYPE: Record<
   material: (id) => `/materials/${id}`,
   consumable: (id) => `/consumables/${id}`,
   ammunition: (id) => `/ammunition/${id}`,
+  rule: (id) => `/rules/${id}`,
+  skill: (id) => `/skills/${id}`,
+  condition: (id) => `/conditions/${id}`,
 };
 
 // Tipos de entidade com view registrada no EntityMentionViewDispatcher — usado pelo
@@ -59,4 +65,7 @@ export const ENTITY_MENTION_VIEWABLE_TYPES: string[] = [
   'material',
   'consumable',
   'ammunition',
+  'rule',
+  'skill',
+  'condition',
 ];
