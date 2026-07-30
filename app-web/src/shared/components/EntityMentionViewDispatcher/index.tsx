@@ -19,6 +19,7 @@ import { AmmunitionView } from '@/app/(authorized)/municoes/components/Ammunitio
 import { RuleView } from '@/app/(authorized)/regras/components/RuleView';
 import { SkillView } from '@/app/(authorized)/pericias/components/SkillView';
 import { ConditionView } from '@/app/(authorized)/condicoes/components/ConditionView';
+import { UtilityView } from '@/app/(authorized)/utilitarios/components/UtilityView';
 
 interface EntityMentionViewRendererParams {
   entityId: string;
@@ -82,6 +83,9 @@ const ENTITY_MENTION_VIEW_REGISTRY: Record<
   ),
   condition: ({ entityId, onNotFound }) => (
     <ConditionView conditionId={entityId} onNotFound={onNotFound} />
+  ),
+  utility: ({ entityId, onNotFound }) => (
+    <UtilityView utilityId={entityId} onNotFound={onNotFound} />
   ),
 };
 

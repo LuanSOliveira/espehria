@@ -21,3 +21,4 @@ export * from './PageStore/AmmunitionStore';
 export * from './PageStore/RulesStore';
 export * from './PageStore/SkillsStore';
 export * from './PageStore/ConditionsStore';
+export * from './PageStore/UtilitiesStore';

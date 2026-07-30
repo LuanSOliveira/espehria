@@ -19,6 +19,7 @@ import { Ammunition } from '../ammunition/entities/ammunition.entity';
 import { Rule } from '../rules/entities/rule.entity';
 import { Skill } from '../skills/entities/skill.entity';
 import { Condition } from '../conditions/entities/condition.entity';
+import { Utility } from '../utilities/entities/utility.entity';
 import { LinkableEntityType } from './enums/linkable-entity-type.enum';
 import { SearchResultItemResponseDto } from './dto/search-result-item-response.dto';
 
@@ -63,6 +64,8 @@ export class SearchService {
     private readonly skillsRepository: Repository<Skill>,
     @InjectRepository(Condition)
     private readonly conditionsRepository: Repository<Condition>,
+    @InjectRepository(Utility)
+    private readonly utilitiesRepository: Repository<Utility>,
   ) {}
 
   async search(query: string): Promise<SearchResultItemResponseDto[]> {
@@ -126,6 +129,10 @@ export class SearchService {
       {
         entityType: LinkableEntityType.CONDITION,
         repository: this.conditionsRepository,
+      },
+      {
+        entityType: LinkableEntityType.UTILITY,
+        repository: this.utilitiesRepository,
       },
     ];
 

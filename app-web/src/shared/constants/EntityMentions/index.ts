@@ -19,6 +19,7 @@ export const ENTITY_MENTION_TYPE_LABELS: Record<string, string> = {
   rule: 'regra',
   skill: 'perícia',
   condition: 'condição',
+  utility: 'utilitário',
 };
 
 // Endpoint de detalhe usado para resolver o nome atual de uma entidade mencionada
@@ -46,6 +47,7 @@ export const ENTITY_MENTION_DETAIL_URL_BY_TYPE: Record<
   rule: (id) => `/rules/${id}`,
   skill: (id) => `/skills/${id}`,
   condition: (id) => `/conditions/${id}`,
+  utility: (id) => `/utilities/${id}`,
 };
 
 // Tipos de entidade com view registrada no EntityMentionViewDispatcher — usado pelo
@@ -68,4 +70,5 @@ export const ENTITY_MENTION_VIEWABLE_TYPES: string[] = [
   'rule',
   'skill',
   'condition',
+  'utility',
 ];

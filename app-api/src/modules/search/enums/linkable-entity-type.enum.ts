@@ -17,4 +17,5 @@ export enum LinkableEntityType {
   RULE = 'rule',
   SKILL = 'skill',
   CONDITION = 'condition',
+  UTILITY = 'utility',
 }

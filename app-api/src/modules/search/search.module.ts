@@ -18,6 +18,7 @@ import { Ammunition } from '../ammunition/entities/ammunition.entity';
 import { Rule } from '../rules/entities/rule.entity';
 import { Skill } from '../skills/entities/skill.entity';
 import { Condition } from '../conditions/entities/condition.entity';
+import { Utility } from '../utilities/entities/utility.entity';
 import { SearchController } from './search.controller';
 import { SearchService } from './search.service';
 
@@ -42,6 +43,7 @@ import { SearchService } from './search.service';
       Rule,
       Skill,
       Condition,
+      Utility,
     ]),
   ],
   controllers: [SearchController],

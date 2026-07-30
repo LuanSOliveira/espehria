@@ -25,6 +25,7 @@ import { EquipmentModule } from './modules/equipment/equipment.module';
 import { MaterialsModule } from './modules/materials/materials.module';
 import { ConsumablesModule } from './modules/consumables/consumables.module';
 import { AmmunitionModule } from './modules/ammunition/ammunition.module';
+import { UtilitiesModule } from './modules/utilities/utilities.module';
 import { RulesModule } from './modules/rules/rules.module';
 import { SkillsModule } from './modules/skills/skills.module';
 import { ConditionsModule } from './modules/conditions/conditions.module';
@@ -74,6 +75,7 @@ import { ConditionsModule } from './modules/conditions/conditions.module';
     MaterialsModule,
     ConsumablesModule,
     AmmunitionModule,
+    UtilitiesModule,
     RulesModule,
     SkillsModule,
     ConditionsModule,

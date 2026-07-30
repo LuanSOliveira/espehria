@@ -17,3 +17,4 @@ export * from './AmmunitionFormSchema';
 export * from './RuleFormSchema';
 export * from './SkillFormSchema';
 export * from './ConditionFormSchema';
+export * from './UtilityFormSchema';

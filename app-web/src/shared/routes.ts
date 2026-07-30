@@ -19,6 +19,7 @@ const MENU_ROUTES = {
   rules: '/regras',
   skills: '/pericias',
   conditions: '/condicoes',
+  utilities: '/utilitarios',
 };
 
 export const APP_ROUTES = {
@@ -42,6 +43,7 @@ export const APP_ROUTES = {
     rules: MENU_ROUTES.rules,
     skills: MENU_ROUTES.skills,
     conditions: MENU_ROUTES.conditions,
+    utilities: MENU_ROUTES.utilities,
   },
   public: {
     login: MENU_ROUTES.login,

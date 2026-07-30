@@ -19,4 +19,5 @@ export * from './Ammunition';
 export * from './Rule';
 export * from './Skill';
 export * from './Condition';
+export * from './Utility';
 export * from './SearchResult';
