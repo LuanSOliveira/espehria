@@ -12,6 +12,10 @@ const MENU_ROUTES = {
   characters: '/personagens',
   organizations: '/organizacoes',
   families: '/familias',
+  equipment: '/equipamentos',
+  materials: '/materiais',
+  consumables: '/consumiveis',
+  ammunition: '/municoes',
 };
 
 export const APP_ROUTES = {
@@ -28,6 +32,10 @@ export const APP_ROUTES = {
     characters: MENU_ROUTES.characters,
     organizations: MENU_ROUTES.organizations,
     families: MENU_ROUTES.families,
+    equipment: MENU_ROUTES.equipment,
+    materials: MENU_ROUTES.materials,
+    consumables: MENU_ROUTES.consumables,
+    ammunition: MENU_ROUTES.ammunition,
   },
   public: {
     login: MENU_ROUTES.login,

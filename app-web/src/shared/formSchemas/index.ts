@@ -10,3 +10,7 @@ export * from './DivinityFormSchema';
 export * from './CharacterFormSchema';
 export * from './OrganizationFormSchema';
 export * from './FamilyFormSchema';
+export * from './EquipmentFormSchema';
+export * from './MaterialFormSchema';
+export * from './ConsumableFormSchema';
+export * from './AmmunitionFormSchema';

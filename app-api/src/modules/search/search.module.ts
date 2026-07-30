@@ -11,6 +11,10 @@ import { Divinity } from '../divinities/entities/divinity.entity';
 import { Character } from '../characters/entities/character.entity';
 import { Organization } from '../organizations/entities/organization.entity';
 import { Family } from '../families/entities/family.entity';
+import { Equipment } from '../equipment/entities/equipment.entity';
+import { Material } from '../materials/entities/material.entity';
+import { Consumable } from '../consumables/entities/consumable.entity';
+import { Ammunition } from '../ammunition/entities/ammunition.entity';
 import { SearchController } from './search.controller';
 import { SearchService } from './search.service';
 
@@ -28,6 +32,10 @@ import { SearchService } from './search.service';
       Character,
       Organization,
       Family,
+      Equipment,
+      Material,
+      Consumable,
+      Ammunition,
     ]),
   ],
   controllers: [SearchController],

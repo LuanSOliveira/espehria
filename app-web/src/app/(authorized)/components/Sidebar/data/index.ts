@@ -2,12 +2,16 @@ import {
   FiBriefcase,
   FiCalendar,
   FiClock,
+  FiCoffee,
+  FiCrosshair,
   FiFeather,
   FiGitBranch,
   FiHome,
   FiMapPin,
+  FiPackage,
   FiSun,
   FiTag,
+  FiTool,
   FiUser,
   FiUsers,
 } from 'react-icons/fi';
@@ -75,6 +79,31 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: 'Eras', href: APP_ROUTES.private.eras, icon: FiClock },
       { label: 'Eventos', href: APP_ROUTES.private.events, icon: FiCalendar },
+    ],
+  },
+  {
+    title: 'Itens',
+    items: [
+      {
+        label: 'Equipamentos',
+        href: APP_ROUTES.private.equipment,
+        icon: FiTool,
+      },
+      {
+        label: 'Materiais',
+        href: APP_ROUTES.private.materials,
+        icon: FiPackage,
+      },
+      {
+        label: 'Consumíveis',
+        href: APP_ROUTES.private.consumables,
+        icon: FiCoffee,
+      },
+      {
+        label: 'Munições',
+        href: APP_ROUTES.private.ammunition,
+        icon: FiCrosshair,
+      },
     ],
   },
   {

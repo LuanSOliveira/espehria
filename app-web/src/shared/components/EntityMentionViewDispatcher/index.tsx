@@ -12,6 +12,10 @@ import { DivinityView } from '@/app/(authorized)/divindades/components/DivinityV
 import { CharacterView } from '@/app/(authorized)/personagens/components/CharacterView';
 import { OrganizationView } from '@/app/(authorized)/organizacoes/components/OrganizationView';
 import { FamilyView } from '@/app/(authorized)/familias/components/FamilyView';
+import { EquipmentView } from '@/app/(authorized)/equipamentos/components/EquipmentView';
+import { MaterialView } from '@/app/(authorized)/materiais/components/MaterialView';
+import { ConsumableView } from '@/app/(authorized)/consumiveis/components/ConsumableView';
+import { AmmunitionView } from '@/app/(authorized)/municoes/components/AmmunitionView';
 
 interface EntityMentionViewRendererParams {
   entityId: string;
@@ -54,6 +58,18 @@ const ENTITY_MENTION_VIEW_REGISTRY: Record<
   ),
   family: ({ entityId, onNotFound }) => (
     <FamilyView familyId={entityId} onNotFound={onNotFound} />
+  ),
+  equipment: ({ entityId, onNotFound }) => (
+    <EquipmentView equipmentId={entityId} onNotFound={onNotFound} />
+  ),
+  material: ({ entityId, onNotFound }) => (
+    <MaterialView materialId={entityId} onNotFound={onNotFound} />
+  ),
+  consumable: ({ entityId, onNotFound }) => (
+    <ConsumableView consumableId={entityId} onNotFound={onNotFound} />
+  ),
+  ammunition: ({ entityId, onNotFound }) => (
+    <AmmunitionView ammunitionId={entityId} onNotFound={onNotFound} />
   ),
 };
 

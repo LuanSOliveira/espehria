@@ -12,6 +12,10 @@ export const ENTITY_MENTION_TYPE_LABELS: Record<string, string> = {
   character: 'personagem',
   organization: 'organização',
   family: 'família',
+  equipment: 'equipamento',
+  material: 'material',
+  consumable: 'consumível',
+  ammunition: 'munição',
 };
 
 // Endpoint de detalhe usado para resolver o nome atual de uma entidade mencionada
@@ -32,6 +36,10 @@ export const ENTITY_MENTION_DETAIL_URL_BY_TYPE: Record<
   character: (id) => `/characters/${id}`,
   organization: (id) => `/organizations/${id}`,
   family: (id) => `/families/${id}`,
+  equipment: (id) => `/equipment/${id}`,
+  material: (id) => `/materials/${id}`,
+  consumable: (id) => `/consumables/${id}`,
+  ammunition: (id) => `/ammunition/${id}`,
 };
 
 // Tipos de entidade com view registrada no EntityMentionViewDispatcher — usado pelo
@@ -47,4 +55,8 @@ export const ENTITY_MENTION_VIEWABLE_TYPES: string[] = [
   'character',
   'organization',
   'family',
+  'equipment',
+  'material',
+  'consumable',
+  'ammunition',
 ];

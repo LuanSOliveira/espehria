@@ -12,4 +12,8 @@ export * from './Divinity';
 export * from './Character';
 export * from './Organization';
 export * from './Family';
+export * from './Equipment';
+export * from './Material';
+export * from './Consumable';
+export * from './Ammunition';
 export * from './SearchResult';

@@ -12,6 +12,10 @@ import { Divinity } from '../divinities/entities/divinity.entity';
 import { Character } from '../characters/entities/character.entity';
 import { Organization } from '../organizations/entities/organization.entity';
 import { Family } from '../families/entities/family.entity';
+import { Equipment } from '../equipment/entities/equipment.entity';
+import { Material } from '../materials/entities/material.entity';
+import { Consumable } from '../consumables/entities/consumable.entity';
+import { Ammunition } from '../ammunition/entities/ammunition.entity';
 import { LinkableEntityType } from './enums/linkable-entity-type.enum';
 import { SearchResultItemResponseDto } from './dto/search-result-item-response.dto';
 
@@ -42,6 +46,14 @@ export class SearchService {
     private readonly organizationsRepository: Repository<Organization>,
     @InjectRepository(Family)
     private readonly familiesRepository: Repository<Family>,
+    @InjectRepository(Equipment)
+    private readonly equipmentRepository: Repository<Equipment>,
+    @InjectRepository(Material)
+    private readonly materialsRepository: Repository<Material>,
+    @InjectRepository(Consumable)
+    private readonly consumablesRepository: Repository<Consumable>,
+    @InjectRepository(Ammunition)
+    private readonly ammunitionRepository: Repository<Ammunition>,
   ) {}
 
   async search(query: string): Promise<SearchResultItemResponseDto[]> {
@@ -77,6 +89,22 @@ export class SearchService {
       {
         entityType: LinkableEntityType.FAMILY,
         repository: this.familiesRepository,
+      },
+      {
+        entityType: LinkableEntityType.EQUIPMENT,
+        repository: this.equipmentRepository,
+      },
+      {
+        entityType: LinkableEntityType.MATERIAL,
+        repository: this.materialsRepository,
+      },
+      {
+        entityType: LinkableEntityType.CONSUMABLE,
+        repository: this.consumablesRepository,
+      },
+      {
+        entityType: LinkableEntityType.AMMUNITION,
+        repository: this.ammunitionRepository,
       },
     ];
 

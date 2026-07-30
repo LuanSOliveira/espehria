@@ -21,6 +21,10 @@ import { DivinitiesModule } from './modules/divinities/divinities.module';
 import { CharactersModule } from './modules/characters/characters.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { FamiliesModule } from './modules/families/families.module';
+import { EquipmentModule } from './modules/equipment/equipment.module';
+import { MaterialsModule } from './modules/materials/materials.module';
+import { ConsumablesModule } from './modules/consumables/consumables.module';
+import { AmmunitionModule } from './modules/ammunition/ammunition.module';
 
 @Module({
   imports: [
@@ -63,6 +67,10 @@ import { FamiliesModule } from './modules/families/families.module';
     CharactersModule,
     OrganizationsModule,
     FamiliesModule,
+    EquipmentModule,
+    MaterialsModule,
+    ConsumablesModule,
+    AmmunitionModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

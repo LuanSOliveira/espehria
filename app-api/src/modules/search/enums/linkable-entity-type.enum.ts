@@ -10,4 +10,8 @@ export enum LinkableEntityType {
   CHARACTER = 'character',
   ORGANIZATION = 'organization',
   FAMILY = 'family',
+  EQUIPMENT = 'equipment',
+  MATERIAL = 'material',
+  CONSUMABLE = 'consumable',
+  AMMUNITION = 'ammunition',
 }
