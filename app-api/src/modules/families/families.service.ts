@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
 import {
@@ -419,7 +423,11 @@ export class FamiliesService {
       await familyMembersRepository.save(toSaveMembers);
     }
     if (characters.length > 0) {
-      await this.applyFamilyAssignments(family, characters, charactersRepository);
+      await this.applyFamilyAssignments(
+        family,
+        characters,
+        charactersRepository,
+      );
     }
   }
 
@@ -604,9 +612,7 @@ export class FamiliesService {
       order: { name: 'ASC' },
     });
 
-    const familiesById = new Map(
-      families.map((family) => [family.id, family]),
-    );
+    const familiesById = new Map(families.map((family) => [family.id, family]));
     const data = ids
       .map((family) => familiesById.get(family.id))
       .filter((family): family is Family => family !== undefined);
@@ -623,10 +629,7 @@ export class FamiliesService {
       const tagsRepository = manager.getRepository(Tag);
       const charactersRepository = manager.getRepository(Character);
 
-      const family = await this.findFamilyWithRelations(
-        id,
-        familiesRepository,
-      );
+      const family = await this.findFamilyWithRelations(id, familiesRepository);
       if (!family) {
         throw new NotFoundException('Família não encontrada.');
       }

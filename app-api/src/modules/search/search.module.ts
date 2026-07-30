@@ -15,6 +15,7 @@ import { Equipment } from '../equipment/entities/equipment.entity';
 import { Material } from '../materials/entities/material.entity';
 import { Consumable } from '../consumables/entities/consumable.entity';
 import { Ammunition } from '../ammunition/entities/ammunition.entity';
+import { Rule } from '../rules/entities/rule.entity';
 import { SearchController } from './search.controller';
 import { SearchService } from './search.service';
 
@@ -36,6 +37,7 @@ import { SearchService } from './search.service';
       Material,
       Consumable,
       Ammunition,
+      Rule,
     ]),
   ],
   controllers: [SearchController],

@@ -46,7 +46,9 @@ export class AmmunitionController {
   @Post()
   @ApiOperation({ summary: 'Cria um item de munição' })
   @ApiCreatedResponse({ type: AmmunitionResponseDto })
-  @ApiConflictResponse({ description: 'Já existe um item de munição com este nome' })
+  @ApiConflictResponse({
+    description: 'Já existe um item de munição com este nome',
+  })
   @ApiNotFoundResponse({
     description: 'Uma ou mais tags não foram encontradas',
   })
@@ -105,7 +107,9 @@ export class AmmunitionController {
   @ApiNotFoundResponse({
     description: 'Item de munição ou uma ou mais tags não encontrados',
   })
-  @ApiConflictResponse({ description: 'Já existe um item de munição com este nome' })
+  @ApiConflictResponse({
+    description: 'Já existe um item de munição com este nome',
+  })
   @ApiBadRequestResponse({
     description:
       'URL de imagem de referência inválida ou ID em formato inválido',

@@ -14,4 +14,5 @@ export enum LinkableEntityType {
   MATERIAL = 'material',
   CONSUMABLE = 'consumable',
   AMMUNITION = 'ammunition',
+  RULE = 'rule',
 }

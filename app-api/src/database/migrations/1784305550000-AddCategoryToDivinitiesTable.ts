@@ -1,14 +1,10 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddCategoryToDivinitiesTable1784305550000
-  implements MigrationInterface
-{
+export class AddCategoryToDivinitiesTable1784305550000 implements MigrationInterface {
   name = 'AddCategoryToDivinitiesTable1784305550000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE "divinities" ADD "category_id" uuid`,
-    );
+    await queryRunner.query(`ALTER TABLE "divinities" ADD "category_id" uuid`);
     await queryRunner.query(
       `UPDATE "divinities" SET "category_id" = (SELECT "id" FROM "divinity_categories" WHERE "name" = 'Divindade Maior') WHERE "category_id" IS NULL`,
     );

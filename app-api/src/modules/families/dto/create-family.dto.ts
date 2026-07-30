@@ -68,7 +68,8 @@ export class CreateFamilyDto {
 
   @ApiPropertyOptional({
     type: () => [FamilyMemberInputDto],
-    description: 'Membros posicionados na árvore genealógica (cards de personagens)',
+    description:
+      'Membros posicionados na árvore genealógica (cards de personagens)',
   })
   @IsOptional()
   @IsArray()
@@ -78,7 +79,8 @@ export class CreateFamilyDto {
 
   @ApiPropertyOptional({
     type: () => [FamilyRelationshipInputDto],
-    description: 'Vínculos de parentesco entre os membros da árvore genealógica',
+    description:
+      'Vínculos de parentesco entre os membros da árvore genealógica',
   })
   @IsOptional()
   @IsArray()

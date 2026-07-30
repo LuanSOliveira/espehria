@@ -14,3 +14,4 @@ export * from './EquipmentFormSchema';
 export * from './MaterialFormSchema';
 export * from './ConsumableFormSchema';
 export * from './AmmunitionFormSchema';
+export * from './RuleFormSchema';

@@ -25,6 +25,7 @@ import { EquipmentModule } from './modules/equipment/equipment.module';
 import { MaterialsModule } from './modules/materials/materials.module';
 import { ConsumablesModule } from './modules/consumables/consumables.module';
 import { AmmunitionModule } from './modules/ammunition/ammunition.module';
+import { RulesModule } from './modules/rules/rules.module';
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { AmmunitionModule } from './modules/ammunition/ammunition.module';
     MaterialsModule,
     ConsumablesModule,
     AmmunitionModule,
+    RulesModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

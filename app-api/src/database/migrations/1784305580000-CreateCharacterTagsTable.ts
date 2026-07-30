@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateCharacterTagsTable1784305580000
-  implements MigrationInterface
-{
+export class CreateCharacterTagsTable1784305580000 implements MigrationInterface {
   name = 'CreateCharacterTagsTable1784305580000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

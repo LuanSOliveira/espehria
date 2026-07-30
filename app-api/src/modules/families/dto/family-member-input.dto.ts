@@ -11,14 +11,16 @@ export class FamilyMemberInputDto {
   characterId: string;
 
   @ApiProperty({
-    description: 'Posição X do card do personagem no quadro da árvore genealógica',
+    description:
+      'Posição X do card do personagem no quadro da árvore genealógica',
     example: 120,
   })
   @IsNumber()
   positionX: number;
 
   @ApiProperty({
-    description: 'Posição Y do card do personagem no quadro da árvore genealógica',
+    description:
+      'Posição Y do card do personagem no quadro da árvore genealógica',
     example: 80,
   })
   @IsNumber()

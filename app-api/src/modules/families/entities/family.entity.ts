@@ -49,7 +49,8 @@ export class Family extends BaseEntity {
 
   @ApiProperty({
     type: () => [FamilyRelationship],
-    description: 'Vínculos de parentesco entre os membros da árvore genealógica',
+    description:
+      'Vínculos de parentesco entre os membros da árvore genealógica',
   })
   @OneToMany(() => FamilyRelationship, (relationship) => relationship.family, {
     cascade: true,

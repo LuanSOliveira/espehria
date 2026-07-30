@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateConsumableTagsTable1784305760000
-  implements MigrationInterface
-{
+export class CreateConsumableTagsTable1784305760000 implements MigrationInterface {
   name = 'CreateConsumableTagsTable1784305760000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -30,9 +28,7 @@ export class CreateConsumableTagsTable1784305760000
     await queryRunner.query(
       `ALTER TABLE "consumable_tags" DROP CONSTRAINT "FK_consumable_tags_consumable_id"`,
     );
-    await queryRunner.query(
-      `DROP INDEX "public"."IDX_consumable_tags_tag_id"`,
-    );
+    await queryRunner.query(`DROP INDEX "public"."IDX_consumable_tags_tag_id"`);
     await queryRunner.query(
       `DROP INDEX "public"."IDX_consumable_tags_consumable_id"`,
     );

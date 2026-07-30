@@ -16,6 +16,7 @@ import { Equipment } from '../equipment/entities/equipment.entity';
 import { Material } from '../materials/entities/material.entity';
 import { Consumable } from '../consumables/entities/consumable.entity';
 import { Ammunition } from '../ammunition/entities/ammunition.entity';
+import { Rule } from '../rules/entities/rule.entity';
 import { LinkableEntityType } from './enums/linkable-entity-type.enum';
 import { SearchResultItemResponseDto } from './dto/search-result-item-response.dto';
 
@@ -54,6 +55,8 @@ export class SearchService {
     private readonly consumablesRepository: Repository<Consumable>,
     @InjectRepository(Ammunition)
     private readonly ammunitionRepository: Repository<Ammunition>,
+    @InjectRepository(Rule)
+    private readonly rulesRepository: Repository<Rule>,
   ) {}
 
   async search(query: string): Promise<SearchResultItemResponseDto[]> {
@@ -105,6 +108,10 @@ export class SearchService {
       {
         entityType: LinkableEntityType.AMMUNITION,
         repository: this.ammunitionRepository,
+      },
+      {
+        entityType: LinkableEntityType.RULE,
+        repository: this.rulesRepository,
       },
     ];
 

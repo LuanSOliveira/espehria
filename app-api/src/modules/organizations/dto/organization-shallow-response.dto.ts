@@ -20,7 +20,9 @@ export class OrganizationShallowResponseDto {
   })
   referenceImage: string | null;
 
-  static fromEntity(organization: Organization): OrganizationShallowResponseDto {
+  static fromEntity(
+    organization: Organization,
+  ): OrganizationShallowResponseDto {
     const dto = new OrganizationShallowResponseDto();
     dto.id = organization.id;
     dto.name = organization.name;

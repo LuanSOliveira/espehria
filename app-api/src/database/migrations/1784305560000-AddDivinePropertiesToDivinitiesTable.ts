@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddDivinePropertiesToDivinitiesTable1784305560000
-  implements MigrationInterface
-{
+export class AddDivinePropertiesToDivinitiesTable1784305560000 implements MigrationInterface {
   name = 'AddDivinePropertiesToDivinitiesTable1784305560000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -44,13 +42,9 @@ export class AddDivinePropertiesToDivinitiesTable1784305560000
     await queryRunner.query(`ALTER TABLE "divinities" ADD "blessings" text`);
     await queryRunner.query(`ALTER TABLE "divinities" ADD "curses" text`);
     await queryRunner.query(`ALTER TABLE "divinities" ADD "legends" text`);
-    await queryRunner.query(
-      `ALTER TABLE "divinities" ADD "commandments" text`,
-    );
+    await queryRunner.query(`ALTER TABLE "divinities" ADD "commandments" text`);
     await queryRunner.query(`ALTER TABLE "divinities" ADD "oaths" text`);
-    await queryRunner.query(
-      `ALTER TABLE "divinities" ADD "curiosities" text`,
-    );
+    await queryRunner.query(`ALTER TABLE "divinities" ADD "curiosities" text`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
@@ -63,9 +57,7 @@ export class AddDivinePropertiesToDivinitiesTable1784305560000
     );
     await queryRunner.query(`ALTER TABLE "divinities" DROP COLUMN "legends"`);
     await queryRunner.query(`ALTER TABLE "divinities" DROP COLUMN "curses"`);
-    await queryRunner.query(
-      `ALTER TABLE "divinities" DROP COLUMN "blessings"`,
-    );
+    await queryRunner.query(`ALTER TABLE "divinities" DROP COLUMN "blessings"`);
     await queryRunner.query(`ALTER TABLE "divinities" DROP COLUMN "cult"`);
     await queryRunner.query(`ALTER TABLE "divinities" DROP COLUMN "church"`);
     await queryRunner.query(`ALTER TABLE "divinities" DROP COLUMN "avatars"`);
@@ -97,9 +89,7 @@ export class AddDivinePropertiesToDivinitiesTable1784305560000
     await queryRunner.query(
       `ALTER TABLE "divinities" DROP COLUMN "domain_sphere"`,
     );
-    await queryRunner.query(
-      `ALTER TABLE "divinities" DROP COLUMN "alignment"`,
-    );
+    await queryRunner.query(`ALTER TABLE "divinities" DROP COLUMN "alignment"`);
     await queryRunner.query(`ALTER TABLE "divinities" DROP COLUMN "titles"`);
   }
 }

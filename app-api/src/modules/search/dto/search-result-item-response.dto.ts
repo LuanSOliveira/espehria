@@ -16,7 +16,7 @@ export class SearchResultItemResponseDto {
   @ApiProperty({
     enum: LinkableEntityType,
     description:
-      'Tipo de entidade linkável (usuário, criatura, tag, local, raça, era, evento, divindade, personagem, organização, família, equipamento, material, consumível ou munição)',
+      'Tipo de entidade linkável (usuário, criatura, tag, local, raça, era, evento, divindade, personagem, organização, família, equipamento, material, consumível, munição ou regra)',
   })
   entityType!: LinkableEntityType;
 

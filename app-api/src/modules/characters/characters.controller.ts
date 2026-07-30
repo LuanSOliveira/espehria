@@ -53,14 +53,10 @@ export class CharactersController {
     description:
       'URL de imagem de referência inválida, dados obrigatórios ausentes, ID em formato inválido, ou família primária e secundária são a mesma família',
   })
-  async create(
-    @Body() dto: CreateCharacterDto,
-  ): Promise<CharacterResponseDto> {
+  async create(@Body() dto: CreateCharacterDto): Promise<CharacterResponseDto> {
     const character = await this.charactersService.create(dto);
     const organizations =
-      await this.charactersService.findOrganizationsForCharacter(
-        character.id,
-      );
+      await this.charactersService.findOrganizationsForCharacter(character.id);
     return CharacterResponseDto.fromEntity(character, organizations);
   }
 
@@ -91,7 +87,9 @@ export class CharactersController {
   @ApiOperation({ summary: 'Busca um personagem pelo id' })
   @ApiOkResponse({ type: CharacterResponseDto })
   @ApiNotFoundResponse({ description: 'Personagem não encontrado' })
-  @ApiBadRequestResponse({ description: 'ID de personagem em formato inválido' })
+  @ApiBadRequestResponse({
+    description: 'ID de personagem em formato inválido',
+  })
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<CharacterResponseDto> {
@@ -130,7 +128,9 @@ export class CharactersController {
   @ApiOperation({ summary: 'Remove um personagem' })
   @ApiNoContentResponse({ description: 'Personagem removido com sucesso' })
   @ApiNotFoundResponse({ description: 'Personagem não encontrado' })
-  @ApiBadRequestResponse({ description: 'ID de personagem em formato inválido' })
+  @ApiBadRequestResponse({
+    description: 'ID de personagem em formato inválido',
+  })
   async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     await this.charactersService.remove(id);
   }

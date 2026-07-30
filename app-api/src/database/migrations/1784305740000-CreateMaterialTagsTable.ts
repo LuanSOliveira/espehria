@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateMaterialTagsTable1784305740000
-  implements MigrationInterface
-{
+export class CreateMaterialTagsTable1784305740000 implements MigrationInterface {
   name = 'CreateMaterialTagsTable1784305740000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

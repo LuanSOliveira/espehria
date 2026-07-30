@@ -5,7 +5,8 @@ import { FamilyRelationshipType } from '../enums/family-relationship-type.enum';
 export class FamilyRelationshipInputDto {
   @ApiProperty({
     format: 'uuid',
-    description: 'ID do personagem de origem do vínculo (para PARENT, o pai/mãe)',
+    description:
+      'ID do personagem de origem do vínculo (para PARENT, o pai/mãe)',
     example: '550e8400-e29b-41d4-a716-446655440000',
   })
   @IsUUID()
@@ -13,7 +14,8 @@ export class FamilyRelationshipInputDto {
 
   @ApiProperty({
     format: 'uuid',
-    description: 'ID do personagem de destino do vínculo (para PARENT, o filho/filha)',
+    description:
+      'ID do personagem de destino do vínculo (para PARENT, o filho/filha)',
     example: '660e8400-e29b-41d4-a716-446655440000',
   })
   @IsUUID()

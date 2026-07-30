@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddFamilyColumnsToCharactersTable1784305680000
-  implements MigrationInterface
-{
+export class AddFamilyColumnsToCharactersTable1784305680000 implements MigrationInterface {
   name = 'AddFamilyColumnsToCharactersTable1784305680000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -38,8 +36,6 @@ export class AddFamilyColumnsToCharactersTable1784305680000
     await queryRunner.query(
       `ALTER TABLE "characters" DROP COLUMN "secondary_family_id"`,
     );
-    await queryRunner.query(
-      `ALTER TABLE "characters" DROP COLUMN "family_id"`,
-    );
+    await queryRunner.query(`ALTER TABLE "characters" DROP COLUMN "family_id"`);
   }
 }

@@ -21,9 +21,7 @@ export class OrganizationMemberResponseDto {
   })
   character: CharacterShallowResponseDto;
 
-  static fromEntity(
-    member: OrganizationMember,
-  ): OrganizationMemberResponseDto {
+  static fromEntity(member: OrganizationMember): OrganizationMemberResponseDto {
     const dto = new OrganizationMemberResponseDto();
     dto.id = member.id;
     dto.role = member.role;

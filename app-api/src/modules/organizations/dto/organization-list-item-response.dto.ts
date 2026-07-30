@@ -27,7 +27,9 @@ export class OrganizationListItemResponseDto {
   })
   tags: TagResponseDto[];
 
-  static fromEntity(organization: Organization): OrganizationListItemResponseDto {
+  static fromEntity(
+    organization: Organization,
+  ): OrganizationListItemResponseDto {
     const dto = new OrganizationListItemResponseDto();
     dto.id = organization.id;
     dto.referenceImage = organization.referenceImage;

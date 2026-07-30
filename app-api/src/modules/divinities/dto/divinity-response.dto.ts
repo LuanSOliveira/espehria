@@ -71,8 +71,7 @@ export class DivinityResponseDto {
   sacredSymbol: string | null;
 
   @ApiPropertyOptional({
-    description:
-      'Animal sagrado da divindade (pode ser nulo se não informado)',
+    description: 'Animal sagrado da divindade (pode ser nulo se não informado)',
     example: 'Águia',
   })
   sacredAnimal: string | null;
@@ -126,8 +125,7 @@ export class DivinityResponseDto {
   avatars: string | null;
 
   @ApiPropertyOptional({
-    description:
-      'Igreja da divindade em HTML (pode ser nula se não informada)',
+    description: 'Igreja da divindade em HTML (pode ser nula se não informada)',
     example: '<p>Templo de Zeus em Olímpia</p>',
   })
   church: string | null;

@@ -157,7 +157,9 @@ export class CharactersService {
       dto.secondaryFamilyId ?? null,
     );
 
-    const family = dto.familyId ? await this.findFamilyById(dto.familyId) : null;
+    const family = dto.familyId
+      ? await this.findFamilyById(dto.familyId)
+      : null;
     const secondaryFamily = dto.secondaryFamilyId
       ? await this.findFamilyById(dto.secondaryFamilyId)
       : null;

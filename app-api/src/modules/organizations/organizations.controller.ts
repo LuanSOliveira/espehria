@@ -50,7 +50,8 @@ export class OrganizationsController {
     description: 'Nome da organização já existe',
   })
   @ApiNotFoundResponse({
-    description: 'Uma ou mais tags não encontradas ou personagem-membro não encontrado',
+    description:
+      'Uma ou mais tags não encontradas ou personagem-membro não encontrado',
   })
   @ApiBadRequestResponse({
     description:
@@ -90,7 +91,9 @@ export class OrganizationsController {
   @ApiOperation({ summary: 'Busca uma organização pelo id' })
   @ApiOkResponse({ type: OrganizationResponseDto })
   @ApiNotFoundResponse({ description: 'Organização não encontrada' })
-  @ApiBadRequestResponse({ description: 'ID de organização em formato inválido' })
+  @ApiBadRequestResponse({
+    description: 'ID de organização em formato inválido',
+  })
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<OrganizationResponseDto> {
@@ -128,7 +131,9 @@ export class OrganizationsController {
   @ApiOperation({ summary: 'Remove uma organização' })
   @ApiNoContentResponse({ description: 'Organização removida com sucesso' })
   @ApiNotFoundResponse({ description: 'Organização não encontrada' })
-  @ApiBadRequestResponse({ description: 'ID de organização em formato inválido' })
+  @ApiBadRequestResponse({
+    description: 'ID de organização em formato inválido',
+  })
   async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     await this.organizationsService.remove(id);
   }

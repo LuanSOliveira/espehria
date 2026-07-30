@@ -57,7 +57,8 @@ export class FamilyResponseDto {
 
   @ApiProperty({
     type: () => [FamilyRelationshipResponseDto],
-    description: 'Vínculos de parentesco entre os membros da árvore genealógica',
+    description:
+      'Vínculos de parentesco entre os membros da árvore genealógica',
   })
   relationships: FamilyRelationshipResponseDto[];
 

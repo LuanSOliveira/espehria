@@ -16,6 +16,7 @@ const MENU_ROUTES = {
   materials: '/materiais',
   consumables: '/consumiveis',
   ammunition: '/municoes',
+  rules: '/regras',
 };
 
 export const APP_ROUTES = {
@@ -36,6 +37,7 @@ export const APP_ROUTES = {
     materials: MENU_ROUTES.materials,
     consumables: MENU_ROUTES.consumables,
     ammunition: MENU_ROUTES.ammunition,
+    rules: MENU_ROUTES.rules,
   },
   public: {
     login: MENU_ROUTES.login,

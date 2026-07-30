@@ -74,7 +74,8 @@ export class CreateLocationDto {
 
   @ApiPropertyOptional({
     type: () => [LocationSectionInputDto],
-    description: 'Seções do local, criadas na ordem fornecida (array de seções)',
+    description:
+      'Seções do local, criadas na ordem fornecida (array de seções)',
   })
   @IsOptional()
   @IsArray()

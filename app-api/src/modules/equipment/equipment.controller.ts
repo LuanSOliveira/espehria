@@ -46,7 +46,9 @@ export class EquipmentController {
   @Post()
   @ApiOperation({ summary: 'Cria um equipamento' })
   @ApiCreatedResponse({ type: EquipmentResponseDto })
-  @ApiConflictResponse({ description: 'Já existe um equipamento com este nome' })
+  @ApiConflictResponse({
+    description: 'Já existe um equipamento com este nome',
+  })
   @ApiNotFoundResponse({
     description: 'Uma ou mais tags não foram encontradas',
   })
@@ -54,9 +56,7 @@ export class EquipmentController {
     description:
       'URL de imagem de referência inválida ou dados obrigatórios ausentes',
   })
-  async create(
-    @Body() dto: CreateEquipmentDto,
-  ): Promise<EquipmentResponseDto> {
+  async create(@Body() dto: CreateEquipmentDto): Promise<EquipmentResponseDto> {
     const equipment = await this.equipmentService.create(dto);
     return EquipmentResponseDto.fromEntity(equipment);
   }
@@ -88,7 +88,9 @@ export class EquipmentController {
   @ApiOperation({ summary: 'Busca um equipamento pelo id' })
   @ApiOkResponse({ type: EquipmentResponseDto })
   @ApiNotFoundResponse({ description: 'Equipamento não encontrado' })
-  @ApiBadRequestResponse({ description: 'ID de equipamento em formato inválido' })
+  @ApiBadRequestResponse({
+    description: 'ID de equipamento em formato inválido',
+  })
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<EquipmentResponseDto> {
@@ -105,7 +107,9 @@ export class EquipmentController {
   @ApiNotFoundResponse({
     description: 'Equipamento ou uma ou mais tags não encontrados',
   })
-  @ApiConflictResponse({ description: 'Já existe um equipamento com este nome' })
+  @ApiConflictResponse({
+    description: 'Já existe um equipamento com este nome',
+  })
   @ApiBadRequestResponse({
     description:
       'URL de imagem de referência inválida ou ID em formato inválido',
@@ -123,7 +127,9 @@ export class EquipmentController {
   @ApiOperation({ summary: 'Remove um equipamento' })
   @ApiNoContentResponse({ description: 'Equipamento removido com sucesso' })
   @ApiNotFoundResponse({ description: 'Equipamento não encontrado' })
-  @ApiBadRequestResponse({ description: 'ID de equipamento em formato inválido' })
+  @ApiBadRequestResponse({
+    description: 'ID de equipamento em formato inválido',
+  })
   async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     await this.equipmentService.remove(id);
   }

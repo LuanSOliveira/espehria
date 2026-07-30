@@ -1,4 +1,5 @@
 import {
+  FiBookOpen,
   FiBriefcase,
   FiCalendar,
   FiClock,
@@ -33,6 +34,12 @@ export interface NavSection {
 export const NAV_SECTIONS: NavSection[] = [
   {
     items: [{ label: 'Home', href: APP_ROUTES.private.home, icon: FiHome }],
+  },
+  {
+    title: 'JOGO',
+    items: [
+      { label: 'Regras', href: APP_ROUTES.private.rules, icon: FiBookOpen },
+    ],
   },
   {
     title: 'Mundo',

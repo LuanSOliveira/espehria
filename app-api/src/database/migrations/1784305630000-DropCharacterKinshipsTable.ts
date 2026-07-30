@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class DropCharacterKinshipsTable1784305630000
-  implements MigrationInterface
-{
+export class DropCharacterKinshipsTable1784305630000 implements MigrationInterface {
   name = 'DropCharacterKinshipsTable1784305630000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

@@ -106,9 +106,7 @@ export class EquipmentService {
       order: { name: 'ASC' },
     });
 
-    const equipmentById = new Map(
-      equipmentList.map((item) => [item.id, item]),
-    );
+    const equipmentById = new Map(equipmentList.map((item) => [item.id, item]));
     const data = ids
       .map((item) => equipmentById.get(item.id))
       .filter((item): item is Equipment => item !== undefined);

@@ -88,7 +88,9 @@ export class ConsumablesController {
   @ApiOperation({ summary: 'Busca um consumível pelo id' })
   @ApiOkResponse({ type: ConsumableResponseDto })
   @ApiNotFoundResponse({ description: 'Consumível não encontrado' })
-  @ApiBadRequestResponse({ description: 'ID de consumível em formato inválido' })
+  @ApiBadRequestResponse({
+    description: 'ID de consumível em formato inválido',
+  })
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<ConsumableResponseDto> {
@@ -123,7 +125,9 @@ export class ConsumablesController {
   @ApiOperation({ summary: 'Remove um consumível' })
   @ApiNoContentResponse({ description: 'Consumível removido com sucesso' })
   @ApiNotFoundResponse({ description: 'Consumível não encontrado' })
-  @ApiBadRequestResponse({ description: 'ID de consumível em formato inválido' })
+  @ApiBadRequestResponse({
+    description: 'ID de consumível em formato inválido',
+  })
   async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     await this.consumablesService.remove(id);
   }
