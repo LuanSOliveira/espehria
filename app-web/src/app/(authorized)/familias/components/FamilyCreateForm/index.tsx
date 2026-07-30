@@ -72,8 +72,10 @@ interface FamilyRelationshipPayload {
   type: FamilyRelationshipType;
 }
 
-interface FamilyPayload extends Omit<FamilyFormData, 'referenceImage'> {
+interface FamilyPayload
+  extends Omit<FamilyFormData, 'referenceImage' | 'description'> {
   referenceImage?: string;
+  description?: string;
   members: FamilyMemberPayload[];
   relationships: FamilyRelationshipPayload[];
 }
@@ -127,6 +129,7 @@ export const FamilyCreateForm = ({ onSaved }: FamilyCreateFormProps) => {
   useEffect(() => {
     if (!isEditMode) {
       reset(familyFormDefaultValues);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setMembers([]);
       setRelationships([]);
       return;

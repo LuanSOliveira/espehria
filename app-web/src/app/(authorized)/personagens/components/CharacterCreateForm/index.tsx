@@ -42,12 +42,17 @@ export interface CharacterCreateFormProps {
 interface CharacterPayload
   extends Omit<
     CharacterFormData,
-    'referenceImage' | 'raceId' | 'familyId' | 'secondaryFamilyId'
+    | 'referenceImage'
+    | 'raceId'
+    | 'familyId'
+    | 'secondaryFamilyId'
+    | 'description'
   > {
   referenceImage?: string;
   raceId?: string;
   familyId?: string;
   secondaryFamilyId?: string;
+  description?: string;
 }
 
 export const CharacterCreateForm = ({ onSaved }: CharacterCreateFormProps) => {

@@ -29,8 +29,15 @@ export interface MaterialCreateFormProps {
   onSaved: () => void;
 }
 
-interface MaterialPayload extends Omit<MaterialFormData, 'referenceImage'> {
+interface MaterialPayload
+  extends Omit<
+    MaterialFormData,
+    'referenceImage' | 'description' | 'price' | 'privateInformation'
+  > {
   referenceImage?: string;
+  description?: string;
+  price?: string;
+  privateInformation?: string;
 }
 
 export const MaterialCreateForm = ({ onSaved }: MaterialCreateFormProps) => {

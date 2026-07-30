@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Divider } from '@mui/material';
@@ -33,10 +33,12 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
   const [expandedSection, setExpandedSection] = useState<string | null>(() =>
     getSectionForPathname(pathname),
   );
+  const [pathnameForSection, setPathnameForSection] = useState(pathname);
 
-  useEffect(() => {
+  if (pathname !== pathnameForSection) {
+    setPathnameForSection(pathname);
     setExpandedSection(getSectionForPathname(pathname));
-  }, [pathname]);
+  }
 
   const handleToggleSection = (sectionTitle: string) => {
     setExpandedSection((current) =>

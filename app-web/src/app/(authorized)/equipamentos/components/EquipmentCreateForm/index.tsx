@@ -29,8 +29,15 @@ export interface EquipmentCreateFormProps {
   onSaved: () => void;
 }
 
-interface EquipmentPayload extends Omit<EquipmentFormData, 'referenceImage'> {
+interface EquipmentPayload
+  extends Omit<
+    EquipmentFormData,
+    'referenceImage' | 'description' | 'price' | 'privateInformation'
+  > {
   referenceImage?: string;
+  description?: string;
+  price?: string;
+  privateInformation?: string;
 }
 
 export const EquipmentCreateForm = ({ onSaved }: EquipmentCreateFormProps) => {

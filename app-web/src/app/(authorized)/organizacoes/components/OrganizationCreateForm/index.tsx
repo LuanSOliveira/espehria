@@ -39,8 +39,9 @@ interface OrganizationMemberPayload {
 }
 
 interface OrganizationPayload
-  extends Omit<OrganizationFormData, 'referenceImage'> {
+  extends Omit<OrganizationFormData, 'referenceImage' | 'description'> {
   referenceImage?: string;
+  description?: string;
   members: OrganizationMemberPayload[];
 }
 
@@ -78,6 +79,7 @@ export const OrganizationCreateForm = ({
   useEffect(() => {
     if (!isEditMode) {
       reset(organizationFormDefaultValues);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setMembers([]);
       return;
     }

@@ -39,9 +39,9 @@ export const ViewModal = ({
   const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(
     null,
   );
+  const [emotionCache, setEmotionCache] = useState<EmotionCache | null>(null);
 
   const popupWindowRef = useRef<Window | null>(null);
-  const emotionCacheRef = useRef<EmotionCache | null>(null);
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const openRef = useRef(open);
 
@@ -56,7 +56,7 @@ export const ViewModal = ({
     }
 
     popupWindowRef.current = null;
-    emotionCacheRef.current = null;
+    setEmotionCache(null);
     setPopupContainer(null);
     setIsPoppedOut(false);
 
@@ -96,12 +96,13 @@ export const ViewModal = ({
     container.style.height = '100vh';
     popupWindow.document.body.appendChild(container);
 
-    emotionCacheRef.current = createCache({
-      key: 'view-modal-popup',
-      container: popupWindow.document.head,
-    });
-
     popupWindowRef.current = popupWindow;
+    setEmotionCache(
+      createCache({
+        key: 'view-modal-popup',
+        container: popupWindow.document.head,
+      }),
+    );
     setPopupContainer(container);
     setIsPoppedOut(true);
 
@@ -133,9 +134,9 @@ export const ViewModal = ({
   }, []);
 
   const popupPortal =
-    isPoppedOut && popupContainer && emotionCacheRef.current
+    isPoppedOut && popupContainer && emotionCache
       ? createPortal(
-          <CacheProvider value={emotionCacheRef.current}>
+          <CacheProvider value={emotionCache}>
             <ThemeProvider theme={theme}>
               <PageContainer className="h-screen! w-screen! rounded-none! border-0!">
                 <Title component="h2" sx={{ textAlign: 'left', marginBottom: '20px' }}>

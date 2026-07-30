@@ -30,8 +30,14 @@ export interface AmmunitionCreateFormProps {
 }
 
 interface AmmunitionPayload
-  extends Omit<AmmunitionFormData, 'referenceImage'> {
+  extends Omit<
+    AmmunitionFormData,
+    'referenceImage' | 'description' | 'price' | 'privateInformation'
+  > {
   referenceImage?: string;
+  description?: string;
+  price?: string;
+  privateInformation?: string;
 }
 
 export const AmmunitionCreateForm = ({

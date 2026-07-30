@@ -102,6 +102,7 @@ export const LocationCreateForm = ({ onSaved }: LocationCreateFormProps) => {
           description: section.description ?? '',
         })) ?? [],
     });
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local com os dados carregados de forma assíncrona
     setPointsOfInterest(locationDetail.pointsOfInterest ?? []);
   }, [isEditMode, locationDetail, reset]);
 

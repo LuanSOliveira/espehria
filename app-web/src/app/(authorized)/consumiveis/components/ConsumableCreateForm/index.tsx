@@ -30,8 +30,14 @@ export interface ConsumableCreateFormProps {
 }
 
 interface ConsumablePayload
-  extends Omit<ConsumableFormData, 'referenceImage'> {
+  extends Omit<
+    ConsumableFormData,
+    'referenceImage' | 'description' | 'price' | 'privateInformation'
+  > {
   referenceImage?: string;
+  description?: string;
+  price?: string;
+  privateInformation?: string;
 }
 
 export const ConsumableCreateForm = ({
