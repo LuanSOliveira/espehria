@@ -20,8 +20,8 @@ export const TagsFilterSection = ({
   onSubmit,
 }: TagsFilterSectionProps) => {
   return (
-    <form onSubmit={onSubmit} className="mt-6 flex max-w-90 items-end gap-3">
-      <div className="flex-1">
+    <form onSubmit={onSubmit} className="mt-6 flex max-w-160 items-end gap-3">
+      <div className="min-w-50 flex-1">
         <DefaultTextInput
           id="tags-name-filter"
           label="Nome"
@@ -31,7 +31,7 @@ export const TagsFilterSection = ({
           icon={<FiSearch />}
         />
       </div>
-      <div className="flex-1">
+      <div className="min-w-50 flex-1">
         <DefaultTextInput
           id="tags-type-filter"
           label="Tipo"
