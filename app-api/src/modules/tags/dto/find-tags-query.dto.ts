@@ -12,6 +12,14 @@ export class FindTagsQueryDto {
   name?: string;
 
   @ApiPropertyOptional({
+    description: 'Filtro por tipo (busca parcial, case-insensitive)',
+    example: 'Monstro',
+  })
+  @IsOptional()
+  @IsString()
+  type?: string;
+
+  @ApiPropertyOptional({
     minimum: 1,
     default: 1,
     description: 'Número da página',

@@ -11,6 +11,12 @@ export class TagResponseDto {
   @ApiProperty({ description: 'Cor da tag em formato hexadecimal' })
   color: string;
 
+  @ApiProperty({
+    nullable: true,
+    description: 'Tipo da tag',
+  })
+  type: string | null;
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -19,6 +25,7 @@ export class TagResponseDto {
     dto.id = tag.id;
     dto.name = tag.name;
     dto.color = tag.color;
+    dto.type = tag.type ?? null;
     dto.createdAt = tag.createdAt;
     return dto;
   }

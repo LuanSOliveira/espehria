@@ -19,6 +19,7 @@ import { TagsFilterSection } from './components/TagsFilterSection';
 export default function TagsPage() {
   const isGoogleUser = useIsGoogleUser();
   const [nameInput, setNameInput] = useState('');
+  const [typeInput, setTypeInput] = useState('');
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [tagPendingDelete, setTagPendingDelete] = useState<ITag | null>(null);
   const [filters, setFilters] = useState<ITagListFilters>({
@@ -58,6 +59,7 @@ export default function TagsPage() {
     setFilters((current) => ({
       ...current,
       name: nameInput.trim() || undefined,
+      type: typeInput.trim() || undefined,
       page: 1,
     }));
   };
@@ -101,6 +103,8 @@ export default function TagsPage() {
       <TagsFilterSection
         nameValue={nameInput}
         onNameChange={setNameInput}
+        typeValue={typeInput}
+        onTypeChange={setTypeInput}
         onSubmit={handleSearch}
       />
 

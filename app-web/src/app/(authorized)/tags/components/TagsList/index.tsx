@@ -46,6 +46,11 @@ export const TagsList = ({
                 Cor
               </Label>
             </TableCell>
+            <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
+                Tipo
+              </Label>
+            </TableCell>
             <TableCell align="right" sx={{ borderColor: APP_COLORS.gold }}>
               <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
                 Ações
@@ -56,7 +61,7 @@ export const TagsList = ({
         <TableBody>
           {!isLoading && tags.length === 0 && (
             <TableRow>
-              <TableCell colSpan={3} sx={{ borderColor: APP_COLORS.gold }}>
+              <TableCell colSpan={4} sx={{ borderColor: APP_COLORS.gold }}>
                 <DefaultText>Nenhuma tag encontrada.</DefaultText>
               </TableCell>
             </TableRow>

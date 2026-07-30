@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { FiTag } from 'react-icons/fi';
+import { FiLayers, FiTag } from 'react-icons/fi';
 import { FormColorInput, FormTextInput } from '@/shared/components/Inputs';
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { usePostEntity, usePutEntity } from '@/hooks/Queries';
@@ -31,7 +31,11 @@ export const TagCreateForm = ({ onSaved }: TagCreateFormProps) => {
   useEffect(() => {
     reset(
       selectedTag
-        ? { name: selectedTag.name, color: selectedTag.color }
+        ? {
+            name: selectedTag.name,
+            color: selectedTag.color,
+            type: selectedTag.type ?? '',
+          }
         : tagFormDefaultValues,
     );
   }, [selectedTag, reset]);
@@ -103,6 +107,15 @@ export const TagCreateForm = ({ onSaved }: TagCreateFormProps) => {
         name="color"
         control={control}
         label="Cor"
+      />
+
+      <FormTextInput
+        id="tag-form-type"
+        name="type"
+        control={control}
+        label="Tipo"
+        placeholder="Digite o tipo da tag"
+        icon={<FiLayers />}
       />
 
       <PrimaryButton

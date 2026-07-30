@@ -45,6 +45,7 @@ export class TagsService {
     const tag = this.tagsRepository.create({
       name: dto.name,
       color: dto.color,
+      type: dto.type,
     });
     return this.tagsRepository.save(tag);
   }
@@ -58,6 +59,12 @@ export class TagsService {
     if (query.name) {
       queryBuilder.andWhere('tag.name ILIKE :name', {
         name: `%${query.name}%`,
+      });
+    }
+
+    if (query.type) {
+      queryBuilder.andWhere('tag.type ILIKE :type', {
+        type: `%${query.type}%`,
       });
     }
 
@@ -86,6 +93,10 @@ export class TagsService {
 
     if (dto.color) {
       tag.color = dto.color;
+    }
+
+    if (dto.type !== undefined) {
+      tag.type = dto.type;
     }
 
     return this.tagsRepository.save(tag);

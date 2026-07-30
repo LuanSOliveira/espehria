@@ -39,6 +39,9 @@ export const TagsListItem = ({ tag, onEdit, onDelete }: TagsListItemProps) => {
           <DefaultText>{tag.color}</DefaultText>
         </div>
       </TableCell>
+      <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+        <DefaultText>{tag.type || '-'}</DefaultText>
+      </TableCell>
       <TableCell align="right" sx={{ borderColor: APP_COLORS.gold }}>
         {!isGoogleUser && (
           <>

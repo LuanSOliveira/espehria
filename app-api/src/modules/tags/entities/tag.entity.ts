@@ -12,4 +12,8 @@ export class Tag extends BaseEntity {
   @ApiProperty()
   @Column()
   color!: string;
+
+  @ApiProperty({ required: false, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  type!: string | null;
 }

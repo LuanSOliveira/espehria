@@ -55,7 +55,7 @@ export class TagsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Lista tags com paginação e filtro por nome' })
+  @ApiOperation({ summary: 'Lista tags com paginação e filtro por nome e tipo' })
   @ApiOkResponse({ type: PaginatedTagsResponseDto })
   @ApiBadRequestResponse({
     description: 'Parâmetros de paginação ou filtro inválidos',
