@@ -14,12 +14,23 @@ import { UpdateTalentDto } from './dto/update-talent.dto';
 import { FindTalentsQueryDto } from './dto/find-talents-query.dto';
 import { Talent } from './entities/talent.entity';
 import { Tag } from '../tags/entities/tag.entity';
+import { EntityLinksService } from '../entity-links/entity-links.service';
+import { EntityLinkType } from '../entity-links/enums/entity-link-type.enum';
+import { ReferenceableEntityType } from '../entity-links/enums/referenceable-entity-type.enum';
+import { EntityReferenceInputDto } from '../entity-links/dto/entity-reference-input.dto';
+import { EntityReferenceResponseDto } from '../entity-links/dto/entity-reference-response.dto';
 
 export interface PaginatedTalents {
   data: Talent[];
   total: number;
   page: number;
   perPage: number;
+}
+
+export interface TalentWithReferences {
+  talent: Talent;
+  improvedFrom: EntityReferenceResponseDto[];
+  requirements: EntityReferenceResponseDto[];
 }
 
 @Injectable()
@@ -29,17 +40,29 @@ export class TalentsService {
     private readonly talentsRepository: Repository<Talent>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
+    private readonly entityLinksService: EntityLinksService,
   ) {}
 
   findByName(name: string): Promise<Talent | null> {
     return this.talentsRepository.findOneBy({ name });
   }
 
-  findById(id: string): Promise<Talent | null> {
-    return this.talentsRepository.findOne({
+  async findById(id: string): Promise<TalentWithReferences | null> {
+    const talent = await this.talentsRepository.findOne({
       where: { id },
       relations: { tags: true },
     });
+    if (!talent) {
+      return null;
+    }
+
+    const { improvedFrom, requirements } =
+      await this.entityLinksService.loadReferencesFor(
+        ReferenceableEntityType.TALENT,
+        id,
+      );
+
+    return { talent, improvedFrom, requirements };
   }
 
   private async findTagsByIds(tagIds: string[]): Promise<Tag[]> {
@@ -51,7 +74,7 @@ export class TalentsService {
     return tags;
   }
 
-  async create(dto: CreateTalentDto): Promise<Talent> {
+  async create(dto: CreateTalentDto): Promise<TalentWithReferences> {
     const existing = await this.findByName(dto.name);
     if (existing) {
       throw new ConflictException('Já existe um talento com este nome.');
@@ -62,13 +85,46 @@ export class TalentsService {
         ? await this.findTagsByIds(dto.tagIds)
         : [];
 
+    const improvedFromInput = dto.improvedFrom ?? [];
+    const requirementsInput = dto.requirements ?? [];
+
+    this.entityLinksService.validateLists({
+      ownerEntityType: ReferenceableEntityType.TALENT,
+      improvedFrom: improvedFromInput,
+      requirements: requirementsInput,
+    });
+
+    await this.entityLinksService.resolveReferences(improvedFromInput);
+    await this.entityLinksService.resolveReferences(requirementsInput);
+
     const talent = this.talentsRepository.create({
       name: dto.name,
       description: dto.description ?? null,
       tags,
     });
 
-    return this.talentsRepository.save(talent);
+    const savedTalent = await this.talentsRepository.save(talent);
+
+    await this.entityLinksService.replaceLinks(
+      ReferenceableEntityType.TALENT,
+      savedTalent.id,
+      EntityLinkType.IMPROVED_FROM,
+      improvedFromInput,
+    );
+    await this.entityLinksService.replaceLinks(
+      ReferenceableEntityType.TALENT,
+      savedTalent.id,
+      EntityLinkType.REQUIREMENT,
+      requirementsInput,
+    );
+
+    const { improvedFrom, requirements } =
+      await this.entityLinksService.loadReferencesFor(
+        ReferenceableEntityType.TALENT,
+        savedTalent.id,
+      );
+
+    return { talent: savedTalent, improvedFrom, requirements };
   }
 
   async findAllPaginated(
@@ -110,8 +166,14 @@ export class TalentsService {
     return { data, total, page, perPage };
   }
 
-  async update(id: string, dto: UpdateTalentDto): Promise<Talent> {
-    const talent = await this.findById(id);
+  async update(
+    id: string,
+    dto: UpdateTalentDto,
+  ): Promise<TalentWithReferences> {
+    const talent = await this.talentsRepository.findOne({
+      where: { id },
+      relations: { tags: true },
+    });
     if (!talent) {
       throw new NotFoundException('Talento não encontrado.');
     }
@@ -132,7 +194,75 @@ export class TalentsService {
         dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
     }
 
-    return this.talentsRepository.save(talent);
+    let effectiveImprovedFrom = dto.improvedFrom;
+    let effectiveRequirements = dto.requirements;
+
+    if (
+      effectiveImprovedFrom === undefined ||
+      effectiveRequirements === undefined
+    ) {
+      const current = await this.entityLinksService.loadReferencesFor(
+        ReferenceableEntityType.TALENT,
+        id,
+      );
+      if (effectiveImprovedFrom === undefined) {
+        effectiveImprovedFrom = current.improvedFrom.map(
+          (ref): EntityReferenceInputDto => ({
+            entityType: ref.entityType,
+            id: ref.id,
+          }),
+        );
+      }
+      if (effectiveRequirements === undefined) {
+        effectiveRequirements = current.requirements.map(
+          (ref): EntityReferenceInputDto => ({
+            entityType: ref.entityType,
+            id: ref.id,
+          }),
+        );
+      }
+    }
+
+    this.entityLinksService.validateLists({
+      ownerEntityType: ReferenceableEntityType.TALENT,
+      ownerId: id,
+      improvedFrom: effectiveImprovedFrom,
+      requirements: effectiveRequirements,
+    });
+
+    if (dto.improvedFrom !== undefined) {
+      await this.entityLinksService.resolveReferences(dto.improvedFrom);
+    }
+    if (dto.requirements !== undefined) {
+      await this.entityLinksService.resolveReferences(dto.requirements);
+    }
+
+    const savedTalent = await this.talentsRepository.save(talent);
+
+    if (dto.improvedFrom !== undefined) {
+      await this.entityLinksService.replaceLinks(
+        ReferenceableEntityType.TALENT,
+        id,
+        EntityLinkType.IMPROVED_FROM,
+        dto.improvedFrom,
+      );
+    }
+    if (dto.requirements !== undefined) {
+      await this.entityLinksService.replaceLinks(
+        ReferenceableEntityType.TALENT,
+        id,
+        EntityLinkType.REQUIREMENT,
+        dto.requirements,
+      );
+    }
+
+    const { improvedFrom, requirements } =
+      await this.entityLinksService.loadReferencesFor(
+        ReferenceableEntityType.TALENT,
+        id,
+      );
+
+    return { talent: savedTalent, improvedFrom, requirements };
   }
 
   async remove(id: string): Promise<void> {

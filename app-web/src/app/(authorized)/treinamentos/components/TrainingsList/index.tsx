@@ -43,6 +43,11 @@ export const TrainingsList = ({
                 Nome
               </Label>
             </TableCell>
+            <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
+                Tags
+              </Label>
+            </TableCell>
             <TableCell align="right" sx={{ borderColor: APP_COLORS.gold }}>
               <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
                 Ações
@@ -53,7 +58,7 @@ export const TrainingsList = ({
         <TableBody>
           {!isLoading && trainings.length === 0 && (
             <TableRow>
-              <TableCell colSpan={2} sx={{ borderColor: APP_COLORS.gold }}>
+              <TableCell colSpan={3} sx={{ borderColor: APP_COLORS.gold }}>
                 <DefaultText>Nenhum treinamento encontrado.</DefaultText>
               </TableCell>
             </TableRow>

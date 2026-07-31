@@ -2,9 +2,10 @@
 
 import { useEffect } from 'react';
 import { Chip, CircularProgress } from '@mui/material';
-import { FiFileText } from 'react-icons/fi';
+import { FiCheckSquare, FiFileText, FiTrendingUp } from 'react-icons/fi';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
+import { EntityReferenceCard } from '@/shared/components/EntityReferenceCard';
 import { useGetEntityById } from '@/hooks/Queries';
 import { ITalent } from '@/shared/interfaces';
 import { getContrastTextColor, showToast } from '@/shared/util';
@@ -103,6 +104,54 @@ export const TalentView = ({ talentId, onNotFound }: TalentViewProps) => {
         </div>
         <div className="px-3 py-3">
           <RichTextViewer value={talent.description} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div style={APP_CONTAINER_STYLES.detailSectionBox}>
+          <div
+            className="flex items-center gap-2 px-3 py-2"
+            style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
+          >
+            <FiTrendingUp style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
+            <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
+              Aprimorado de
+            </Label>
+          </div>
+          <div className="flex flex-col gap-2 px-3 py-3">
+            {talent.improvedFrom.length === 0 && (
+              <DefaultText>Nenhum item adicionado.</DefaultText>
+            )}
+            {talent.improvedFrom.map((reference) => (
+              <EntityReferenceCard
+                key={`${reference.entityType}-${reference.id}`}
+                reference={reference}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div style={APP_CONTAINER_STYLES.detailSectionBox}>
+          <div
+            className="flex items-center gap-2 px-3 py-2"
+            style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
+          >
+            <FiCheckSquare style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
+            <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
+              Requisitos
+            </Label>
+          </div>
+          <div className="flex flex-col gap-2 px-3 py-3">
+            {talent.requirements.length === 0 && (
+              <DefaultText>Nenhum item adicionado.</DefaultText>
+            )}
+            {talent.requirements.map((reference) => (
+              <EntityReferenceCard
+                key={`${reference.entityType}-${reference.id}`}
+                reference={reference}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>

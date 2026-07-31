@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import {
@@ -10,6 +10,7 @@ import {
 } from '@/shared/components/Inputs';
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
+import { EntityReferenceListField } from '@/shared/components/EntityReferenceListField';
 import {
   useGetEntityById,
   useGetEntityList,
@@ -21,7 +22,12 @@ import {
   spellFormDefaultValues,
   spellFormResolver,
 } from '@/shared/formSchemas';
-import { ISpell, ITag, ITagListFilters } from '@/shared/interfaces';
+import {
+  IEntityReference,
+  ISpell,
+  ITag,
+  ITagListFilters,
+} from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedSpellStore } from '@/store';
 
@@ -29,15 +35,25 @@ export interface SpellCreateFormProps {
   onSaved: () => void;
 }
 
+interface EntityReferenceInputPayload {
+  entityType: string;
+  id: string;
+}
+
 interface SpellPayload
   extends Omit<SpellFormData, 'referenceImage' | 'description'> {
   referenceImage?: string;
   description?: string;
+  improvedFrom: EntityReferenceInputPayload[];
+  requirements: EntityReferenceInputPayload[];
 }
 
 export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
   const selectedSpell = useSelectedSpellStore((state) => state.selectedSpell);
   const isEditMode = !!selectedSpell;
+
+  const [improvedFrom, setImprovedFrom] = useState<IEntityReference[]>([]);
+  const [requirements, setRequirements] = useState<IEntityReference[]>([]);
 
   const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
     url: '/tags',
@@ -63,6 +79,10 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
   useEffect(() => {
     if (!isEditMode) {
       reset(spellFormDefaultValues);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setImprovedFrom([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setRequirements([]);
       return;
     }
 
@@ -76,6 +96,8 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
       description: spellDetail.description ?? '',
       tagIds: spellDetail.tags?.map((tag) => tag.id) ?? [],
     });
+    setImprovedFrom(spellDetail.improvedFrom ?? []);
+    setRequirements(spellDetail.requirements ?? []);
   }, [isEditMode, spellDetail, reset]);
 
   useEffect(() => {
@@ -91,11 +113,23 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
     });
   }, [isSpellDetailError, spellDetailError]);
 
-  const buildPayload = (data: SpellFormData): SpellPayload => ({
+  const buildPayload = (
+    data: SpellFormData,
+    improvedFrom: IEntityReference[],
+    requirements: IEntityReference[],
+  ): SpellPayload => ({
     ...data,
     referenceImage: data.referenceImage || undefined,
     description: data.description || undefined,
     tagIds: data.tagIds ?? [],
+    improvedFrom: improvedFrom.map((reference) => ({
+      entityType: reference.entityType,
+      id: reference.id,
+    })),
+    requirements: requirements.map((reference) => ({
+      entityType: reference.entityType,
+      id: reference.id,
+    })),
   });
 
   const createSpellMutation = usePostEntity<ISpell, SpellPayload>({
@@ -107,6 +141,8 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
         type: 'success',
       });
       reset(spellFormDefaultValues);
+      setImprovedFrom([]);
+      setRequirements([]);
       onSaved();
     },
     onError: (error) => {
@@ -140,7 +176,7 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
   });
 
   const onSubmit = (data: SpellFormData) => {
-    const payload = buildPayload(data);
+    const payload = buildPayload(data, improvedFrom, requirements);
 
     if (isEditMode) {
       updateSpellMutation.mutate(payload);
@@ -201,6 +237,28 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
         label="Descrição"
         placeholder="Descreva a magia"
       />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <EntityReferenceListField
+          label="Aprimorado de"
+          addButtonLabel="Adicionar Aprimorado de"
+          value={improvedFrom}
+          onChange={setImprovedFrom}
+          otherListValue={requirements}
+          currentEntityType="spell"
+          currentEntityId={selectedSpell?.id}
+        />
+
+        <EntityReferenceListField
+          label="Requisitos"
+          addButtonLabel="Adicionar Requisitos"
+          value={requirements}
+          onChange={setRequirements}
+          otherListValue={improvedFrom}
+          currentEntityType="spell"
+          currentEntityId={selectedSpell?.id}
+        />
+      </div>
 
       <PrimaryButton
         type="submit"

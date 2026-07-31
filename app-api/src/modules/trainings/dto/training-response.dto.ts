@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Training } from '../entities/training.entity';
 import { TagResponseDto } from '../../tags/dto/tag-response.dto';
+import { EntityReferenceResponseDto } from '../../entity-links/dto/entity-reference-response.dto';
 
 export class TrainingResponseDto {
   @ApiProperty({
@@ -27,13 +28,29 @@ export class TrainingResponseDto {
   })
   tags: TagResponseDto[];
 
+  @ApiProperty({
+    type: () => [EntityReferenceResponseDto],
+    description: 'Itens dos quais este treinamento é aprimorado',
+  })
+  improvedFrom: EntityReferenceResponseDto[];
+
+  @ApiProperty({
+    type: () => [EntityReferenceResponseDto],
+    description: 'Itens exigidos como requisito para este treinamento',
+  })
+  requirements: EntityReferenceResponseDto[];
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
   @ApiProperty({ description: 'Data da última atualização' })
   updatedAt: Date;
 
-  static fromEntity(training: Training): TrainingResponseDto {
+  static fromEntity(
+    training: Training,
+    improvedFrom: EntityReferenceResponseDto[],
+    requirements: EntityReferenceResponseDto[],
+  ): TrainingResponseDto {
     const dto = new TrainingResponseDto();
     dto.id = training.id;
     dto.name = training.name;
@@ -41,6 +58,8 @@ export class TrainingResponseDto {
     dto.tags = (training.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),
     );
+    dto.improvedFrom = improvedFrom;
+    dto.requirements = requirements;
     dto.createdAt = training.createdAt;
     dto.updatedAt = training.updatedAt;
     return dto;

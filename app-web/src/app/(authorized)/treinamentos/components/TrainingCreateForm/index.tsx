@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import {
@@ -10,6 +10,7 @@ import {
 } from '@/shared/components/Inputs';
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
+import { EntityReferenceListField } from '@/shared/components/EntityReferenceListField';
 import {
   useGetEntityById,
   useGetEntityList,
@@ -21,7 +22,12 @@ import {
   trainingFormDefaultValues,
   trainingFormResolver,
 } from '@/shared/formSchemas';
-import { ITag, ITagListFilters, ITraining } from '@/shared/interfaces';
+import {
+  IEntityReference,
+  ITag,
+  ITagListFilters,
+  ITraining,
+} from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedTrainingStore } from '@/store';
 
@@ -29,8 +35,15 @@ export interface TrainingCreateFormProps {
   onSaved: () => void;
 }
 
+interface EntityReferenceInputPayload {
+  entityType: string;
+  id: string;
+}
+
 interface TrainingPayload extends Omit<TrainingFormData, 'description'> {
   description?: string;
+  improvedFrom: EntityReferenceInputPayload[];
+  requirements: EntityReferenceInputPayload[];
 }
 
 export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
@@ -38,6 +51,9 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
     (state) => state.selectedTraining,
   );
   const isEditMode = !!selectedTraining;
+
+  const [improvedFrom, setImprovedFrom] = useState<IEntityReference[]>([]);
+  const [requirements, setRequirements] = useState<IEntityReference[]>([]);
 
   const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
     url: '/tags',
@@ -63,6 +79,10 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
   useEffect(() => {
     if (!isEditMode) {
       reset(trainingFormDefaultValues);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setImprovedFrom([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setRequirements([]);
       return;
     }
 
@@ -75,6 +95,8 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
       description: trainingDetail.description ?? '',
       tagIds: trainingDetail.tags?.map((tag) => tag.id) ?? [],
     });
+    setImprovedFrom(trainingDetail.improvedFrom ?? []);
+    setRequirements(trainingDetail.requirements ?? []);
   }, [isEditMode, trainingDetail, reset]);
 
   useEffect(() => {
@@ -90,10 +112,22 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
     });
   }, [isTrainingDetailError, trainingDetailError]);
 
-  const buildPayload = (data: TrainingFormData): TrainingPayload => ({
+  const buildPayload = (
+    data: TrainingFormData,
+    improvedFrom: IEntityReference[],
+    requirements: IEntityReference[],
+  ): TrainingPayload => ({
     ...data,
     description: data.description || undefined,
     tagIds: data.tagIds ?? [],
+    improvedFrom: improvedFrom.map((reference) => ({
+      entityType: reference.entityType,
+      id: reference.id,
+    })),
+    requirements: requirements.map((reference) => ({
+      entityType: reference.entityType,
+      id: reference.id,
+    })),
   });
 
   const createTrainingMutation = usePostEntity<ITraining, TrainingPayload>({
@@ -105,6 +139,8 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
         type: 'success',
       });
       reset(trainingFormDefaultValues);
+      setImprovedFrom([]);
+      setRequirements([]);
       onSaved();
     },
     onError: (error) => {
@@ -138,7 +174,7 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
   });
 
   const onSubmit = (data: TrainingFormData) => {
-    const payload = buildPayload(data);
+    const payload = buildPayload(data, improvedFrom, requirements);
 
     if (isEditMode) {
       updateTrainingMutation.mutate(payload);
@@ -191,6 +227,28 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
         label="Descrição"
         placeholder="Descreva o treinamento"
       />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <EntityReferenceListField
+          label="Aprimorado de"
+          addButtonLabel="Adicionar Aprimorado de"
+          value={improvedFrom}
+          onChange={setImprovedFrom}
+          otherListValue={requirements}
+          currentEntityType="training"
+          currentEntityId={selectedTraining?.id}
+        />
+
+        <EntityReferenceListField
+          label="Requisitos"
+          addButtonLabel="Adicionar Requisitos"
+          value={requirements}
+          onChange={setRequirements}
+          otherListValue={improvedFrom}
+          currentEntityType="training"
+          currentEntityId={selectedTraining?.id}
+        />
+      </div>
 
       <PrimaryButton
         type="submit"

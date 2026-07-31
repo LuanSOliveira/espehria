@@ -1,5 +1,6 @@
 import { IEntity } from '../Entity';
 import { ITag } from '../Tag';
+import { IEntityReference } from '../EntityReference';
 
 export interface ITechniqueListItem {
   id: string;
@@ -13,6 +14,8 @@ export interface ITechnique extends IEntity {
   referenceImage?: string | null;
   description?: string | null;
   tags: ITag[];
+  improvedFrom: IEntityReference[];
+  requirements: IEntityReference[];
   createdAt: string;
   updatedAt: string;
 }

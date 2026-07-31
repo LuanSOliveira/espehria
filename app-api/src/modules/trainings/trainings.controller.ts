@@ -47,17 +47,25 @@ export class TrainingsController {
   @ApiOperation({ summary: 'Cria um treinamento' })
   @ApiCreatedResponse({ type: TrainingResponseDto })
   @ApiConflictResponse({
-    description: 'Já existe um treinamento com este nome',
+    description:
+      'Já existe um treinamento com este nome, ou violação de regra em Aprimorado de/Requisitos (autorreferência, duplicata ou item em ambas as listas)',
   })
   @ApiNotFoundResponse({
-    description: 'Uma ou mais tags não foram encontradas',
+    description:
+      'Uma ou mais tags ou entidades referenciadas em Aprimorado de/Requisitos não foram encontradas',
   })
   @ApiBadRequestResponse({
-    description: 'Dados obrigatórios ausentes',
+    description:
+      'Dados obrigatórios ausentes ou formato inválido de entityType/id',
   })
   async create(@Body() dto: CreateTrainingDto): Promise<TrainingResponseDto> {
-    const training = await this.trainingsService.create(dto);
-    return TrainingResponseDto.fromEntity(training);
+    const { training, improvedFrom, requirements } =
+      await this.trainingsService.create(dto);
+    return TrainingResponseDto.fromEntity(
+      training,
+      improvedFrom,
+      requirements,
+    );
   }
 
   @Get()
@@ -93,31 +101,43 @@ export class TrainingsController {
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<TrainingResponseDto> {
-    const training = await this.trainingsService.findById(id);
-    if (!training) {
+    const result = await this.trainingsService.findById(id);
+    if (!result) {
       throw new NotFoundException('Treinamento não encontrado.');
     }
-    return TrainingResponseDto.fromEntity(training);
+    return TrainingResponseDto.fromEntity(
+      result.training,
+      result.improvedFrom,
+      result.requirements,
+    );
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Atualiza um treinamento' })
   @ApiOkResponse({ type: TrainingResponseDto })
   @ApiNotFoundResponse({
-    description: 'Treinamento ou uma ou mais tags não encontrados',
+    description:
+      'Treinamento ou uma ou mais tags/entidades referenciadas não encontrados',
   })
   @ApiConflictResponse({
-    description: 'Já existe um treinamento com este nome',
+    description:
+      'Já existe um treinamento com este nome, ou violação de regra em Aprimorado de/Requisitos (autorreferência, duplicata ou item em ambas as listas)',
   })
   @ApiBadRequestResponse({
-    description: 'ID em formato inválido',
+    description:
+      'ID em formato inválido ou formato inválido de entityType/id em Aprimorado de/Requisitos',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateTrainingDto,
   ): Promise<TrainingResponseDto> {
-    const training = await this.trainingsService.update(id, dto);
-    return TrainingResponseDto.fromEntity(training);
+    const { training, improvedFrom, requirements } =
+      await this.trainingsService.update(id, dto);
+    return TrainingResponseDto.fromEntity(
+      training,
+      improvedFrom,
+      requirements,
+    );
   }
 
   @Delete(':id')

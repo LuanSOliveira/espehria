@@ -26,5 +26,6 @@ export * from './Talent';
 export * from './Technique';
 export * from './Spell';
 export * from './SearchResult';
+export * from './EntityReference';
 export * from './Campaign';
 export * from './PlannedSession';

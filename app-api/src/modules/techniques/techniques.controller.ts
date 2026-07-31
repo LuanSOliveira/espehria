@@ -46,19 +46,28 @@ export class TechniquesController {
   @Post()
   @ApiOperation({ summary: 'Cria uma técnica' })
   @ApiCreatedResponse({ type: TechniqueResponseDto })
-  @ApiConflictResponse({ description: 'Já existe uma técnica com este nome' })
+  @ApiConflictResponse({
+    description:
+      'Já existe uma técnica com este nome, ou violação de regra em Aprimorado de/Requisitos (autorreferência, duplicata ou item em ambas as listas)',
+  })
   @ApiNotFoundResponse({
-    description: 'Uma ou mais tags não foram encontradas',
+    description:
+      'Uma ou mais tags ou entidades referenciadas em Aprimorado de/Requisitos não foram encontradas',
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida ou dados obrigatórios ausentes',
+      'URL de imagem de referência inválida, dados obrigatórios ausentes ou formato inválido de entityType/id',
   })
   async create(
     @Body() dto: CreateTechniqueDto,
   ): Promise<TechniqueResponseDto> {
-    const technique = await this.techniquesService.create(dto);
-    return TechniqueResponseDto.fromEntity(technique);
+    const { technique, improvedFrom, requirements } =
+      await this.techniquesService.create(dto);
+    return TechniqueResponseDto.fromEntity(
+      technique,
+      improvedFrom,
+      requirements,
+    );
   }
 
   @Get()
@@ -92,30 +101,43 @@ export class TechniquesController {
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<TechniqueResponseDto> {
-    const technique = await this.techniquesService.findById(id);
-    if (!technique) {
+    const result = await this.techniquesService.findById(id);
+    if (!result) {
       throw new NotFoundException('Técnica não encontrada.');
     }
-    return TechniqueResponseDto.fromEntity(technique);
+    return TechniqueResponseDto.fromEntity(
+      result.technique,
+      result.improvedFrom,
+      result.requirements,
+    );
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Atualiza uma técnica' })
   @ApiOkResponse({ type: TechniqueResponseDto })
   @ApiNotFoundResponse({
-    description: 'Técnica ou uma ou mais tags não encontradas',
+    description:
+      'Técnica ou uma ou mais tags/entidades referenciadas não encontradas',
   })
-  @ApiConflictResponse({ description: 'Já existe uma técnica com este nome' })
+  @ApiConflictResponse({
+    description:
+      'Já existe uma técnica com este nome, ou violação de regra em Aprimorado de/Requisitos (autorreferência, duplicata ou item em ambas as listas)',
+  })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida ou ID em formato inválido',
+      'URL de imagem de referência inválida, ID em formato inválido ou formato inválido de entityType/id em Aprimorado de/Requisitos',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateTechniqueDto,
   ): Promise<TechniqueResponseDto> {
-    const technique = await this.techniquesService.update(id, dto);
-    return TechniqueResponseDto.fromEntity(technique);
+    const { technique, improvedFrom, requirements } =
+      await this.techniquesService.update(id, dto);
+    return TechniqueResponseDto.fromEntity(
+      technique,
+      improvedFrom,
+      requirements,
+    );
   }
 
   @Delete(':id')

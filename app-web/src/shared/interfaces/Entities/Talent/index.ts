@@ -1,10 +1,13 @@
 import { IEntity } from '../Entity';
 import { ITag } from '../Tag';
+import { IEntityReference } from '../EntityReference';
 
 export interface ITalent extends IEntity {
   name: string;
   description?: string | null;
   tags: ITag[];
+  improvedFrom: IEntityReference[];
+  requirements: IEntityReference[];
   createdAt: string;
   updatedAt: string;
 }

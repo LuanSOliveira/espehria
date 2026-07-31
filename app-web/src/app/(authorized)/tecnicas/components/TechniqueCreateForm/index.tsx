@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import {
@@ -10,6 +10,7 @@ import {
 } from '@/shared/components/Inputs';
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
+import { EntityReferenceListField } from '@/shared/components/EntityReferenceListField';
 import {
   useGetEntityById,
   useGetEntityList,
@@ -21,7 +22,12 @@ import {
   techniqueFormDefaultValues,
   techniqueFormResolver,
 } from '@/shared/formSchemas';
-import { ITag, ITagListFilters, ITechnique } from '@/shared/interfaces';
+import {
+  IEntityReference,
+  ITag,
+  ITagListFilters,
+  ITechnique,
+} from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedTechniqueStore } from '@/store';
 
@@ -29,10 +35,17 @@ export interface TechniqueCreateFormProps {
   onSaved: () => void;
 }
 
+interface EntityReferenceInputPayload {
+  entityType: string;
+  id: string;
+}
+
 interface TechniquePayload
   extends Omit<TechniqueFormData, 'referenceImage' | 'description'> {
   referenceImage?: string;
   description?: string;
+  improvedFrom: EntityReferenceInputPayload[];
+  requirements: EntityReferenceInputPayload[];
 }
 
 export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
@@ -40,6 +53,9 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
     (state) => state.selectedTechnique,
   );
   const isEditMode = !!selectedTechnique;
+
+  const [improvedFrom, setImprovedFrom] = useState<IEntityReference[]>([]);
+  const [requirements, setRequirements] = useState<IEntityReference[]>([]);
 
   const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
     url: '/tags',
@@ -65,6 +81,10 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
   useEffect(() => {
     if (!isEditMode) {
       reset(techniqueFormDefaultValues);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setImprovedFrom([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setRequirements([]);
       return;
     }
 
@@ -78,6 +98,8 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
       description: techniqueDetail.description ?? '',
       tagIds: techniqueDetail.tags?.map((tag) => tag.id) ?? [],
     });
+    setImprovedFrom(techniqueDetail.improvedFrom ?? []);
+    setRequirements(techniqueDetail.requirements ?? []);
   }, [isEditMode, techniqueDetail, reset]);
 
   useEffect(() => {
@@ -93,11 +115,23 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
     });
   }, [isTechniqueDetailError, techniqueDetailError]);
 
-  const buildPayload = (data: TechniqueFormData): TechniquePayload => ({
+  const buildPayload = (
+    data: TechniqueFormData,
+    improvedFrom: IEntityReference[],
+    requirements: IEntityReference[],
+  ): TechniquePayload => ({
     ...data,
     referenceImage: data.referenceImage || undefined,
     description: data.description || undefined,
     tagIds: data.tagIds ?? [],
+    improvedFrom: improvedFrom.map((reference) => ({
+      entityType: reference.entityType,
+      id: reference.id,
+    })),
+    requirements: requirements.map((reference) => ({
+      entityType: reference.entityType,
+      id: reference.id,
+    })),
   });
 
   const createTechniqueMutation = usePostEntity<ITechnique, TechniquePayload>({
@@ -109,6 +143,8 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
         type: 'success',
       });
       reset(techniqueFormDefaultValues);
+      setImprovedFrom([]);
+      setRequirements([]);
       onSaved();
     },
     onError: (error) => {
@@ -142,7 +178,7 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
   });
 
   const onSubmit = (data: TechniqueFormData) => {
-    const payload = buildPayload(data);
+    const payload = buildPayload(data, improvedFrom, requirements);
 
     if (isEditMode) {
       updateTechniqueMutation.mutate(payload);
@@ -203,6 +239,28 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
         label="Descrição"
         placeholder="Descreva a técnica"
       />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <EntityReferenceListField
+          label="Aprimorado de"
+          addButtonLabel="Adicionar Aprimorado de"
+          value={improvedFrom}
+          onChange={setImprovedFrom}
+          otherListValue={requirements}
+          currentEntityType="technique"
+          currentEntityId={selectedTechnique?.id}
+        />
+
+        <EntityReferenceListField
+          label="Requisitos"
+          addButtonLabel="Adicionar Requisitos"
+          value={requirements}
+          onChange={setRequirements}
+          otherListValue={improvedFrom}
+          currentEntityType="technique"
+          currentEntityId={selectedTechnique?.id}
+        />
+      </div>
 
       <PrimaryButton
         type="submit"

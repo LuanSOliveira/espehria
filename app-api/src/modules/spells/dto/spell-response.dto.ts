@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Spell } from '../entities/spell.entity';
 import { TagResponseDto } from '../../tags/dto/tag-response.dto';
+import { EntityReferenceResponseDto } from '../../entity-links/dto/entity-reference-response.dto';
 
 export class SpellResponseDto {
   @ApiProperty({
@@ -33,19 +34,37 @@ export class SpellResponseDto {
   })
   tags: TagResponseDto[];
 
+  @ApiProperty({
+    type: () => [EntityReferenceResponseDto],
+    description: 'Itens dos quais esta magia é aprimorada',
+  })
+  improvedFrom: EntityReferenceResponseDto[];
+
+  @ApiProperty({
+    type: () => [EntityReferenceResponseDto],
+    description: 'Itens exigidos como requisito para esta magia',
+  })
+  requirements: EntityReferenceResponseDto[];
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
   @ApiProperty({ description: 'Data da última atualização' })
   updatedAt: Date;
 
-  static fromEntity(spell: Spell): SpellResponseDto {
+  static fromEntity(
+    spell: Spell,
+    improvedFrom: EntityReferenceResponseDto[],
+    requirements: EntityReferenceResponseDto[],
+  ): SpellResponseDto {
     const dto = new SpellResponseDto();
     dto.id = spell.id;
     dto.name = spell.name;
     dto.referenceImage = spell.referenceImage;
     dto.description = spell.description;
     dto.tags = (spell.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
+    dto.improvedFrom = improvedFrom;
+    dto.requirements = requirements;
     dto.createdAt = spell.createdAt;
     dto.updatedAt = spell.updatedAt;
     return dto;

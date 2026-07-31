@@ -3,6 +3,7 @@ import { alpha } from '@mui/material/styles';
 import { FiEdit2, FiEye, FiTrash2 } from 'react-icons/fi';
 import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText } from '@/shared/components/Texts';
+import { TagBadge } from '@/shared/components/TagBadge';
 import { ITalentListItem } from '@/shared/interfaces';
 import { APP_COLORS } from '@/shared/constants';
 
@@ -30,6 +31,13 @@ export const TalentsListItem = ({
     >
       <TableCell sx={{ borderColor: APP_COLORS.gold }}>
         <DefaultText>{talent.name}</DefaultText>
+      </TableCell>
+      <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+        <div className="flex flex-wrap items-center gap-1">
+          {talent.tags.map((tag) => (
+            <TagBadge key={tag.id} name={tag.name} color={tag.color} />
+          ))}
+        </div>
       </TableCell>
       <TableCell align="right" sx={{ borderColor: APP_COLORS.gold }}>
         <Tooltip title="Visualizar">

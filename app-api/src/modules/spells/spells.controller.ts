@@ -46,17 +46,22 @@ export class SpellsController {
   @Post()
   @ApiOperation({ summary: 'Cria uma magia' })
   @ApiCreatedResponse({ type: SpellResponseDto })
-  @ApiConflictResponse({ description: 'Já existe uma magia com este nome' })
+  @ApiConflictResponse({
+    description:
+      'Já existe uma magia com este nome, ou violação de regra em Aprimorado de/Requisitos (autorreferência, duplicata ou item em ambas as listas)',
+  })
   @ApiNotFoundResponse({
-    description: 'Uma ou mais tags não foram encontradas',
+    description:
+      'Uma ou mais tags ou entidades referenciadas em Aprimorado de/Requisitos não foram encontradas',
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida ou dados obrigatórios ausentes',
+      'URL de imagem de referência inválida, dados obrigatórios ausentes ou formato inválido de entityType/id',
   })
   async create(@Body() dto: CreateSpellDto): Promise<SpellResponseDto> {
-    const spell = await this.spellsService.create(dto);
-    return SpellResponseDto.fromEntity(spell);
+    const { spell, improvedFrom, requirements } =
+      await this.spellsService.create(dto);
+    return SpellResponseDto.fromEntity(spell, improvedFrom, requirements);
   }
 
   @Get()
@@ -88,30 +93,39 @@ export class SpellsController {
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<SpellResponseDto> {
-    const spell = await this.spellsService.findById(id);
-    if (!spell) {
+    const result = await this.spellsService.findById(id);
+    if (!result) {
       throw new NotFoundException('Magia não encontrada.');
     }
-    return SpellResponseDto.fromEntity(spell);
+    return SpellResponseDto.fromEntity(
+      result.spell,
+      result.improvedFrom,
+      result.requirements,
+    );
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Atualiza uma magia' })
   @ApiOkResponse({ type: SpellResponseDto })
   @ApiNotFoundResponse({
-    description: 'Magia ou uma ou mais tags não encontradas',
+    description:
+      'Magia ou uma ou mais tags/entidades referenciadas não encontradas',
   })
-  @ApiConflictResponse({ description: 'Já existe uma magia com este nome' })
+  @ApiConflictResponse({
+    description:
+      'Já existe uma magia com este nome, ou violação de regra em Aprimorado de/Requisitos (autorreferência, duplicata ou item em ambas as listas)',
+  })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida ou ID em formato inválido',
+      'URL de imagem de referência inválida, ID em formato inválido ou formato inválido de entityType/id em Aprimorado de/Requisitos',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateSpellDto,
   ): Promise<SpellResponseDto> {
-    const spell = await this.spellsService.update(id, dto);
-    return SpellResponseDto.fromEntity(spell);
+    const { spell, improvedFrom, requirements } =
+      await this.spellsService.update(id, dto);
+    return SpellResponseDto.fromEntity(spell, improvedFrom, requirements);
   }
 
   @Delete(':id')

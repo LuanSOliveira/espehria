@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { Box, Chip, CircularProgress } from '@mui/material';
-import { FiFileText, FiImage } from 'react-icons/fi';
+import { FiCheckSquare, FiFileText, FiImage, FiTrendingUp } from 'react-icons/fi';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
+import { EntityReferenceCard } from '@/shared/components/EntityReferenceCard';
 import { useGetEntityById } from '@/hooks/Queries';
 import { ISpell } from '@/shared/interfaces';
 import { getContrastTextColor, showToast } from '@/shared/util';
@@ -164,6 +165,60 @@ export const SpellView = ({ spellId, onNotFound }: SpellViewProps) => {
         </div>
         <div className="flex-1 px-3 py-3">
           <RichTextViewer value={spell.description} emptyLabel={NOT_INFORMED} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div
+          className="flex-1 min-w-0 flex flex-col"
+          style={APP_CONTAINER_STYLES.detailSectionBox}
+        >
+          <div
+            className="flex items-center gap-2 px-3 py-2"
+            style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
+          >
+            <FiTrendingUp style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
+            <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
+              Aprimorado de
+            </Label>
+          </div>
+          <div className="flex-1 flex flex-col gap-2 px-3 py-3">
+            {spell.improvedFrom.length === 0 && (
+              <DefaultText>Nenhum item adicionado.</DefaultText>
+            )}
+            {spell.improvedFrom.map((reference) => (
+              <EntityReferenceCard
+                key={`${reference.entityType}-${reference.id}`}
+                reference={reference}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div
+          className="flex-1 min-w-0 flex flex-col"
+          style={APP_CONTAINER_STYLES.detailSectionBox}
+        >
+          <div
+            className="flex items-center gap-2 px-3 py-2"
+            style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
+          >
+            <FiCheckSquare style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
+            <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
+              Requisitos
+            </Label>
+          </div>
+          <div className="flex-1 flex flex-col gap-2 px-3 py-3">
+            {spell.requirements.length === 0 && (
+              <DefaultText>Nenhum item adicionado.</DefaultText>
+            )}
+            {spell.requirements.map((reference) => (
+              <EntityReferenceCard
+                key={`${reference.entityType}-${reference.id}`}
+                reference={reference}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>

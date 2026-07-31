@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsNotEmpty,
@@ -6,7 +7,9 @@ import {
   IsString,
   IsUrl,
   IsUUID,
+  ValidateNested,
 } from 'class-validator';
+import { EntityReferenceInputDto } from '../../entity-links/dto/entity-reference-input.dto';
 
 export class CreateSpellDto {
   @ApiProperty({
@@ -43,4 +46,38 @@ export class CreateSpellDto {
   @IsArray()
   @IsUUID('4', { each: true })
   tagIds?: string[];
+
+  @ApiPropertyOptional({
+    type: () => [EntityReferenceInputDto],
+    description:
+      'Itens dos quais esta magia é aprimorada. Não pode referenciar a si mesma, conter duplicatas ou estar simultaneamente em Requisitos.',
+    example: [
+      {
+        entityType: 'spell',
+        id: '550e8400-e29b-41d4-a716-446655440000',
+      },
+    ],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => EntityReferenceInputDto)
+  improvedFrom?: EntityReferenceInputDto[];
+
+  @ApiPropertyOptional({
+    type: () => [EntityReferenceInputDto],
+    description:
+      'Itens exigidos como requisito para esta magia. Não pode referenciar a si mesma, conter duplicatas ou estar simultaneamente em Aprimorado de.',
+    example: [
+      {
+        entityType: 'training',
+        id: '550e8400-e29b-41d4-a716-446655440001',
+      },
+    ],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => EntityReferenceInputDto)
+  requirements?: EntityReferenceInputDto[];
 }

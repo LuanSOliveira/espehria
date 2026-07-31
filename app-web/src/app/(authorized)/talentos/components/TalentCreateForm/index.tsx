@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import {
@@ -10,6 +10,7 @@ import {
 } from '@/shared/components/Inputs';
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
+import { EntityReferenceListField } from '@/shared/components/EntityReferenceListField';
 import {
   useGetEntityById,
   useGetEntityList,
@@ -21,7 +22,12 @@ import {
   talentFormDefaultValues,
   talentFormResolver,
 } from '@/shared/formSchemas';
-import { ITag, ITagListFilters, ITalent } from '@/shared/interfaces';
+import {
+  IEntityReference,
+  ITag,
+  ITagListFilters,
+  ITalent,
+} from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedTalentStore } from '@/store';
 
@@ -29,13 +35,23 @@ export interface TalentCreateFormProps {
   onSaved: () => void;
 }
 
+interface EntityReferenceInputPayload {
+  entityType: string;
+  id: string;
+}
+
 interface TalentPayload extends Omit<TalentFormData, 'description'> {
   description?: string;
+  improvedFrom: EntityReferenceInputPayload[];
+  requirements: EntityReferenceInputPayload[];
 }
 
 export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
   const selectedTalent = useSelectedTalentStore((state) => state.selectedTalent);
   const isEditMode = !!selectedTalent;
+
+  const [improvedFrom, setImprovedFrom] = useState<IEntityReference[]>([]);
+  const [requirements, setRequirements] = useState<IEntityReference[]>([]);
 
   const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
     url: '/tags',
@@ -61,6 +77,10 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
   useEffect(() => {
     if (!isEditMode) {
       reset(talentFormDefaultValues);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setImprovedFrom([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setRequirements([]);
       return;
     }
 
@@ -73,6 +93,8 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
       description: talentDetail.description ?? '',
       tagIds: talentDetail.tags?.map((tag) => tag.id) ?? [],
     });
+    setImprovedFrom(talentDetail.improvedFrom ?? []);
+    setRequirements(talentDetail.requirements ?? []);
   }, [isEditMode, talentDetail, reset]);
 
   useEffect(() => {
@@ -88,10 +110,22 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
     });
   }, [isTalentDetailError, talentDetailError]);
 
-  const buildPayload = (data: TalentFormData): TalentPayload => ({
+  const buildPayload = (
+    data: TalentFormData,
+    improvedFrom: IEntityReference[],
+    requirements: IEntityReference[],
+  ): TalentPayload => ({
     ...data,
     description: data.description || undefined,
     tagIds: data.tagIds ?? [],
+    improvedFrom: improvedFrom.map((reference) => ({
+      entityType: reference.entityType,
+      id: reference.id,
+    })),
+    requirements: requirements.map((reference) => ({
+      entityType: reference.entityType,
+      id: reference.id,
+    })),
   });
 
   const createTalentMutation = usePostEntity<ITalent, TalentPayload>({
@@ -103,6 +137,8 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
         type: 'success',
       });
       reset(talentFormDefaultValues);
+      setImprovedFrom([]);
+      setRequirements([]);
       onSaved();
     },
     onError: (error) => {
@@ -136,7 +172,7 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
   });
 
   const onSubmit = (data: TalentFormData) => {
-    const payload = buildPayload(data);
+    const payload = buildPayload(data, improvedFrom, requirements);
 
     if (isEditMode) {
       updateTalentMutation.mutate(payload);
@@ -189,6 +225,28 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
         label="Descrição"
         placeholder="Descreva o talento"
       />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <EntityReferenceListField
+          label="Aprimorado de"
+          addButtonLabel="Adicionar Aprimorado de"
+          value={improvedFrom}
+          onChange={setImprovedFrom}
+          otherListValue={requirements}
+          currentEntityType="talent"
+          currentEntityId={selectedTalent?.id}
+        />
+
+        <EntityReferenceListField
+          label="Requisitos"
+          addButtonLabel="Adicionar Requisitos"
+          value={requirements}
+          onChange={setRequirements}
+          otherListValue={improvedFrom}
+          currentEntityType="talent"
+          currentEntityId={selectedTalent?.id}
+        />
+      </div>
 
       <PrimaryButton
         type="submit"
