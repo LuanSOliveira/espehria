@@ -31,6 +31,9 @@ export const SkillsListItem = ({
       <TableCell sx={{ borderColor: APP_COLORS.gold }}>
         <DefaultText>{skill.name}</DefaultText>
       </TableCell>
+      <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+        <DefaultText>{skill.keyAttribute.name}</DefaultText>
+      </TableCell>
       <TableCell align="right" sx={{ borderColor: APP_COLORS.gold }}>
         <Tooltip title="Visualizar">
           <IconButton

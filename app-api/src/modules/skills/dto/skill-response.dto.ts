@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Skill } from '../entities/skill.entity';
+import { AttributeResponseDto } from '../../attributes/dto/attribute-response.dto';
 import { TagResponseDto } from '../../tags/dto/tag-response.dto';
 import { SkillSectionResponseDto } from './skill-section-response.dto';
 
@@ -18,6 +19,12 @@ export class SkillResponseDto {
     example: '<p>Capacidade de se mover sem ser percebido.</p>',
   })
   description: string | null;
+
+  @ApiProperty({
+    type: () => AttributeResponseDto,
+    description: 'Atributo chave da perícia',
+  })
+  keyAttribute: AttributeResponseDto;
 
   @ApiProperty({
     type: () => [TagResponseDto],
@@ -42,6 +49,7 @@ export class SkillResponseDto {
     dto.id = skill.id;
     dto.name = skill.name;
     dto.description = skill.description;
+    dto.keyAttribute = AttributeResponseDto.fromEntity(skill.keyAttribute);
     dto.tags = (skill.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
     dto.sections = (skill.sections ?? [])
       .slice()

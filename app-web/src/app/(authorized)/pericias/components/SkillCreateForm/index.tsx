@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import {
+  FormAutocompleteInput,
   FormMultiAutocompleteInput,
   FormRichTextInput,
   FormTextInput,
@@ -11,6 +12,7 @@ import {
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
 import {
+  useAttributesQuery,
   useGetEntityById,
   useGetEntityList,
   usePostEntity,
@@ -21,7 +23,7 @@ import {
   skillFormDefaultValues,
   skillFormResolver,
 } from '@/shared/formSchemas';
-import { ISkill, ITag, ITagListFilters } from '@/shared/interfaces';
+import { IAttribute, ISkill, ITag, ITagListFilters } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedSkillStore } from '@/store';
 import { SkillSectionsField } from '../SkillSectionsField';
@@ -42,6 +44,8 @@ interface SkillPayload extends Omit<SkillFormData, 'sections'> {
 export const SkillCreateForm = ({ onSaved }: SkillCreateFormProps) => {
   const selectedSkill = useSelectedSkillStore((state) => state.selectedSkill);
   const isEditMode = !!selectedSkill;
+
+  const { data: attributes } = useAttributesQuery();
 
   const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
     url: '/tags',
@@ -77,6 +81,7 @@ export const SkillCreateForm = ({ onSaved }: SkillCreateFormProps) => {
     reset({
       name: skillDetail.name,
       description: skillDetail.description ?? '',
+      keyAttributeId: skillDetail.keyAttribute.id,
       tagIds: skillDetail.tags?.map((tag) => tag.id) ?? [],
       sections:
         skillDetail.sections?.map((section) => ({
@@ -193,6 +198,17 @@ export const SkillCreateForm = ({ onSaved }: SkillCreateFormProps) => {
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"
+        />
+
+        <FormAutocompleteInput<SkillFormData, IAttribute>
+          id="skill-form-key-attribute"
+          name="keyAttributeId"
+          control={control}
+          label="Atributo Chave"
+          options={attributes ?? []}
+          getOptionLabel={(attribute) => attribute.name}
+          getOptionValue={(attribute) => attribute.id}
+          placeholder="Selecione o atributo chave"
         />
       </div>
 

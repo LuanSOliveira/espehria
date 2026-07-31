@@ -7,8 +7,16 @@ import { ConfirmationModal, FormModal, ViewModal } from '@/shared/components/Mod
 import { Title } from '@/shared/components/Texts';
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { useIsGoogleUser } from '@/hooks/Auth';
-import { useDeleteEntity, useGetEntityList } from '@/hooks/Queries';
-import { ISkillListFilters, ISkillListItem } from '@/shared/interfaces';
+import {
+  useAttributesQuery,
+  useDeleteEntity,
+  useGetEntityList,
+} from '@/hooks/Queries';
+import {
+  IAttribute,
+  ISkillListFilters,
+  ISkillListItem,
+} from '@/shared/interfaces';
 import { APP_DEFAULT_PAGE_SIZE } from '@/shared/constants';
 import { showToast } from '@/shared/util';
 import { useSelectedSkillStore } from '@/store';
@@ -20,6 +28,9 @@ import { SkillView } from './components/SkillView';
 export default function SkillsPage() {
   const isGoogleUser = useIsGoogleUser();
   const [nameInput, setNameInput] = useState('');
+  const [attributeFilter, setAttributeFilter] = useState<IAttribute | null>(
+    null,
+  );
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [skillPendingDelete, setSkillPendingDelete] =
     useState<ISkillListItem | null>(null);
@@ -32,6 +43,8 @@ export default function SkillsPage() {
 
   const { selectedSkill, resetSelectedSkill, setSelectedSkill } =
     useSelectedSkillStore();
+
+  const { data: attributes } = useAttributesQuery();
 
   const { data, isLoading } = useGetEntityList<ISkillListItem, ISkillListFilters>({
     url: '/skills',
@@ -63,6 +76,7 @@ export default function SkillsPage() {
     setFilters((current) => ({
       ...current,
       name: nameInput.trim() || undefined,
+      keyAttributeId: attributeFilter?.id,
       page: 1,
     }));
   };
@@ -110,6 +124,9 @@ export default function SkillsPage() {
       <SkillsFilterSection
         nameValue={nameInput}
         onNameChange={setNameInput}
+        attributeValue={attributeFilter}
+        onAttributeChange={setAttributeFilter}
+        attributes={attributes ?? []}
         onSubmit={handleSearch}
       />
 

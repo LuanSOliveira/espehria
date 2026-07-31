@@ -48,7 +48,8 @@ export class SkillsController {
   @ApiCreatedResponse({ type: SkillResponseDto })
   @ApiConflictResponse({ description: 'Nome da perícia já existe' })
   @ApiNotFoundResponse({
-    description: 'Uma ou mais tags não foram encontradas',
+    description:
+      'Atributo chave não encontrado ou uma ou mais tags não foram encontradas',
   })
   @ApiBadRequestResponse({ description: 'Dados obrigatórios ausentes' })
   async create(@Body() dto: CreateSkillDto): Promise<SkillResponseDto> {
@@ -96,7 +97,8 @@ export class SkillsController {
   @ApiOperation({ summary: 'Atualiza uma perícia' })
   @ApiOkResponse({ type: SkillResponseDto })
   @ApiNotFoundResponse({
-    description: 'Perícia não encontrada ou uma ou mais tags não encontradas',
+    description:
+      'Perícia não encontrada, atributo chave não encontrado ou uma ou mais tags não encontradas',
   })
   @ApiConflictResponse({ description: 'Nome da perícia já existe' })
   @ApiBadRequestResponse({ description: 'ID de perícia em formato inválido' })

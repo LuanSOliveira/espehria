@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { Chip, CircularProgress } from '@mui/material';
-import { FiFileText } from 'react-icons/fi';
+import { FiFileText, FiTag } from 'react-icons/fi';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
 import { useGetEntityById } from '@/hooks/Queries';
@@ -74,6 +74,21 @@ export const SkillView = ({ skillId, onNotFound }: SkillViewProps) => {
         >
           {skill.name}
         </Title>
+
+        <div
+          className="flex items-start gap-2 px-3 py-2"
+          style={APP_CONTAINER_STYLES.detailInfoField}
+        >
+          <FiTag
+            style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+          />
+          <div>
+            <Label component="span" sx={{ margin: 0 }}>
+              Atributo Chave
+            </Label>
+            <DefaultText>{skill.keyAttribute.name}</DefaultText>
+          </div>
+        </div>
 
         {skill.tags.length > 0 && (
           <div className="flex flex-wrap justify-center gap-2">

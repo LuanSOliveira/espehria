@@ -1,5 +1,6 @@
 import { IEntity } from '../Entity';
 import { ITag } from '../Tag';
+import { IAttribute } from '../Attribute';
 
 export interface ISkillSection {
   id: string;
@@ -11,6 +12,7 @@ export interface ISkillSection {
 export interface ISkill extends IEntity {
   name: string;
   description?: string | null;
+  keyAttribute: IAttribute;
   tags: ITag[];
   sections: ISkillSection[];
   createdAt: string;
@@ -20,10 +22,12 @@ export interface ISkill extends IEntity {
 export interface ISkillListItem {
   id: string;
   name: string;
+  keyAttribute: IAttribute;
 }
 
 export interface ISkillListFilters {
   name?: string;
+  keyAttributeId?: string;
   page?: number;
   perPage?: number;
 }

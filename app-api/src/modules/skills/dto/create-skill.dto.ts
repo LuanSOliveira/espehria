@@ -27,6 +27,14 @@ export class CreateSkillDto {
   @IsString()
   description?: string;
 
+  @ApiProperty({
+    format: 'uuid',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: 'ID do atributo chave da perícia (obrigatório)',
+  })
+  @IsUUID()
+  keyAttributeId: string;
+
   @ApiPropertyOptional({
     type: [String],
     format: 'uuid',

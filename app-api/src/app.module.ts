@@ -35,6 +35,7 @@ import { TechniquesModule } from './modules/techniques/techniques.module';
 import { SpellsModule } from './modules/spells/spells.module';
 import { CampaignsModule } from './modules/campaigns/campaigns.module';
 import { PlannedSessionsModule } from './modules/planned-sessions/planned-sessions.module';
+import { AttributesModule } from './modules/attributes/attributes.module';
 
 @Module({
   imports: [
@@ -91,6 +92,7 @@ import { PlannedSessionsModule } from './modules/planned-sessions/planned-sessio
     SpellsModule,
     CampaignsModule,
     PlannedSessionsModule,
+    AttributesModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

@@ -1,4 +1,5 @@
 export * from './Entity';
+export * from './Attribute';
 export * from './Token';
 export * from './Auth';
 export * from './User';

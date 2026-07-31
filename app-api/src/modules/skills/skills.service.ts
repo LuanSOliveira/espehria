@@ -15,6 +15,7 @@ import { FindSkillsQueryDto } from './dto/find-skills-query.dto';
 import { SkillSectionInputDto } from './dto/skill-section-input.dto';
 import { Skill } from './entities/skill.entity';
 import { SkillSection } from './entities/skill-section.entity';
+import { Attribute } from '../attributes/entities/attribute.entity';
 import { Tag } from '../tags/entities/tag.entity';
 
 export interface PaginatedSkills {
@@ -33,6 +34,8 @@ export class SkillsService {
     private readonly tagsRepository: Repository<Tag>,
     @InjectRepository(SkillSection)
     private readonly skillSectionsRepository: Repository<SkillSection>,
+    @InjectRepository(Attribute)
+    private readonly attributesRepository: Repository<Attribute>,
   ) {}
 
   findByName(name: string): Promise<Skill | null> {
@@ -42,8 +45,12 @@ export class SkillsService {
   findById(id: string): Promise<Skill | null> {
     return this.skillsRepository.findOne({
       where: { id },
-      relations: { tags: true, sections: true },
+      relations: { keyAttribute: true, tags: true, sections: true },
     });
+  }
+
+  findKeyAttributeById(id: string): Promise<Attribute | null> {
+    return this.attributesRepository.findOneBy({ id });
   }
 
   private buildSections(sections: SkillSectionInputDto[]): SkillSection[] {
@@ -71,6 +78,11 @@ export class SkillsService {
       throw new ConflictException('Já existe uma perícia com este nome.');
     }
 
+    const keyAttribute = await this.findKeyAttributeById(dto.keyAttributeId);
+    if (!keyAttribute) {
+      throw new NotFoundException('Atributo chave não encontrado.');
+    }
+
     const tags =
       dto.tagIds && dto.tagIds.length > 0
         ? await this.findTagsByIds(dto.tagIds)
@@ -84,6 +96,7 @@ export class SkillsService {
     const skill = this.skillsRepository.create({
       name: dto.name,
       description: dto.description ?? null,
+      keyAttribute,
       tags,
       sections,
     });
@@ -95,11 +108,19 @@ export class SkillsService {
     const page = query.page ?? DEFAULT_PAGE;
     const perPage = query.perPage ?? DEFAULT_PER_PAGE;
 
-    const queryBuilder = this.skillsRepository.createQueryBuilder('skill');
+    const queryBuilder = this.skillsRepository
+      .createQueryBuilder('skill')
+      .leftJoin('skill.keyAttribute', 'keyAttribute');
 
     if (query.name) {
       queryBuilder.andWhere('skill.name ILIKE :name', {
         name: `%${query.name}%`,
+      });
+    }
+
+    if (query.keyAttributeId) {
+      queryBuilder.andWhere('skill.keyAttribute = :keyAttributeId', {
+        keyAttributeId: query.keyAttributeId,
       });
     }
 
@@ -116,7 +137,7 @@ export class SkillsService {
 
     const skills = await this.skillsRepository.find({
       where: { id: In(ids.map((skill) => skill.id)) },
-      relations: { tags: true },
+      relations: { keyAttribute: true, tags: true },
     });
 
     const skillsById = new Map(skills.map((skill) => [skill.id, skill]));
@@ -143,6 +164,16 @@ export class SkillsService {
 
     if (dto.description !== undefined) {
       skill.description = dto.description;
+    }
+
+    if (dto.keyAttributeId && dto.keyAttributeId !== skill.keyAttribute.id) {
+      const keyAttribute = await this.findKeyAttributeById(
+        dto.keyAttributeId,
+      );
+      if (!keyAttribute) {
+        throw new NotFoundException('Atributo chave não encontrado.');
+      }
+      skill.keyAttribute = keyAttribute;
     }
 
     if (dto.tagIds !== undefined) {
