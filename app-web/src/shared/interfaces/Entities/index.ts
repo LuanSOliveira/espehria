@@ -25,3 +25,5 @@ export * from './Talent';
 export * from './Technique';
 export * from './Spell';
 export * from './SearchResult';
+export * from './Campaign';
+export * from './PlannedSession';

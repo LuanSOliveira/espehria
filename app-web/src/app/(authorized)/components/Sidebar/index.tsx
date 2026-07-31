@@ -16,11 +16,19 @@ interface SidebarProps {
   isOpen: boolean;
 }
 
+const GOOGLE_BLOCKED_ROUTES = [
+  APP_ROUTES.private.users,
+  APP_ROUTES.private.campaigns,
+];
+
+const isRouteActive = (pathname: string, href: string): boolean =>
+  pathname === href || pathname.startsWith(`${href}/`);
+
 const getSectionForPathname = (pathname: string): string | null => {
   const activeSection = NAV_SECTIONS.find(
     (section) =>
       section.title &&
-      section.items.some((item) => item.href === pathname),
+      section.items.some((item) => isRouteActive(pathname, item.href)),
   );
 
   return activeSection?.title ?? null;
@@ -50,7 +58,7 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
     ? NAV_SECTIONS.map((section) => ({
         ...section,
         items: section.items.filter(
-          (item) => item.href !== APP_ROUTES.private.users,
+          (item) => !GOOGLE_BLOCKED_ROUTES.includes(item.href),
         ),
       }))
     : NAV_SECTIONS;
@@ -94,7 +102,7 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
                 />
               ) : (
                 section.items.map((item) => {
-                  const isActive = pathname === item.href;
+                  const isActive = isRouteActive(pathname, item.href);
                   const Icon = item.icon;
 
                   return (

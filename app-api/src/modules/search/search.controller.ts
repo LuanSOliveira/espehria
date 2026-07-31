@@ -6,7 +6,9 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { User } from '../users/entities/user.entity';
 import { SearchQueryDto } from './dto/search-query.dto';
 import { SearchResultItemResponseDto } from './dto/search-result-item-response.dto';
 import { SearchService } from './search.service';
@@ -21,7 +23,7 @@ export class SearchController {
   @Get()
   @ApiOperation({
     summary:
-      'Busca entidades linkáveis (usuários, criaturas, tags, locais, raças, eras, eventos, divindades, personagens, organizações, famílias, equipamentos, materiais, consumíveis, munições, utilitários, regras, perícias, condições, treinamentos, talentos, técnicas e magias) por nome, para uso em menções (@mention)',
+      'Busca entidades linkáveis (campanhas, sessões planejadas, usuários, criaturas, tags, locais, raças, eras, eventos, divindades, personagens, organizações, famílias, equipamentos, materiais, consumíveis, munições, utilitários, regras, perícias, condições, treinamentos, talentos, técnicas e magias) por nome, para uso em menções (@mention). Campanhas e sessões planejadas aparecem apenas se pertencem ao usuário autenticado; usuários Google não veem esses tipos nos resultados',
   })
   @ApiOkResponse({ type: [SearchResultItemResponseDto] })
   @ApiBadRequestResponse({
@@ -29,7 +31,8 @@ export class SearchController {
   })
   async search(
     @Query() query: SearchQueryDto,
+    @CurrentUser() currentUser: User,
   ): Promise<SearchResultItemResponseDto[]> {
-    return this.searchService.search(query.query);
+    return this.searchService.search(query.query, currentUser);
   }
 }

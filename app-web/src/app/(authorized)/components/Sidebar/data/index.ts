@@ -22,6 +22,7 @@ import {
   FiUser,
   FiUsers,
   FiZap,
+  FiCompass,
 } from 'react-icons/fi';
 import { MdOutlineFace } from 'react-icons/md';
 import { IconType } from 'react-icons';
@@ -40,7 +41,14 @@ export interface NavSection {
 
 export const NAV_SECTIONS: NavSection[] = [
   {
-    items: [{ label: 'Home', href: APP_ROUTES.private.home, icon: FiHome }],
+    items: [
+      { label: 'Home', href: APP_ROUTES.private.home, icon: FiHome },
+      {
+        label: 'Campanhas',
+        href: APP_ROUTES.private.campaigns,
+        icon: FiCompass,
+      },
+    ],
   },
   {
     title: 'JOGO',

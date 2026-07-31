@@ -33,6 +33,8 @@ import { TrainingsModule } from './modules/trainings/trainings.module';
 import { TalentsModule } from './modules/talents/talents.module';
 import { TechniquesModule } from './modules/techniques/techniques.module';
 import { SpellsModule } from './modules/spells/spells.module';
+import { CampaignsModule } from './modules/campaigns/campaigns.module';
+import { PlannedSessionsModule } from './modules/planned-sessions/planned-sessions.module';
 
 @Module({
   imports: [
@@ -87,6 +89,8 @@ import { SpellsModule } from './modules/spells/spells.module';
     TalentsModule,
     TechniquesModule,
     SpellsModule,
+    CampaignsModule,
+    PlannedSessionsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

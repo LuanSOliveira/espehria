@@ -31,7 +31,12 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (pathname === APP_ROUTES.private.users) {
+  const isGoogleBlockedPath =
+    pathname === APP_ROUTES.private.users ||
+    pathname === APP_ROUTES.private.campaigns ||
+    pathname.startsWith(`${APP_ROUTES.private.campaigns}/`);
+
+  if (isGoogleBlockedPath) {
     const decoded = decodeToken(token);
     if (decoded.provider === 'google') {
       const homeUrl = new URL(APP_ROUTES.private.home, request.url);

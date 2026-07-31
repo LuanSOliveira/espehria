@@ -24,6 +24,7 @@ const MENU_ROUTES = {
   talents: '/talentos',
   techniques: '/tecnicas',
   spells: '/magias',
+  campaigns: '/campanhas',
 };
 
 export const APP_ROUTES = {
@@ -52,6 +53,8 @@ export const APP_ROUTES = {
     talents: MENU_ROUTES.talents,
     techniques: MENU_ROUTES.techniques,
     spells: MENU_ROUTES.spells,
+    campaigns: MENU_ROUTES.campaigns,
+    campaignDetails: (id: string) => `${MENU_ROUTES.campaigns}/${id}`,
   },
   public: {
     login: MENU_ROUTES.login,

@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
+import { AuthProvider } from '../users/enums/auth-provider.enum';
+import { Campaign } from '../campaigns/entities/campaign.entity';
+import { PlannedSession } from '../planned-sessions/entities/planned-session.entity';
 import { Creature } from '../creatures/entities/creature.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { Location } from '../locations/entities/location.entity';
@@ -78,9 +81,16 @@ export class SearchService {
     private readonly techniquesRepository: Repository<Technique>,
     @InjectRepository(Spell)
     private readonly spellsRepository: Repository<Spell>,
+    @InjectRepository(Campaign)
+    private readonly campaignsRepository: Repository<Campaign>,
+    @InjectRepository(PlannedSession)
+    private readonly plannedSessionsRepository: Repository<PlannedSession>,
   ) {}
 
-  async search(query: string): Promise<SearchResultItemResponseDto[]> {
+  async search(
+    query: string,
+    currentUser: User,
+  ): Promise<SearchResultItemResponseDto[]> {
     const linkableEntities = [
       { entityType: LinkableEntityType.USER, repository: this.usersRepository },
       {
@@ -162,14 +172,48 @@ export class SearchService {
         entityType: LinkableEntityType.SPELL,
         repository: this.spellsRepository,
       },
+      {
+        entityType: LinkableEntityType.CAMPAIGN,
+        repository: this.campaignsRepository,
+      },
+      {
+        entityType: LinkableEntityType.PLANNED_SESSION,
+        repository: this.plannedSessionsRepository,
+      },
     ];
+
+    // Campanhas e sessões planejadas são recursos privados do dono (ver
+    // CampaignsService/PlannedSessionsService) — usuários Google são bloqueados
+    // desses recursos por completo, então nem aparecem como resultado de busca.
+    const searchableEntities =
+      currentUser.provider === AuthProvider.GOOGLE
+        ? linkableEntities.filter(
+            ({ entityType }) =>
+              entityType !== LinkableEntityType.CAMPAIGN &&
+              entityType !== LinkableEntityType.PLANNED_SESSION,
+          )
+        : linkableEntities;
 
     const results: SearchResultItemResponseDto[] = [];
 
-    for (const { entityType, repository } of linkableEntities) {
-      const rows = await repository
+    for (const { entityType, repository } of searchableEntities) {
+      const queryBuilder = repository
         .createQueryBuilder('entity')
-        .where('entity.name ILIKE :query', { query: `%${query}%` })
+        .where('entity.name ILIKE :query', { query: `%${query}%` });
+
+      if (entityType === LinkableEntityType.CAMPAIGN) {
+        queryBuilder.andWhere('entity.createdBy = :userId', {
+          userId: currentUser.id,
+        });
+      } else if (entityType === LinkableEntityType.PLANNED_SESSION) {
+        queryBuilder
+          .leftJoin('entity.campaign', 'campaign')
+          .andWhere('campaign.createdBy = :userId', {
+            userId: currentUser.id,
+          });
+      }
+
+      const rows = await queryBuilder
         .orderBy('entity.name', 'ASC')
         .take(MAX_RESULTS)
         .getMany();

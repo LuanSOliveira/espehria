@@ -22,3 +22,5 @@ export * from './TrainingFormSchema';
 export * from './TalentFormSchema';
 export * from './TechniqueFormSchema';
 export * from './SpellFormSchema';
+export * from './CampaignFormSchema';
+export * from './PlannedSessionFormSchema';
