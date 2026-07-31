@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ReferenceableEntityType } from '../enums/referenceable-entity-type.enum';
+import { Tag } from '../../tags/entities/tag.entity';
+import { TagResponseDto } from '../../tags/dto/tag-response.dto';
 
 export class EntityReferenceResponseDto {
   @ApiProperty({
@@ -23,14 +25,21 @@ export class EntityReferenceResponseDto {
   })
   entityType!: ReferenceableEntityType;
 
+  @ApiProperty({
+    type: () => [TagResponseDto],
+    description: 'Tags associadas à entidade referenciada',
+  })
+  tags!: TagResponseDto[];
+
   static fromResolved(
-    entity: { id: string; name: string },
+    entity: { id: string; name: string; tags?: Tag[] },
     entityType: ReferenceableEntityType,
   ): EntityReferenceResponseDto {
     const dto = new EntityReferenceResponseDto();
     dto.id = entity.id;
     dto.name = entity.name;
     dto.entityType = entityType;
+    dto.tags = (entity.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
     return dto;
   }
 }

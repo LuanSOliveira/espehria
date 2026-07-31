@@ -140,7 +140,7 @@ export const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    title: 'Características',
+    title: 'Habilidades',
     items: [
       {
         label: 'Treinamentos',

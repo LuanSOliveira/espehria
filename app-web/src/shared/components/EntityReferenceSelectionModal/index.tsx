@@ -18,14 +18,16 @@ import { FiEye, FiPlus, FiSearch } from 'react-icons/fi';
 import { FormModal } from '@/shared/components/Modals';
 import { DefaultTextInput } from '@/shared/components/Inputs';
 import { DefaultText, Label } from '@/shared/components/Texts';
+import { TagBadge } from '@/shared/components/TagBadge';
 import { useGetEntityList } from '@/hooks/Queries';
 import { useEntityMentionViewStore } from '@/store';
-import { IEntityReference } from '@/shared/interfaces';
+import { IEntityReference, ITag } from '@/shared/interfaces';
 import { APP_COLORS, APP_DEFAULT_PAGE_SIZE } from '@/shared/constants';
 
 interface EntityReferenceCandidate {
   id: string;
   name: string;
+  tags: ITag[];
 }
 
 interface EntityReferenceCandidateListFilters {
@@ -143,6 +145,11 @@ export const EntityReferenceSelectionModal = ({
                     Nome
                   </Label>
                 </TableCell>
+                <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+                  <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
+                    Tags
+                  </Label>
+                </TableCell>
                 <TableCell align="right" sx={{ borderColor: APP_COLORS.gold }}>
                   <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
                     Ações
@@ -153,7 +160,7 @@ export const EntityReferenceSelectionModal = ({
             <TableBody>
               {!isLoading && items.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={2} sx={{ borderColor: APP_COLORS.gold }}>
+                  <TableCell colSpan={3} sx={{ borderColor: APP_COLORS.gold }}>
                     <DefaultText>Nenhum item encontrado.</DefaultText>
                   </TableCell>
                 </TableRow>
@@ -163,6 +170,13 @@ export const EntityReferenceSelectionModal = ({
                 <TableRow key={item.id}>
                   <TableCell sx={{ borderColor: APP_COLORS.gold }}>
                     <DefaultText>{item.name}</DefaultText>
+                  </TableCell>
+                  <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+                    <div className="flex flex-wrap items-center gap-1">
+                      {item.tags.map((tag) => (
+                        <TagBadge key={tag.id} name={tag.name} color={tag.color} />
+                      ))}
+                    </div>
                   </TableCell>
                   <TableCell align="right" sx={{ borderColor: APP_COLORS.gold }}>
                     <Tooltip title="Visualizar">
@@ -184,6 +198,7 @@ export const EntityReferenceSelectionModal = ({
                             id: item.id,
                             name: item.name,
                             entityType: activeTab.entityType,
+                            tags: item.tags,
                           })
                         }
                         sx={{ color: APP_COLORS.textBrownDark }}

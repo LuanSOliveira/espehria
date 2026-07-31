@@ -3,6 +3,7 @@
 import { IconButton, Tooltip } from '@mui/material';
 import { FiEye, FiTrash2 } from 'react-icons/fi';
 import { DefaultText } from '@/shared/components/Texts';
+import { TagBadge } from '@/shared/components/TagBadge';
 import { useEntityMentionViewStore } from '@/store';
 import { IEntityReference } from '@/shared/interfaces';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
@@ -25,7 +26,16 @@ export const EntityReferenceCard = ({
       className="flex items-center gap-3 px-3 py-2"
       style={APP_CONTAINER_STYLES.detailInfoField}
     >
-      <DefaultText className="flex-1">{reference.name}</DefaultText>
+      <div className="flex flex-1 flex-col gap-1">
+        <DefaultText>{reference.name}</DefaultText>
+        {reference.tags.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1">
+            {reference.tags.map((tag) => (
+              <TagBadge key={tag.id} name={tag.name} color={tag.color} />
+            ))}
+          </div>
+        )}
+      </div>
 
       <Tooltip title="Visualizar">
         <IconButton

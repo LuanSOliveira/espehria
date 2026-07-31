@@ -231,10 +231,10 @@ export class EntityLinksService {
     const links = await this.entityLinksRepository.find({
       where: whereCriteria as FindOptionsWhere<EntityLink>,
       relations: {
-        targetTraining: true,
-        targetTalent: true,
-        targetTechnique: true,
-        targetSpell: true,
+        targetTraining: { tags: true },
+        targetTalent: { tags: true },
+        targetTechnique: { tags: true },
+        targetSpell: { tags: true },
       },
     });
 
