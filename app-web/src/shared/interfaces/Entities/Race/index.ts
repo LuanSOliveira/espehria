@@ -1,4 +1,5 @@
 import { IEntity } from '../Entity';
+import { IEntityReference } from '../EntityReference';
 import { ITag } from '../Tag';
 
 export interface IRaceCategory {
@@ -18,10 +19,11 @@ export interface IRace extends IEntity {
   name: string;
   category: IRaceCategory;
   referenceImageUrl?: string | null;
-  physicalCharacteristics?: string | null;
   description?: string | null;
   privateInformation?: string | null;
   tags: ITag[];
+  characteristics: IEntityReference[];
+  talents: IEntityReference[];
   createdAt: string;
   updatedAt: string;
 }

@@ -37,6 +37,9 @@ export const SpellsListItem = ({
         <DefaultText>{spell.name}</DefaultText>
       </TableCell>
       <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+        <DefaultText>{spell.level}</DefaultText>
+      </TableCell>
+      <TableCell sx={{ borderColor: APP_COLORS.gold }}>
         <div className="flex flex-wrap items-center gap-1">
           {spell.tags.map((tag) => (
             <TagBadge key={tag.id} name={tag.name} color={tag.color} />

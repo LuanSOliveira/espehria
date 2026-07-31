@@ -10,6 +10,10 @@ export class Technique extends BaseEntity {
   @Column()
   name!: string;
 
+  @ApiProperty({ description: 'Nível da técnica (obrigatório)', example: 3 })
+  @Column({ type: 'int' })
+  level!: number;
+
   @Column({ type: 'varchar', nullable: true, name: 'reference_image' })
   referenceImage!: string | null;
 

@@ -4,7 +4,10 @@ import { useState } from 'react';
 import { SecondaryButton } from '@/shared/components/Buttons';
 import { DefaultText, Label } from '@/shared/components/Texts';
 import { EntityReferenceCard } from '@/shared/components/EntityReferenceCard';
-import { EntityReferenceSelectionModal } from '@/shared/components/EntityReferenceSelectionModal';
+import {
+  EntityReferenceSelectionModal,
+  EntityReferenceTabConfig,
+} from '@/shared/components/EntityReferenceSelectionModal';
 import { IEntityReference } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 
@@ -13,9 +16,10 @@ export interface EntityReferenceListFieldProps {
   addButtonLabel: string;
   value: IEntityReference[];
   onChange: (value: IEntityReference[]) => void;
-  otherListValue: IEntityReference[];
-  currentEntityType: string;
+  otherListValue?: IEntityReference[];
+  currentEntityType?: string;
   currentEntityId?: string;
+  tabs?: EntityReferenceTabConfig[];
 }
 
 const isSameReference = (
@@ -31,11 +35,13 @@ export const EntityReferenceListField = ({
   otherListValue,
   currentEntityType,
   currentEntityId,
+  tabs,
 }: EntityReferenceListFieldProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSelect = (reference: IEntityReference) => {
     if (
+      currentEntityType !== undefined &&
       reference.entityType === currentEntityType &&
       reference.id === currentEntityId
     ) {
@@ -54,7 +60,9 @@ export const EntityReferenceListField = ({
       return;
     }
 
-    if (otherListValue.some((item) => isSameReference(item, reference))) {
+    if (
+      (otherListValue ?? []).some((item) => isSameReference(item, reference))
+    ) {
       showToast({
         message:
           'Este item já está presente na outra lista e não pode ser adicionado aqui.',
@@ -104,6 +112,7 @@ export const EntityReferenceListField = ({
         title={addButtonLabel}
         excludeReferences={value}
         onSelect={handleSelect}
+        tabs={tabs}
       />
     </div>
   );

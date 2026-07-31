@@ -10,6 +10,7 @@ import {
   FiFeather,
   FiGitBranch,
   FiHome,
+  FiLayers,
   FiMapPin,
   FiPackage,
   FiSettings,
@@ -151,6 +152,11 @@ export const NAV_SECTIONS: NavSection[] = [
         label: 'Talentos',
         href: APP_ROUTES.private.talents,
         icon: FiStar,
+      },
+      {
+        label: 'Características',
+        href: APP_ROUTES.private.characteristics,
+        icon: FiLayers,
       },
       {
         label: 'Técnicas',

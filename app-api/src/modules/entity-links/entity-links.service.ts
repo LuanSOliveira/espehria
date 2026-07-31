@@ -5,6 +5,7 @@ import { Training } from '../trainings/entities/training.entity';
 import { Talent } from '../talents/entities/talent.entity';
 import { Technique } from '../techniques/entities/technique.entity';
 import { Spell } from '../spells/entities/spell.entity';
+import { Characteristic } from '../characteristics/entities/characteristic.entity';
 import { EntityLink } from './entities/entity-link.entity';
 import { EntityLinkType } from './enums/entity-link-type.enum';
 import { ReferenceableEntityType } from './enums/referenceable-entity-type.enum';
@@ -21,13 +22,15 @@ type OwnerColumn =
   | 'ownerTraining'
   | 'ownerTalent'
   | 'ownerTechnique'
-  | 'ownerSpell';
+  | 'ownerSpell'
+  | 'ownerCharacteristic';
 
 type TargetColumn =
   | 'targetTraining'
   | 'targetTalent'
   | 'targetTechnique'
-  | 'targetSpell';
+  | 'targetSpell'
+  | 'targetCharacteristic';
 
 @Injectable()
 export class EntityLinksService {
@@ -42,11 +45,13 @@ export class EntityLinksService {
     private readonly techniquesRepository: Repository<Technique>,
     @InjectRepository(Spell)
     private readonly spellsRepository: Repository<Spell>,
+    @InjectRepository(Characteristic)
+    private readonly characteristicsRepository: Repository<Characteristic>,
   ) {}
 
   private repositoryFor(
     entityType: ReferenceableEntityType,
-  ): Repository<Training | Talent | Technique | Spell> {
+  ): Repository<Training | Talent | Technique | Spell | Characteristic> {
     switch (entityType) {
       case ReferenceableEntityType.TRAINING:
         return this.trainingsRepository;
@@ -56,6 +61,8 @@ export class EntityLinksService {
         return this.techniquesRepository;
       case ReferenceableEntityType.SPELL:
         return this.spellsRepository;
+      case ReferenceableEntityType.CHARACTERISTIC:
+        return this.characteristicsRepository;
     }
   }
 
@@ -69,6 +76,8 @@ export class EntityLinksService {
         return 'ownerTechnique';
       case ReferenceableEntityType.SPELL:
         return 'ownerSpell';
+      case ReferenceableEntityType.CHARACTERISTIC:
+        return 'ownerCharacteristic';
     }
   }
 
@@ -82,6 +91,8 @@ export class EntityLinksService {
         return 'targetTechnique';
       case ReferenceableEntityType.SPELL:
         return 'targetSpell';
+      case ReferenceableEntityType.CHARACTERISTIC:
+        return 'targetCharacteristic';
     }
   }
 
@@ -235,6 +246,7 @@ export class EntityLinksService {
         targetTalent: { tags: true },
         targetTechnique: { tags: true },
         targetSpell: { tags: true },
+        targetCharacteristic: { tags: true },
       },
     });
 
@@ -257,9 +269,15 @@ export class EntityLinksService {
           ReferenceableEntityType.TECHNIQUE,
         );
       }
+      if (link.targetSpell) {
+        return EntityReferenceResponseDto.fromResolved(
+          link.targetSpell,
+          ReferenceableEntityType.SPELL,
+        );
+      }
       return EntityReferenceResponseDto.fromResolved(
-        link.targetSpell as Spell,
-        ReferenceableEntityType.SPELL,
+        link.targetCharacteristic as Characteristic,
+        ReferenceableEntityType.CHARACTERISTIC,
       );
     };
 

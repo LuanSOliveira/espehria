@@ -16,6 +16,9 @@ export class TechniqueResponseDto {
   })
   name: string;
 
+  @ApiProperty({ description: 'Nível da técnica', example: 3 })
+  level: number;
+
   @ApiPropertyOptional({
     description: 'URL de uma imagem de referência da técnica',
     example: 'https://exemplo.com/golpe-giratorio.jpg',
@@ -60,6 +63,7 @@ export class TechniqueResponseDto {
     const dto = new TechniqueResponseDto();
     dto.id = technique.id;
     dto.name = technique.name;
+    dto.level = technique.level;
     dto.referenceImage = technique.referenceImage;
     dto.description = technique.description;
     dto.tags = (technique.tags ?? []).map((tag) =>

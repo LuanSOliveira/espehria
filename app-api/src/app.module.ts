@@ -31,6 +31,7 @@ import { SkillsModule } from './modules/skills/skills.module';
 import { ConditionsModule } from './modules/conditions/conditions.module';
 import { TrainingsModule } from './modules/trainings/trainings.module';
 import { TalentsModule } from './modules/talents/talents.module';
+import { CharacteristicsModule } from './modules/characteristics/characteristics.module';
 import { TechniquesModule } from './modules/techniques/techniques.module';
 import { SpellsModule } from './modules/spells/spells.module';
 import { CampaignsModule } from './modules/campaigns/campaigns.module';
@@ -88,6 +89,7 @@ import { AttributesModule } from './modules/attributes/attributes.module';
     ConditionsModule,
     TrainingsModule,
     TalentsModule,
+    CharacteristicsModule,
     TechniquesModule,
     SpellsModule,
     CampaignsModule,

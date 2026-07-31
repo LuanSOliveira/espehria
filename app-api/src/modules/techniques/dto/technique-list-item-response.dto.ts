@@ -21,6 +21,9 @@ export class TechniqueListItemResponseDto {
   })
   name: string;
 
+  @ApiProperty({ description: 'Nível da técnica', example: 3 })
+  level: number;
+
   @ApiProperty({
     type: () => [TagResponseDto],
     description: 'Tags associadas à técnica',
@@ -32,6 +35,7 @@ export class TechniqueListItemResponseDto {
     dto.id = technique.id;
     dto.referenceImage = technique.referenceImage;
     dto.name = technique.name;
+    dto.level = technique.level;
     dto.tags = (technique.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),
     );

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import {
@@ -11,6 +11,8 @@ import {
 } from '@/shared/components/Inputs';
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
+import { EntityReferenceListField } from '@/shared/components/EntityReferenceListField';
+import { RaceTalentsListField } from '../RaceTalentsListField';
 import {
   useGetEntityById,
   useGetEntityList,
@@ -24,6 +26,7 @@ import {
   raceFormResolver,
 } from '@/shared/formSchemas';
 import {
+  IEntityReference,
   IRace,
   IRaceCategory,
   ITag,
@@ -36,13 +39,29 @@ export interface RaceCreateFormProps {
   onSaved: () => void;
 }
 
-interface RacePayload extends Omit<RaceFormData, 'referenceImageUrl'> {
+interface RacePayload
+  extends Omit<
+    RaceFormData,
+    'referenceImageUrl' | 'characteristicIds' | 'talentIds'
+  > {
   referenceImageUrl?: string;
+  characteristicIds: string[];
+  talentIds: string[];
 }
+
+const toEntityReferences = (
+  items: { id: string; name: string; level?: number | null; tags: ITag[] }[],
+  entityType: string,
+): IEntityReference[] => items.map((item) => ({ ...item, entityType }));
 
 export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
   const selectedRace = useSelectedRaceStore((state) => state.selectedRace);
   const isEditMode = !!selectedRace;
+
+  const [characteristics, setCharacteristics] = useState<IEntityReference[]>(
+    [],
+  );
+  const [talents, setTalents] = useState<IEntityReference[]>([]);
 
   const { data: categories } = useRaceCategoriesQuery();
 
@@ -70,6 +89,10 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
   useEffect(() => {
     if (!isEditMode) {
       reset(raceFormDefaultValues);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setCharacteristics([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setTalents([]);
       return;
     }
 
@@ -81,11 +104,14 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
       name: raceDetail.name,
       categoryId: raceDetail.category.id,
       referenceImageUrl: raceDetail.referenceImageUrl ?? '',
-      physicalCharacteristics: raceDetail.physicalCharacteristics ?? '',
       description: raceDetail.description ?? '',
       privateInformation: raceDetail.privateInformation ?? '',
       tagIds: raceDetail.tags?.map((tag) => tag.id) ?? [],
     });
+    setCharacteristics(
+      toEntityReferences(raceDetail.characteristics ?? [], 'characteristic'),
+    );
+    setTalents(toEntityReferences(raceDetail.talents ?? [], 'talent'));
   }, [isEditMode, raceDetail, reset]);
 
   useEffect(() => {
@@ -101,10 +127,16 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
     });
   }, [isRaceDetailError, raceDetailError]);
 
-  const buildPayload = (data: RaceFormData): RacePayload => ({
+  const buildPayload = (
+    data: RaceFormData,
+    characteristics: IEntityReference[],
+    talents: IEntityReference[],
+  ): RacePayload => ({
     ...data,
     referenceImageUrl: data.referenceImageUrl || undefined,
     tagIds: data.tagIds ?? [],
+    characteristicIds: characteristics.map((item) => item.id),
+    talentIds: talents.map((item) => item.id),
   });
 
   const createRaceMutation = usePostEntity<IRace, RacePayload>({
@@ -116,6 +148,8 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
         type: 'success',
       });
       reset(raceFormDefaultValues);
+      setCharacteristics([]);
+      setTalents([]);
       onSaved();
     },
     onError: (error) => {
@@ -147,7 +181,7 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
   });
 
   const onSubmit = (data: RaceFormData) => {
-    const payload = buildPayload(data);
+    const payload = buildPayload(data, characteristics, talents);
 
     if (isEditMode) {
       updateRaceMutation.mutate(payload);
@@ -212,15 +246,7 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <FormRichTextInput
-          id="race-form-physical-characteristics"
-          name="physicalCharacteristics"
-          control={control}
-          label="Características Físicas"
-          placeholder="Descreva as características físicas"
-        />
-
+      <div className="w-full">
         <FormRichTextInput
           id="race-form-description"
           name="description"
@@ -229,6 +255,22 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
           placeholder="Descreva a raça"
         />
       </div>
+
+      <EntityReferenceListField
+        label="Características"
+        addButtonLabel="Adicionar Características"
+        value={characteristics}
+        onChange={setCharacteristics}
+        tabs={[
+          {
+            label: 'Características',
+            entityType: 'characteristic',
+            url: '/characteristics',
+          },
+        ]}
+      />
+
+      <RaceTalentsListField value={talents} onChange={setTalents} />
 
       <FormRichTextInput
         id="race-form-private-information"

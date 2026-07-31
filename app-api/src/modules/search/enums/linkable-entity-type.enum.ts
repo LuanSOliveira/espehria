@@ -22,6 +22,7 @@ export enum LinkableEntityType {
   TALENT = 'talent',
   TECHNIQUE = 'technique',
   SPELL = 'spell',
+  CHARACTERISTIC = 'characteristic',
   CAMPAIGN = 'campaign',
   PLANNED_SESSION = 'planned_session',
 }

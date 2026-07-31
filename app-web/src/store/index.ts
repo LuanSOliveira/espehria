@@ -24,6 +24,7 @@ export * from './PageStore/ConditionsStore';
 export * from './PageStore/UtilitiesStore';
 export * from './PageStore/TrainingsStore';
 export * from './PageStore/TalentsStore';
+export * from './PageStore/CharacteristicsStore';
 export * from './PageStore/TechniquesStore';
 export * from './PageStore/SpellsStore';
 export * from './PageStore/CampaignsStore';

@@ -23,6 +23,7 @@ export * from './Condition';
 export * from './Utility';
 export * from './Training';
 export * from './Talent';
+export * from './Characteristic';
 export * from './Technique';
 export * from './Spell';
 export * from './SearchResult';

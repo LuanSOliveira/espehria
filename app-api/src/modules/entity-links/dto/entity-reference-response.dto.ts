@@ -20,7 +20,8 @@ export class EntityReferenceResponseDto {
   @ApiProperty({
     enum: ReferenceableEntityType,
     enumName: 'ReferenceableEntityType',
-    description: 'Tipo de entidade referenciada',
+    description:
+      'Tipo de entidade referenciada (treinamento, talento, técnica, magia ou característica)',
     example: ReferenceableEntityType.TRAINING,
   })
   entityType!: ReferenceableEntityType;
@@ -31,8 +32,16 @@ export class EntityReferenceResponseDto {
   })
   tags!: TagResponseDto[];
 
+  @ApiProperty({
+    nullable: true,
+    description:
+      'Nível da entidade referenciada (característica, talento, técnica ou magia); null quando a entidade referenciada for um treinamento (que não possui nível)',
+    example: 3,
+  })
+  level!: number | null;
+
   static fromResolved(
-    entity: { id: string; name: string; tags?: Tag[] },
+    entity: { id: string; name: string; tags?: Tag[]; level?: number },
     entityType: ReferenceableEntityType,
   ): EntityReferenceResponseDto {
     const dto = new EntityReferenceResponseDto();
@@ -40,6 +49,7 @@ export class EntityReferenceResponseDto {
     dto.name = entity.name;
     dto.entityType = entityType;
     dto.tags = (entity.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
+    dto.level = entity.level ?? null;
     return dto;
   }
 }

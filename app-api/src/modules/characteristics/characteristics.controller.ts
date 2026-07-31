@@ -1,0 +1,158 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import { GoogleAccess } from '../auth/decorators/google-access.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { GoogleAccessGuard } from '../auth/guards/google-access.guard';
+import { CreateCharacteristicDto } from './dto/create-characteristic.dto';
+import { UpdateCharacteristicDto } from './dto/update-characteristic.dto';
+import { FindCharacteristicsQueryDto } from './dto/find-characteristics-query.dto';
+import { CharacteristicResponseDto } from './dto/characteristic-response.dto';
+import { CharacteristicListItemResponseDto } from './dto/characteristic-list-item-response.dto';
+import { PaginatedCharacteristicsResponseDto } from './dto/paginated-characteristics-response.dto';
+import { CharacteristicsService } from './characteristics.service';
+
+@ApiTags('characteristics')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, GoogleAccessGuard)
+@GoogleAccess('read-only')
+@Controller('characteristics')
+export class CharacteristicsController {
+  constructor(
+    private readonly characteristicsService: CharacteristicsService,
+  ) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Cria uma característica' })
+  @ApiCreatedResponse({ type: CharacteristicResponseDto })
+  @ApiConflictResponse({
+    description:
+      'Já existe uma característica com este nome, ou violação de regra em Aprimorado de/Requisitos (autorreferência, duplicata ou item em ambas as listas)',
+  })
+  @ApiNotFoundResponse({
+    description:
+      'Uma ou mais tags ou entidades referenciadas em Aprimorado de/Requisitos não foram encontradas',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'Dados obrigatórios ausentes ou formato inválido de entityType/id',
+  })
+  async create(
+    @Body() dto: CreateCharacteristicDto,
+  ): Promise<CharacteristicResponseDto> {
+    const { characteristic, improvedFrom, requirements } =
+      await this.characteristicsService.create(dto);
+    return CharacteristicResponseDto.fromEntity(
+      characteristic,
+      improvedFrom,
+      requirements,
+    );
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Lista características com paginação e filtro' })
+  @ApiOkResponse({ type: PaginatedCharacteristicsResponseDto })
+  @ApiBadRequestResponse({
+    description: 'Parâmetros de paginação ou filtro inválidos',
+  })
+  async findAll(
+    @Query() query: FindCharacteristicsQueryDto,
+  ): Promise<PaginatedCharacteristicsResponseDto> {
+    const { data, total, page, perPage } =
+      await this.characteristicsService.findAllPaginated(query);
+
+    return {
+      data: data.map((characteristic) =>
+        CharacteristicListItemResponseDto.fromEntity(characteristic),
+      ),
+      total,
+      page,
+      perPage,
+      totalPages: Math.ceil(total / perPage),
+    };
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Busca uma característica pelo id' })
+  @ApiOkResponse({ type: CharacteristicResponseDto })
+  @ApiNotFoundResponse({ description: 'Característica não encontrada' })
+  @ApiBadRequestResponse({
+    description: 'ID de característica em formato inválido',
+  })
+  async findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<CharacteristicResponseDto> {
+    const result = await this.characteristicsService.findById(id);
+    if (!result) {
+      throw new NotFoundException('Característica não encontrada.');
+    }
+    return CharacteristicResponseDto.fromEntity(
+      result.characteristic,
+      result.improvedFrom,
+      result.requirements,
+    );
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Atualiza uma característica' })
+  @ApiOkResponse({ type: CharacteristicResponseDto })
+  @ApiNotFoundResponse({
+    description:
+      'Característica ou uma ou mais tags/entidades referenciadas não encontrados',
+  })
+  @ApiConflictResponse({
+    description:
+      'Já existe uma característica com este nome, ou violação de regra em Aprimorado de/Requisitos (autorreferência, duplicata ou item em ambas as listas)',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'ID em formato inválido ou formato inválido de entityType/id em Aprimorado de/Requisitos',
+  })
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateCharacteristicDto,
+  ): Promise<CharacteristicResponseDto> {
+    const { characteristic, improvedFrom, requirements } =
+      await this.characteristicsService.update(id, dto);
+    return CharacteristicResponseDto.fromEntity(
+      characteristic,
+      improvedFrom,
+      requirements,
+    );
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Remove uma característica' })
+  @ApiNoContentResponse({ description: 'Característica removida com sucesso' })
+  @ApiNotFoundResponse({ description: 'Característica não encontrada' })
+  @ApiBadRequestResponse({
+    description: 'ID de característica em formato inválido',
+  })
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    await this.characteristicsService.remove(id);
+  }
+}

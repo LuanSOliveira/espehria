@@ -3,13 +3,15 @@
 import { useEffect, useState } from 'react';
 import { Box, Chip, CircularProgress } from '@mui/material';
 import { IconType } from 'react-icons';
-import { FiFileText, FiImage, FiLock, FiTag, FiUser } from 'react-icons/fi';
+import { FiFileText, FiImage, FiLock, FiTag } from 'react-icons/fi';
 import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
+import { EntityReferenceCard } from '@/shared/components/EntityReferenceCard';
+import { RaceTalentsListField } from '../RaceTalentsListField';
 import { useGetEntityById } from '@/hooks/Queries';
-import { IRace } from '@/shared/interfaces';
+import { IEntityReference, IRace, ITag } from '@/shared/interfaces';
 import { getContrastTextColor, showToast } from '@/shared/util';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 
@@ -30,6 +32,11 @@ interface RaceSectionData {
   icon: IconType;
   value?: string | null;
 }
+
+const toEntityReferences = (
+  items: { id: string; name: string; level?: number | null; tags: ITag[] }[],
+  entityType: string,
+): IEntityReference[] => items.map((item) => ({ ...item, entityType }));
 
 const RaceSectionBox = ({ label, icon: Icon, value }: RaceSectionData) => (
   <div className="flex-1 min-w-0" style={APP_CONTAINER_STYLES.detailSectionBox}>
@@ -195,19 +202,39 @@ export const RaceView = ({ raceId, onNotFound }: RaceViewProps) => {
 
       <div className="flex flex-col gap-4 sm:flex-row">
         <RaceSectionBox
-          label="Características Físicas"
-          icon={FiUser}
-          value={race.physicalCharacteristics}
-        />
-      </div>
-
-      <div className="flex flex-col gap-4 sm:flex-row">
-        <RaceSectionBox
           label="Descrição"
           icon={FiFileText}
           value={race.description}
         />
       </div>
+
+      <div className="flex flex-col gap-3">
+        <Label component="span" sx={{ margin: 0 }}>
+          Características
+        </Label>
+
+        {race.characteristics.length > 0 && (
+          <div className="flex flex-col gap-2">
+            {toEntityReferences(race.characteristics, 'characteristic').map(
+              (reference) => (
+                <EntityReferenceCard
+                  key={`${reference.entityType}-${reference.id}`}
+                  reference={reference}
+                />
+              ),
+            )}
+          </div>
+        )}
+
+        {race.characteristics.length === 0 && (
+          <DefaultText>Nenhum item adicionado.</DefaultText>
+        )}
+      </div>
+
+      <RaceTalentsListField
+        value={toEntityReferences(race.talents, 'talent')}
+        readOnly
+      />
 
       {!isGoogleUser && (
         <div className="flex flex-col gap-4 sm:flex-row">

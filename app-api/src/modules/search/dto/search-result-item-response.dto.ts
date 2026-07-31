@@ -16,7 +16,7 @@ export class SearchResultItemResponseDto {
   @ApiProperty({
     enum: LinkableEntityType,
     description:
-      'Tipo de entidade linkável (campanha, sessão planejada, usuário, criatura, tag, local, raça, era, evento, divindade, personagem, organização, família, equipamento, material, consumível, munição, utilitário, regra, perícia, condição, treinamento, talento, técnica ou magia). Campanhas e sessões planejadas aparecem apenas se pertencem ao usuário autenticado; usuários Google não veem esses tipos',
+      'Tipo de entidade linkável (campanha, sessão planejada, usuário, criatura, tag, local, raça, era, evento, divindade, personagem, organização, família, equipamento, material, consumível, munição, utilitário, regra, perícia, condição, treinamento, talento, técnica, magia ou característica). Campanhas e sessões planejadas aparecem apenas se pertencem ao usuário autenticado; usuários Google não veem esses tipos',
   })
   entityType!: LinkableEntityType;
 

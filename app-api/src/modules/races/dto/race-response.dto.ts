@@ -2,6 +2,8 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Race } from '../entities/race.entity';
 import { RaceCategoryResponseDto } from './race-category-response.dto';
 import { TagResponseDto } from '../../tags/dto/tag-response.dto';
+import { CharacteristicListItemResponseDto } from '../../characteristics/dto/characteristic-list-item-response.dto';
+import { TalentListItemResponseDto } from '../../talents/dto/talent-list-item-response.dto';
 
 export class RaceResponseDto {
   @ApiProperty({
@@ -31,13 +33,6 @@ export class RaceResponseDto {
   referenceImageUrl: string | null;
 
   @ApiPropertyOptional({
-    description:
-      'Características físicas da raça em HTML (pode ser nula se não informada)',
-    example: '<p>Orelhas pontudas, estatura esguia e traços delicados</p>',
-  })
-  physicalCharacteristics: string | null;
-
-  @ApiPropertyOptional({
     description: 'Descrição da raça em HTML (pode ser nula se não informada)',
     example: '<p>Povo antigo, ligado à natureza e à magia</p>',
   })
@@ -53,6 +48,20 @@ export class RaceResponseDto {
     description: 'Tags associadas à raça',
   })
   tags: TagResponseDto[];
+
+  @ApiProperty({
+    type: () => [CharacteristicListItemResponseDto],
+    description:
+      'Características associadas à raça (retornam id, name, level e tags para suportar filtro por level e exibição de tags no frontend)',
+  })
+  characteristics: CharacteristicListItemResponseDto[];
+
+  @ApiProperty({
+    type: () => [TalentListItemResponseDto],
+    description:
+      'Talentos associados à raça (retornam id, name, level e tags para suportar filtro por level e exibição de tags no frontend)',
+  })
+  talents: TalentListItemResponseDto[];
 
   @ApiProperty({
     description: 'Data de criação do registro',
@@ -72,10 +81,15 @@ export class RaceResponseDto {
     dto.name = race.name;
     dto.category = RaceCategoryResponseDto.fromEntity(race.category);
     dto.referenceImageUrl = race.referenceImageUrl;
-    dto.physicalCharacteristics = race.physicalCharacteristics;
     dto.description = race.description;
     dto.privateInformation = race.privateInformation;
     dto.tags = (race.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
+    dto.characteristics = (race.characteristics ?? []).map((characteristic) =>
+      CharacteristicListItemResponseDto.fromEntity(characteristic),
+    );
+    dto.talents = (race.talents ?? []).map((talent) =>
+      TalentListItemResponseDto.fromEntity(talent),
+    );
     dto.createdAt = race.createdAt;
     dto.updatedAt = race.updatedAt;
     return dto;

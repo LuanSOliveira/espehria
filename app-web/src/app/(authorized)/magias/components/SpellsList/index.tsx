@@ -50,6 +50,11 @@ export const SpellsList = ({
             </TableCell>
             <TableCell sx={{ borderColor: APP_COLORS.gold }}>
               <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
+                Level
+              </Label>
+            </TableCell>
+            <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
                 Tags
               </Label>
             </TableCell>
@@ -63,7 +68,7 @@ export const SpellsList = ({
         <TableBody>
           {!isLoading && spells.length === 0 && (
             <TableRow>
-              <TableCell colSpan={4} sx={{ borderColor: APP_COLORS.gold }}>
+              <TableCell colSpan={5} sx={{ borderColor: APP_COLORS.gold }}>
                 <DefaultText>Nenhuma magia encontrada.</DefaultText>
               </TableCell>
             </TableRow>

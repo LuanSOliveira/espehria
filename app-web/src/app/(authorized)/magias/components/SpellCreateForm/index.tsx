@@ -41,9 +41,10 @@ interface EntityReferenceInputPayload {
 }
 
 interface SpellPayload
-  extends Omit<SpellFormData, 'referenceImage' | 'description'> {
+  extends Omit<SpellFormData, 'referenceImage' | 'description' | 'level'> {
   referenceImage?: string;
   description?: string;
+  level: number;
   improvedFrom: EntityReferenceInputPayload[];
   requirements: EntityReferenceInputPayload[];
 }
@@ -95,6 +96,7 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
       referenceImage: spellDetail.referenceImage ?? '',
       description: spellDetail.description ?? '',
       tagIds: spellDetail.tags?.map((tag) => tag.id) ?? [],
+      level: String(spellDetail.level),
     });
     setImprovedFrom(spellDetail.improvedFrom ?? []);
     setRequirements(spellDetail.requirements ?? []);
@@ -122,6 +124,7 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
     referenceImage: data.referenceImage || undefined,
     description: data.description || undefined,
     tagIds: data.tagIds ?? [],
+    level: Number(data.level),
     improvedFrom: improvedFrom.map((reference) => ({
       entityType: reference.entityType,
       id: reference.id,
@@ -227,6 +230,16 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"
+        />
+
+        <FormTextInput
+          id="spell-form-level"
+          name="level"
+          control={control}
+          label="Level"
+          placeholder="Digite o level"
+          type="number"
+          slotProps={{ htmlInput: { min: 1, step: 1, inputMode: 'numeric' } }}
         />
       </div>
 

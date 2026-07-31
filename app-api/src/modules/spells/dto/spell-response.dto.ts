@@ -16,6 +16,9 @@ export class SpellResponseDto {
   })
   name: string;
 
+  @ApiProperty({ description: 'Nível da magia', example: 3 })
+  level: number;
+
   @ApiPropertyOptional({
     description: 'URL de uma imagem de referência da magia',
     example: 'https://exemplo.com/bola-de-fogo.jpg',
@@ -60,6 +63,7 @@ export class SpellResponseDto {
     const dto = new SpellResponseDto();
     dto.id = spell.id;
     dto.name = spell.name;
+    dto.level = spell.level;
     dto.referenceImage = spell.referenceImage;
     dto.description = spell.description;
     dto.tags = (spell.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));

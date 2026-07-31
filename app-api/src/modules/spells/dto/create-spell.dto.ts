@@ -2,11 +2,13 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUrl,
   IsUUID,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { EntityReferenceInputDto } from '../../entity-links/dto/entity-reference-input.dto';
@@ -19,6 +21,14 @@ export class CreateSpellDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @ApiProperty({
+    example: 3,
+    description: 'Nível da magia (obrigatório, número inteiro >= 1)',
+  })
+  @IsInt({ message: 'O nível deve ser um número inteiro.' })
+  @Min(1, { message: 'O nível deve ser maior ou igual a 1.' })
+  level: number;
 
   @ApiPropertyOptional({
     example: 'https://exemplo.com/bola-de-fogo.jpg',

@@ -11,6 +11,8 @@ import {
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { RaceCategory } from './race-category.entity';
 import { Tag } from '../../tags/entities/tag.entity';
+import { Characteristic } from '../../characteristics/entities/characteristic.entity';
+import { Talent } from '../../talents/entities/talent.entity';
 
 @Entity('races')
 export class Race extends BaseEntity {
@@ -27,13 +29,6 @@ export class Race extends BaseEntity {
   @Column({ type: 'varchar', nullable: true, name: 'reference_image_url' })
   referenceImageUrl!: string | null;
 
-  @Column({
-    type: 'text',
-    nullable: true,
-    name: 'physical_characteristics',
-  })
-  physicalCharacteristics!: string | null;
-
   @Column({ type: 'text', nullable: true })
   description!: string | null;
 
@@ -48,4 +43,31 @@ export class Race extends BaseEntity {
     inverseJoinColumn: { name: 'tag_id', referencedColumnName: 'id' },
   })
   tags!: Tag[];
+
+  @ApiProperty({
+    type: () => [Characteristic],
+    description: 'Características associadas à raça',
+  })
+  @ManyToMany(() => Characteristic)
+  @JoinTable({
+    name: 'race_characteristics',
+    joinColumn: { name: 'race_id', referencedColumnName: 'id' },
+    inverseJoinColumn: {
+      name: 'characteristic_id',
+      referencedColumnName: 'id',
+    },
+  })
+  characteristics!: Characteristic[];
+
+  @ApiProperty({
+    type: () => [Talent],
+    description: 'Talentos associados à raça',
+  })
+  @ManyToMany(() => Talent)
+  @JoinTable({
+    name: 'race_talents',
+    joinColumn: { name: 'race_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'talent_id', referencedColumnName: 'id' },
+  })
+  talents!: Talent[];
 }

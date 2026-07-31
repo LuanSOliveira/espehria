@@ -34,15 +34,6 @@ export class CreateRaceDto {
   referenceImageUrl?: string;
 
   @ApiPropertyOptional({
-    example: '<p>Orelhas pontudas, estatura esguia e traços delicados</p>',
-    description:
-      'Características físicas da raça (suporta HTML, opcional nesta entidade)',
-  })
-  @IsOptional()
-  @IsString()
-  physicalCharacteristics?: string;
-
-  @ApiPropertyOptional({
     example: '<p>Povo antigo, ligado à natureza e à magia</p>',
     description: 'Descrição da raça (suporta HTML, opcional)',
   })
@@ -68,4 +59,28 @@ export class CreateRaceDto {
   @IsArray()
   @IsUUID('4', { each: true })
   tagIds?: string[];
+
+  @ApiPropertyOptional({
+    type: [String],
+    format: 'uuid',
+    description:
+      'IDs das características associadas à raça (array de UUIDs válidos; ao retornar, incluem id, name, level e tags)',
+    example: ['550e8400-e29b-41d4-a716-446655440000'],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  characteristicIds?: string[];
+
+  @ApiPropertyOptional({
+    type: [String],
+    format: 'uuid',
+    description:
+      'IDs dos talentos associados à raça (array de UUIDs válidos; ao retornar, incluem id, name, level e tags)',
+    example: ['550e8400-e29b-41d4-a716-446655440000'],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  talentIds?: string[];
 }

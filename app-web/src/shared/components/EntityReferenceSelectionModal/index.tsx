@@ -28,6 +28,7 @@ interface EntityReferenceCandidate {
   id: string;
   name: string;
   tags: ITag[];
+  level?: number | null;
 }
 
 interface EntityReferenceCandidateListFilters {
@@ -36,7 +37,7 @@ interface EntityReferenceCandidateListFilters {
   perPage?: number;
 }
 
-interface EntityReferenceTabConfig {
+export interface EntityReferenceTabConfig {
   label: string;
   entityType: string;
   url: string;
@@ -45,6 +46,11 @@ interface EntityReferenceTabConfig {
 const ENTITY_REFERENCE_SELECTION_TABS: EntityReferenceTabConfig[] = [
   { label: 'Treinamentos', entityType: 'training', url: '/trainings' },
   { label: 'Talentos', entityType: 'talent', url: '/talents' },
+  {
+    label: 'Características',
+    entityType: 'characteristic',
+    url: '/characteristics',
+  },
   { label: 'Técnicas', entityType: 'technique', url: '/techniques' },
   { label: 'Magias', entityType: 'spell', url: '/spells' },
 ];
@@ -55,6 +61,7 @@ export interface EntityReferenceSelectionModalProps {
   title: string;
   excludeReferences: { entityType: string; id: string }[];
   onSelect: (reference: IEntityReference) => void;
+  tabs?: EntityReferenceTabConfig[];
 }
 
 export const EntityReferenceSelectionModal = ({
@@ -63,6 +70,7 @@ export const EntityReferenceSelectionModal = ({
   title,
   excludeReferences,
   onSelect,
+  tabs = ENTITY_REFERENCE_SELECTION_TABS,
 }: EntityReferenceSelectionModalProps) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [nameFilter, setNameFilter] = useState('');
@@ -72,7 +80,7 @@ export const EntityReferenceSelectionModal = ({
     (state) => state.openEntityView,
   );
 
-  const activeTab = ENTITY_REFERENCE_SELECTION_TABS[activeTabIndex];
+  const activeTab = tabs[activeTabIndex];
 
   useEffect(() => {
     if (!open) {
@@ -112,20 +120,22 @@ export const EntityReferenceSelectionModal = ({
   return (
     <FormModal open={open} onClose={onClose} title={title} size="wide">
       <div className="flex flex-col gap-4">
-        <Tabs
-          value={activeTabIndex}
-          onChange={(_event, newValue: number) => setActiveTabIndex(newValue)}
-          sx={{
-            borderBottom: `1px solid ${APP_COLORS.gold}`,
-            '& .MuiTab-root': { color: APP_COLORS.textBrownDark },
-            '& .Mui-selected': { color: `${APP_COLORS.goldDark} !important` },
-            '& .MuiTabs-indicator': { backgroundColor: APP_COLORS.goldDark },
-          }}
-        >
-          {ENTITY_REFERENCE_SELECTION_TABS.map((tab) => (
-            <Tab key={tab.entityType} label={tab.label} />
-          ))}
-        </Tabs>
+        {tabs.length > 1 && (
+          <Tabs
+            value={activeTabIndex}
+            onChange={(_event, newValue: number) => setActiveTabIndex(newValue)}
+            sx={{
+              borderBottom: `1px solid ${APP_COLORS.gold}`,
+              '& .MuiTab-root': { color: APP_COLORS.textBrownDark },
+              '& .Mui-selected': { color: `${APP_COLORS.goldDark} !important` },
+              '& .MuiTabs-indicator': { backgroundColor: APP_COLORS.goldDark },
+            }}
+          >
+            {tabs.map((tab) => (
+              <Tab key={tab.entityType} label={tab.label} />
+            ))}
+          </Tabs>
+        )}
 
         <DefaultTextInput
           id="entity-reference-selection-name-filter"
@@ -199,6 +209,7 @@ export const EntityReferenceSelectionModal = ({
                             name: item.name,
                             entityType: activeTab.entityType,
                             tags: item.tags,
+                            level: item.level,
                           })
                         }
                         sx={{ color: APP_COLORS.textBrownDark }}

@@ -45,6 +45,11 @@ export const TalentsList = ({
             </TableCell>
             <TableCell sx={{ borderColor: APP_COLORS.gold }}>
               <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
+                Level
+              </Label>
+            </TableCell>
+            <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
                 Tags
               </Label>
             </TableCell>
@@ -58,7 +63,7 @@ export const TalentsList = ({
         <TableBody>
           {!isLoading && talents.length === 0 && (
             <TableRow>
-              <TableCell colSpan={3} sx={{ borderColor: APP_COLORS.gold }}>
+              <TableCell colSpan={4} sx={{ borderColor: APP_COLORS.gold }}>
                 <DefaultText>Nenhum talento encontrado.</DefaultText>
               </TableCell>
             </TableRow>

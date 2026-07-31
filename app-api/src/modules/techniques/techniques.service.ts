@@ -99,6 +99,7 @@ export class TechniquesService {
 
     const technique = this.techniquesRepository.create({
       name: dto.name,
+      level: dto.level,
       referenceImage: dto.referenceImage ?? null,
       description: dto.description ?? null,
       tags,
@@ -190,6 +191,9 @@ export class TechniquesService {
       technique.name = dto.name;
     }
 
+    if (dto.level !== undefined) {
+      technique.level = dto.level;
+    }
     if (dto.referenceImage !== undefined) {
       technique.referenceImage = dto.referenceImage;
     }

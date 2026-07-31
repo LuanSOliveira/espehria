@@ -22,42 +22,59 @@ export const EntityReferenceCard = ({
   );
 
   return (
-    <div
-      className="flex items-center gap-3 px-3 py-2"
-      style={APP_CONTAINER_STYLES.detailInfoField}
-    >
-      <div className="flex flex-1 flex-col gap-1">
-        <DefaultText>{reference.name}</DefaultText>
-        {reference.tags.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1">
-            {reference.tags.map((tag) => (
-              <TagBadge key={tag.id} name={tag.name} color={tag.color} />
-            ))}
-          </div>
-        )}
-      </div>
-
-      <Tooltip title="Visualizar">
-        <IconButton
-          aria-label={`Visualizar ${reference.name}`}
-          onClick={() => openEntityView(reference.entityType, reference.id)}
-          sx={{ color: APP_COLORS.textBrownDark }}
+    <div style={{ position: 'relative' }}>
+      {reference.level !== null && reference.level !== undefined && (
+        <span
+          style={{
+            position: 'absolute',
+            top: 4,
+            right: 8,
+            color: APP_COLORS.textBrownDark,
+            fontSize: '0.75rem',
+            fontWeight: 700,
+          }}
         >
-          <FiEye />
-        </IconButton>
-      </Tooltip>
+          {reference.level}
+        </span>
+      )}
 
-      {onRemove && (
-        <Tooltip title="Remover">
+      <div
+        className="flex items-center gap-3 px-3 py-2"
+        style={APP_CONTAINER_STYLES.detailInfoField}
+      >
+        <div className="flex flex-1 flex-col gap-1">
+          <DefaultText>{reference.name}</DefaultText>
+          {reference.tags.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1">
+              {reference.tags.map((tag) => (
+                <TagBadge key={tag.id} name={tag.name} color={tag.color} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <Tooltip title="Visualizar">
           <IconButton
-            aria-label={`Remover ${reference.name}`}
-            onClick={onRemove}
+            aria-label={`Visualizar ${reference.name}`}
+            onClick={() => openEntityView(reference.entityType, reference.id)}
             sx={{ color: APP_COLORS.textBrownDark }}
           >
-            <FiTrash2 />
+            <FiEye />
           </IconButton>
         </Tooltip>
-      )}
+
+        {onRemove && (
+          <Tooltip title="Remover">
+            <IconButton
+              aria-label={`Remover ${reference.name}`}
+              onClick={onRemove}
+              sx={{ color: APP_COLORS.textBrownDark }}
+            >
+              <FiTrash2 />
+            </IconButton>
+          </Tooltip>
+        )}
+      </div>
     </div>
   );
 };

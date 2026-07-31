@@ -23,6 +23,7 @@ import { Training } from '../trainings/entities/training.entity';
 import { Talent } from '../talents/entities/talent.entity';
 import { Technique } from '../techniques/entities/technique.entity';
 import { Spell } from '../spells/entities/spell.entity';
+import { Characteristic } from '../characteristics/entities/characteristic.entity';
 import { Campaign } from '../campaigns/entities/campaign.entity';
 import { PlannedSession } from '../planned-sessions/entities/planned-session.entity';
 import { SearchController } from './search.controller';
@@ -54,6 +55,7 @@ import { SearchService } from './search.service';
       Talent,
       Technique,
       Spell,
+      Characteristic,
       Campaign,
       PlannedSession,
     ]),

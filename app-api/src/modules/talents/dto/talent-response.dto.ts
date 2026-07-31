@@ -16,6 +16,9 @@ export class TalentResponseDto {
   })
   name: string;
 
+  @ApiProperty({ description: 'Nível do talento', example: 3 })
+  level: number;
+
   @ApiPropertyOptional({
     description: 'Descrição do talento em HTML',
     example: '<p>Facilidade natural em convencer outras pessoas</p>',
@@ -54,6 +57,7 @@ export class TalentResponseDto {
     const dto = new TalentResponseDto();
     dto.id = talent.id;
     dto.name = talent.name;
+    dto.level = talent.level;
     dto.description = talent.description;
     dto.tags = (talent.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
     dto.improvedFrom = improvedFrom;

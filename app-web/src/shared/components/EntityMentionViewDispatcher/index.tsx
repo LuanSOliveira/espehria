@@ -22,6 +22,7 @@ import { ConditionView } from '@/app/(authorized)/condicoes/components/Condition
 import { UtilityView } from '@/app/(authorized)/utilitarios/components/UtilityView';
 import { TrainingView } from '@/app/(authorized)/treinamentos/components/TrainingView';
 import { TalentView } from '@/app/(authorized)/talentos/components/TalentView';
+import { CharacteristicView } from '@/app/(authorized)/caracteristicas/components/CharacteristicView';
 import { TechniqueView } from '@/app/(authorized)/tecnicas/components/TechniqueView';
 import { SpellView } from '@/app/(authorized)/magias/components/SpellView';
 
@@ -96,6 +97,9 @@ const ENTITY_MENTION_VIEW_REGISTRY: Record<
   ),
   talent: ({ entityId, onNotFound }) => (
     <TalentView talentId={entityId} onNotFound={onNotFound} />
+  ),
+  characteristic: ({ entityId, onNotFound }) => (
+    <CharacteristicView characteristicId={entityId} onNotFound={onNotFound} />
   ),
   technique: ({ entityId, onNotFound }) => (
     <TechniqueView techniqueId={entityId} onNotFound={onNotFound} />

@@ -99,6 +99,7 @@ export class TalentsService {
 
     const talent = this.talentsRepository.create({
       name: dto.name,
+      level: dto.level,
       description: dto.description ?? null,
       tags,
     });
@@ -186,6 +187,9 @@ export class TalentsService {
       talent.name = dto.name;
     }
 
+    if (dto.level !== undefined) {
+      talent.level = dto.level;
+    }
     if (dto.description !== undefined) {
       talent.description = dto.description;
     }

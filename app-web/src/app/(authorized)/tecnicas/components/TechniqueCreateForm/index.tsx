@@ -41,9 +41,10 @@ interface EntityReferenceInputPayload {
 }
 
 interface TechniquePayload
-  extends Omit<TechniqueFormData, 'referenceImage' | 'description'> {
+  extends Omit<TechniqueFormData, 'referenceImage' | 'description' | 'level'> {
   referenceImage?: string;
   description?: string;
+  level: number;
   improvedFrom: EntityReferenceInputPayload[];
   requirements: EntityReferenceInputPayload[];
 }
@@ -97,6 +98,7 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
       referenceImage: techniqueDetail.referenceImage ?? '',
       description: techniqueDetail.description ?? '',
       tagIds: techniqueDetail.tags?.map((tag) => tag.id) ?? [],
+      level: String(techniqueDetail.level),
     });
     setImprovedFrom(techniqueDetail.improvedFrom ?? []);
     setRequirements(techniqueDetail.requirements ?? []);
@@ -124,6 +126,7 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
     referenceImage: data.referenceImage || undefined,
     description: data.description || undefined,
     tagIds: data.tagIds ?? [],
+    level: Number(data.level),
     improvedFrom: improvedFrom.map((reference) => ({
       entityType: reference.entityType,
       id: reference.id,
@@ -229,6 +232,16 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"
+        />
+
+        <FormTextInput
+          id="technique-form-level"
+          name="level"
+          control={control}
+          label="Level"
+          placeholder="Digite o level"
+          type="number"
+          slotProps={{ htmlInput: { min: 1, step: 1, inputMode: 'numeric' } }}
         />
       </div>
 

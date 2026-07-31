@@ -21,6 +21,9 @@ export class SpellListItemResponseDto {
   })
   name: string;
 
+  @ApiProperty({ description: 'Nível da magia', example: 3 })
+  level: number;
+
   @ApiProperty({
     type: () => [TagResponseDto],
     description: 'Tags associadas à magia',
@@ -32,6 +35,7 @@ export class SpellListItemResponseDto {
     dto.id = spell.id;
     dto.referenceImage = spell.referenceImage;
     dto.name = spell.name;
+    dto.level = spell.level;
     dto.tags = (spell.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
     return dto;
   }

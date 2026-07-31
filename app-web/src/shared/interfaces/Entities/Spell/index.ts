@@ -7,6 +7,7 @@ export interface ISpellListItem {
   referenceImage?: string | null;
   name: string;
   tags: ITag[];
+  level: number;
 }
 
 export interface ISpell extends IEntity {
@@ -14,6 +15,7 @@ export interface ISpell extends IEntity {
   referenceImage?: string | null;
   description?: string | null;
   tags: ITag[];
+  level: number;
   improvedFrom: IEntityReference[];
   requirements: IEntityReference[];
   createdAt: string;

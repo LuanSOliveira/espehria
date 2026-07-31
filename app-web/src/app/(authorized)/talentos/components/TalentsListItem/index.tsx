@@ -33,6 +33,9 @@ export const TalentsListItem = ({
         <DefaultText>{talent.name}</DefaultText>
       </TableCell>
       <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+        <DefaultText>{talent.level}</DefaultText>
+      </TableCell>
+      <TableCell sx={{ borderColor: APP_COLORS.gold }}>
         <div className="flex flex-wrap items-center gap-1">
           {talent.tags.map((tag) => (
             <TagBadge key={tag.id} name={tag.name} color={tag.color} />

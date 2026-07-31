@@ -27,6 +27,7 @@ import { Training } from '../trainings/entities/training.entity';
 import { Talent } from '../talents/entities/talent.entity';
 import { Technique } from '../techniques/entities/technique.entity';
 import { Spell } from '../spells/entities/spell.entity';
+import { Characteristic } from '../characteristics/entities/characteristic.entity';
 import { LinkableEntityType } from './enums/linkable-entity-type.enum';
 import { SearchResultItemResponseDto } from './dto/search-result-item-response.dto';
 
@@ -81,6 +82,8 @@ export class SearchService {
     private readonly techniquesRepository: Repository<Technique>,
     @InjectRepository(Spell)
     private readonly spellsRepository: Repository<Spell>,
+    @InjectRepository(Characteristic)
+    private readonly characteristicsRepository: Repository<Characteristic>,
     @InjectRepository(Campaign)
     private readonly campaignsRepository: Repository<Campaign>,
     @InjectRepository(PlannedSession)
@@ -171,6 +174,10 @@ export class SearchService {
       {
         entityType: LinkableEntityType.SPELL,
         repository: this.spellsRepository,
+      },
+      {
+        entityType: LinkableEntityType.CHARACTERISTIC,
+        repository: this.characteristicsRepository,
       },
       {
         entityType: LinkableEntityType.CAMPAIGN,

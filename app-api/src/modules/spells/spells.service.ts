@@ -99,6 +99,7 @@ export class SpellsService {
 
     const spell = this.spellsRepository.create({
       name: dto.name,
+      level: dto.level,
       referenceImage: dto.referenceImage ?? null,
       description: dto.description ?? null,
       tags,
@@ -182,6 +183,9 @@ export class SpellsService {
       spell.name = dto.name;
     }
 
+    if (dto.level !== undefined) {
+      spell.level = dto.level;
+    }
     if (dto.referenceImage !== undefined) {
       spell.referenceImage = dto.referenceImage;
     }

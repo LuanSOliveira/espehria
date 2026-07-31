@@ -49,7 +49,8 @@ export class RacesController {
   @ApiCreatedResponse({ type: RaceResponseDto })
   @ApiConflictResponse({ description: 'Nome da raça já existe' })
   @ApiNotFoundResponse({
-    description: 'Categoria não encontrada ou uma ou mais tags não encontradas',
+    description:
+      'Categoria não encontrada, uma ou mais tags não encontradas, uma ou mais características não encontradas ou um ou mais talentos não encontrados',
   })
   @ApiBadRequestResponse({
     description:
@@ -110,7 +111,8 @@ export class RacesController {
   @ApiOperation({ summary: 'Atualiza uma raça' })
   @ApiOkResponse({ type: RaceResponseDto })
   @ApiNotFoundResponse({
-    description: 'Raça, categoria ou uma ou mais tags não encontradas',
+    description:
+      'Raça, categoria, uma ou mais tags, uma ou mais características ou um ou mais talentos não encontrados',
   })
   @ApiConflictResponse({ description: 'Nome da raça já existe' })
   @ApiBadRequestResponse({

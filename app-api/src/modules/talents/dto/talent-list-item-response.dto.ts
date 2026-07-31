@@ -15,6 +15,9 @@ export class TalentListItemResponseDto {
   })
   name: string;
 
+  @ApiProperty({ description: 'Nível do talento', example: 3 })
+  level: number;
+
   @ApiProperty({
     type: () => [TagResponseDto],
     description: 'Tags associadas ao talento',
@@ -25,6 +28,7 @@ export class TalentListItemResponseDto {
     const dto = new TalentListItemResponseDto();
     dto.id = talent.id;
     dto.name = talent.name;
+    dto.level = talent.level;
     dto.tags = (talent.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
     return dto;
   }

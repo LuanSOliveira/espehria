@@ -10,10 +10,11 @@ export const raceFormSchema = z.object({
       (value) => value === '' || z.string().url().safeParse(value).success,
       'Informe uma URL de imagem válida',
     ),
-  physicalCharacteristics: z.string(),
   description: z.string(),
   privateInformation: z.string(),
   tagIds: z.array(z.string()).optional(),
+  characteristicIds: z.array(z.string()).optional(),
+  talentIds: z.array(z.string()).optional(),
 });
 
 export type RaceFormData = z.infer<typeof raceFormSchema>;
@@ -24,8 +25,9 @@ export const raceFormDefaultValues: RaceFormData = {
   name: '',
   categoryId: '',
   referenceImageUrl: '',
-  physicalCharacteristics: '',
   description: '',
   privateInformation: '',
   tagIds: [],
+  characteristicIds: [],
+  talentIds: [],
 };

@@ -22,6 +22,7 @@ export const ENTITY_MENTION_TYPE_LABELS: Record<string, string> = {
   utility: 'utilitário',
   training: 'treinamento',
   talent: 'talento',
+  characteristic: 'característica',
   technique: 'técnica',
   spell: 'magia',
 };
@@ -54,6 +55,7 @@ export const ENTITY_MENTION_DETAIL_URL_BY_TYPE: Record<
   utility: (id) => `/utilities/${id}`,
   training: (id) => `/trainings/${id}`,
   talent: (id) => `/talents/${id}`,
+  characteristic: (id) => `/characteristics/${id}`,
   technique: (id) => `/techniques/${id}`,
   spell: (id) => `/spells/${id}`,
 };
@@ -81,6 +83,7 @@ export const ENTITY_MENTION_VIEWABLE_TYPES: string[] = [
   'utility',
   'training',
   'talent',
+  'characteristic',
   'technique',
   'spell',
 ];

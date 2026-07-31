@@ -40,8 +40,9 @@ interface EntityReferenceInputPayload {
   id: string;
 }
 
-interface TalentPayload extends Omit<TalentFormData, 'description'> {
+interface TalentPayload extends Omit<TalentFormData, 'description' | 'level'> {
   description?: string;
+  level: number;
   improvedFrom: EntityReferenceInputPayload[];
   requirements: EntityReferenceInputPayload[];
 }
@@ -92,6 +93,7 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
       name: talentDetail.name,
       description: talentDetail.description ?? '',
       tagIds: talentDetail.tags?.map((tag) => tag.id) ?? [],
+      level: String(talentDetail.level),
     });
     setImprovedFrom(talentDetail.improvedFrom ?? []);
     setRequirements(talentDetail.requirements ?? []);
@@ -118,6 +120,7 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
     ...data,
     description: data.description || undefined,
     tagIds: data.tagIds ?? [],
+    level: Number(data.level),
     improvedFrom: improvedFrom.map((reference) => ({
       entityType: reference.entityType,
       id: reference.id,
@@ -215,6 +218,16 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"
+        />
+
+        <FormTextInput
+          id="talent-form-level"
+          name="level"
+          control={control}
+          label="Level"
+          placeholder="Digite o level"
+          type="number"
+          slotProps={{ htmlInput: { min: 1, step: 1, inputMode: 'numeric' } }}
         />
       </div>
 

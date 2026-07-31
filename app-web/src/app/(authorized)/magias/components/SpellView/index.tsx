@@ -132,6 +132,8 @@ export const SpellView = ({ spellId, onNotFound }: SpellViewProps) => {
             {spell.name}
           </Title>
 
+          <DefaultText>{`(level ${spell.level})`}</DefaultText>
+
           {spell.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {spell.tags.map((tag) => (

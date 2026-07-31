@@ -11,6 +11,11 @@ export const spellFormSchema = z.object({
     ),
   tagIds: z.array(z.string()).optional(),
   description: z.string().optional(),
+  level: z
+    .string()
+    .min(1, 'Informe o level')
+    .refine((value) => /^\d+$/.test(value), 'Informe um número inteiro')
+    .refine((value) => Number(value) >= 1, 'O level deve ser no mínimo 1'),
 });
 
 export type SpellFormData = z.infer<typeof spellFormSchema>;
@@ -22,4 +27,5 @@ export const spellFormDefaultValues: SpellFormData = {
   referenceImage: '',
   tagIds: [],
   description: '',
+  level: '',
 };

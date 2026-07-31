@@ -135,6 +135,8 @@ export const TechniqueView = ({
             {technique.name}
           </Title>
 
+          <DefaultText>{`(level ${technique.level})`}</DefaultText>
+
           {technique.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {technique.tags.map((tag) => (

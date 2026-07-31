@@ -5,4 +5,5 @@ export interface IEntityReference {
   name: string;
   entityType: string;
   tags: ITag[];
+  level?: number | null;
 }

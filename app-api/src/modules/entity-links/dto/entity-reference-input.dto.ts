@@ -6,7 +6,8 @@ export class EntityReferenceInputDto {
   @ApiProperty({
     enum: ReferenceableEntityType,
     enumName: 'ReferenceableEntityType',
-    description: 'Tipo de entidade referenciada (treinamento, talento, técnica ou magia)',
+    description:
+      'Tipo de entidade referenciada (treinamento, talento, técnica, magia ou característica)',
     example: ReferenceableEntityType.TRAINING,
   })
   @IsEnum(ReferenceableEntityType)

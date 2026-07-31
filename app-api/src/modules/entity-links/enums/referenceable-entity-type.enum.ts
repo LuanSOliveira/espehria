@@ -3,4 +3,5 @@ export enum ReferenceableEntityType {
   TALENT = 'talent',
   TECHNIQUE = 'technique',
   SPELL = 'spell',
+  CHARACTERISTIC = 'characteristic',
 }

@@ -4,16 +4,17 @@ import { Training } from '../../trainings/entities/training.entity';
 import { Talent } from '../../talents/entities/talent.entity';
 import { Technique } from '../../techniques/entities/technique.entity';
 import { Spell } from '../../spells/entities/spell.entity';
+import { Characteristic } from '../../characteristics/entities/characteristic.entity';
 import { EntityLinkType } from '../enums/entity-link-type.enum';
 
 @Entity('entity_links')
 @Check(
   'CK_entity_links_owner_exclusive',
-  'num_nonnulls(owner_training_id, owner_talent_id, owner_technique_id, owner_spell_id) = 1',
+  'num_nonnulls(owner_training_id, owner_talent_id, owner_technique_id, owner_spell_id, owner_characteristic_id) = 1',
 )
 @Check(
   'CK_entity_links_target_exclusive',
-  'num_nonnulls(target_training_id, target_talent_id, target_technique_id, target_spell_id) = 1',
+  'num_nonnulls(target_training_id, target_talent_id, target_technique_id, target_spell_id, target_characteristic_id) = 1',
 )
 @Unique([
   'linkType',
@@ -21,10 +22,12 @@ import { EntityLinkType } from '../enums/entity-link-type.enum';
   'ownerTalent',
   'ownerTechnique',
   'ownerSpell',
+  'ownerCharacteristic',
   'targetTraining',
   'targetTalent',
   'targetTechnique',
   'targetSpell',
+  'targetCharacteristic',
 ])
 export class EntityLink extends BaseEntity {
   @Column({ type: 'enum', enum: EntityLinkType, name: 'link_type' })
@@ -46,6 +49,10 @@ export class EntityLink extends BaseEntity {
   @JoinColumn({ name: 'owner_spell_id' })
   ownerSpell!: Spell | null;
 
+  @ManyToOne(() => Characteristic, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'owner_characteristic_id' })
+  ownerCharacteristic!: Characteristic | null;
+
   @ManyToOne(() => Training, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'target_training_id' })
   targetTraining!: Training | null;
@@ -61,4 +68,8 @@ export class EntityLink extends BaseEntity {
   @ManyToOne(() => Spell, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'target_spell_id' })
   targetSpell!: Spell | null;
+
+  @ManyToOne(() => Characteristic, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'target_characteristic_id' })
+  targetCharacteristic!: Characteristic | null;
 }

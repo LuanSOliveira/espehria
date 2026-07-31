@@ -75,6 +75,8 @@ export const TalentView = ({ talentId, onNotFound }: TalentViewProps) => {
           {talent.name}
         </Title>
 
+        <DefaultText>{`(level ${talent.level})`}</DefaultText>
+
         {talent.tags.length > 0 && (
           <div className="flex flex-wrap justify-center gap-2">
             {talent.tags.map((tag) => (

@@ -20,6 +20,7 @@ export * from './ConditionFormSchema';
 export * from './UtilityFormSchema';
 export * from './TrainingFormSchema';
 export * from './TalentFormSchema';
+export * from './CharacteristicFormSchema';
 export * from './TechniqueFormSchema';
 export * from './SpellFormSchema';
 export * from './CampaignFormSchema';
