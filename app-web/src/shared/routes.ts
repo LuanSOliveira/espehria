@@ -20,6 +20,10 @@ const MENU_ROUTES = {
   skills: '/pericias',
   conditions: '/condicoes',
   utilities: '/utilitarios',
+  trainings: '/treinamentos',
+  talents: '/talentos',
+  techniques: '/tecnicas',
+  spells: '/magias',
 };
 
 export const APP_ROUTES = {
@@ -44,6 +48,10 @@ export const APP_ROUTES = {
     skills: MENU_ROUTES.skills,
     conditions: MENU_ROUTES.conditions,
     utilities: MENU_ROUTES.utilities,
+    trainings: MENU_ROUTES.trainings,
+    talents: MENU_ROUTES.talents,
+    techniques: MENU_ROUTES.techniques,
+    spells: MENU_ROUTES.spells,
   },
   public: {
     login: MENU_ROUTES.login,

@@ -29,6 +29,10 @@ import { UtilitiesModule } from './modules/utilities/utilities.module';
 import { RulesModule } from './modules/rules/rules.module';
 import { SkillsModule } from './modules/skills/skills.module';
 import { ConditionsModule } from './modules/conditions/conditions.module';
+import { TrainingsModule } from './modules/trainings/trainings.module';
+import { TalentsModule } from './modules/talents/talents.module';
+import { TechniquesModule } from './modules/techniques/techniques.module';
+import { SpellsModule } from './modules/spells/spells.module';
 
 @Module({
   imports: [
@@ -79,6 +83,10 @@ import { ConditionsModule } from './modules/conditions/conditions.module';
     RulesModule,
     SkillsModule,
     ConditionsModule,
+    TrainingsModule,
+    TalentsModule,
+    TechniquesModule,
+    SpellsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

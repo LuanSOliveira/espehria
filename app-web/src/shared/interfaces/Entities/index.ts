@@ -20,4 +20,8 @@ export * from './Rule';
 export * from './Skill';
 export * from './Condition';
 export * from './Utility';
+export * from './Training';
+export * from './Talent';
+export * from './Technique';
+export * from './Spell';
 export * from './SearchResult';

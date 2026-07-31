@@ -20,6 +20,10 @@ export const ENTITY_MENTION_TYPE_LABELS: Record<string, string> = {
   skill: 'perícia',
   condition: 'condição',
   utility: 'utilitário',
+  training: 'treinamento',
+  talent: 'talento',
+  technique: 'técnica',
+  spell: 'magia',
 };
 
 // Endpoint de detalhe usado para resolver o nome atual de uma entidade mencionada
@@ -48,6 +52,10 @@ export const ENTITY_MENTION_DETAIL_URL_BY_TYPE: Record<
   skill: (id) => `/skills/${id}`,
   condition: (id) => `/conditions/${id}`,
   utility: (id) => `/utilities/${id}`,
+  training: (id) => `/trainings/${id}`,
+  talent: (id) => `/talents/${id}`,
+  technique: (id) => `/techniques/${id}`,
+  spell: (id) => `/spells/${id}`,
 };
 
 // Tipos de entidade com view registrada no EntityMentionViewDispatcher — usado pelo
@@ -71,4 +79,8 @@ export const ENTITY_MENTION_VIEWABLE_TYPES: string[] = [
   'skill',
   'condition',
   'utility',
+  'training',
+  'talent',
+  'technique',
+  'spell',
 ];

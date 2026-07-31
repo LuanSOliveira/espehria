@@ -20,6 +20,10 @@ import { RuleView } from '@/app/(authorized)/regras/components/RuleView';
 import { SkillView } from '@/app/(authorized)/pericias/components/SkillView';
 import { ConditionView } from '@/app/(authorized)/condicoes/components/ConditionView';
 import { UtilityView } from '@/app/(authorized)/utilitarios/components/UtilityView';
+import { TrainingView } from '@/app/(authorized)/treinamentos/components/TrainingView';
+import { TalentView } from '@/app/(authorized)/talentos/components/TalentView';
+import { TechniqueView } from '@/app/(authorized)/tecnicas/components/TechniqueView';
+import { SpellView } from '@/app/(authorized)/magias/components/SpellView';
 
 interface EntityMentionViewRendererParams {
   entityId: string;
@@ -86,6 +90,18 @@ const ENTITY_MENTION_VIEW_REGISTRY: Record<
   ),
   utility: ({ entityId, onNotFound }) => (
     <UtilityView utilityId={entityId} onNotFound={onNotFound} />
+  ),
+  training: ({ entityId, onNotFound }) => (
+    <TrainingView trainingId={entityId} onNotFound={onNotFound} />
+  ),
+  talent: ({ entityId, onNotFound }) => (
+    <TalentView talentId={entityId} onNotFound={onNotFound} />
+  ),
+  technique: ({ entityId, onNotFound }) => (
+    <TechniqueView techniqueId={entityId} onNotFound={onNotFound} />
+  ),
+  spell: ({ entityId, onNotFound }) => (
+    <SpellView spellId={entityId} onNotFound={onNotFound} />
   ),
 };
 

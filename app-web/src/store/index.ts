@@ -22,3 +22,7 @@ export * from './PageStore/RulesStore';
 export * from './PageStore/SkillsStore';
 export * from './PageStore/ConditionsStore';
 export * from './PageStore/UtilitiesStore';
+export * from './PageStore/TrainingsStore';
+export * from './PageStore/TalentsStore';
+export * from './PageStore/TechniquesStore';
+export * from './PageStore/SpellsStore';

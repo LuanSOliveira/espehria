@@ -18,3 +18,7 @@ export * from './RuleFormSchema';
 export * from './SkillFormSchema';
 export * from './ConditionFormSchema';
 export * from './UtilityFormSchema';
+export * from './TrainingFormSchema';
+export * from './TalentFormSchema';
+export * from './TechniqueFormSchema';
+export * from './SpellFormSchema';

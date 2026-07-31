@@ -19,6 +19,10 @@ import { Rule } from '../rules/entities/rule.entity';
 import { Skill } from '../skills/entities/skill.entity';
 import { Condition } from '../conditions/entities/condition.entity';
 import { Utility } from '../utilities/entities/utility.entity';
+import { Training } from '../trainings/entities/training.entity';
+import { Talent } from '../talents/entities/talent.entity';
+import { Technique } from '../techniques/entities/technique.entity';
+import { Spell } from '../spells/entities/spell.entity';
 import { SearchController } from './search.controller';
 import { SearchService } from './search.service';
 
@@ -44,6 +48,10 @@ import { SearchService } from './search.service';
       Skill,
       Condition,
       Utility,
+      Training,
+      Talent,
+      Technique,
+      Spell,
     ]),
   ],
   controllers: [SearchController],

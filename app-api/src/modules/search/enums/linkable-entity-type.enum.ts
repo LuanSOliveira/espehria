@@ -18,4 +18,8 @@ export enum LinkableEntityType {
   SKILL = 'skill',
   CONDITION = 'condition',
   UTILITY = 'utility',
+  TRAINING = 'training',
+  TALENT = 'talent',
+  TECHNIQUE = 'technique',
+  SPELL = 'spell',
 }
