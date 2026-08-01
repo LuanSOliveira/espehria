@@ -1,11 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUrl,
   IsUUID,
+  Min,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreateEquipmentDto {
@@ -34,12 +37,23 @@ export class CreateEquipmentDto {
   description?: string;
 
   @ApiPropertyOptional({
-    example: '50 moedas de ouro',
-    description: 'Preço do equipamento (texto livre, opcional)',
+    example: 50,
+    description: 'Preço do equipamento (valor inteiro, opcional)',
   })
   @IsOptional()
-  @IsString()
-  price?: string;
+  @IsInt({ message: 'O preço deve ser um número inteiro.' })
+  @Min(0, { message: 'O preço não pode ser negativo.' })
+  price?: number;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'ID da moeda associada ao preço (obrigatório quando o preço é informado)',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @ValidateIf((dto) => dto.price !== undefined && dto.price !== null)
+  @IsUUID('4', { message: 'A moeda é obrigatória quando o preço é informado.' })
+  currencyId?: string;
 
   @ApiPropertyOptional({
     example: '<p>Anotações internas não destinadas ao público</p>',

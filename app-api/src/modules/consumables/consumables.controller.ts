@@ -48,7 +48,7 @@ export class ConsumablesController {
   @ApiCreatedResponse({ type: ConsumableResponseDto })
   @ApiConflictResponse({ description: 'Já existe um consumível com este nome' })
   @ApiNotFoundResponse({
-    description: 'Uma ou mais tags não foram encontradas',
+    description: 'Uma ou mais tags não foram encontradas, ou a moeda informada não existe',
   })
   @ApiBadRequestResponse({
     description:
@@ -105,7 +105,7 @@ export class ConsumablesController {
   @ApiOperation({ summary: 'Atualiza um consumível' })
   @ApiOkResponse({ type: ConsumableResponseDto })
   @ApiNotFoundResponse({
-    description: 'Consumível ou uma ou mais tags não encontrados',
+    description: 'Consumível, uma ou mais tags, ou a moeda informados não foram encontrados',
   })
   @ApiConflictResponse({ description: 'Já existe um consumível com este nome' })
   @ApiBadRequestResponse({

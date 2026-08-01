@@ -14,7 +14,11 @@ import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
 import { useGetEntityById } from '@/hooks/Queries';
 import { IMaterial } from '@/shared/interfaces';
-import { getContrastTextColor, showToast } from '@/shared/util';
+import {
+  formatPriceWithCurrency,
+  getContrastTextColor,
+  showToast,
+} from '@/shared/util';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 
 export interface MaterialViewProps {
@@ -170,7 +174,9 @@ export const MaterialView = ({ materialId, onNotFound }: MaterialViewProps) => {
               <Label component="span" sx={{ margin: 0 }}>
                 Preço
               </Label>
-              <DefaultText>{material.price || NOT_INFORMED}</DefaultText>
+              <DefaultText>
+                {formatPriceWithCurrency(material.price, material.currency)}
+              </DefaultText>
             </div>
           </div>
         </div>

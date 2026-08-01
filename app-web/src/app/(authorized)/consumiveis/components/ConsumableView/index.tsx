@@ -14,7 +14,11 @@ import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
 import { useGetEntityById } from '@/hooks/Queries';
 import { IConsumable } from '@/shared/interfaces';
-import { getContrastTextColor, showToast } from '@/shared/util';
+import {
+  formatPriceWithCurrency,
+  getContrastTextColor,
+  showToast,
+} from '@/shared/util';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 
 export interface ConsumableViewProps {
@@ -173,7 +177,9 @@ export const ConsumableView = ({
               <Label component="span" sx={{ margin: 0 }}>
                 Preço
               </Label>
-              <DefaultText>{consumable.price || NOT_INFORMED}</DefaultText>
+              <DefaultText>
+                {formatPriceWithCurrency(consumable.price, consumable.currency)}
+              </DefaultText>
             </div>
           </div>
         </div>

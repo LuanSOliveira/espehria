@@ -14,6 +14,7 @@ import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { FindEquipmentQueryDto } from './dto/find-equipment-query.dto';
 import { Equipment } from './entities/equipment.entity';
 import { Tag } from '../tags/entities/tag.entity';
+import { Currency } from '../currencies/entities/currency.entity';
 
 export interface PaginatedEquipment {
   data: Equipment[];
@@ -29,6 +30,8 @@ export class EquipmentService {
     private readonly equipmentRepository: Repository<Equipment>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
+    @InjectRepository(Currency)
+    private readonly currencyRepository: Repository<Currency>,
   ) {}
 
   findByName(name: string): Promise<Equipment | null> {
@@ -38,7 +41,7 @@ export class EquipmentService {
   findById(id: string): Promise<Equipment | null> {
     return this.equipmentRepository.findOne({
       where: { id },
-      relations: { tags: true },
+      relations: { tags: true, currency: true },
     });
   }
 
@@ -49,6 +52,16 @@ export class EquipmentService {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
     return tags;
+  }
+
+  private async findCurrencyById(currencyId: string): Promise<Currency> {
+    const currency = await this.currencyRepository.findOneBy({
+      id: currencyId,
+    });
+    if (!currency) {
+      throw new NotFoundException('Moeda não encontrada.');
+    }
+    return currency;
   }
 
   async create(dto: CreateEquipmentDto): Promise<Equipment> {
@@ -62,11 +75,16 @@ export class EquipmentService {
         ? await this.findTagsByIds(dto.tagIds)
         : [];
 
+    const currency = dto.currencyId
+      ? await this.findCurrencyById(dto.currencyId)
+      : null;
+
     const equipment = this.equipmentRepository.create({
       name: dto.name,
       referenceImage: dto.referenceImage ?? null,
       description: dto.description ?? null,
       price: dto.price ?? null,
+      currency,
       privateInformation: dto.privateInformation ?? null,
       tags,
     });
@@ -102,7 +120,7 @@ export class EquipmentService {
 
     const equipmentList = await this.equipmentRepository.find({
       where: { id: In(ids.map((item) => item.id)) },
-      relations: { tags: true },
+      relations: { tags: true, currency: true },
       order: { name: 'ASC' },
     });
 
@@ -136,6 +154,11 @@ export class EquipmentService {
     }
     if (dto.price !== undefined) {
       equipment.price = dto.price;
+    }
+    if (dto.price === null) {
+      equipment.currency = null;
+    } else if (dto.currencyId !== undefined) {
+      equipment.currency = await this.findCurrencyById(dto.currencyId);
     }
     if (dto.privateInformation !== undefined) {
       equipment.privateInformation = dto.privateInformation;

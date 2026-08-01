@@ -14,6 +14,7 @@ import { UpdateMaterialDto } from './dto/update-material.dto';
 import { FindMaterialsQueryDto } from './dto/find-materials-query.dto';
 import { Material } from './entities/material.entity';
 import { Tag } from '../tags/entities/tag.entity';
+import { Currency } from '../currencies/entities/currency.entity';
 
 export interface PaginatedMaterials {
   data: Material[];
@@ -29,6 +30,8 @@ export class MaterialsService {
     private readonly materialsRepository: Repository<Material>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
+    @InjectRepository(Currency)
+    private readonly currencyRepository: Repository<Currency>,
   ) {}
 
   findByName(name: string): Promise<Material | null> {
@@ -38,7 +41,7 @@ export class MaterialsService {
   findById(id: string): Promise<Material | null> {
     return this.materialsRepository.findOne({
       where: { id },
-      relations: { tags: true },
+      relations: { tags: true, currency: true },
     });
   }
 
@@ -49,6 +52,16 @@ export class MaterialsService {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
     return tags;
+  }
+
+  private async findCurrencyById(currencyId: string): Promise<Currency> {
+    const currency = await this.currencyRepository.findOneBy({
+      id: currencyId,
+    });
+    if (!currency) {
+      throw new NotFoundException('Moeda não encontrada.');
+    }
+    return currency;
   }
 
   async create(dto: CreateMaterialDto): Promise<Material> {
@@ -62,11 +75,16 @@ export class MaterialsService {
         ? await this.findTagsByIds(dto.tagIds)
         : [];
 
+    const currency = dto.currencyId
+      ? await this.findCurrencyById(dto.currencyId)
+      : null;
+
     const material = this.materialsRepository.create({
       name: dto.name,
       referenceImage: dto.referenceImage ?? null,
       description: dto.description ?? null,
       price: dto.price ?? null,
+      currency,
       privateInformation: dto.privateInformation ?? null,
       tags,
     });
@@ -102,7 +120,7 @@ export class MaterialsService {
 
     const materials = await this.materialsRepository.find({
       where: { id: In(ids.map((material) => material.id)) },
-      relations: { tags: true },
+      relations: { tags: true, currency: true },
       order: { name: 'ASC' },
     });
 
@@ -138,6 +156,11 @@ export class MaterialsService {
     }
     if (dto.price !== undefined) {
       material.price = dto.price;
+    }
+    if (dto.price === null) {
+      material.currency = null;
+    } else if (dto.currencyId !== undefined) {
+      material.currency = await this.findCurrencyById(dto.currencyId);
     }
     if (dto.privateInformation !== undefined) {
       material.privateInformation = dto.privateInformation;

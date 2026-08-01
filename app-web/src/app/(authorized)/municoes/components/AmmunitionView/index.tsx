@@ -14,7 +14,11 @@ import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
 import { useGetEntityById } from '@/hooks/Queries';
 import { IAmmunition } from '@/shared/interfaces';
-import { getContrastTextColor, showToast } from '@/shared/util';
+import {
+  formatPriceWithCurrency,
+  getContrastTextColor,
+  showToast,
+} from '@/shared/util';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 
 export interface AmmunitionViewProps {
@@ -173,7 +177,9 @@ export const AmmunitionView = ({
               <Label component="span" sx={{ margin: 0 }}>
                 Preço
               </Label>
-              <DefaultText>{ammunition.price || NOT_INFORMED}</DefaultText>
+              <DefaultText>
+                {formatPriceWithCurrency(ammunition.price, ammunition.currency)}
+              </DefaultText>
             </div>
           </div>
         </div>

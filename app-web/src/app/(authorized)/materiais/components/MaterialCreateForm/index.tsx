@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import {
+  FormAutocompleteInput,
   FormMultiAutocompleteInput,
   FormRichTextInput,
   FormTextInput,
@@ -11,6 +12,7 @@ import {
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
 import {
+  useCurrenciesQuery,
   useGetEntityById,
   useGetEntityList,
   usePostEntity,
@@ -21,7 +23,7 @@ import {
   materialFormDefaultValues,
   materialFormResolver,
 } from '@/shared/formSchemas';
-import { IMaterial, ITag, ITagListFilters } from '@/shared/interfaces';
+import { ICurrency, IMaterial, ITag, ITagListFilters } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedMaterialStore } from '@/store';
 
@@ -32,11 +34,12 @@ export interface MaterialCreateFormProps {
 interface MaterialPayload
   extends Omit<
     MaterialFormData,
-    'referenceImage' | 'description' | 'price' | 'privateInformation'
+    'referenceImage' | 'description' | 'price' | 'currencyId' | 'privateInformation'
   > {
   referenceImage?: string;
   description?: string;
-  price?: string;
+  price?: number | null;
+  currencyId?: string;
   privateInformation?: string;
 }
 
@@ -51,6 +54,9 @@ export const MaterialCreateForm = ({ onSaved }: MaterialCreateFormProps) => {
     filters: { perPage: 100 },
   });
   const tagOptions = tagsData?.data ?? [];
+
+  const { data: currenciesData } = useCurrenciesQuery();
+  const currencyOptions = currenciesData ?? [];
 
   const {
     data: materialDetail,
@@ -81,7 +87,8 @@ export const MaterialCreateForm = ({ onSaved }: MaterialCreateFormProps) => {
       name: materialDetail.name,
       referenceImage: materialDetail.referenceImage ?? '',
       description: materialDetail.description ?? '',
-      price: materialDetail.price ?? '',
+      price: materialDetail.price != null ? String(materialDetail.price) : '',
+      currencyId: materialDetail.currency?.id ?? '',
       privateInformation: materialDetail.privateInformation ?? '',
       tagIds: materialDetail.tags?.map((tag) => tag.id) ?? [],
     });
@@ -104,7 +111,8 @@ export const MaterialCreateForm = ({ onSaved }: MaterialCreateFormProps) => {
     ...data,
     referenceImage: data.referenceImage || undefined,
     description: data.description || undefined,
-    price: data.price || undefined,
+    price: data.price ? Number(data.price) : null,
+    currencyId: data.currencyId || undefined,
     privateInformation: data.privateInformation || undefined,
     tagIds: data.tagIds ?? [],
   });
@@ -197,7 +205,22 @@ export const MaterialCreateForm = ({ onSaved }: MaterialCreateFormProps) => {
           name="price"
           control={control}
           label="Preço"
-          placeholder="Ex.: 50 moedas de ouro"
+          placeholder="Digite o preço"
+          type="number"
+          slotProps={{ htmlInput: { min: 0, step: 1, inputMode: 'numeric' } }}
+        />
+
+        <FormAutocompleteInput<MaterialFormData, ICurrency>
+          id="material-form-currency"
+          name="currencyId"
+          control={control}
+          label="Moeda"
+          options={currencyOptions}
+          getOptionLabel={(currency) =>
+            `${currency.abbreviation} - ${currency.name}`
+          }
+          getOptionValue={(currency) => currency.id}
+          placeholder="Selecione a moeda"
         />
 
         <FormMultiAutocompleteInput<MaterialFormData, ITag>
@@ -213,7 +236,7 @@ export const MaterialCreateForm = ({ onSaved }: MaterialCreateFormProps) => {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4">
         <FormRichTextInput
           id="material-form-description"
           name="description"
@@ -221,15 +244,15 @@ export const MaterialCreateForm = ({ onSaved }: MaterialCreateFormProps) => {
           label="Descrição"
           placeholder="Descreva o material"
         />
-
-        <FormRichTextInput
-          id="material-form-private-information"
-          name="privateInformation"
-          control={control}
-          label="Informações Privadas"
-          placeholder="Anotações internas não destinadas ao público"
-        />
       </div>
+
+      <FormRichTextInput
+        id="material-form-private-information"
+        name="privateInformation"
+        control={control}
+        label="Informações Privadas"
+        placeholder="Anotações internas não destinadas ao público"
+      />
 
       <PrimaryButton
         type="submit"

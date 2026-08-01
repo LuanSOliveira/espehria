@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import {
+  FormAutocompleteInput,
   FormMultiAutocompleteInput,
   FormRichTextInput,
   FormTextInput,
@@ -11,6 +12,7 @@ import {
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
 import {
+  useCurrenciesQuery,
   useGetEntityById,
   useGetEntityList,
   usePostEntity,
@@ -21,7 +23,7 @@ import {
   utilityFormDefaultValues,
   utilityFormResolver,
 } from '@/shared/formSchemas';
-import { IUtility, ITag, ITagListFilters } from '@/shared/interfaces';
+import { ICurrency, IUtility, ITag, ITagListFilters } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedUtilityStore } from '@/store';
 
@@ -32,11 +34,12 @@ export interface UtilityCreateFormProps {
 interface UtilityPayload
   extends Omit<
     UtilityFormData,
-    'referenceImage' | 'description' | 'price' | 'privateInformation'
+    'referenceImage' | 'description' | 'price' | 'currencyId' | 'privateInformation'
   > {
   referenceImage?: string;
   description?: string;
-  price?: string;
+  price?: number | null;
+  currencyId?: string;
   privateInformation?: string;
 }
 
@@ -51,6 +54,9 @@ export const UtilityCreateForm = ({ onSaved }: UtilityCreateFormProps) => {
     filters: { perPage: 100 },
   });
   const tagOptions = tagsData?.data ?? [];
+
+  const { data: currenciesData } = useCurrenciesQuery();
+  const currencyOptions = currenciesData ?? [];
 
   const {
     data: utilityDetail,
@@ -81,7 +87,8 @@ export const UtilityCreateForm = ({ onSaved }: UtilityCreateFormProps) => {
       name: utilityDetail.name,
       referenceImage: utilityDetail.referenceImage ?? '',
       description: utilityDetail.description ?? '',
-      price: utilityDetail.price ?? '',
+      price: utilityDetail.price != null ? String(utilityDetail.price) : '',
+      currencyId: utilityDetail.currency?.id ?? '',
       privateInformation: utilityDetail.privateInformation ?? '',
       tagIds: utilityDetail.tags?.map((tag) => tag.id) ?? [],
     });
@@ -104,7 +111,8 @@ export const UtilityCreateForm = ({ onSaved }: UtilityCreateFormProps) => {
     ...data,
     referenceImage: data.referenceImage || undefined,
     description: data.description || undefined,
-    price: data.price || undefined,
+    price: data.price ? Number(data.price) : null,
+    currencyId: data.currencyId || undefined,
     privateInformation: data.privateInformation || undefined,
     tagIds: data.tagIds ?? [],
   });
@@ -197,7 +205,22 @@ export const UtilityCreateForm = ({ onSaved }: UtilityCreateFormProps) => {
           name="price"
           control={control}
           label="Preço"
-          placeholder="Ex.: 50 moedas de ouro"
+          placeholder="Digite o preço"
+          type="number"
+          slotProps={{ htmlInput: { min: 0, step: 1, inputMode: 'numeric' } }}
+        />
+
+        <FormAutocompleteInput<UtilityFormData, ICurrency>
+          id="utility-form-currency"
+          name="currencyId"
+          control={control}
+          label="Moeda"
+          options={currencyOptions}
+          getOptionLabel={(currency) =>
+            `${currency.abbreviation} - ${currency.name}`
+          }
+          getOptionValue={(currency) => currency.id}
+          placeholder="Selecione a moeda"
         />
 
         <FormMultiAutocompleteInput<UtilityFormData, ITag>
@@ -213,7 +236,7 @@ export const UtilityCreateForm = ({ onSaved }: UtilityCreateFormProps) => {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4">
         <FormRichTextInput
           id="utility-form-description"
           name="description"
@@ -221,15 +244,15 @@ export const UtilityCreateForm = ({ onSaved }: UtilityCreateFormProps) => {
           label="Descrição"
           placeholder="Descreva o utilitário"
         />
-
-        <FormRichTextInput
-          id="utility-form-private-information"
-          name="privateInformation"
-          control={control}
-          label="Informações Privadas"
-          placeholder="Anotações internas não destinadas ao público"
-        />
       </div>
+
+      <FormRichTextInput
+        id="utility-form-private-information"
+        name="privateInformation"
+        control={control}
+        label="Informações Privadas"
+        placeholder="Anotações internas não destinadas ao público"
+      />
 
       <PrimaryButton
         type="submit"

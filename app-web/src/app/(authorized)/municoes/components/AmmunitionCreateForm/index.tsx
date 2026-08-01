@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import {
+  FormAutocompleteInput,
   FormMultiAutocompleteInput,
   FormRichTextInput,
   FormTextInput,
@@ -11,6 +12,7 @@ import {
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
 import {
+  useCurrenciesQuery,
   useGetEntityById,
   useGetEntityList,
   usePostEntity,
@@ -21,7 +23,7 @@ import {
   ammunitionFormDefaultValues,
   ammunitionFormResolver,
 } from '@/shared/formSchemas';
-import { IAmmunition, ITag, ITagListFilters } from '@/shared/interfaces';
+import { ICurrency, IAmmunition, ITag, ITagListFilters } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedAmmunitionStore } from '@/store';
 
@@ -32,11 +34,12 @@ export interface AmmunitionCreateFormProps {
 interface AmmunitionPayload
   extends Omit<
     AmmunitionFormData,
-    'referenceImage' | 'description' | 'price' | 'privateInformation'
+    'referenceImage' | 'description' | 'price' | 'currencyId' | 'privateInformation'
   > {
   referenceImage?: string;
   description?: string;
-  price?: string;
+  price?: number | null;
+  currencyId?: string;
   privateInformation?: string;
 }
 
@@ -53,6 +56,9 @@ export const AmmunitionCreateForm = ({
     filters: { perPage: 100 },
   });
   const tagOptions = tagsData?.data ?? [];
+
+  const { data: currenciesData } = useCurrenciesQuery();
+  const currencyOptions = currenciesData ?? [];
 
   const {
     data: ammunitionDetail,
@@ -83,7 +89,9 @@ export const AmmunitionCreateForm = ({
       name: ammunitionDetail.name,
       referenceImage: ammunitionDetail.referenceImage ?? '',
       description: ammunitionDetail.description ?? '',
-      price: ammunitionDetail.price ?? '',
+      price:
+        ammunitionDetail.price != null ? String(ammunitionDetail.price) : '',
+      currencyId: ammunitionDetail.currency?.id ?? '',
       privateInformation: ammunitionDetail.privateInformation ?? '',
       tagIds: ammunitionDetail.tags?.map((tag) => tag.id) ?? [],
     });
@@ -106,7 +114,8 @@ export const AmmunitionCreateForm = ({
     ...data,
     referenceImage: data.referenceImage || undefined,
     description: data.description || undefined,
-    price: data.price || undefined,
+    price: data.price ? Number(data.price) : null,
+    currencyId: data.currencyId || undefined,
     privateInformation: data.privateInformation || undefined,
     tagIds: data.tagIds ?? [],
   });
@@ -205,7 +214,22 @@ export const AmmunitionCreateForm = ({
           name="price"
           control={control}
           label="Preço"
-          placeholder="Ex.: 50 moedas de ouro"
+          placeholder="Digite o preço"
+          type="number"
+          slotProps={{ htmlInput: { min: 0, step: 1, inputMode: 'numeric' } }}
+        />
+
+        <FormAutocompleteInput<AmmunitionFormData, ICurrency>
+          id="ammunition-form-currency"
+          name="currencyId"
+          control={control}
+          label="Moeda"
+          options={currencyOptions}
+          getOptionLabel={(currency) =>
+            `${currency.abbreviation} - ${currency.name}`
+          }
+          getOptionValue={(currency) => currency.id}
+          placeholder="Selecione a moeda"
         />
 
         <FormMultiAutocompleteInput<AmmunitionFormData, ITag>
@@ -221,7 +245,7 @@ export const AmmunitionCreateForm = ({
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4">
         <FormRichTextInput
           id="ammunition-form-description"
           name="description"
@@ -229,15 +253,15 @@ export const AmmunitionCreateForm = ({
           label="Descrição"
           placeholder="Descreva a munição"
         />
-
-        <FormRichTextInput
-          id="ammunition-form-private-information"
-          name="privateInformation"
-          control={control}
-          label="Informações Privadas"
-          placeholder="Anotações internas não destinadas ao público"
-        />
       </div>
+
+      <FormRichTextInput
+        id="ammunition-form-private-information"
+        name="privateInformation"
+        control={control}
+        label="Informações Privadas"
+        placeholder="Anotações internas não destinadas ao público"
+      />
 
       <PrimaryButton
         type="submit"

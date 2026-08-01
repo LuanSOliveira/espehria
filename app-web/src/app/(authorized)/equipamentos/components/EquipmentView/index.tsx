@@ -14,7 +14,11 @@ import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
 import { useGetEntityById } from '@/hooks/Queries';
 import { IEquipment } from '@/shared/interfaces';
-import { getContrastTextColor, showToast } from '@/shared/util';
+import {
+  formatPriceWithCurrency,
+  getContrastTextColor,
+  showToast,
+} from '@/shared/util';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 
 export interface EquipmentViewProps {
@@ -173,7 +177,9 @@ export const EquipmentView = ({
               <Label component="span" sx={{ margin: 0 }}>
                 Preço
               </Label>
-              <DefaultText>{equipment.price || NOT_INFORMED}</DefaultText>
+              <DefaultText>
+                {formatPriceWithCurrency(equipment.price, equipment.currency)}
+              </DefaultText>
             </div>
           </div>
         </div>

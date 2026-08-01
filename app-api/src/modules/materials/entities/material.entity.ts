@@ -1,7 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, Index, JoinTable, ManyToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+} from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Tag } from '../../tags/entities/tag.entity';
+import { Currency } from '../../currencies/entities/currency.entity';
 
 @Entity('materials')
 export class Material extends BaseEntity {
@@ -16,8 +25,12 @@ export class Material extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   description!: string | null;
 
-  @Column({ type: 'varchar', nullable: true })
-  price!: string | null;
+  @Column({ type: 'integer', nullable: true })
+  price!: number | null;
+
+  @ManyToOne(() => Currency, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'currency_id' })
+  currency!: Currency | null;
 
   @Column({ type: 'text', nullable: true, name: 'private_information' })
   privateInformation!: string | null;

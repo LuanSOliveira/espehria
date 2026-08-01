@@ -1,4 +1,5 @@
 export * from './useAttributesQuery';
+export * from './useCurrenciesQuery';
 export * from './useCreatureCategoriesQuery';
 export * from './useDivinityCategoriesQuery';
 export * from './useRaceCategoriesQuery';

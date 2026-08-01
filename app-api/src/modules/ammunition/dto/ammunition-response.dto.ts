@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Ammunition } from '../entities/ammunition.entity';
 import { TagResponseDto } from '../../tags/dto/tag-response.dto';
+import { CurrencyResponseDto } from '../../currencies/dto/currency-response.dto';
 
 export class AmmunitionResponseDto {
   @ApiProperty({
@@ -28,10 +29,16 @@ export class AmmunitionResponseDto {
   description: string | null;
 
   @ApiPropertyOptional({
-    description: 'Preço do item de munição (texto livre)',
-    example: '5 moedas de cobre',
+    description: 'Preço do item de munição (valor inteiro)',
+    example: 5,
   })
-  price: string | null;
+  price: number | null;
+
+  @ApiPropertyOptional({
+    type: () => CurrencyResponseDto,
+    description: 'Moeda associada ao preço do item de munição',
+  })
+  currency: CurrencyResponseDto | null;
 
   @ApiPropertyOptional({
     description: 'Informações privadas do item de munição em HTML',
@@ -57,6 +64,9 @@ export class AmmunitionResponseDto {
     dto.referenceImage = ammunition.referenceImage;
     dto.description = ammunition.description;
     dto.price = ammunition.price;
+    dto.currency = ammunition.currency
+      ? CurrencyResponseDto.fromEntity(ammunition.currency)
+      : null;
     dto.privateInformation = ammunition.privateInformation;
     dto.tags = (ammunition.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),

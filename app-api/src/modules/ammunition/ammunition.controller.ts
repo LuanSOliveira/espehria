@@ -50,7 +50,7 @@ export class AmmunitionController {
     description: 'Já existe um item de munição com este nome',
   })
   @ApiNotFoundResponse({
-    description: 'Uma ou mais tags não foram encontradas',
+    description: 'Uma ou mais tags não foram encontradas, ou a moeda informada não existe',
   })
   @ApiBadRequestResponse({
     description:
@@ -105,7 +105,7 @@ export class AmmunitionController {
   @ApiOperation({ summary: 'Atualiza um item de munição' })
   @ApiOkResponse({ type: AmmunitionResponseDto })
   @ApiNotFoundResponse({
-    description: 'Item de munição ou uma ou mais tags não encontrados',
+    description: 'Item de munição, uma ou mais tags, ou a moeda informados não foram encontrados',
   })
   @ApiConflictResponse({
     description: 'Já existe um item de munição com este nome',

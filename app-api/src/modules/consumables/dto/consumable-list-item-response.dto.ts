@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Consumable } from '../entities/consumable.entity';
 import { TagResponseDto } from '../../tags/dto/tag-response.dto';
+import { CurrencyResponseDto } from '../../currencies/dto/currency-response.dto';
 
 export class ConsumableListItemResponseDto {
   @ApiProperty({
@@ -21,6 +22,18 @@ export class ConsumableListItemResponseDto {
   })
   name: string;
 
+  @ApiPropertyOptional({
+    description: 'Preço do consumível (valor inteiro)',
+    example: 15,
+  })
+  price: number | null;
+
+  @ApiPropertyOptional({
+    type: () => CurrencyResponseDto,
+    description: 'Moeda associada ao preço do consumível',
+  })
+  currency: CurrencyResponseDto | null;
+
   @ApiProperty({
     type: () => [TagResponseDto],
     description: 'Tags associadas ao consumível',
@@ -32,6 +45,10 @@ export class ConsumableListItemResponseDto {
     dto.id = consumable.id;
     dto.referenceImage = consumable.referenceImage;
     dto.name = consumable.name;
+    dto.price = consumable.price;
+    dto.currency = consumable.currency
+      ? CurrencyResponseDto.fromEntity(consumable.currency)
+      : null;
     dto.tags = (consumable.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),
     );

@@ -53,6 +53,11 @@ export const UtilitiesList = ({
                 Tags
               </Label>
             </TableCell>
+            <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
+                Preço
+              </Label>
+            </TableCell>
             <TableCell align="right" sx={{ borderColor: APP_COLORS.gold }}>
               <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
                 Ações
@@ -63,7 +68,7 @@ export const UtilitiesList = ({
         <TableBody>
           {!isLoading && utilities.length === 0 && (
             <TableRow>
-              <TableCell colSpan={4} sx={{ borderColor: APP_COLORS.gold }}>
+              <TableCell colSpan={5} sx={{ borderColor: APP_COLORS.gold }}>
                 <DefaultText>Nenhum utilitário encontrado.</DefaultText>
               </TableCell>
             </TableRow>

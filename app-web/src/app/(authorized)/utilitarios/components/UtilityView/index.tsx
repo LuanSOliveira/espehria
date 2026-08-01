@@ -14,7 +14,11 @@ import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
 import { useGetEntityById } from '@/hooks/Queries';
 import { IUtility } from '@/shared/interfaces';
-import { getContrastTextColor, showToast } from '@/shared/util';
+import {
+  formatPriceWithCurrency,
+  getContrastTextColor,
+  showToast,
+} from '@/shared/util';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 
 export interface UtilityViewProps {
@@ -170,7 +174,9 @@ export const UtilityView = ({ utilityId, onNotFound }: UtilityViewProps) => {
               <Label component="span" sx={{ margin: 0 }}>
                 Preço
               </Label>
-              <DefaultText>{utility.price || NOT_INFORMED}</DefaultText>
+              <DefaultText>
+                {formatPriceWithCurrency(utility.price, utility.currency)}
+              </DefaultText>
             </div>
           </div>
         </div>

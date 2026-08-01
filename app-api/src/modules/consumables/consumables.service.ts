@@ -14,6 +14,7 @@ import { UpdateConsumableDto } from './dto/update-consumable.dto';
 import { FindConsumablesQueryDto } from './dto/find-consumables-query.dto';
 import { Consumable } from './entities/consumable.entity';
 import { Tag } from '../tags/entities/tag.entity';
+import { Currency } from '../currencies/entities/currency.entity';
 
 export interface PaginatedConsumables {
   data: Consumable[];
@@ -29,6 +30,8 @@ export class ConsumablesService {
     private readonly consumablesRepository: Repository<Consumable>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
+    @InjectRepository(Currency)
+    private readonly currencyRepository: Repository<Currency>,
   ) {}
 
   findByName(name: string): Promise<Consumable | null> {
@@ -38,7 +41,7 @@ export class ConsumablesService {
   findById(id: string): Promise<Consumable | null> {
     return this.consumablesRepository.findOne({
       where: { id },
-      relations: { tags: true },
+      relations: { tags: true, currency: true },
     });
   }
 
@@ -49,6 +52,16 @@ export class ConsumablesService {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
     return tags;
+  }
+
+  private async findCurrencyById(currencyId: string): Promise<Currency> {
+    const currency = await this.currencyRepository.findOneBy({
+      id: currencyId,
+    });
+    if (!currency) {
+      throw new NotFoundException('Moeda não encontrada.');
+    }
+    return currency;
   }
 
   async create(dto: CreateConsumableDto): Promise<Consumable> {
@@ -62,11 +75,16 @@ export class ConsumablesService {
         ? await this.findTagsByIds(dto.tagIds)
         : [];
 
+    const currency = dto.currencyId
+      ? await this.findCurrencyById(dto.currencyId)
+      : null;
+
     const consumable = this.consumablesRepository.create({
       name: dto.name,
       referenceImage: dto.referenceImage ?? null,
       description: dto.description ?? null,
       price: dto.price ?? null,
+      currency,
       privateInformation: dto.privateInformation ?? null,
       tags,
     });
@@ -102,7 +120,7 @@ export class ConsumablesService {
 
     const consumables = await this.consumablesRepository.find({
       where: { id: In(ids.map((consumable) => consumable.id)) },
-      relations: { tags: true },
+      relations: { tags: true, currency: true },
       order: { name: 'ASC' },
     });
 
@@ -140,6 +158,11 @@ export class ConsumablesService {
     }
     if (dto.price !== undefined) {
       consumable.price = dto.price;
+    }
+    if (dto.price === null) {
+      consumable.currency = null;
+    } else if (dto.currencyId !== undefined) {
+      consumable.currency = await this.findCurrencyById(dto.currencyId);
     }
     if (dto.privateInformation !== undefined) {
       consumable.privateInformation = dto.privateInformation;

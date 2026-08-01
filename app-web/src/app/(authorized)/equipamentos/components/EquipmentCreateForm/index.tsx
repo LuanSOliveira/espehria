@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import {
+  FormAutocompleteInput,
   FormMultiAutocompleteInput,
   FormRichTextInput,
   FormTextInput,
@@ -11,6 +12,7 @@ import {
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
 import {
+  useCurrenciesQuery,
   useGetEntityById,
   useGetEntityList,
   usePostEntity,
@@ -21,7 +23,7 @@ import {
   equipmentFormDefaultValues,
   equipmentFormResolver,
 } from '@/shared/formSchemas';
-import { IEquipment, ITag, ITagListFilters } from '@/shared/interfaces';
+import { ICurrency, IEquipment, ITag, ITagListFilters } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedEquipmentStore } from '@/store';
 
@@ -32,11 +34,12 @@ export interface EquipmentCreateFormProps {
 interface EquipmentPayload
   extends Omit<
     EquipmentFormData,
-    'referenceImage' | 'description' | 'price' | 'privateInformation'
+    'referenceImage' | 'description' | 'price' | 'currencyId' | 'privateInformation'
   > {
   referenceImage?: string;
   description?: string;
-  price?: string;
+  price?: number | null;
+  currencyId?: string;
   privateInformation?: string;
 }
 
@@ -51,6 +54,9 @@ export const EquipmentCreateForm = ({ onSaved }: EquipmentCreateFormProps) => {
     filters: { perPage: 100 },
   });
   const tagOptions = tagsData?.data ?? [];
+
+  const { data: currenciesData } = useCurrenciesQuery();
+  const currencyOptions = currenciesData ?? [];
 
   const {
     data: equipmentDetail,
@@ -81,7 +87,9 @@ export const EquipmentCreateForm = ({ onSaved }: EquipmentCreateFormProps) => {
       name: equipmentDetail.name,
       referenceImage: equipmentDetail.referenceImage ?? '',
       description: equipmentDetail.description ?? '',
-      price: equipmentDetail.price ?? '',
+      price:
+        equipmentDetail.price != null ? String(equipmentDetail.price) : '',
+      currencyId: equipmentDetail.currency?.id ?? '',
       privateInformation: equipmentDetail.privateInformation ?? '',
       tagIds: equipmentDetail.tags?.map((tag) => tag.id) ?? [],
     });
@@ -104,7 +112,8 @@ export const EquipmentCreateForm = ({ onSaved }: EquipmentCreateFormProps) => {
     ...data,
     referenceImage: data.referenceImage || undefined,
     description: data.description || undefined,
-    price: data.price || undefined,
+    price: data.price ? Number(data.price) : null,
+    currencyId: data.currencyId || undefined,
     privateInformation: data.privateInformation || undefined,
     tagIds: data.tagIds ?? [],
   });
@@ -197,7 +206,22 @@ export const EquipmentCreateForm = ({ onSaved }: EquipmentCreateFormProps) => {
           name="price"
           control={control}
           label="Preço"
-          placeholder="Ex.: 50 moedas de ouro"
+          placeholder="Digite o preço"
+          type="number"
+          slotProps={{ htmlInput: { min: 0, step: 1, inputMode: 'numeric' } }}
+        />
+
+        <FormAutocompleteInput<EquipmentFormData, ICurrency>
+          id="equipment-form-currency"
+          name="currencyId"
+          control={control}
+          label="Moeda"
+          options={currencyOptions}
+          getOptionLabel={(currency) =>
+            `${currency.abbreviation} - ${currency.name}`
+          }
+          getOptionValue={(currency) => currency.id}
+          placeholder="Selecione a moeda"
         />
 
         <FormMultiAutocompleteInput<EquipmentFormData, ITag>
@@ -213,7 +237,7 @@ export const EquipmentCreateForm = ({ onSaved }: EquipmentCreateFormProps) => {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4">
         <FormRichTextInput
           id="equipment-form-description"
           name="description"
@@ -221,15 +245,15 @@ export const EquipmentCreateForm = ({ onSaved }: EquipmentCreateFormProps) => {
           label="Descrição"
           placeholder="Descreva o equipamento"
         />
-
-        <FormRichTextInput
-          id="equipment-form-private-information"
-          name="privateInformation"
-          control={control}
-          label="Informações Privadas"
-          placeholder="Anotações internas não destinadas ao público"
-        />
       </div>
+
+      <FormRichTextInput
+        id="equipment-form-private-information"
+        name="privateInformation"
+        control={control}
+        label="Informações Privadas"
+        placeholder="Anotações internas não destinadas ao público"
+      />
 
       <PrimaryButton
         type="submit"

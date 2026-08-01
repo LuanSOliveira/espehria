@@ -48,7 +48,7 @@ export class MaterialsController {
   @ApiCreatedResponse({ type: MaterialResponseDto })
   @ApiConflictResponse({ description: 'Já existe um material com este nome' })
   @ApiNotFoundResponse({
-    description: 'Uma ou mais tags não foram encontradas',
+    description: 'Uma ou mais tags não foram encontradas, ou a moeda informada não existe',
   })
   @ApiBadRequestResponse({
     description:
@@ -101,7 +101,7 @@ export class MaterialsController {
   @ApiOperation({ summary: 'Atualiza um material' })
   @ApiOkResponse({ type: MaterialResponseDto })
   @ApiNotFoundResponse({
-    description: 'Material ou uma ou mais tags não encontrados',
+    description: 'Material, uma ou mais tags, ou a moeda informados não foram encontrados',
   })
   @ApiConflictResponse({ description: 'Já existe um material com este nome' })
   @ApiBadRequestResponse({

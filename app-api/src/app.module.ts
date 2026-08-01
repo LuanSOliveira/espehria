@@ -37,6 +37,7 @@ import { SpellsModule } from './modules/spells/spells.module';
 import { CampaignsModule } from './modules/campaigns/campaigns.module';
 import { PlannedSessionsModule } from './modules/planned-sessions/planned-sessions.module';
 import { AttributesModule } from './modules/attributes/attributes.module';
+import { CurrenciesModule } from './modules/currencies/currencies.module';
 
 @Module({
   imports: [
@@ -95,6 +96,7 @@ import { AttributesModule } from './modules/attributes/attributes.module';
     CampaignsModule,
     PlannedSessionsModule,
     AttributesModule,
+    CurrenciesModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

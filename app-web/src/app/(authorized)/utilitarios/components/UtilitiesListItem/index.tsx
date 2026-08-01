@@ -7,6 +7,7 @@ import { ImageAvatarPreview } from '@/shared/components/ImageAvatarPreview';
 import { TagBadge } from '@/shared/components/TagBadge';
 import { IUtilityListItem } from '@/shared/interfaces';
 import { APP_COLORS } from '@/shared/constants';
+import { formatPriceWithCurrency } from '@/shared/util';
 
 export interface UtilitiesListItemProps {
   utility: IUtilityListItem;
@@ -45,6 +46,11 @@ export const UtilitiesListItem = ({
             <TagBadge key={tag.id} name={tag.name} color={tag.color} />
           ))}
         </div>
+      </TableCell>
+      <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+        <DefaultText>
+          {formatPriceWithCurrency(utility.price, utility.currency)}
+        </DefaultText>
       </TableCell>
       <TableCell align="right" sx={{ borderColor: APP_COLORS.gold }}>
         <Tooltip title="Visualizar">

@@ -14,6 +14,7 @@ import { UpdateUtilityDto } from './dto/update-utility.dto';
 import { FindUtilitiesQueryDto } from './dto/find-utilities-query.dto';
 import { Utility } from './entities/utility.entity';
 import { Tag } from '../tags/entities/tag.entity';
+import { Currency } from '../currencies/entities/currency.entity';
 
 export interface PaginatedUtilities {
   data: Utility[];
@@ -29,6 +30,8 @@ export class UtilitiesService {
     private readonly utilitiesRepository: Repository<Utility>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
+    @InjectRepository(Currency)
+    private readonly currencyRepository: Repository<Currency>,
   ) {}
 
   findByName(name: string): Promise<Utility | null> {
@@ -38,7 +41,7 @@ export class UtilitiesService {
   findById(id: string): Promise<Utility | null> {
     return this.utilitiesRepository.findOne({
       where: { id },
-      relations: { tags: true },
+      relations: { tags: true, currency: true },
     });
   }
 
@@ -49,6 +52,16 @@ export class UtilitiesService {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
     return tags;
+  }
+
+  private async findCurrencyById(currencyId: string): Promise<Currency> {
+    const currency = await this.currencyRepository.findOneBy({
+      id: currencyId,
+    });
+    if (!currency) {
+      throw new NotFoundException('Moeda não encontrada.');
+    }
+    return currency;
   }
 
   async create(dto: CreateUtilityDto): Promise<Utility> {
@@ -62,11 +75,16 @@ export class UtilitiesService {
         ? await this.findTagsByIds(dto.tagIds)
         : [];
 
+    const currency = dto.currencyId
+      ? await this.findCurrencyById(dto.currencyId)
+      : null;
+
     const utility = this.utilitiesRepository.create({
       name: dto.name,
       referenceImage: dto.referenceImage ?? null,
       description: dto.description ?? null,
       price: dto.price ?? null,
+      currency,
       privateInformation: dto.privateInformation ?? null,
       tags,
     });
@@ -102,7 +120,7 @@ export class UtilitiesService {
 
     const utilities = await this.utilitiesRepository.find({
       where: { id: In(ids.map((utility) => utility.id)) },
-      relations: { tags: true },
+      relations: { tags: true, currency: true },
       order: { name: 'ASC' },
     });
 
@@ -138,6 +156,11 @@ export class UtilitiesService {
     }
     if (dto.price !== undefined) {
       utility.price = dto.price;
+    }
+    if (dto.price === null) {
+      utility.currency = null;
+    } else if (dto.currencyId !== undefined) {
+      utility.currency = await this.findCurrencyById(dto.currencyId);
     }
     if (dto.privateInformation !== undefined) {
       utility.privateInformation = dto.privateInformation;
