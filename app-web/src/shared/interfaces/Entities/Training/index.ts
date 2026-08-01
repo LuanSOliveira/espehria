@@ -8,6 +8,7 @@ export interface ITraining extends IEntity {
   tags: ITag[];
   improvedFrom: IEntityReference[];
   requirements: IEntityReference[];
+  additionalAbilities: IEntityReference[];
   createdAt: string;
   updatedAt: string;
 }

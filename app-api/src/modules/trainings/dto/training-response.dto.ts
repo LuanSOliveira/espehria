@@ -40,6 +40,12 @@ export class TrainingResponseDto {
   })
   requirements: EntityReferenceResponseDto[];
 
+  @ApiProperty({
+    type: () => [EntityReferenceResponseDto],
+    description: 'Habilidades adicionais associadas a este treinamento',
+  })
+  additionalAbilities: EntityReferenceResponseDto[];
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -50,6 +56,7 @@ export class TrainingResponseDto {
     training: Training,
     improvedFrom: EntityReferenceResponseDto[],
     requirements: EntityReferenceResponseDto[],
+    additionalAbilities: EntityReferenceResponseDto[],
   ): TrainingResponseDto {
     const dto = new TrainingResponseDto();
     dto.id = training.id;
@@ -60,6 +67,7 @@ export class TrainingResponseDto {
     );
     dto.improvedFrom = improvedFrom;
     dto.requirements = requirements;
+    dto.additionalAbilities = additionalAbilities;
     dto.createdAt = training.createdAt;
     dto.updatedAt = training.updatedAt;
     return dto;

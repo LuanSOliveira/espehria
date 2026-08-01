@@ -43,6 +43,12 @@ export class CharacteristicResponseDto {
   })
   requirements: EntityReferenceResponseDto[];
 
+  @ApiProperty({
+    type: () => [EntityReferenceResponseDto],
+    description: 'Habilidades adicionais associadas a esta característica',
+  })
+  additionalAbilities: EntityReferenceResponseDto[];
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -53,6 +59,7 @@ export class CharacteristicResponseDto {
     characteristic: Characteristic,
     improvedFrom: EntityReferenceResponseDto[],
     requirements: EntityReferenceResponseDto[],
+    additionalAbilities: EntityReferenceResponseDto[],
   ): CharacteristicResponseDto {
     const dto = new CharacteristicResponseDto();
     dto.id = characteristic.id;
@@ -64,6 +71,7 @@ export class CharacteristicResponseDto {
     );
     dto.improvedFrom = improvedFrom;
     dto.requirements = requirements;
+    dto.additionalAbilities = additionalAbilities;
     dto.createdAt = characteristic.createdAt;
     dto.updatedAt = characteristic.updatedAt;
     return dto;

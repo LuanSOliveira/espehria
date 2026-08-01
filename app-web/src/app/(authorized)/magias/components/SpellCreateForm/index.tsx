@@ -257,7 +257,7 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
           addButtonLabel="Adicionar Aprimorado de"
           value={improvedFrom}
           onChange={setImprovedFrom}
-          otherListValue={requirements}
+          otherListValues={[requirements]}
           currentEntityType="spell"
           currentEntityId={selectedSpell?.id}
         />
@@ -267,7 +267,7 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
           addButtonLabel="Adicionar Requisitos"
           value={requirements}
           onChange={setRequirements}
-          otherListValue={improvedFrom}
+          otherListValues={[improvedFrom]}
           currentEntityType="spell"
           currentEntityId={selectedSpell?.id}
         />

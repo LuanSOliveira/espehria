@@ -48,23 +48,24 @@ export class TrainingsController {
   @ApiCreatedResponse({ type: TrainingResponseDto })
   @ApiConflictResponse({
     description:
-      'Já existe um treinamento com este nome, ou violação de regra em Aprimorado de/Requisitos (autorreferência, duplicata ou item em ambas as listas)',
+      'Já existe um treinamento com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas)',
   })
   @ApiNotFoundResponse({
     description:
-      'Uma ou mais tags ou entidades referenciadas em Aprimorado de/Requisitos não foram encontradas',
+      'Uma ou mais tags ou entidades referenciadas em Aprimorado de/Requisitos/Habilidades Adicionais não foram encontradas',
   })
   @ApiBadRequestResponse({
     description:
       'Dados obrigatórios ausentes ou formato inválido de entityType/id',
   })
   async create(@Body() dto: CreateTrainingDto): Promise<TrainingResponseDto> {
-    const { training, improvedFrom, requirements } =
+    const { training, improvedFrom, requirements, additionalAbilities } =
       await this.trainingsService.create(dto);
     return TrainingResponseDto.fromEntity(
       training,
       improvedFrom,
       requirements,
+      additionalAbilities,
     );
   }
 
@@ -109,6 +110,7 @@ export class TrainingsController {
       result.training,
       result.improvedFrom,
       result.requirements,
+      result.additionalAbilities,
     );
   }
 
@@ -121,22 +123,23 @@ export class TrainingsController {
   })
   @ApiConflictResponse({
     description:
-      'Já existe um treinamento com este nome, ou violação de regra em Aprimorado de/Requisitos (autorreferência, duplicata ou item em ambas as listas)',
+      'Já existe um treinamento com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas)',
   })
   @ApiBadRequestResponse({
     description:
-      'ID em formato inválido ou formato inválido de entityType/id em Aprimorado de/Requisitos',
+      'ID em formato inválido ou formato inválido de entityType/id em Aprimorado de/Requisitos/Habilidades Adicionais',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateTrainingDto,
   ): Promise<TrainingResponseDto> {
-    const { training, improvedFrom, requirements } =
+    const { training, improvedFrom, requirements, additionalAbilities } =
       await this.trainingsService.update(id, dto);
     return TrainingResponseDto.fromEntity(
       training,
       improvedFrom,
       requirements,
+      additionalAbilities,
     );
   }
 

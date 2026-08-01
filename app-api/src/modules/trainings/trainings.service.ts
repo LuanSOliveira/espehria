@@ -31,6 +31,7 @@ export interface TrainingWithReferences {
   training: Training;
   improvedFrom: EntityReferenceResponseDto[];
   requirements: EntityReferenceResponseDto[];
+  additionalAbilities: EntityReferenceResponseDto[];
 }
 
 @Injectable()
@@ -56,13 +57,13 @@ export class TrainingsService {
       return null;
     }
 
-    const { improvedFrom, requirements } =
+    const { improvedFrom, requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
         ReferenceableEntityType.TRAINING,
         id,
       );
 
-    return { training, improvedFrom, requirements };
+    return { training, improvedFrom, requirements, additionalAbilities };
   }
 
   private async findTagsByIds(tagIds: string[]): Promise<Tag[]> {
@@ -87,15 +88,18 @@ export class TrainingsService {
 
     const improvedFromInput = dto.improvedFrom ?? [];
     const requirementsInput = dto.requirements ?? [];
+    const additionalAbilitiesInput = dto.additionalAbilities ?? [];
 
     this.entityLinksService.validateLists({
       ownerEntityType: ReferenceableEntityType.TRAINING,
       improvedFrom: improvedFromInput,
       requirements: requirementsInput,
+      additionalAbilities: additionalAbilitiesInput,
     });
 
     await this.entityLinksService.resolveReferences(improvedFromInput);
     await this.entityLinksService.resolveReferences(requirementsInput);
+    await this.entityLinksService.resolveReferences(additionalAbilitiesInput);
 
     const training = this.trainingsRepository.create({
       name: dto.name,
@@ -117,14 +121,25 @@ export class TrainingsService {
       EntityLinkType.REQUIREMENT,
       requirementsInput,
     );
+    await this.entityLinksService.replaceLinks(
+      ReferenceableEntityType.TRAINING,
+      savedTraining.id,
+      EntityLinkType.ADDITIONAL_ABILITY,
+      additionalAbilitiesInput,
+    );
 
-    const { improvedFrom, requirements } =
+    const { improvedFrom, requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
         ReferenceableEntityType.TRAINING,
         savedTraining.id,
       );
 
-    return { training: savedTraining, improvedFrom, requirements };
+    return {
+      training: savedTraining,
+      improvedFrom,
+      requirements,
+      additionalAbilities,
+    };
   }
 
   async findAllPaginated(
@@ -201,10 +216,12 @@ export class TrainingsService {
 
     let effectiveImprovedFrom = dto.improvedFrom;
     let effectiveRequirements = dto.requirements;
+    let effectiveAdditionalAbilities = dto.additionalAbilities;
 
     if (
       effectiveImprovedFrom === undefined ||
-      effectiveRequirements === undefined
+      effectiveRequirements === undefined ||
+      effectiveAdditionalAbilities === undefined
     ) {
       const current = await this.entityLinksService.loadReferencesFor(
         ReferenceableEntityType.TRAINING,
@@ -226,6 +243,14 @@ export class TrainingsService {
           }),
         );
       }
+      if (effectiveAdditionalAbilities === undefined) {
+        effectiveAdditionalAbilities = current.additionalAbilities.map(
+          (ref): EntityReferenceInputDto => ({
+            entityType: ref.entityType,
+            id: ref.id,
+          }),
+        );
+      }
     }
 
     this.entityLinksService.validateLists({
@@ -233,6 +258,7 @@ export class TrainingsService {
       ownerId: id,
       improvedFrom: effectiveImprovedFrom,
       requirements: effectiveRequirements,
+      additionalAbilities: effectiveAdditionalAbilities,
     });
 
     if (dto.improvedFrom !== undefined) {
@@ -240,6 +266,11 @@ export class TrainingsService {
     }
     if (dto.requirements !== undefined) {
       await this.entityLinksService.resolveReferences(dto.requirements);
+    }
+    if (dto.additionalAbilities !== undefined) {
+      await this.entityLinksService.resolveReferences(
+        dto.additionalAbilities,
+      );
     }
 
     const savedTraining = await this.trainingsRepository.save(training);
@@ -260,14 +291,27 @@ export class TrainingsService {
         dto.requirements,
       );
     }
+    if (dto.additionalAbilities !== undefined) {
+      await this.entityLinksService.replaceLinks(
+        ReferenceableEntityType.TRAINING,
+        id,
+        EntityLinkType.ADDITIONAL_ABILITY,
+        dto.additionalAbilities,
+      );
+    }
 
-    const { improvedFrom, requirements } =
+    const { improvedFrom, requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
         ReferenceableEntityType.TRAINING,
         id,
       );
 
-    return { training: savedTraining, improvedFrom, requirements };
+    return {
+      training: savedTraining,
+      improvedFrom,
+      requirements,
+      additionalAbilities,
+    };
   }
 
   async remove(id: string): Promise<void> {

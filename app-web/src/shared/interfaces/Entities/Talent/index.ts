@@ -9,6 +9,7 @@ export interface ITalent extends IEntity {
   level: number;
   improvedFrom: IEntityReference[];
   requirements: IEntityReference[];
+  additionalAbilities: IEntityReference[];
   createdAt: string;
   updatedAt: string;
 }

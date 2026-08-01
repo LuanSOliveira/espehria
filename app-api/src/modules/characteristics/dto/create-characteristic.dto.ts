@@ -82,4 +82,21 @@ export class CreateCharacteristicDto {
   @ValidateNested({ each: true })
   @Type(() => EntityReferenceInputDto)
   requirements?: EntityReferenceInputDto[];
+
+  @ApiPropertyOptional({
+    type: () => [EntityReferenceInputDto],
+    description:
+      'Habilidades adicionais associadas a esta característica. Não pode referenciar a si mesmo, conter duplicatas ou estar simultâneamente em Aprimorado de ou em Requisitos.',
+    example: [
+      {
+        entityType: 'technique',
+        id: '550e8400-e29b-41d4-a716-446655440002',
+      },
+    ],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => EntityReferenceInputDto)
+  additionalAbilities?: EntityReferenceInputDto[];
 }

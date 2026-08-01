@@ -48,20 +48,25 @@ export class TalentsController {
   @ApiCreatedResponse({ type: TalentResponseDto })
   @ApiConflictResponse({
     description:
-      'Já existe um talento com este nome, ou violação de regra em Aprimorado de/Requisitos (autorreferência, duplicata ou item em ambas as listas)',
+      'Já existe um talento com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas)',
   })
   @ApiNotFoundResponse({
     description:
-      'Uma ou mais tags ou entidades referenciadas em Aprimorado de/Requisitos não foram encontradas',
+      'Uma ou mais tags ou entidades referenciadas em Aprimorado de/Requisitos/Habilidades Adicionais não foram encontradas',
   })
   @ApiBadRequestResponse({
     description:
       'Dados obrigatórios ausentes ou formato inválido de entityType/id',
   })
   async create(@Body() dto: CreateTalentDto): Promise<TalentResponseDto> {
-    const { talent, improvedFrom, requirements } =
+    const { talent, improvedFrom, requirements, additionalAbilities } =
       await this.talentsService.create(dto);
-    return TalentResponseDto.fromEntity(talent, improvedFrom, requirements);
+    return TalentResponseDto.fromEntity(
+      talent,
+      improvedFrom,
+      requirements,
+      additionalAbilities,
+    );
   }
 
   @Get()
@@ -101,6 +106,7 @@ export class TalentsController {
       result.talent,
       result.improvedFrom,
       result.requirements,
+      result.additionalAbilities,
     );
   }
 
@@ -113,19 +119,24 @@ export class TalentsController {
   })
   @ApiConflictResponse({
     description:
-      'Já existe um talento com este nome, ou violação de regra em Aprimorado de/Requisitos (autorreferência, duplicata ou item em ambas as listas)',
+      'Já existe um talento com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas)',
   })
   @ApiBadRequestResponse({
     description:
-      'ID em formato inválido ou formato inválido de entityType/id em Aprimorado de/Requisitos',
+      'ID em formato inválido ou formato inválido de entityType/id em Aprimorado de/Requisitos/Habilidades Adicionais',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateTalentDto,
   ): Promise<TalentResponseDto> {
-    const { talent, improvedFrom, requirements } =
+    const { talent, improvedFrom, requirements, additionalAbilities } =
       await this.talentsService.update(id, dto);
-    return TalentResponseDto.fromEntity(talent, improvedFrom, requirements);
+    return TalentResponseDto.fromEntity(
+      talent,
+      improvedFrom,
+      requirements,
+      additionalAbilities,
+    );
   }
 
   @Delete(':id')

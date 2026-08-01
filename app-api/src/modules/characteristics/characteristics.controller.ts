@@ -50,11 +50,11 @@ export class CharacteristicsController {
   @ApiCreatedResponse({ type: CharacteristicResponseDto })
   @ApiConflictResponse({
     description:
-      'Já existe uma característica com este nome, ou violação de regra em Aprimorado de/Requisitos (autorreferência, duplicata ou item em ambas as listas)',
+      'Já existe uma característica com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas)',
   })
   @ApiNotFoundResponse({
     description:
-      'Uma ou mais tags ou entidades referenciadas em Aprimorado de/Requisitos não foram encontradas',
+      'Uma ou mais tags ou entidades referenciadas em Aprimorado de/Requisitos/Habilidades Adicionais não foram encontradas',
   })
   @ApiBadRequestResponse({
     description:
@@ -63,12 +63,13 @@ export class CharacteristicsController {
   async create(
     @Body() dto: CreateCharacteristicDto,
   ): Promise<CharacteristicResponseDto> {
-    const { characteristic, improvedFrom, requirements } =
+    const { characteristic, improvedFrom, requirements, additionalAbilities } =
       await this.characteristicsService.create(dto);
     return CharacteristicResponseDto.fromEntity(
       characteristic,
       improvedFrom,
       requirements,
+      additionalAbilities,
     );
   }
 
@@ -113,6 +114,7 @@ export class CharacteristicsController {
       result.characteristic,
       result.improvedFrom,
       result.requirements,
+      result.additionalAbilities,
     );
   }
 
@@ -125,22 +127,23 @@ export class CharacteristicsController {
   })
   @ApiConflictResponse({
     description:
-      'Já existe uma característica com este nome, ou violação de regra em Aprimorado de/Requisitos (autorreferência, duplicata ou item em ambas as listas)',
+      'Já existe uma característica com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas)',
   })
   @ApiBadRequestResponse({
     description:
-      'ID em formato inválido ou formato inválido de entityType/id em Aprimorado de/Requisitos',
+      'ID em formato inválido ou formato inválido de entityType/id em Aprimorado de/Requisitos/Habilidades Adicionais',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateCharacteristicDto,
   ): Promise<CharacteristicResponseDto> {
-    const { characteristic, improvedFrom, requirements } =
+    const { characteristic, improvedFrom, requirements, additionalAbilities } =
       await this.characteristicsService.update(id, dto);
     return CharacteristicResponseDto.fromEntity(
       characteristic,
       improvedFrom,
       requirements,
+      additionalAbilities,
     );
   }
 

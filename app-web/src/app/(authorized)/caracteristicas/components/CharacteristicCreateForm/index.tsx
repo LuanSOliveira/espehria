@@ -46,6 +46,7 @@ interface CharacteristicPayload
   level: number;
   improvedFrom: EntityReferenceInputPayload[];
   requirements: EntityReferenceInputPayload[];
+  additionalAbilities: EntityReferenceInputPayload[];
 }
 
 export const CharacteristicCreateForm = ({
@@ -58,6 +59,9 @@ export const CharacteristicCreateForm = ({
 
   const [improvedFrom, setImprovedFrom] = useState<IEntityReference[]>([]);
   const [requirements, setRequirements] = useState<IEntityReference[]>([]);
+  const [additionalAbilities, setAdditionalAbilities] = useState<
+    IEntityReference[]
+  >([]);
 
   const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
     url: '/tags',
@@ -87,6 +91,8 @@ export const CharacteristicCreateForm = ({
       setImprovedFrom([]);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setRequirements([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setAdditionalAbilities([]);
       return;
     }
 
@@ -102,6 +108,7 @@ export const CharacteristicCreateForm = ({
     });
     setImprovedFrom(characteristicDetail.improvedFrom ?? []);
     setRequirements(characteristicDetail.requirements ?? []);
+    setAdditionalAbilities(characteristicDetail.additionalAbilities ?? []);
   }, [isEditMode, characteristicDetail, reset]);
 
   useEffect(() => {
@@ -121,6 +128,7 @@ export const CharacteristicCreateForm = ({
     data: CharacteristicFormData,
     improvedFrom: IEntityReference[],
     requirements: IEntityReference[],
+    additionalAbilities: IEntityReference[],
   ): CharacteristicPayload => ({
     ...data,
     description: data.description || undefined,
@@ -131,6 +139,10 @@ export const CharacteristicCreateForm = ({
       id: reference.id,
     })),
     requirements: requirements.map((reference) => ({
+      entityType: reference.entityType,
+      id: reference.id,
+    })),
+    additionalAbilities: additionalAbilities.map((reference) => ({
       entityType: reference.entityType,
       id: reference.id,
     })),
@@ -150,6 +162,7 @@ export const CharacteristicCreateForm = ({
       reset(characteristicFormDefaultValues);
       setImprovedFrom([]);
       setRequirements([]);
+      setAdditionalAbilities([]);
       onSaved();
     },
     onError: (error) => {
@@ -186,7 +199,12 @@ export const CharacteristicCreateForm = ({
   });
 
   const onSubmit = (data: CharacteristicFormData) => {
-    const payload = buildPayload(data, improvedFrom, requirements);
+    const payload = buildPayload(
+      data,
+      improvedFrom,
+      requirements,
+      additionalAbilities,
+    );
 
     if (isEditMode) {
       updateCharacteristicMutation.mutate(payload);
@@ -251,13 +269,23 @@ export const CharacteristicCreateForm = ({
         placeholder="Descreva a característica"
       />
 
+      <EntityReferenceListField
+        label="Habilidades Adicionais"
+        addButtonLabel="Adicionar Habilidades"
+        value={additionalAbilities}
+        onChange={setAdditionalAbilities}
+        otherListValues={[improvedFrom, requirements]}
+        currentEntityType="characteristic"
+        currentEntityId={selectedCharacteristic?.id}
+      />
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <EntityReferenceListField
           label="Aprimorado de"
           addButtonLabel="Adicionar Aprimorado de"
           value={improvedFrom}
           onChange={setImprovedFrom}
-          otherListValue={requirements}
+          otherListValues={[requirements, additionalAbilities]}
           currentEntityType="characteristic"
           currentEntityId={selectedCharacteristic?.id}
         />
@@ -267,7 +295,7 @@ export const CharacteristicCreateForm = ({
           addButtonLabel="Adicionar Requisitos"
           value={requirements}
           onChange={setRequirements}
-          otherListValue={improvedFrom}
+          otherListValues={[improvedFrom, additionalAbilities]}
           currentEntityType="characteristic"
           currentEntityId={selectedCharacteristic?.id}
         />

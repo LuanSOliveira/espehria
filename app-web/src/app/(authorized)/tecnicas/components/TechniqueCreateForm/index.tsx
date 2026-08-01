@@ -259,7 +259,7 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
           addButtonLabel="Adicionar Aprimorado de"
           value={improvedFrom}
           onChange={setImprovedFrom}
-          otherListValue={requirements}
+          otherListValues={[requirements]}
           currentEntityType="technique"
           currentEntityId={selectedTechnique?.id}
         />
@@ -269,7 +269,7 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
           addButtonLabel="Adicionar Requisitos"
           value={requirements}
           onChange={setRequirements}
-          otherListValue={improvedFrom}
+          otherListValues={[improvedFrom]}
           currentEntityType="technique"
           currentEntityId={selectedTechnique?.id}
         />

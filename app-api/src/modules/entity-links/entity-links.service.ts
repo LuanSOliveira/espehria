@@ -118,7 +118,7 @@ export class EntityLinksService {
       const entities = await repository.findBy({ id: In(uniqueIds) });
       if (entities.length !== uniqueIds.length) {
         throw new NotFoundException(
-          'Um ou mais itens referenciados em Aprimorado de/Requisitos não foram encontrados.',
+          'Um ou mais itens referenciados em Aprimorado de/Requisitos/Habilidades Adicionais não foram encontrados.',
         );
       }
       for (const entity of entities) {
@@ -134,7 +134,7 @@ export class EntityLinksService {
       const resolved = resolvedByKey.get(`${ref.entityType}:${ref.id}`);
       if (!resolved) {
         throw new NotFoundException(
-          'Um ou mais itens referenciados em Aprimorado de/Requisitos não foram encontrados.',
+          'Um ou mais itens referenciados em Aprimorado de/Requisitos/Habilidades Adicionais não foram encontrados.',
         );
       }
       return resolved;
@@ -146,15 +146,21 @@ export class EntityLinksService {
     ownerId?: string;
     improvedFrom: EntityReferenceInputDto[];
     requirements: EntityReferenceInputDto[];
+    additionalAbilities?: EntityReferenceInputDto[];
   }): void {
     const { ownerEntityType, ownerId, improvedFrom, requirements } = params;
+    const additionalAbilities = params.additionalAbilities ?? [];
     const key = (ref: EntityReferenceInputDto) => `${ref.entityType}:${ref.id}`;
 
     if (ownerId) {
-      for (const ref of [...improvedFrom, ...requirements]) {
+      for (const ref of [
+        ...improvedFrom,
+        ...requirements,
+        ...additionalAbilities,
+      ]) {
         if (ref.entityType === ownerEntityType && ref.id === ownerId) {
           throw new ConflictException(
-            'Um item não pode ser Aprimorado de/Requisito de si mesmo.',
+            'Um item não pode ser Aprimorado de/Requisito/Habilidade Adicional de si mesmo.',
           );
         }
       }
@@ -182,11 +188,32 @@ export class EntityLinksService {
       requirementsKeys.add(refKey);
     }
 
+    const additionalAbilitiesKeys = new Set<string>();
+    for (const ref of additionalAbilities) {
+      const refKey = key(ref);
+      if (additionalAbilitiesKeys.has(refKey)) {
+        throw new ConflictException(
+          'Um item não pode ser adicionado duas vezes à mesma lista.',
+        );
+      }
+      additionalAbilitiesKeys.add(refKey);
+    }
+
+    const mutualExclusivityMessage =
+      'Um item não pode estar em mais de uma das listas Aprimorado de, Requisitos e Habilidades Adicionais ao mesmo tempo.';
+
     for (const refKey of improvedFromKeys) {
       if (requirementsKeys.has(refKey)) {
-        throw new ConflictException(
-          'Um item não pode estar em Aprimorado de e em Requisitos ao mesmo tempo.',
-        );
+        throw new ConflictException(mutualExclusivityMessage);
+      }
+      if (additionalAbilitiesKeys.has(refKey)) {
+        throw new ConflictException(mutualExclusivityMessage);
+      }
+    }
+
+    for (const refKey of requirementsKeys) {
+      if (additionalAbilitiesKeys.has(refKey)) {
+        throw new ConflictException(mutualExclusivityMessage);
       }
     }
   }
@@ -232,6 +259,7 @@ export class EntityLinksService {
   ): Promise<{
     improvedFrom: EntityReferenceResponseDto[];
     requirements: EntityReferenceResponseDto[];
+    additionalAbilities: EntityReferenceResponseDto[];
   }> {
     const ownerColumn = this.ownerColumnFor(ownerEntityType);
 
@@ -296,6 +324,11 @@ export class EntityLinksService {
       .map(toResponse)
       .sort(sortByName);
 
-    return { improvedFrom, requirements };
+    const additionalAbilities = links
+      .filter((link) => link.linkType === EntityLinkType.ADDITIONAL_ABILITY)
+      .map(toResponse)
+      .sort(sortByName);
+
+    return { improvedFrom, requirements, additionalAbilities };
   }
 }

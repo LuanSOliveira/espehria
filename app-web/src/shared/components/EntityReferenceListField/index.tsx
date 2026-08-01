@@ -16,7 +16,7 @@ export interface EntityReferenceListFieldProps {
   addButtonLabel: string;
   value: IEntityReference[];
   onChange: (value: IEntityReference[]) => void;
-  otherListValue?: IEntityReference[];
+  otherListValues?: IEntityReference[][];
   currentEntityType?: string;
   currentEntityId?: string;
   tabs?: EntityReferenceTabConfig[];
@@ -32,7 +32,7 @@ export const EntityReferenceListField = ({
   addButtonLabel,
   value,
   onChange,
-  otherListValue,
+  otherListValues = [],
   currentEntityType,
   currentEntityId,
   tabs,
@@ -61,7 +61,9 @@ export const EntityReferenceListField = ({
     }
 
     if (
-      (otherListValue ?? []).some((item) => isSameReference(item, reference))
+      otherListValues.some((list) =>
+        list.some((item) => isSameReference(item, reference)),
+      )
     ) {
       showToast({
         message:

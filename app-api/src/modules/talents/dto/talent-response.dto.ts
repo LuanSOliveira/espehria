@@ -43,6 +43,12 @@ export class TalentResponseDto {
   })
   requirements: EntityReferenceResponseDto[];
 
+  @ApiProperty({
+    type: () => [EntityReferenceResponseDto],
+    description: 'Habilidades adicionais associadas a este talento',
+  })
+  additionalAbilities: EntityReferenceResponseDto[];
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -53,6 +59,7 @@ export class TalentResponseDto {
     talent: Talent,
     improvedFrom: EntityReferenceResponseDto[],
     requirements: EntityReferenceResponseDto[],
+    additionalAbilities: EntityReferenceResponseDto[],
   ): TalentResponseDto {
     const dto = new TalentResponseDto();
     dto.id = talent.id;
@@ -62,6 +69,7 @@ export class TalentResponseDto {
     dto.tags = (talent.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
     dto.improvedFrom = improvedFrom;
     dto.requirements = requirements;
+    dto.additionalAbilities = additionalAbilities;
     dto.createdAt = talent.createdAt;
     dto.updatedAt = talent.updatedAt;
     return dto;
