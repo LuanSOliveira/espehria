@@ -1,10 +1,11 @@
 import { IconButton, TableCell, TableRow, Tooltip } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import { FiTrash2 } from 'react-icons/fi';
+import { FiEye, FiTrash2 } from 'react-icons/fi';
 import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText } from '@/shared/components/Texts';
 import { ImageAvatarPreview } from '@/shared/components/ImageAvatarPreview';
 import { ICampaignSheetListItem } from '@/shared/interfaces';
+import { APP_ROUTES } from '@/shared/routes';
 import { APP_COLORS } from '@/shared/constants';
 
 export interface CampaignSheetsListItemProps {
@@ -35,6 +36,22 @@ export const CampaignSheetsListItem = ({
         <DefaultText>{sheet.createdBy.name}</DefaultText>
       </TableCell>
       <TableCell align="right" sx={{ borderColor: APP_COLORS.gold }}>
+        <Tooltip title="Abrir ficha">
+          <IconButton
+            aria-label="Abrir ficha"
+            onClick={() =>
+              window.open(
+                APP_ROUTES.private.sheetDetails(sheet.id),
+                '_blank',
+                'noopener,noreferrer',
+              )
+            }
+            sx={{ color: APP_COLORS.textBrownDark }}
+          >
+            <FiEye />
+          </IconButton>
+        </Tooltip>
+
         {!isGoogleUser && (
           <Tooltip title="Desvincular">
             <IconButton
