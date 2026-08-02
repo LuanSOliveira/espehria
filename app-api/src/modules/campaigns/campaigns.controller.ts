@@ -57,7 +57,7 @@ export class CampaignsController {
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida ou dados obrigatórios ausentes',
+      'URL de imagem de referência inválida, dados obrigatórios ausentes, ou um ou mais usuários em allowedUserIds não são válidos (devem ser usuários Google)',
   })
   async create(
     @Body() dto: CreateCampaignDto,
@@ -136,7 +136,7 @@ export class CampaignsController {
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida ou ID em formato inválido',
+      'URL de imagem de referência inválida, ID em formato inválido, ou um ou mais usuários em allowedUserIds não são válidos (devem ser usuários Google)',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,

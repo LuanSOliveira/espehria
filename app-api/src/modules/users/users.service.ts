@@ -15,6 +15,7 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FindUsersQueryDto } from './dto/find-users-query.dto';
+import { FindGoogleUsersQueryDto } from './dto/find-google-users-query.dto';
 
 const SALT_ROUNDS = 10;
 
@@ -116,6 +117,32 @@ export class UsersService {
 
     const [data, total] = await queryBuilder
       .orderBy('user.createdAt', 'DESC')
+      .skip((page - 1) * perPage)
+      .take(perPage)
+      .getManyAndCount();
+
+    return { data, total, page, perPage };
+  }
+
+  async findAllGooglePaginated(
+    query: FindGoogleUsersQueryDto,
+  ): Promise<PaginatedUsers> {
+    const page = query.page ?? DEFAULT_PAGE;
+    const perPage = query.perPage ?? DEFAULT_PER_PAGE;
+
+    const queryBuilder = this.usersRepository
+      .createQueryBuilder('user')
+      .where('user.provider = :provider', { provider: AuthProvider.GOOGLE });
+
+    if (query.search) {
+      queryBuilder.andWhere(
+        '(user.name ILIKE :search OR user.email ILIKE :search)',
+        { search: `%${query.search}%` },
+      );
+    }
+
+    const [data, total] = await queryBuilder
+      .orderBy('user.name', 'ASC')
       .skip((page - 1) * perPage)
       .take(perPage)
       .getManyAndCount();

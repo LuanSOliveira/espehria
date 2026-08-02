@@ -22,6 +22,7 @@ export interface ICampaign extends IEntity {
   description?: string | null;
   tags: ITag[];
   sections: ICampaignSection[];
+  allowedUsers: IUser[];
   createdBy: IUser;
   createdAt: string;
   updatedAt: string;

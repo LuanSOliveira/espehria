@@ -55,6 +55,19 @@ export class Campaign extends BaseEntity {
   createdBy!: User;
 
   @ApiProperty({
+    type: () => [User],
+    description:
+      'Usuários Google autorizados a visualizar esta campanha no contexto de fichas',
+  })
+  @ManyToMany(() => User)
+  @JoinTable({
+    name: 'campaign_allowed_users',
+    joinColumn: { name: 'campaign_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'user_id', referencedColumnName: 'id' },
+  })
+  allowedUsers!: User[];
+
+  @ApiProperty({
     type: () => [CampaignSection],
     description: 'Seções da campanha',
   })

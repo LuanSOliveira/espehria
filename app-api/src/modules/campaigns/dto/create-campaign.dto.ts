@@ -55,4 +55,16 @@ export class CreateCampaignDto {
   @ValidateNested({ each: true })
   @Type(() => CampaignSectionInputDto)
   sections?: CampaignSectionInputDto[];
+
+  @ApiPropertyOptional({
+    type: [String],
+    format: 'uuid',
+    description:
+      'IDs dos usuários Google autorizados a visualizar a campanha (array de UUIDs válidos, apenas usuários com provider Google)',
+    example: ['550e8400-e29b-41d4-a716-446655440000'],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  allowedUserIds?: string[];
 }

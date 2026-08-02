@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import {
@@ -21,10 +21,11 @@ import {
   campaignFormDefaultValues,
   campaignFormResolver,
 } from '@/shared/formSchemas';
-import { ICampaign, ITag, ITagListFilters } from '@/shared/interfaces';
+import { ICampaign, ITag, ITagListFilters, IUser } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedCampaignStore } from '@/store';
 import { CampaignSectionsField } from '../CampaignSectionsField';
+import { CampaignAllowedUsersField } from '../CampaignAllowedUsersField';
 
 export interface CampaignCreateFormProps {
   onSaved: () => void;
@@ -39,6 +40,7 @@ interface CampaignPayload
   extends Omit<CampaignFormData, 'referenceImageUrl' | 'sections'> {
   referenceImageUrl?: string;
   sections: CampaignSectionPayload[];
+  allowedUserIds: string[];
 }
 
 export const CampaignCreateForm = ({ onSaved }: CampaignCreateFormProps) => {
@@ -46,6 +48,8 @@ export const CampaignCreateForm = ({ onSaved }: CampaignCreateFormProps) => {
     (state) => state.selectedCampaign,
   );
   const isEditMode = !!selectedCampaign;
+
+  const [allowedUsers, setAllowedUsers] = useState<IUser[]>([]);
 
   const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
     url: '/tags',
@@ -71,6 +75,8 @@ export const CampaignCreateForm = ({ onSaved }: CampaignCreateFormProps) => {
   useEffect(() => {
     if (!isEditMode) {
       reset(campaignFormDefaultValues);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setAllowedUsers([]);
       return;
     }
 
@@ -89,6 +95,7 @@ export const CampaignCreateForm = ({ onSaved }: CampaignCreateFormProps) => {
           description: section.description ?? '',
         })) ?? [],
     });
+    setAllowedUsers(campaignDetail.allowedUsers ?? []);
   }, [isEditMode, campaignDetail, reset]);
 
   useEffect(() => {
@@ -104,7 +111,10 @@ export const CampaignCreateForm = ({ onSaved }: CampaignCreateFormProps) => {
     });
   }, [isCampaignDetailError, campaignDetailError]);
 
-  const buildPayload = (data: CampaignFormData): CampaignPayload => ({
+  const buildPayload = (
+    data: CampaignFormData,
+    allowedUsers: IUser[],
+  ): CampaignPayload => ({
     ...data,
     referenceImageUrl: data.referenceImageUrl || undefined,
     tagIds: data.tagIds ?? [],
@@ -112,6 +122,7 @@ export const CampaignCreateForm = ({ onSaved }: CampaignCreateFormProps) => {
       label: section.label,
       description: section.description || undefined,
     })),
+    allowedUserIds: allowedUsers.map((user) => user.id),
   });
 
   const createCampaignMutation = usePostEntity<ICampaign, CampaignPayload>({
@@ -123,6 +134,7 @@ export const CampaignCreateForm = ({ onSaved }: CampaignCreateFormProps) => {
         type: 'success',
       });
       reset(campaignFormDefaultValues);
+      setAllowedUsers([]);
       onSaved();
     },
     onError: (error) => {
@@ -156,7 +168,7 @@ export const CampaignCreateForm = ({ onSaved }: CampaignCreateFormProps) => {
   });
 
   const onSubmit = (data: CampaignFormData) => {
-    const payload = buildPayload(data);
+    const payload = buildPayload(data, allowedUsers);
 
     if (isEditMode) {
       updateCampaignMutation.mutate(payload);
@@ -216,6 +228,11 @@ export const CampaignCreateForm = ({ onSaved }: CampaignCreateFormProps) => {
         control={control}
         label="Descrição"
         placeholder="Descreva a campanha"
+      />
+
+      <CampaignAllowedUsersField
+        value={allowedUsers}
+        onChange={setAllowedUsers}
       />
 
       <CampaignSectionsField control={control} />

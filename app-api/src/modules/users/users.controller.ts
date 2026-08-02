@@ -26,6 +26,7 @@ import { GoogleAccessGuard } from '../auth/guards/google-access.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FindUsersQueryDto } from './dto/find-users-query.dto';
+import { FindGoogleUsersQueryDto } from './dto/find-google-users-query.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { PaginatedUsersResponseDto } from './dto/paginated-users-response.dto';
 import { UsersService } from './users.service';
@@ -54,6 +55,27 @@ export class UsersController {
   ): Promise<PaginatedUsersResponseDto> {
     const { data, total, page, perPage } =
       await this.usersService.findAllLocalPaginated(query);
+
+    return {
+      data: data.map((user) => UserResponseDto.fromEntity(user)),
+      total,
+      page,
+      perPage,
+      totalPages: Math.ceil(total / perPage),
+    };
+  }
+
+  @Get('google')
+  @ApiOperation({
+    summary:
+      'Lista usuários Google (provider = GOOGLE) com paginação e busca por nome ou e-mail',
+  })
+  @ApiOkResponse({ type: PaginatedUsersResponseDto })
+  async findGoogleUsers(
+    @Query() query: FindGoogleUsersQueryDto,
+  ): Promise<PaginatedUsersResponseDto> {
+    const { data, total, page, perPage } =
+      await this.usersService.findAllGooglePaginated(query);
 
     return {
       data: data.map((user) => UserResponseDto.fromEntity(user)),

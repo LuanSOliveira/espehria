@@ -13,3 +13,9 @@ export interface IUserListFilters {
   page?: number;
   perPage?: number;
 }
+
+export interface IGoogleUserListFilters {
+  search?: string;
+  page?: number;
+  perPage?: number;
+}

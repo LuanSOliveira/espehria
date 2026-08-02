@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -10,6 +11,7 @@ import {
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
 import { Tag } from '../tags/entities/tag.entity';
+import { AuthProvider } from '../users/enums/auth-provider.enum';
 import { User } from '../users/entities/user.entity';
 import { CampaignSectionInputDto } from './dto/campaign-section-input.dto';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
@@ -34,6 +36,8 @@ export class CampaignsService {
     private readonly campaignSectionsRepository: Repository<CampaignSection>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
   ) {}
 
   private findByNameForUser(
@@ -49,8 +53,26 @@ export class CampaignsService {
   findOwnedById(id: string, userId: string): Promise<Campaign | null> {
     return this.campaignsRepository.findOne({
       where: { id, createdBy: { id: userId } },
-      relations: { tags: true, sections: true, createdBy: true },
+      relations: {
+        tags: true,
+        sections: true,
+        createdBy: true,
+        allowedUsers: true,
+      },
     });
+  }
+
+  async findVisibleForUser(currentUser: User): Promise<Campaign[]> {
+    if (currentUser.provider === AuthProvider.GOOGLE) {
+      return this.campaignsRepository
+        .createQueryBuilder('campaign')
+        .innerJoin('campaign.allowedUsers', 'allowedUser')
+        .where('allowedUser.id = :userId', { userId: currentUser.id })
+        .orderBy('campaign.name', 'ASC')
+        .getMany();
+    }
+
+    return this.campaignsRepository.find({ order: { name: 'ASC' } });
   }
 
   private buildSections(
@@ -74,6 +96,20 @@ export class CampaignsService {
     return tags;
   }
 
+  private async findAllowedUsersByIds(userIds: string[]): Promise<User[]> {
+    const uniqueIds = [...new Set(userIds)];
+    const users = await this.usersRepository.findBy({ id: In(uniqueIds) });
+    if (
+      users.length !== uniqueIds.length ||
+      users.some((user) => user.provider !== AuthProvider.GOOGLE)
+    ) {
+      throw new BadRequestException(
+        'Um ou mais usuários informados não são usuários Google válidos.',
+      );
+    }
+    return users;
+  }
+
   async create(dto: CreateCampaignDto, currentUser: User): Promise<Campaign> {
     const existing = await this.findByNameForUser(dto.name, currentUser.id);
     if (existing) {
@@ -90,12 +126,18 @@ export class CampaignsService {
         ? this.buildSections(dto.sections)
         : [];
 
+    const allowedUsers =
+      dto.allowedUserIds && dto.allowedUserIds.length > 0
+        ? await this.findAllowedUsersByIds(dto.allowedUserIds)
+        : [];
+
     const campaign = this.campaignsRepository.create({
       name: dto.name,
       referenceImageUrl: dto.referenceImageUrl ?? null,
       description: dto.description ?? null,
       tags,
       sections,
+      allowedUsers,
       createdBy: currentUser,
     });
 
@@ -172,6 +214,12 @@ export class CampaignsService {
     if (dto.tagIds !== undefined) {
       campaign.tags =
         dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+    }
+    if (dto.allowedUserIds !== undefined) {
+      campaign.allowedUsers =
+        dto.allowedUserIds.length > 0
+          ? await this.findAllowedUsersByIds(dto.allowedUserIds)
+          : [];
     }
     if (dto.sections !== undefined) {
       // Reatribuir `campaign.sections` inteiro e deixar o cascade save cuidar da

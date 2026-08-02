@@ -47,6 +47,13 @@ export class CampaignResponseDto {
   })
   createdBy: UserResponseDto;
 
+  @ApiProperty({
+    type: () => [UserResponseDto],
+    description:
+      'Usuários Google autorizados a visualizar a campanha no contexto de fichas',
+  })
+  allowedUsers: UserResponseDto[];
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -67,6 +74,9 @@ export class CampaignResponseDto {
       .sort((a, b) => a.order - b.order)
       .map((section) => CampaignSectionResponseDto.fromEntity(section));
     dto.createdBy = UserResponseDto.fromEntity(campaign.createdBy);
+    dto.allowedUsers = (campaign.allowedUsers ?? []).map((user) =>
+      UserResponseDto.fromEntity(user),
+    );
     dto.createdAt = campaign.createdAt;
     dto.updatedAt = campaign.updatedAt;
     return dto;

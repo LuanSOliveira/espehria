@@ -31,3 +31,4 @@ export * from './SearchResult';
 export * from './EntityReference';
 export * from './Campaign';
 export * from './PlannedSession';
+export * from './Sheet';

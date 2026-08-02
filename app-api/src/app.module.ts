@@ -38,6 +38,7 @@ import { CampaignsModule } from './modules/campaigns/campaigns.module';
 import { PlannedSessionsModule } from './modules/planned-sessions/planned-sessions.module';
 import { AttributesModule } from './modules/attributes/attributes.module';
 import { CurrenciesModule } from './modules/currencies/currencies.module';
+import { SheetsModule } from './modules/sheets/sheets.module';
 
 @Module({
   imports: [
@@ -97,6 +98,7 @@ import { CurrenciesModule } from './modules/currencies/currencies.module';
     PlannedSessionsModule,
     AttributesModule,
     CurrenciesModule,
+    SheetsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
