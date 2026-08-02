@@ -33,6 +33,7 @@ import { User } from '../users/entities/user.entity';
 import { CampaignsService } from './campaigns.service';
 import { CampaignListItemResponseDto } from './dto/campaign-list-item-response.dto';
 import { CampaignResponseDto } from './dto/campaign-response.dto';
+import { CampaignSheetResponseDto } from './dto/campaign-sheet-response.dto';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
 import { FindCampaignsQueryDto } from './dto/find-campaigns-query.dto';
 import { PaginatedCampaignsResponseDto } from './dto/paginated-campaigns-response.dto';
@@ -163,5 +164,84 @@ export class CampaignsController {
     @CurrentUser() currentUser: User,
   ): Promise<void> {
     await this.campaignsService.remove(id, currentUser);
+  }
+
+  @Delete(':id/allowed-users/:userId')
+  @ApiOperation({
+    summary: 'Remove um usuário da lista de usuários permitidos da campanha',
+  })
+  @ApiOkResponse({ type: CampaignResponseDto })
+  @ApiForbiddenResponse({
+    description: 'Usuários Google não têm acesso a campanhas',
+  })
+  @ApiNotFoundResponse({
+    description:
+      'Campanha não encontrada, não pertence ao usuário, ou usuário não está na lista de usuários permitidos',
+  })
+  @ApiBadRequestResponse({
+    description: 'IDs em formato inválido',
+  })
+  async removeAllowedUser(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @CurrentUser() currentUser: User,
+  ): Promise<CampaignResponseDto> {
+    const campaign = await this.campaignsService.removeAllowedUser(
+      id,
+      userId,
+      currentUser,
+    );
+    return CampaignResponseDto.fromEntity(campaign);
+  }
+
+  @Get(':id/sheets')
+  @ApiOperation({
+    summary: 'Lista todas as fichas vinculadas a uma campanha',
+  })
+  @ApiOkResponse({ type: [CampaignSheetResponseDto] })
+  @ApiForbiddenResponse({
+    description: 'Usuários Google não têm acesso a campanhas',
+  })
+  @ApiNotFoundResponse({
+    description: 'Campanha não encontrada ou não pertence ao usuário',
+  })
+  @ApiBadRequestResponse({
+    description: 'ID de campanha em formato inválido',
+  })
+  async findSheets(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() currentUser: User,
+  ): Promise<CampaignSheetResponseDto[]> {
+    const sheets = await this.campaignsService.findSheetsOfCampaign(
+      id,
+      currentUser,
+    );
+    return sheets.map((sheet) => CampaignSheetResponseDto.fromEntity(sheet));
+  }
+
+  @Delete(':id/sheets/:sheetId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Desvincula uma ficha de uma campanha',
+  })
+  @ApiNoContentResponse({
+    description: 'Ficha desvinculada com sucesso',
+  })
+  @ApiForbiddenResponse({
+    description: 'Usuários Google não têm acesso a campanhas',
+  })
+  @ApiNotFoundResponse({
+    description:
+      'Campanha não encontrada, não pertence ao usuário, ou ficha não está vinculada a esta campanha',
+  })
+  @ApiBadRequestResponse({
+    description: 'IDs em formato inválido',
+  })
+  async unassignSheet(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('sheetId', ParseUUIDPipe) sheetId: string,
+    @CurrentUser() currentUser: User,
+  ): Promise<void> {
+    await this.campaignsService.unassignSheet(id, sheetId, currentUser);
   }
 }

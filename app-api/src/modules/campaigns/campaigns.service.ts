@@ -5,11 +5,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { DataSource, EntityManager, In, Repository } from 'typeorm';
 import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import { Sheet } from '../sheets/entities/sheet.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { AuthProvider } from '../users/enums/auth-provider.enum';
 import { User } from '../users/entities/user.entity';
@@ -38,6 +39,9 @@ export class CampaignsService {
     private readonly tagsRepository: Repository<Tag>,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Sheet)
+    private readonly sheetsRepository: Repository<Sheet>,
+    private readonly dataSource: DataSource,
   ) {}
 
   private findByNameForUser(
@@ -215,26 +219,54 @@ export class CampaignsService {
       campaign.tags =
         dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
     }
+
+    let removedUserIds: string[] = [];
     if (dto.allowedUserIds !== undefined) {
+      const allowedUserIds = dto.allowedUserIds;
+      removedUserIds = campaign.allowedUsers
+        .filter((user) => !allowedUserIds.includes(user.id))
+        .map((user) => user.id);
       campaign.allowedUsers =
-        dto.allowedUserIds.length > 0
-          ? await this.findAllowedUsersByIds(dto.allowedUserIds)
+        allowedUserIds.length > 0
+          ? await this.findAllowedUsersByIds(allowedUserIds)
           : [];
     }
-    if (dto.sections !== undefined) {
-      // Reatribuir `campaign.sections` inteiro e deixar o cascade save cuidar da
-      // remoção via orphanedRowAction falha com violação de not-null (mesmo
-      // problema e mesma solução usada em LocationsService). Por isso as seções
-      // antigas são removidas explicitamente pelo repositório antes de atribuir
-      // as novas.
-      if (campaign.sections.length > 0) {
-        await this.campaignSectionsRepository.remove(campaign.sections);
-      }
-      campaign.sections =
-        dto.sections.length > 0 ? this.buildSections(dto.sections) : [];
-    }
 
-    return this.campaignsRepository.save(campaign);
+    const newSections =
+      dto.sections !== undefined
+        ? dto.sections.length > 0
+          ? this.buildSections(dto.sections)
+          : []
+        : undefined;
+
+    return this.dataSource.transaction(async (manager) => {
+      const campaignsRepository = manager.getRepository(Campaign);
+      const campaignSectionsRepository = manager.getRepository(CampaignSection);
+
+      if (newSections !== undefined) {
+        // Reatribuir `campaign.sections` inteiro e deixar o cascade save cuidar da
+        // remoção via orphanedRowAction falha com violação de not-null (mesmo
+        // problema e mesma solução usada em LocationsService). Por isso as seções
+        // antigas são removidas explicitamente pelo repositório antes de atribuir
+        // as novas.
+        if (campaign.sections.length > 0) {
+          await campaignSectionsRepository.remove(campaign.sections);
+        }
+        campaign.sections = newSections;
+      }
+
+      const savedCampaign = await campaignsRepository.save(campaign);
+
+      if (removedUserIds.length > 0) {
+        await this.unassignSheetsOfRemovedAllowedUsers(
+          manager,
+          savedCampaign.id,
+          removedUserIds,
+        );
+      }
+
+      return savedCampaign;
+    });
   }
 
   async remove(id: string, currentUser: User): Promise<void> {
@@ -243,5 +275,102 @@ export class CampaignsService {
       throw new NotFoundException('Campanha não encontrada.');
     }
     await this.campaignsRepository.delete({ id });
+  }
+
+  private async unassignSheetsOfRemovedAllowedUsers(
+    manager: EntityManager,
+    campaignId: string,
+    removedUserIds: string[],
+  ): Promise<void> {
+    if (removedUserIds.length === 0) {
+      return;
+    }
+    await manager
+      .createQueryBuilder()
+      .update(Sheet)
+      .set({ campaign: null })
+      .where('campaign_id = :campaignId', { campaignId })
+      .andWhere('created_by_id IN (:...removedUserIds)', { removedUserIds })
+      .execute();
+  }
+
+  async removeAllowedUser(
+    campaignId: string,
+    userId: string,
+    currentUser: User,
+  ): Promise<Campaign> {
+    const campaign = await this.findOwnedById(campaignId, currentUser.id);
+    if (!campaign) {
+      throw new NotFoundException('Campanha não encontrada.');
+    }
+
+    const isAllowedUser = campaign.allowedUsers.some(
+      (user) => user.id === userId,
+    );
+    if (!isAllowedUser) {
+      throw new NotFoundException(
+        'Usuário não está na lista de usuários permitidos desta campanha.',
+      );
+    }
+
+    await this.dataSource.transaction(async (manager) => {
+      await manager
+        .createQueryBuilder()
+        .relation(Campaign, 'allowedUsers')
+        .of(campaignId)
+        .remove(userId);
+      await this.unassignSheetsOfRemovedAllowedUsers(manager, campaignId, [
+        userId,
+      ]);
+    });
+
+    const updatedCampaign = await this.findOwnedById(
+      campaignId,
+      currentUser.id,
+    );
+    if (!updatedCampaign) {
+      throw new NotFoundException('Campanha não encontrada.');
+    }
+    return updatedCampaign;
+  }
+
+  async findSheetsOfCampaign(
+    campaignId: string,
+    currentUser: User,
+  ): Promise<Sheet[]> {
+    const campaign = await this.findOwnedById(campaignId, currentUser.id);
+    if (!campaign) {
+      throw new NotFoundException('Campanha não encontrada.');
+    }
+
+    return this.sheetsRepository.find({
+      where: { campaign: { id: campaignId } },
+      relations: { createdBy: true },
+      order: { name: 'ASC' },
+    });
+  }
+
+  async unassignSheet(
+    campaignId: string,
+    sheetId: string,
+    currentUser: User,
+  ): Promise<void> {
+    const campaign = await this.findOwnedById(campaignId, currentUser.id);
+    if (!campaign) {
+      throw new NotFoundException('Campanha não encontrada.');
+    }
+
+    const sheet = await this.sheetsRepository.findOne({
+      where: { id: sheetId },
+      relations: { campaign: true },
+    });
+    if (!sheet || sheet.campaign?.id !== campaignId) {
+      throw new NotFoundException(
+        'Ficha não encontrada ou não vinculada a esta campanha.',
+      );
+    }
+
+    sheet.campaign = null;
+    await this.sheetsRepository.save(sheet);
   }
 }

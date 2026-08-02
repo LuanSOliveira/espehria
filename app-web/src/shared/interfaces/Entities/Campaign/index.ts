@@ -33,3 +33,11 @@ export interface ICampaignListFilters {
   page?: number;
   perPage?: number;
 }
+
+export interface ICampaignSheetListItem {
+  id: string;
+  name: string;
+  referenceImage?: string | null;
+  level: number;
+  createdBy: IUser;
+}

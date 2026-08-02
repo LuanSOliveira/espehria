@@ -1,6 +1,7 @@
 import { IconButton, TableCell, TableRow, Tooltip } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import { FiExternalLink, FiTrash2 } from 'react-icons/fi';
+import { useRouter } from 'next/navigation';
+import { FiEye, FiTrash2 } from 'react-icons/fi';
 import { DefaultText } from '@/shared/components/Texts';
 import { ImageAvatarPreview } from '@/shared/components/ImageAvatarPreview';
 import { ISheetListItem } from '@/shared/interfaces';
@@ -13,6 +14,8 @@ export interface SheetsListItemProps {
 }
 
 export const SheetsListItem = ({ sheet, onDelete }: SheetsListItemProps) => {
+  const router = useRouter();
+
   return (
     <TableRow
       sx={{
@@ -33,13 +36,10 @@ export const SheetsListItem = ({ sheet, onDelete }: SheetsListItemProps) => {
         <Tooltip title="Abrir ficha">
           <IconButton
             aria-label="Abrir ficha"
-            component="a"
-            href={APP_ROUTES.private.sheetDetails(sheet.id)}
-            target="_blank"
-            rel="noopener noreferrer"
+            onClick={() => router.push(APP_ROUTES.private.sheetDetails(sheet.id))}
             sx={{ color: APP_COLORS.textBrownDark }}
           >
-            <FiExternalLink />
+            <FiEye />
           </IconButton>
         </Tooltip>
         <Tooltip title="Excluir">

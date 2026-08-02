@@ -1,9 +1,9 @@
 'use client';
 
-import { use, useEffect } from 'react';
+import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Chip, CircularProgress } from '@mui/material';
-import { FiAlertTriangle, FiFileText } from 'react-icons/fi';
+import { FiAlertTriangle, FiArrowLeft, FiFileText } from 'react-icons/fi';
 
 import { PageContainer } from '@/shared/components/Containers';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
@@ -17,6 +17,8 @@ import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 import { APP_ROUTES } from '@/shared/routes';
 import { CampaignSectionCard } from '../components/CampaignSectionCard';
 import { PlannedSessionsSection } from './components/PlannedSessionsSection';
+import { CampaignAllowedUsersModal } from './components/CampaignAllowedUsersModal';
+import { CampaignSheetsModal } from './components/CampaignSheetsModal';
 
 interface CampaignDetailsPageProps {
   params: Promise<{ id: string }>;
@@ -27,6 +29,10 @@ export default function CampaignDetailsPage({
 }: CampaignDetailsPageProps) {
   const { id: campaignId } = use(params);
   const router = useRouter();
+
+  const [isAllowedUsersModalOpen, setIsAllowedUsersModalOpen] =
+    useState(false);
+  const [isSheetsModalOpen, setIsSheetsModalOpen] = useState(false);
 
   const {
     data: campaign,
@@ -121,6 +127,31 @@ export default function CampaignDetailsPage({
         </div>
       </div>
 
+      <div className="mt-4 flex flex-wrap gap-3">
+        <SecondaryButton
+          type="button"
+          icon={<FiArrowLeft />}
+          onClick={() => router.push(APP_ROUTES.private.campaigns)}
+          sx={{ width: 'auto', padding: '10px 20px' }}
+        >
+          Voltar
+        </SecondaryButton>
+        <SecondaryButton
+          type="button"
+          onClick={() => setIsAllowedUsersModalOpen(true)}
+          sx={{ width: 'auto', padding: '10px 20px' }}
+        >
+          Ver Usuários Permitidos
+        </SecondaryButton>
+        <SecondaryButton
+          type="button"
+          onClick={() => setIsSheetsModalOpen(true)}
+          sx={{ width: 'auto', padding: '10px 20px' }}
+        >
+          Ver Fichas Cadastradas
+        </SecondaryButton>
+      </div>
+
       <div className="mt-6 flex flex-col gap-4">
         <div style={APP_CONTAINER_STYLES.detailSectionBox}>
           <div
@@ -147,6 +178,19 @@ export default function CampaignDetailsPage({
       </div>
 
       <PlannedSessionsSection campaignId={campaignId} />
+
+      <CampaignAllowedUsersModal
+        open={isAllowedUsersModalOpen}
+        onClose={() => setIsAllowedUsersModalOpen(false)}
+        campaignId={campaignId}
+        allowedUsers={campaign.allowedUsers}
+      />
+
+      <CampaignSheetsModal
+        open={isSheetsModalOpen}
+        onClose={() => setIsSheetsModalOpen(false)}
+        campaignId={campaignId}
+      />
     </PageContainer>
   );
 }

@@ -3,15 +3,12 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CircularProgress } from '@mui/material';
-import { FiAlertTriangle, FiTrash2 } from 'react-icons/fi';
+import { FiAlertTriangle, FiArrowLeft } from 'react-icons/fi';
 
 import { PageContainer } from '@/shared/components/Containers';
-import { ConfirmationModal } from '@/shared/components/Modals';
 import { DefaultText } from '@/shared/components/Texts';
-import { DefaultAutocompleteInput } from '@/shared/components/Inputs';
 import { SecondaryButton } from '@/shared/components/Buttons';
 import {
-  useDeleteEntity,
   useGetEntityById,
   useGetEntityList,
   usePutEntity,
@@ -31,6 +28,8 @@ import { SheetPortraitImage } from './components/SheetPortraitImage';
 import { SheetImageEditModal } from './components/SheetImageEditModal';
 import { SheetNameField } from './components/SheetNameField';
 import { SheetLevelField } from './components/SheetLevelField';
+import { SheetCampaignField } from './components/SheetCampaignField';
+import { SheetRaceField } from './components/SheetRaceField';
 import { useFieldAutosave } from './hooks/useFieldAutosave';
 
 interface SheetDetailsPageProps {
@@ -74,7 +73,6 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
   const [race, setRace] = useState<ICharacterRace | null>(null);
   const [referenceImage, setReferenceImage] = useState<string | null>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     if (!sheet || hasHydrated) {
@@ -181,22 +179,6 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     },
   });
 
-  const deleteSheetMutation = useDeleteEntity({
-    url: `/sheets/${sheetId}`,
-    onSuccess: () => {
-      showToast({ message: 'Ficha excluída com sucesso.', type: 'success' });
-      router.push(APP_ROUTES.private.sheets);
-    },
-    onError: (mutationError) => {
-      showToast({
-        message:
-          mutationError.response?.data?.message ??
-          'Não foi possível excluir a ficha.',
-        type: 'error',
-      });
-    },
-  });
-
   useFieldAutosave({
     value: name,
     enabled: hasHydrated,
@@ -265,56 +247,48 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
 
   return (
     <PageContainer>
-      <div className="flex justify-end">
+      <div className="flex justify-start">
         <SecondaryButton
           type="button"
-          icon={<FiTrash2 />}
-          onClick={() => setIsDeleteModalOpen(true)}
+          icon={<FiArrowLeft />}
+          onClick={() => router.push(APP_ROUTES.private.sheets)}
           sx={{ width: 'auto', padding: '10px 20px' }}
         >
-          Excluir ficha
+          Voltar
         </SecondaryButton>
       </div>
 
-      <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start">
+      <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-stretch">
         <SheetPortraitImage
           imageUrl={referenceImage}
           alt={name || sheet.name}
           onEditClick={() => setIsImageModalOpen(true)}
         />
 
-        <div className="flex flex-1 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex-1">
-            <SheetNameField value={name} onChange={setName} />
+        <div className="flex flex-1 flex-col gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex-1">
+              <SheetNameField value={name} onChange={setName} />
+            </div>
+            <div className="w-full sm:w-32">
+              <SheetLevelField value={level} onChange={setLevel} />
+            </div>
           </div>
-          <div className="w-full sm:w-32">
-            <SheetLevelField value={level} onChange={setLevel} />
-          </div>
+
+          <SheetCampaignField
+            value={campaign}
+            onChange={setCampaign}
+            options={campaignOptions}
+          />
+
+          <SheetRaceField
+            value={selectedRaceOption}
+            onChange={(newRace) =>
+              setRace(newRace ? { id: newRace.id, name: newRace.name } : null)
+            }
+            options={raceOptions}
+          />
         </div>
-      </div>
-
-      <div className="mt-6 flex flex-col gap-4">
-        <DefaultAutocompleteInput<ISheetCampaignOption>
-          id="sheet-campaign"
-          label="Campanha"
-          options={campaignOptions}
-          getOptionLabel={(option) => option.name}
-          value={campaign}
-          onChange={setCampaign}
-          placeholder="Selecione a campanha"
-        />
-
-        <DefaultAutocompleteInput<IRaceListItem>
-          id="sheet-race"
-          label="Raça"
-          options={raceOptions}
-          getOptionLabel={(option) => option.name}
-          value={selectedRaceOption}
-          onChange={(newRace) =>
-            setRace(newRace ? { id: newRace.id, name: newRace.name } : null)
-          }
-          placeholder="Selecione a raça"
-        />
       </div>
 
       <SheetImageEditModal
@@ -323,16 +297,6 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
         currentImageUrl={referenceImage}
         onSave={handleImageSave}
         isSaving={updateImageMutation.isPending}
-      />
-
-      <ConfirmationModal
-        open={isDeleteModalOpen}
-        title="Excluir ficha"
-        message={`Tem certeza que deseja excluir a ficha "${sheet.name}"?`}
-        confirmLabel="Excluir"
-        isLoading={deleteSheetMutation.isPending}
-        onConfirm={() => deleteSheetMutation.mutate()}
-        onCancel={() => setIsDeleteModalOpen(false)}
       />
     </PageContainer>
   );
