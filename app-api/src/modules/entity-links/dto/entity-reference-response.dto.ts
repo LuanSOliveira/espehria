@@ -21,7 +21,7 @@ export class EntityReferenceResponseDto {
     enum: ReferenceableEntityType,
     enumName: 'ReferenceableEntityType',
     description:
-      'Tipo de entidade referenciada (treinamento, talento, técnica, magia ou característica)',
+      'Tipo de entidade referenciada (treinamento, talento, técnica, magia, característica ou biografia)',
     example: ReferenceableEntityType.TRAINING,
   })
   entityType!: ReferenceableEntityType;

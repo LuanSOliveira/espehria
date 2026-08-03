@@ -4,8 +4,7 @@ import { IsInt, IsUUID, Min } from 'class-validator';
 export class ImprovementFlawItemInputDto {
   @ApiProperty({
     example: 3,
-    description:
-      'Valor do item de melhoria/defeito (número inteiro, mínimo 1)',
+    description: 'Valor do item de melhoria/defeito (número inteiro, mínimo 1)',
   })
   @IsInt({ message: 'O valor deve ser um número inteiro.' })
   @Min(1, { message: 'O valor deve ser maior ou igual a 1.' })

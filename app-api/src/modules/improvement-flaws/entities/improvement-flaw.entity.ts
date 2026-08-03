@@ -3,6 +3,7 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 import { Talent } from '../../talents/entities/talent.entity';
 import { Training } from '../../trainings/entities/training.entity';
 import { Characteristic } from '../../characteristics/entities/characteristic.entity';
+import { Biography } from '../../biographies/entities/biography.entity';
 import { ImprovementFlawType } from '../../improvement-flaw-types/entities/improvement-flaw-type.entity';
 import { ImprovementFlawProperty } from '../../improvement-flaw-properties/entities/improvement-flaw-property.entity';
 import { ImprovementFlawCategory } from '../enums/improvement-flaw-category.enum';
@@ -10,13 +11,14 @@ import { ImprovementFlawCategory } from '../enums/improvement-flaw-category.enum
 @Entity('improvement_flaws')
 @Check(
   'CK_improvement_flaws_owner_exclusive',
-  'num_nonnulls(owner_talent_id, owner_training_id, owner_characteristic_id) = 1',
+  'num_nonnulls(owner_talent_id, owner_training_id, owner_characteristic_id, owner_biography_id) = 1',
 )
 @Unique([
   'category',
   'ownerTalent',
   'ownerTraining',
   'ownerCharacteristic',
+  'ownerBiography',
   'type',
   'property',
 ])
@@ -49,4 +51,8 @@ export class ImprovementFlaw extends BaseEntity {
   @ManyToOne(() => Characteristic, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'owner_characteristic_id' })
   ownerCharacteristic!: Characteristic | null;
+
+  @ManyToOne(() => Biography, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'owner_biography_id' })
+  ownerBiography!: Biography | null;
 }

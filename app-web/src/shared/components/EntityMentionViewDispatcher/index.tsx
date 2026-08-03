@@ -25,6 +25,7 @@ import { TalentView } from '@/app/(authorized)/talentos/components/TalentView';
 import { CharacteristicView } from '@/app/(authorized)/caracteristicas/components/CharacteristicView';
 import { TechniqueView } from '@/app/(authorized)/tecnicas/components/TechniqueView';
 import { SpellView } from '@/app/(authorized)/magias/components/SpellView';
+import { BiographyView } from '@/app/(authorized)/biografias/components/BiographyView';
 
 interface EntityMentionViewRendererParams {
   entityId: string;
@@ -106,6 +107,9 @@ const ENTITY_MENTION_VIEW_REGISTRY: Record<
   ),
   spell: ({ entityId, onNotFound }) => (
     <SpellView spellId={entityId} onNotFound={onNotFound} />
+  ),
+  biography: ({ entityId, onNotFound }) => (
+    <BiographyView biographyId={entityId} onNotFound={onNotFound} />
   ),
 };
 

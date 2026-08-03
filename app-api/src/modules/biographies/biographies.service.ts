@@ -1,0 +1,318 @@
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository } from 'typeorm';
+import {
+  DEFAULT_PAGE,
+  DEFAULT_PER_PAGE,
+} from '../../common/variables/pagination';
+import { CreateBiographyDto } from './dto/create-biography.dto';
+import { UpdateBiographyDto } from './dto/update-biography.dto';
+import { FindBiographiesQueryDto } from './dto/find-biographies-query.dto';
+import { Biography } from './entities/biography.entity';
+import { Tag } from '../tags/entities/tag.entity';
+import { EntityLinksService } from '../entity-links/entity-links.service';
+import { EntityLinkType } from '../entity-links/enums/entity-link-type.enum';
+import { ReferenceableEntityType } from '../entity-links/enums/referenceable-entity-type.enum';
+import { EntityReferenceInputDto } from '../entity-links/dto/entity-reference-input.dto';
+import { EntityReferenceResponseDto } from '../entity-links/dto/entity-reference-response.dto';
+import { ImprovementFlawsService } from '../improvement-flaws/improvement-flaws.service';
+import { ImprovementFlawOwnerType } from '../improvement-flaws/enums/improvement-flaw-owner-type.enum';
+import { ImprovementFlawCategory } from '../improvement-flaws/enums/improvement-flaw-category.enum';
+import { ImprovementFlawItemInputDto } from '../improvement-flaws/dto/improvement-flaw-item-input.dto';
+import { ImprovementFlawItemResponseDto } from '../improvement-flaws/dto/improvement-flaw-item-response.dto';
+
+export interface PaginatedBiographies {
+  data: Biography[];
+  total: number;
+  page: number;
+  perPage: number;
+}
+
+export interface BiographyWithReferences {
+  biography: Biography;
+  additionalAbilities: EntityReferenceResponseDto[];
+  improvements: ImprovementFlawItemResponseDto[];
+}
+
+@Injectable()
+export class BiographiesService {
+  constructor(
+    @InjectRepository(Biography)
+    private readonly biographiesRepository: Repository<Biography>,
+    @InjectRepository(Tag)
+    private readonly tagsRepository: Repository<Tag>,
+    private readonly entityLinksService: EntityLinksService,
+    private readonly improvementFlawsService: ImprovementFlawsService,
+  ) {}
+
+  findByName(name: string): Promise<Biography | null> {
+    return this.biographiesRepository.findOneBy({ name });
+  }
+
+  async findById(id: string): Promise<BiographyWithReferences | null> {
+    const biography = await this.biographiesRepository.findOne({
+      where: { id },
+      relations: { tags: true },
+    });
+    if (!biography) {
+      return null;
+    }
+
+    const { additionalAbilities } =
+      await this.entityLinksService.loadReferencesFor(
+        ReferenceableEntityType.BIOGRAPHY,
+        id,
+      );
+    const { improvements } = await this.improvementFlawsService.loadItemsFor(
+      ImprovementFlawOwnerType.BIOGRAPHY,
+      id,
+    );
+
+    return { biography, additionalAbilities, improvements };
+  }
+
+  private async findTagsByIds(tagIds: string[]): Promise<Tag[]> {
+    const uniqueIds = [...new Set(tagIds)];
+    const tags = await this.tagsRepository.findBy({ id: In(uniqueIds) });
+    if (tags.length !== uniqueIds.length) {
+      throw new NotFoundException('Uma ou mais tags não foram encontradas.');
+    }
+    return tags;
+  }
+
+  async create(dto: CreateBiographyDto): Promise<BiographyWithReferences> {
+    const existing = await this.findByName(dto.name);
+    if (existing) {
+      throw new ConflictException('Já existe uma biografia com este nome.');
+    }
+
+    const tags =
+      dto.tagIds && dto.tagIds.length > 0
+        ? await this.findTagsByIds(dto.tagIds)
+        : [];
+
+    const additionalAbilitiesInput = dto.additionalAbilities ?? [];
+    const improvementsInput = dto.improvements ?? [];
+
+    this.entityLinksService.validateLists({
+      ownerEntityType: ReferenceableEntityType.BIOGRAPHY,
+      improvedFrom: [],
+      requirements: [],
+      additionalAbilities: additionalAbilitiesInput,
+    });
+
+    await this.entityLinksService.resolveReferences(additionalAbilitiesInput);
+
+    const resolvedImprovements =
+      await this.improvementFlawsService.validateAndResolveItems(
+        improvementsInput,
+      );
+    this.improvementFlawsService.validateLists({
+      improvements: improvementsInput,
+      flaws: [],
+    });
+
+    const biography = this.biographiesRepository.create({
+      name: dto.name,
+      description: dto.description ?? null,
+      imageReference: dto.imageReference ?? null,
+      tags,
+    });
+
+    const savedBiography = await this.biographiesRepository.save(biography);
+
+    await this.entityLinksService.replaceLinks(
+      ReferenceableEntityType.BIOGRAPHY,
+      savedBiography.id,
+      EntityLinkType.ADDITIONAL_ABILITY,
+      additionalAbilitiesInput,
+    );
+
+    await this.improvementFlawsService.replaceItems(
+      ImprovementFlawOwnerType.BIOGRAPHY,
+      savedBiography.id,
+      ImprovementFlawCategory.IMPROVEMENT,
+      improvementsInput,
+      resolvedImprovements,
+    );
+
+    const { additionalAbilities } =
+      await this.entityLinksService.loadReferencesFor(
+        ReferenceableEntityType.BIOGRAPHY,
+        savedBiography.id,
+      );
+    const { improvements } = await this.improvementFlawsService.loadItemsFor(
+      ImprovementFlawOwnerType.BIOGRAPHY,
+      savedBiography.id,
+    );
+
+    return { biography: savedBiography, additionalAbilities, improvements };
+  }
+
+  async findAllPaginated(
+    query: FindBiographiesQueryDto,
+  ): Promise<PaginatedBiographies> {
+    const page = query.page ?? DEFAULT_PAGE;
+    const perPage = query.perPage ?? DEFAULT_PER_PAGE;
+
+    const queryBuilder =
+      this.biographiesRepository.createQueryBuilder('biography');
+
+    if (query.name) {
+      queryBuilder.andWhere('biography.name ILIKE :name', {
+        name: `%${query.name}%`,
+      });
+    }
+
+    const [ids, total] = await queryBuilder
+      .select(['biography.id', 'biography.name'])
+      .orderBy('biography.name', 'ASC')
+      .skip((page - 1) * perPage)
+      .take(perPage)
+      .getManyAndCount();
+
+    if (ids.length === 0) {
+      return { data: [], total, page, perPage };
+    }
+
+    const biographies = await this.biographiesRepository.find({
+      where: { id: In(ids.map((biography) => biography.id)) },
+      relations: { tags: true },
+      order: { name: 'ASC' },
+    });
+
+    const biographiesById = new Map(
+      biographies.map((biography) => [biography.id, biography]),
+    );
+    const data = ids
+      .map((biography) => biographiesById.get(biography.id))
+      .filter((biography): biography is Biography => biography !== undefined);
+
+    return { data, total, page, perPage };
+  }
+
+  async update(
+    id: string,
+    dto: UpdateBiographyDto,
+  ): Promise<BiographyWithReferences> {
+    const biography = await this.biographiesRepository.findOne({
+      where: { id },
+      relations: { tags: true },
+    });
+    if (!biography) {
+      throw new NotFoundException('Biografia não encontrada.');
+    }
+
+    if (dto.name && dto.name !== biography.name) {
+      const existing = await this.findByName(dto.name);
+      if (existing) {
+        throw new ConflictException('Já existe uma biografia com este nome.');
+      }
+      biography.name = dto.name;
+    }
+
+    if (dto.description !== undefined) {
+      biography.description = dto.description;
+    }
+    if (dto.imageReference !== undefined) {
+      biography.imageReference = dto.imageReference;
+    }
+    if (dto.tagIds !== undefined) {
+      biography.tags =
+        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+    }
+
+    let effectiveAdditionalAbilities = dto.additionalAbilities;
+    if (effectiveAdditionalAbilities === undefined) {
+      const current = await this.entityLinksService.loadReferencesFor(
+        ReferenceableEntityType.BIOGRAPHY,
+        id,
+      );
+      effectiveAdditionalAbilities = current.additionalAbilities.map(
+        (ref): EntityReferenceInputDto => ({
+          entityType: ref.entityType,
+          id: ref.id,
+        }),
+      );
+    }
+
+    this.entityLinksService.validateLists({
+      ownerEntityType: ReferenceableEntityType.BIOGRAPHY,
+      ownerId: id,
+      improvedFrom: [],
+      requirements: [],
+      additionalAbilities: effectiveAdditionalAbilities,
+    });
+
+    if (dto.additionalAbilities !== undefined) {
+      await this.entityLinksService.resolveReferences(dto.additionalAbilities);
+    }
+
+    let effectiveImprovements = dto.improvements;
+    if (effectiveImprovements === undefined) {
+      const currentItems = await this.improvementFlawsService.loadItemsFor(
+        ImprovementFlawOwnerType.BIOGRAPHY,
+        id,
+      );
+      effectiveImprovements = currentItems.improvements.map(
+        (item): ImprovementFlawItemInputDto => ({
+          value: item.value,
+          type: item.type.id,
+          property: item.property.id,
+        }),
+      );
+    }
+
+    const resolvedImprovements =
+      await this.improvementFlawsService.validateAndResolveItems(
+        effectiveImprovements,
+      );
+    this.improvementFlawsService.validateLists({
+      improvements: effectiveImprovements,
+      flaws: [],
+    });
+
+    const savedBiography = await this.biographiesRepository.save(biography);
+
+    if (dto.additionalAbilities !== undefined) {
+      await this.entityLinksService.replaceLinks(
+        ReferenceableEntityType.BIOGRAPHY,
+        id,
+        EntityLinkType.ADDITIONAL_ABILITY,
+        dto.additionalAbilities,
+      );
+    }
+    if (dto.improvements !== undefined) {
+      await this.improvementFlawsService.replaceItems(
+        ImprovementFlawOwnerType.BIOGRAPHY,
+        id,
+        ImprovementFlawCategory.IMPROVEMENT,
+        dto.improvements,
+        resolvedImprovements,
+      );
+    }
+
+    const { additionalAbilities } =
+      await this.entityLinksService.loadReferencesFor(
+        ReferenceableEntityType.BIOGRAPHY,
+        id,
+      );
+    const { improvements } = await this.improvementFlawsService.loadItemsFor(
+      ImprovementFlawOwnerType.BIOGRAPHY,
+      id,
+    );
+
+    return { biography: savedBiography, additionalAbilities, improvements };
+  }
+
+  async remove(id: string): Promise<void> {
+    const result = await this.biographiesRepository.delete({ id });
+    if (result.affected === 0) {
+      throw new NotFoundException('Biografia não encontrada.');
+    }
+  }
+}

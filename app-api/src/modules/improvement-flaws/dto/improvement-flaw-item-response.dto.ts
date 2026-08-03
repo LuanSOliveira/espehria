@@ -20,9 +20,7 @@ export class ImprovementFlawItemResponseDto {
     const dto = new ImprovementFlawItemResponseDto();
     dto.value = item.value;
     dto.type = ImprovementFlawTypeResponseDto.fromEntity(item.type);
-    dto.property = ImprovementFlawPropertyResponseDto.fromEntity(
-      item.property,
-    );
+    dto.property = ImprovementFlawPropertyResponseDto.fromEntity(item.property);
     return dto;
   }
 }

@@ -29,3 +29,4 @@ export * from './PageStore/TechniquesStore';
 export * from './PageStore/SpellsStore';
 export * from './PageStore/CampaignsStore';
 export * from './PageStore/PlannedSessionsStore';
+export * from './PageStore/BiographiesStore';

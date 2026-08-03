@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, FindOptionsWhere, In, Repository } from 'typeorm';
 import { ImprovementFlaw } from './entities/improvement-flaw.entity';
@@ -14,7 +18,8 @@ export interface ResolvedImprovementFlawItem {
   property: ImprovementFlawProperty;
 }
 
-type OwnerColumn = 'ownerTalent' | 'ownerTraining' | 'ownerCharacteristic';
+type OwnerColumn =
+  'ownerTalent' | 'ownerTraining' | 'ownerCharacteristic' | 'ownerBiography';
 
 @Injectable()
 export class ImprovementFlawsService {
@@ -35,6 +40,8 @@ export class ImprovementFlawsService {
         return 'ownerTraining';
       case ImprovementFlawOwnerType.CHARACTERISTIC:
         return 'ownerCharacteristic';
+      case ImprovementFlawOwnerType.BIOGRAPHY:
+        return 'ownerBiography';
     }
   }
 
@@ -142,15 +149,14 @@ export class ImprovementFlawsService {
       category,
       [ownerColumn]: { id: ownerId },
     };
-    await this.improvementFlawsRepository.delete(
-      deleteCriteria as FindOptionsWhere<ImprovementFlaw>,
-    );
+    await this.improvementFlawsRepository.delete(deleteCriteria);
 
     if (items.length === 0) {
       return;
     }
 
-    const resolved = resolvedItems ?? (await this.validateAndResolveItems(items));
+    const resolved =
+      resolvedItems ?? (await this.validateAndResolveItems(items));
 
     const rows = items.map((item, index) => {
       const resolvedItem = resolved.get(`${item.type}:${item.property}`);

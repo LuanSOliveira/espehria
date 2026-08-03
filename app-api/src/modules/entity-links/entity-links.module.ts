@@ -6,6 +6,7 @@ import { Talent } from '../talents/entities/talent.entity';
 import { Technique } from '../techniques/entities/technique.entity';
 import { Spell } from '../spells/entities/spell.entity';
 import { Characteristic } from '../characteristics/entities/characteristic.entity';
+import { Biography } from '../biographies/entities/biography.entity';
 import { EntityLinksService } from './entity-links.service';
 
 @Module({
@@ -17,6 +18,7 @@ import { EntityLinksService } from './entity-links.service';
       Technique,
       Spell,
       Characteristic,
+      Biography,
     ]),
   ],
   providers: [EntityLinksService],

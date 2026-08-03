@@ -26,6 +26,7 @@ import { Spell } from '../spells/entities/spell.entity';
 import { Characteristic } from '../characteristics/entities/characteristic.entity';
 import { Campaign } from '../campaigns/entities/campaign.entity';
 import { PlannedSession } from '../planned-sessions/entities/planned-session.entity';
+import { Biography } from '../biographies/entities/biography.entity';
 import { SearchController } from './search.controller';
 import { SearchService } from './search.service';
 
@@ -58,6 +59,7 @@ import { SearchService } from './search.service';
       Characteristic,
       Campaign,
       PlannedSession,
+      Biography,
     ]),
   ],
   controllers: [SearchController],

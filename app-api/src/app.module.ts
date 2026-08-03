@@ -41,6 +41,7 @@ import { CurrenciesModule } from './modules/currencies/currencies.module';
 import { SheetsModule } from './modules/sheets/sheets.module';
 import { ImprovementFlawTypesModule } from './modules/improvement-flaw-types/improvement-flaw-types.module';
 import { ImprovementFlawPropertiesModule } from './modules/improvement-flaw-properties/improvement-flaw-properties.module';
+import { BiographiesModule } from './modules/biographies/biographies.module';
 
 @Module({
   imports: [
@@ -103,6 +104,7 @@ import { ImprovementFlawPropertiesModule } from './modules/improvement-flaw-prop
     SheetsModule,
     ImprovementFlawTypesModule,
     ImprovementFlawPropertiesModule,
+    BiographiesModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

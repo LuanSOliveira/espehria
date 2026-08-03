@@ -25,6 +25,7 @@ export const ENTITY_MENTION_TYPE_LABELS: Record<string, string> = {
   characteristic: 'característica',
   technique: 'técnica',
   spell: 'magia',
+  biography: 'biografia',
 };
 
 // Endpoint de detalhe usado para resolver o nome atual de uma entidade mencionada
@@ -58,6 +59,7 @@ export const ENTITY_MENTION_DETAIL_URL_BY_TYPE: Record<
   characteristic: (id) => `/characteristics/${id}`,
   technique: (id) => `/techniques/${id}`,
   spell: (id) => `/spells/${id}`,
+  biography: (id) => `/biographies/${id}`,
 };
 
 // Tipos de entidade com view registrada no EntityMentionViewDispatcher — usado pelo
@@ -86,4 +88,5 @@ export const ENTITY_MENTION_VIEWABLE_TYPES: string[] = [
   'characteristic',
   'technique',
   'spell',
+  'biography',
 ];

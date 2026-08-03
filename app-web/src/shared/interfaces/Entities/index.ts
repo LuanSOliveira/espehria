@@ -27,6 +27,7 @@ export * from './Talent';
 export * from './Characteristic';
 export * from './Technique';
 export * from './Spell';
+export * from './Biography';
 export * from './SearchResult';
 export * from './EntityReference';
 export * from './ImprovementDefectType';

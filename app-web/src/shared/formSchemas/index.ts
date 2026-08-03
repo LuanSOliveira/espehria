@@ -27,3 +27,4 @@ export * from './CampaignFormSchema';
 export * from './PlannedSessionFormSchema';
 export * from './SheetFormSchema';
 export * from './ImprovementDefectFormSchema';
+export * from './BiographyFormSchema';

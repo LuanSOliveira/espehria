@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, FindOptionsWhere, In, Repository } from 'typeorm';
 import { Training } from '../trainings/entities/training.entity';
@@ -6,6 +10,7 @@ import { Talent } from '../talents/entities/talent.entity';
 import { Technique } from '../techniques/entities/technique.entity';
 import { Spell } from '../spells/entities/spell.entity';
 import { Characteristic } from '../characteristics/entities/characteristic.entity';
+import { Biography } from '../biographies/entities/biography.entity';
 import { EntityLink } from './entities/entity-link.entity';
 import { EntityLinkType } from './enums/entity-link-type.enum';
 import { ReferenceableEntityType } from './enums/referenceable-entity-type.enum';
@@ -23,14 +28,16 @@ type OwnerColumn =
   | 'ownerTalent'
   | 'ownerTechnique'
   | 'ownerSpell'
-  | 'ownerCharacteristic';
+  | 'ownerCharacteristic'
+  | 'ownerBiography';
 
 type TargetColumn =
   | 'targetTraining'
   | 'targetTalent'
   | 'targetTechnique'
   | 'targetSpell'
-  | 'targetCharacteristic';
+  | 'targetCharacteristic'
+  | 'targetBiography';
 
 @Injectable()
 export class EntityLinksService {
@@ -47,11 +54,15 @@ export class EntityLinksService {
     private readonly spellsRepository: Repository<Spell>,
     @InjectRepository(Characteristic)
     private readonly characteristicsRepository: Repository<Characteristic>,
+    @InjectRepository(Biography)
+    private readonly biographiesRepository: Repository<Biography>,
   ) {}
 
   private repositoryFor(
     entityType: ReferenceableEntityType,
-  ): Repository<Training | Talent | Technique | Spell | Characteristic> {
+  ): Repository<
+    Training | Talent | Technique | Spell | Characteristic | Biography
+  > {
     switch (entityType) {
       case ReferenceableEntityType.TRAINING:
         return this.trainingsRepository;
@@ -63,6 +74,8 @@ export class EntityLinksService {
         return this.spellsRepository;
       case ReferenceableEntityType.CHARACTERISTIC:
         return this.characteristicsRepository;
+      case ReferenceableEntityType.BIOGRAPHY:
+        return this.biographiesRepository;
     }
   }
 
@@ -78,6 +91,8 @@ export class EntityLinksService {
         return 'ownerSpell';
       case ReferenceableEntityType.CHARACTERISTIC:
         return 'ownerCharacteristic';
+      case ReferenceableEntityType.BIOGRAPHY:
+        return 'ownerBiography';
     }
   }
 
@@ -93,6 +108,8 @@ export class EntityLinksService {
         return 'targetSpell';
       case ReferenceableEntityType.CHARACTERISTIC:
         return 'targetCharacteristic';
+      case ReferenceableEntityType.BIOGRAPHY:
+        return 'targetBiography';
     }
   }
 
@@ -230,9 +247,7 @@ export class EntityLinksService {
       linkType,
       [ownerColumn]: { id: ownerId },
     };
-    await this.entityLinksRepository.delete(
-      deleteCriteria as FindOptionsWhere<EntityLink>,
-    );
+    await this.entityLinksRepository.delete(deleteCriteria);
 
     if (refs.length === 0) {
       return;
@@ -275,6 +290,7 @@ export class EntityLinksService {
         targetTechnique: { tags: true },
         targetSpell: { tags: true },
         targetCharacteristic: { tags: true },
+        targetBiography: { tags: true },
       },
     });
 
@@ -301,6 +317,12 @@ export class EntityLinksService {
         return EntityReferenceResponseDto.fromResolved(
           link.targetSpell,
           ReferenceableEntityType.SPELL,
+        );
+      }
+      if (link.targetBiography) {
+        return EntityReferenceResponseDto.fromResolved(
+          link.targetBiography,
+          ReferenceableEntityType.BIOGRAPHY,
         );
       }
       return EntityReferenceResponseDto.fromResolved(
