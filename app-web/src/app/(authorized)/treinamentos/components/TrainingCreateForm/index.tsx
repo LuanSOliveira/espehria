@@ -11,6 +11,7 @@ import {
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
 import { EntityReferenceListField } from '@/shared/components/EntityReferenceListField';
+import { ImprovementDefectListField } from '@/shared/components/ImprovementDefectListField';
 import {
   useGetEntityById,
   useGetEntityList,
@@ -24,6 +25,7 @@ import {
 } from '@/shared/formSchemas';
 import {
   IEntityReference,
+  IImprovementDefectItem,
   ITag,
   ITagListFilters,
   ITraining,
@@ -40,11 +42,19 @@ interface EntityReferenceInputPayload {
   id: string;
 }
 
+interface ImprovementDefectInputPayload {
+  value: number;
+  type: string;
+  property: string;
+}
+
 interface TrainingPayload extends Omit<TrainingFormData, 'description'> {
   description?: string;
   improvedFrom: EntityReferenceInputPayload[];
   requirements: EntityReferenceInputPayload[];
   additionalAbilities: EntityReferenceInputPayload[];
+  improvements: ImprovementDefectInputPayload[];
+  flaws: ImprovementDefectInputPayload[];
 }
 
 export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
@@ -58,6 +68,10 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
   const [additionalAbilities, setAdditionalAbilities] = useState<
     IEntityReference[]
   >([]);
+  const [improvements, setImprovements] = useState<IImprovementDefectItem[]>(
+    [],
+  );
+  const [flaws, setFlaws] = useState<IImprovementDefectItem[]>([]);
 
   const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
     url: '/tags',
@@ -89,6 +103,10 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
       setRequirements([]);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setAdditionalAbilities([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setImprovements([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setFlaws([]);
       return;
     }
 
@@ -104,6 +122,8 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
     setImprovedFrom(trainingDetail.improvedFrom ?? []);
     setRequirements(trainingDetail.requirements ?? []);
     setAdditionalAbilities(trainingDetail.additionalAbilities ?? []);
+    setImprovements(trainingDetail.improvements ?? []);
+    setFlaws(trainingDetail.flaws ?? []);
   }, [isEditMode, trainingDetail, reset]);
 
   useEffect(() => {
@@ -124,6 +144,8 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
     improvedFrom: IEntityReference[],
     requirements: IEntityReference[],
     additionalAbilities: IEntityReference[],
+    improvements: IImprovementDefectItem[],
+    flaws: IImprovementDefectItem[],
   ): TrainingPayload => ({
     ...data,
     description: data.description || undefined,
@@ -140,6 +162,16 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
       entityType: reference.entityType,
       id: reference.id,
     })),
+    improvements: improvements.map((item) => ({
+      value: item.value,
+      type: item.type.id,
+      property: item.property.id,
+    })),
+    flaws: flaws.map((item) => ({
+      value: item.value,
+      type: item.type.id,
+      property: item.property.id,
+    })),
   });
 
   const createTrainingMutation = usePostEntity<ITraining, TrainingPayload>({
@@ -154,6 +186,8 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
       setImprovedFrom([]);
       setRequirements([]);
       setAdditionalAbilities([]);
+      setImprovements([]);
+      setFlaws([]);
       onSaved();
     },
     onError: (error) => {
@@ -192,6 +226,8 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
       improvedFrom,
       requirements,
       additionalAbilities,
+      improvements,
+      flaws,
     );
 
     if (isEditMode) {
@@ -245,6 +281,26 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
         label="Descrição"
         placeholder="Descreva o treinamento"
       />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <ImprovementDefectListField
+          label="Melhorias"
+          addButtonLabel="Adicionar Melhoria"
+          category="improvement"
+          value={improvements}
+          onChange={setImprovements}
+          otherListValue={flaws}
+        />
+
+        <ImprovementDefectListField
+          label="Defeitos"
+          addButtonLabel="Adicionar Defeito"
+          category="flaw"
+          value={flaws}
+          onChange={setFlaws}
+          otherListValue={improvements}
+        />
+      </div>
 
       <EntityReferenceListField
         label="Habilidades Adicionais"

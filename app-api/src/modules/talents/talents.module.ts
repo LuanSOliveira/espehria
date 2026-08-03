@@ -3,11 +3,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Talent } from './entities/talent.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { EntityLinksModule } from '../entity-links/entity-links.module';
+import { ImprovementFlawsModule } from '../improvement-flaws/improvement-flaws.module';
 import { TalentsController } from './talents.controller';
 import { TalentsService } from './talents.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Talent, Tag]), EntityLinksModule],
+  imports: [
+    TypeOrmModule.forFeature([Talent, Tag]),
+    EntityLinksModule,
+    ImprovementFlawsModule,
+  ],
   controllers: [TalentsController],
   providers: [TalentsService],
   exports: [TalentsService],

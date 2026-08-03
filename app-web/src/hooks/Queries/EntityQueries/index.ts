@@ -6,3 +6,5 @@ export * from './useRaceCategoriesQuery';
 export * from './useErasAllQuery';
 export * from './useSheetCampaignOptionsQuery';
 export * from './useCampaignSheetsQuery';
+export * from './useImprovementDefectTypesQuery';
+export * from './useImprovementDefectPropertiesQuery';

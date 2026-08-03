@@ -19,6 +19,11 @@ import { EntityLinkType } from '../entity-links/enums/entity-link-type.enum';
 import { ReferenceableEntityType } from '../entity-links/enums/referenceable-entity-type.enum';
 import { EntityReferenceInputDto } from '../entity-links/dto/entity-reference-input.dto';
 import { EntityReferenceResponseDto } from '../entity-links/dto/entity-reference-response.dto';
+import { ImprovementFlawsService } from '../improvement-flaws/improvement-flaws.service';
+import { ImprovementFlawOwnerType } from '../improvement-flaws/enums/improvement-flaw-owner-type.enum';
+import { ImprovementFlawCategory } from '../improvement-flaws/enums/improvement-flaw-category.enum';
+import { ImprovementFlawItemInputDto } from '../improvement-flaws/dto/improvement-flaw-item-input.dto';
+import { ImprovementFlawItemResponseDto } from '../improvement-flaws/dto/improvement-flaw-item-response.dto';
 
 export interface PaginatedCharacteristics {
   data: Characteristic[];
@@ -32,6 +37,8 @@ export interface CharacteristicWithReferences {
   improvedFrom: EntityReferenceResponseDto[];
   requirements: EntityReferenceResponseDto[];
   additionalAbilities: EntityReferenceResponseDto[];
+  improvements: ImprovementFlawItemResponseDto[];
+  flaws: ImprovementFlawItemResponseDto[];
 }
 
 @Injectable()
@@ -42,6 +49,7 @@ export class CharacteristicsService {
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     private readonly entityLinksService: EntityLinksService,
+    private readonly improvementFlawsService: ImprovementFlawsService,
   ) {}
 
   findByName(name: string): Promise<Characteristic | null> {
@@ -62,8 +70,20 @@ export class CharacteristicsService {
         ReferenceableEntityType.CHARACTERISTIC,
         id,
       );
+    const { improvements, flaws } =
+      await this.improvementFlawsService.loadItemsFor(
+        ImprovementFlawOwnerType.CHARACTERISTIC,
+        id,
+      );
 
-    return { characteristic, improvedFrom, requirements, additionalAbilities };
+    return {
+      characteristic,
+      improvedFrom,
+      requirements,
+      additionalAbilities,
+      improvements,
+      flaws,
+    };
   }
 
   private async findTagsByIds(tagIds: string[]): Promise<Tag[]> {
@@ -93,6 +113,8 @@ export class CharacteristicsService {
     const improvedFromInput = dto.improvedFrom ?? [];
     const requirementsInput = dto.requirements ?? [];
     const additionalAbilitiesInput = dto.additionalAbilities ?? [];
+    const improvementsInput = dto.improvements ?? [];
+    const flawsInput = dto.flaws ?? [];
 
     this.entityLinksService.validateLists({
       ownerEntityType: ReferenceableEntityType.CHARACTERISTIC,
@@ -104,6 +126,17 @@ export class CharacteristicsService {
     await this.entityLinksService.resolveReferences(improvedFromInput);
     await this.entityLinksService.resolveReferences(requirementsInput);
     await this.entityLinksService.resolveReferences(additionalAbilitiesInput);
+
+    const resolvedImprovements =
+      await this.improvementFlawsService.validateAndResolveItems(
+        improvementsInput,
+      );
+    const resolvedFlaws =
+      await this.improvementFlawsService.validateAndResolveItems(flawsInput);
+    this.improvementFlawsService.validateLists({
+      improvements: improvementsInput,
+      flaws: flawsInput,
+    });
 
     const characteristic = this.characteristicsRepository.create({
       name: dto.name,
@@ -134,9 +167,29 @@ export class CharacteristicsService {
       additionalAbilitiesInput,
     );
 
+    await this.improvementFlawsService.replaceItems(
+      ImprovementFlawOwnerType.CHARACTERISTIC,
+      savedCharacteristic.id,
+      ImprovementFlawCategory.IMPROVEMENT,
+      improvementsInput,
+      resolvedImprovements,
+    );
+    await this.improvementFlawsService.replaceItems(
+      ImprovementFlawOwnerType.CHARACTERISTIC,
+      savedCharacteristic.id,
+      ImprovementFlawCategory.FLAW,
+      flawsInput,
+      resolvedFlaws,
+    );
+
     const { improvedFrom, requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
         ReferenceableEntityType.CHARACTERISTIC,
+        savedCharacteristic.id,
+      );
+    const { improvements, flaws } =
+      await this.improvementFlawsService.loadItemsFor(
+        ImprovementFlawOwnerType.CHARACTERISTIC,
         savedCharacteristic.id,
       );
 
@@ -145,6 +198,8 @@ export class CharacteristicsService {
       improvedFrom,
       requirements,
       additionalAbilities,
+      improvements,
+      flaws,
     };
   }
 
@@ -289,6 +344,47 @@ export class CharacteristicsService {
       );
     }
 
+    let effectiveImprovements = dto.improvements;
+    let effectiveFlaws = dto.flaws;
+
+    if (effectiveImprovements === undefined || effectiveFlaws === undefined) {
+      const currentItems = await this.improvementFlawsService.loadItemsFor(
+        ImprovementFlawOwnerType.CHARACTERISTIC,
+        id,
+      );
+      if (effectiveImprovements === undefined) {
+        effectiveImprovements = currentItems.improvements.map(
+          (item): ImprovementFlawItemInputDto => ({
+            value: item.value,
+            type: item.type.id,
+            property: item.property.id,
+          }),
+        );
+      }
+      if (effectiveFlaws === undefined) {
+        effectiveFlaws = currentItems.flaws.map(
+          (item): ImprovementFlawItemInputDto => ({
+            value: item.value,
+            type: item.type.id,
+            property: item.property.id,
+          }),
+        );
+      }
+    }
+
+    const resolvedImprovements =
+      await this.improvementFlawsService.validateAndResolveItems(
+        effectiveImprovements,
+      );
+    const resolvedFlaws =
+      await this.improvementFlawsService.validateAndResolveItems(
+        effectiveFlaws,
+      );
+    this.improvementFlawsService.validateLists({
+      improvements: effectiveImprovements,
+      flaws: effectiveFlaws,
+    });
+
     const savedCharacteristic =
       await this.characteristicsRepository.save(characteristic);
 
@@ -316,10 +412,33 @@ export class CharacteristicsService {
         dto.additionalAbilities,
       );
     }
+    if (dto.improvements !== undefined) {
+      await this.improvementFlawsService.replaceItems(
+        ImprovementFlawOwnerType.CHARACTERISTIC,
+        id,
+        ImprovementFlawCategory.IMPROVEMENT,
+        dto.improvements,
+        resolvedImprovements,
+      );
+    }
+    if (dto.flaws !== undefined) {
+      await this.improvementFlawsService.replaceItems(
+        ImprovementFlawOwnerType.CHARACTERISTIC,
+        id,
+        ImprovementFlawCategory.FLAW,
+        dto.flaws,
+        resolvedFlaws,
+      );
+    }
 
     const { improvedFrom, requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
         ReferenceableEntityType.CHARACTERISTIC,
+        id,
+      );
+    const { improvements, flaws } =
+      await this.improvementFlawsService.loadItemsFor(
+        ImprovementFlawOwnerType.CHARACTERISTIC,
         id,
       );
 
@@ -328,6 +447,8 @@ export class CharacteristicsService {
       improvedFrom,
       requirements,
       additionalAbilities,
+      improvements,
+      flaws,
     };
   }
 

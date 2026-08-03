@@ -50,27 +50,34 @@ export class CharacteristicsController {
   @ApiCreatedResponse({ type: CharacteristicResponseDto })
   @ApiConflictResponse({
     description:
-      'Já existe uma característica com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas)',
+      'Já existe uma característica com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas), ou violação de regra em Melhorias/Defeitos (duplicidade de combinação Tipo×Propriedade na mesma lista, exclusividade entre listas ou incompatibilidade entre o Tipo e a Propriedade selecionados)',
   })
   @ApiNotFoundResponse({
     description:
-      'Uma ou mais tags ou entidades referenciadas em Aprimorado de/Requisitos/Habilidades Adicionais não foram encontradas',
+      'Uma ou mais tags, entidades referenciadas em Aprimorado de/Requisitos/Habilidades Adicionais, ou tipos/propriedades de Melhorias/Defeitos não foram encontrados',
   })
   @ApiBadRequestResponse({
     description:
-      'Dados obrigatórios ausentes ou formato inválido de entityType/id',
+      'Dados obrigatórios ausentes, formato inválido de entityType/id, ou formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas)',
   })
   async create(
     @Body() dto: CreateCharacteristicDto,
   ): Promise<CharacteristicResponseDto> {
-    const { characteristic, improvedFrom, requirements, additionalAbilities } =
-      await this.characteristicsService.create(dto);
-    return CharacteristicResponseDto.fromEntity(
+    const {
       characteristic,
       improvedFrom,
       requirements,
       additionalAbilities,
-    );
+      improvements,
+      flaws,
+    } = await this.characteristicsService.create(dto);
+    return CharacteristicResponseDto.fromEntity(characteristic, {
+      improvedFrom,
+      requirements,
+      additionalAbilities,
+      improvements,
+      flaws,
+    });
   }
 
   @Get()
@@ -110,12 +117,13 @@ export class CharacteristicsController {
     if (!result) {
       throw new NotFoundException('Característica não encontrada.');
     }
-    return CharacteristicResponseDto.fromEntity(
-      result.characteristic,
-      result.improvedFrom,
-      result.requirements,
-      result.additionalAbilities,
-    );
+    return CharacteristicResponseDto.fromEntity(result.characteristic, {
+      improvedFrom: result.improvedFrom,
+      requirements: result.requirements,
+      additionalAbilities: result.additionalAbilities,
+      improvements: result.improvements,
+      flaws: result.flaws,
+    });
   }
 
   @Put(':id')
@@ -123,28 +131,35 @@ export class CharacteristicsController {
   @ApiOkResponse({ type: CharacteristicResponseDto })
   @ApiNotFoundResponse({
     description:
-      'Característica ou uma ou mais tags/entidades referenciadas não encontrados',
+      'Característica ou uma ou mais tags/entidades referenciadas em Aprimorado de/Requisitos/Habilidades Adicionais, ou tipos/propriedades de Melhorias/Defeitos não encontrados',
   })
   @ApiConflictResponse({
     description:
-      'Já existe uma característica com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas)',
+      'Já existe uma característica com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas), ou violação de regra em Melhorias/Defeitos (duplicidade de combinação Tipo×Propriedade na mesma lista, exclusividade entre listas ou incompatibilidade entre o Tipo e a Propriedade selecionados)',
   })
   @ApiBadRequestResponse({
     description:
-      'ID em formato inválido ou formato inválido de entityType/id em Aprimorado de/Requisitos/Habilidades Adicionais',
+      'ID em formato inválido, formato inválido de entityType/id em Aprimorado de/Requisitos/Habilidades Adicionais, ou formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas)',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateCharacteristicDto,
   ): Promise<CharacteristicResponseDto> {
-    const { characteristic, improvedFrom, requirements, additionalAbilities } =
-      await this.characteristicsService.update(id, dto);
-    return CharacteristicResponseDto.fromEntity(
+    const {
       characteristic,
       improvedFrom,
       requirements,
       additionalAbilities,
-    );
+      improvements,
+      flaws,
+    } = await this.characteristicsService.update(id, dto);
+    return CharacteristicResponseDto.fromEntity(characteristic, {
+      improvedFrom,
+      requirements,
+      additionalAbilities,
+      improvements,
+      flaws,
+    });
   }
 
   @Delete(':id')

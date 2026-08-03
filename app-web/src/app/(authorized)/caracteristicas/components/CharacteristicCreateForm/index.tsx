@@ -11,6 +11,7 @@ import {
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
 import { EntityReferenceListField } from '@/shared/components/EntityReferenceListField';
+import { ImprovementDefectListField } from '@/shared/components/ImprovementDefectListField';
 import {
   useGetEntityById,
   useGetEntityList,
@@ -25,6 +26,7 @@ import {
 import {
   ICharacteristic,
   IEntityReference,
+  IImprovementDefectItem,
   ITag,
   ITagListFilters,
 } from '@/shared/interfaces';
@@ -40,6 +42,12 @@ interface EntityReferenceInputPayload {
   id: string;
 }
 
+interface ImprovementDefectInputPayload {
+  value: number;
+  type: string;
+  property: string;
+}
+
 interface CharacteristicPayload
   extends Omit<CharacteristicFormData, 'description' | 'level'> {
   description?: string;
@@ -47,6 +55,8 @@ interface CharacteristicPayload
   improvedFrom: EntityReferenceInputPayload[];
   requirements: EntityReferenceInputPayload[];
   additionalAbilities: EntityReferenceInputPayload[];
+  improvements: ImprovementDefectInputPayload[];
+  flaws: ImprovementDefectInputPayload[];
 }
 
 export const CharacteristicCreateForm = ({
@@ -62,6 +72,10 @@ export const CharacteristicCreateForm = ({
   const [additionalAbilities, setAdditionalAbilities] = useState<
     IEntityReference[]
   >([]);
+  const [improvements, setImprovements] = useState<IImprovementDefectItem[]>(
+    [],
+  );
+  const [flaws, setFlaws] = useState<IImprovementDefectItem[]>([]);
 
   const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
     url: '/tags',
@@ -93,6 +107,10 @@ export const CharacteristicCreateForm = ({
       setRequirements([]);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setAdditionalAbilities([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setImprovements([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setFlaws([]);
       return;
     }
 
@@ -109,6 +127,8 @@ export const CharacteristicCreateForm = ({
     setImprovedFrom(characteristicDetail.improvedFrom ?? []);
     setRequirements(characteristicDetail.requirements ?? []);
     setAdditionalAbilities(characteristicDetail.additionalAbilities ?? []);
+    setImprovements(characteristicDetail.improvements ?? []);
+    setFlaws(characteristicDetail.flaws ?? []);
   }, [isEditMode, characteristicDetail, reset]);
 
   useEffect(() => {
@@ -129,6 +149,8 @@ export const CharacteristicCreateForm = ({
     improvedFrom: IEntityReference[],
     requirements: IEntityReference[],
     additionalAbilities: IEntityReference[],
+    improvements: IImprovementDefectItem[],
+    flaws: IImprovementDefectItem[],
   ): CharacteristicPayload => ({
     ...data,
     description: data.description || undefined,
@@ -145,6 +167,16 @@ export const CharacteristicCreateForm = ({
     additionalAbilities: additionalAbilities.map((reference) => ({
       entityType: reference.entityType,
       id: reference.id,
+    })),
+    improvements: improvements.map((item) => ({
+      value: item.value,
+      type: item.type.id,
+      property: item.property.id,
+    })),
+    flaws: flaws.map((item) => ({
+      value: item.value,
+      type: item.type.id,
+      property: item.property.id,
     })),
   });
 
@@ -163,6 +195,8 @@ export const CharacteristicCreateForm = ({
       setImprovedFrom([]);
       setRequirements([]);
       setAdditionalAbilities([]);
+      setImprovements([]);
+      setFlaws([]);
       onSaved();
     },
     onError: (error) => {
@@ -204,6 +238,8 @@ export const CharacteristicCreateForm = ({
       improvedFrom,
       requirements,
       additionalAbilities,
+      improvements,
+      flaws,
     );
 
     if (isEditMode) {
@@ -268,6 +304,26 @@ export const CharacteristicCreateForm = ({
         label="Descrição"
         placeholder="Descreva a característica"
       />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <ImprovementDefectListField
+          label="Melhorias"
+          addButtonLabel="Adicionar Melhoria"
+          category="improvement"
+          value={improvements}
+          onChange={setImprovements}
+          otherListValue={flaws}
+        />
+
+        <ImprovementDefectListField
+          label="Defeitos"
+          addButtonLabel="Adicionar Defeito"
+          category="flaw"
+          value={flaws}
+          onChange={setFlaws}
+          otherListValue={improvements}
+        />
+      </div>
 
       <EntityReferenceListField
         label="Habilidades Adicionais"

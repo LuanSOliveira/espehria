@@ -39,6 +39,8 @@ import { PlannedSessionsModule } from './modules/planned-sessions/planned-sessio
 import { AttributesModule } from './modules/attributes/attributes.module';
 import { CurrenciesModule } from './modules/currencies/currencies.module';
 import { SheetsModule } from './modules/sheets/sheets.module';
+import { ImprovementFlawTypesModule } from './modules/improvement-flaw-types/improvement-flaw-types.module';
+import { ImprovementFlawPropertiesModule } from './modules/improvement-flaw-properties/improvement-flaw-properties.module';
 
 @Module({
   imports: [
@@ -99,6 +101,8 @@ import { SheetsModule } from './modules/sheets/sheets.module';
     AttributesModule,
     CurrenciesModule,
     SheetsModule,
+    ImprovementFlawTypesModule,
+    ImprovementFlawPropertiesModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

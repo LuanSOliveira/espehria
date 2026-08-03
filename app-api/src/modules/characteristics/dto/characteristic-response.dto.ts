@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Characteristic } from '../entities/characteristic.entity';
 import { TagResponseDto } from '../../tags/dto/tag-response.dto';
 import { EntityReferenceResponseDto } from '../../entity-links/dto/entity-reference-response.dto';
+import { ImprovementFlawItemResponseDto } from '../../improvement-flaws/dto/improvement-flaw-item-response.dto';
 
 export class CharacteristicResponseDto {
   @ApiProperty({
@@ -49,6 +50,20 @@ export class CharacteristicResponseDto {
   })
   additionalAbilities: EntityReferenceResponseDto[];
 
+  @ApiProperty({
+    type: () => [ImprovementFlawItemResponseDto],
+    description:
+      'Melhorias associadas a esta característica, na ordem em que foram inseridas',
+  })
+  improvements: ImprovementFlawItemResponseDto[];
+
+  @ApiProperty({
+    type: () => [ImprovementFlawItemResponseDto],
+    description:
+      'Defeitos associados a esta característica, na ordem em que foram inseridos',
+  })
+  flaws: ImprovementFlawItemResponseDto[];
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -57,9 +72,13 @@ export class CharacteristicResponseDto {
 
   static fromEntity(
     characteristic: Characteristic,
-    improvedFrom: EntityReferenceResponseDto[],
-    requirements: EntityReferenceResponseDto[],
-    additionalAbilities: EntityReferenceResponseDto[],
+    references: {
+      improvedFrom: EntityReferenceResponseDto[];
+      requirements: EntityReferenceResponseDto[];
+      additionalAbilities: EntityReferenceResponseDto[];
+      improvements: ImprovementFlawItemResponseDto[];
+      flaws: ImprovementFlawItemResponseDto[];
+    },
   ): CharacteristicResponseDto {
     const dto = new CharacteristicResponseDto();
     dto.id = characteristic.id;
@@ -69,9 +88,11 @@ export class CharacteristicResponseDto {
     dto.tags = (characteristic.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),
     );
-    dto.improvedFrom = improvedFrom;
-    dto.requirements = requirements;
-    dto.additionalAbilities = additionalAbilities;
+    dto.improvedFrom = references.improvedFrom;
+    dto.requirements = references.requirements;
+    dto.additionalAbilities = references.additionalAbilities;
+    dto.improvements = references.improvements;
+    dto.flaws = references.flaws;
     dto.createdAt = characteristic.createdAt;
     dto.updatedAt = characteristic.updatedAt;
     return dto;

@@ -11,6 +11,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { EntityReferenceInputDto } from '../../entity-links/dto/entity-reference-input.dto';
+import { ImprovementFlawItemInputDto } from '../../improvement-flaws/dto/improvement-flaw-item-input.dto';
 
 export class CreateTalentDto {
   @ApiProperty({
@@ -98,4 +99,40 @@ export class CreateTalentDto {
   @ValidateNested({ each: true })
   @Type(() => EntityReferenceInputDto)
   additionalAbilities?: EntityReferenceInputDto[];
+
+  @ApiPropertyOptional({
+    type: () => [ImprovementFlawItemInputDto],
+    description:
+      'Melhorias associadas a este talento. Valor deve ser inteiro >= 1. Tipo e Propriedade devem ser compatíveis (validados via API). Não pode repetir a mesma combinação de Tipo e Propriedade nesta lista nem ter a mesma combinação em Defeitos simultaneamente.',
+    example: [
+      {
+        value: 3,
+        type: '550e8400-e29b-41d4-a716-446655440003',
+        property: '550e8400-e29b-41d4-a716-446655440004',
+      },
+    ],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ImprovementFlawItemInputDto)
+  improvements?: ImprovementFlawItemInputDto[];
+
+  @ApiPropertyOptional({
+    type: () => [ImprovementFlawItemInputDto],
+    description:
+      'Defeitos associados a este talento. Valor deve ser inteiro >= 1. Tipo e Propriedade devem ser compatíveis (validados via API). Não pode repetir a mesma combinação de Tipo e Propriedade nesta lista nem ter a mesma combinação em Melhorias simultaneamente.',
+    example: [
+      {
+        value: 2,
+        type: '550e8400-e29b-41d4-a716-446655440003',
+        property: '550e8400-e29b-41d4-a716-446655440005',
+      },
+    ],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ImprovementFlawItemInputDto)
+  flaws?: ImprovementFlawItemInputDto[];
 }

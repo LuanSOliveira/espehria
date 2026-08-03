@@ -48,25 +48,32 @@ export class TalentsController {
   @ApiCreatedResponse({ type: TalentResponseDto })
   @ApiConflictResponse({
     description:
-      'Já existe um talento com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas)',
+      'Já existe um talento com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas), ou violação de regra em Melhorias/Defeitos (duplicidade de combinação Tipo×Propriedade na mesma lista, exclusividade entre listas ou incompatibilidade entre o Tipo e a Propriedade selecionados)',
   })
   @ApiNotFoundResponse({
     description:
-      'Uma ou mais tags ou entidades referenciadas em Aprimorado de/Requisitos/Habilidades Adicionais não foram encontradas',
+      'Uma ou mais tags, entidades referenciadas em Aprimorado de/Requisitos/Habilidades Adicionais, ou tipos/propriedades de Melhorias/Defeitos não foram encontrados',
   })
   @ApiBadRequestResponse({
     description:
-      'Dados obrigatórios ausentes ou formato inválido de entityType/id',
+      'Dados obrigatórios ausentes, formato inválido de entityType/id, ou formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas)',
   })
   async create(@Body() dto: CreateTalentDto): Promise<TalentResponseDto> {
-    const { talent, improvedFrom, requirements, additionalAbilities } =
-      await this.talentsService.create(dto);
-    return TalentResponseDto.fromEntity(
+    const {
       talent,
       improvedFrom,
       requirements,
       additionalAbilities,
-    );
+      improvements,
+      flaws,
+    } = await this.talentsService.create(dto);
+    return TalentResponseDto.fromEntity(talent, {
+      improvedFrom,
+      requirements,
+      additionalAbilities,
+      improvements,
+      flaws,
+    });
   }
 
   @Get()
@@ -102,12 +109,13 @@ export class TalentsController {
     if (!result) {
       throw new NotFoundException('Talento não encontrado.');
     }
-    return TalentResponseDto.fromEntity(
-      result.talent,
-      result.improvedFrom,
-      result.requirements,
-      result.additionalAbilities,
-    );
+    return TalentResponseDto.fromEntity(result.talent, {
+      improvedFrom: result.improvedFrom,
+      requirements: result.requirements,
+      additionalAbilities: result.additionalAbilities,
+      improvements: result.improvements,
+      flaws: result.flaws,
+    });
   }
 
   @Put(':id')
@@ -115,28 +123,35 @@ export class TalentsController {
   @ApiOkResponse({ type: TalentResponseDto })
   @ApiNotFoundResponse({
     description:
-      'Talento ou uma ou mais tags/entidades referenciadas não encontrados',
+      'Talento ou uma ou mais tags/entidades referenciadas em Aprimorado de/Requisitos/Habilidades Adicionais, ou tipos/propriedades de Melhorias/Defeitos não encontrados',
   })
   @ApiConflictResponse({
     description:
-      'Já existe um talento com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas)',
+      'Já existe um talento com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas), ou violação de regra em Melhorias/Defeitos (duplicidade de combinação Tipo×Propriedade na mesma lista, exclusividade entre listas ou incompatibilidade entre o Tipo e a Propriedade selecionados)',
   })
   @ApiBadRequestResponse({
     description:
-      'ID em formato inválido ou formato inválido de entityType/id em Aprimorado de/Requisitos/Habilidades Adicionais',
+      'ID em formato inválido, formato inválido de entityType/id em Aprimorado de/Requisitos/Habilidades Adicionais, ou formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas)',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateTalentDto,
   ): Promise<TalentResponseDto> {
-    const { talent, improvedFrom, requirements, additionalAbilities } =
-      await this.talentsService.update(id, dto);
-    return TalentResponseDto.fromEntity(
+    const {
       talent,
       improvedFrom,
       requirements,
       additionalAbilities,
-    );
+      improvements,
+      flaws,
+    } = await this.talentsService.update(id, dto);
+    return TalentResponseDto.fromEntity(talent, {
+      improvedFrom,
+      requirements,
+      additionalAbilities,
+      improvements,
+      flaws,
+    });
   }
 
   @Delete(':id')

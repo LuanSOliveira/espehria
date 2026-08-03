@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Talent } from '../entities/talent.entity';
 import { TagResponseDto } from '../../tags/dto/tag-response.dto';
 import { EntityReferenceResponseDto } from '../../entity-links/dto/entity-reference-response.dto';
+import { ImprovementFlawItemResponseDto } from '../../improvement-flaws/dto/improvement-flaw-item-response.dto';
 
 export class TalentResponseDto {
   @ApiProperty({
@@ -49,6 +50,20 @@ export class TalentResponseDto {
   })
   additionalAbilities: EntityReferenceResponseDto[];
 
+  @ApiProperty({
+    type: () => [ImprovementFlawItemResponseDto],
+    description:
+      'Melhorias associadas a este talento, na ordem em que foram inseridas',
+  })
+  improvements: ImprovementFlawItemResponseDto[];
+
+  @ApiProperty({
+    type: () => [ImprovementFlawItemResponseDto],
+    description:
+      'Defeitos associados a este talento, na ordem em que foram inseridos',
+  })
+  flaws: ImprovementFlawItemResponseDto[];
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -57,9 +72,13 @@ export class TalentResponseDto {
 
   static fromEntity(
     talent: Talent,
-    improvedFrom: EntityReferenceResponseDto[],
-    requirements: EntityReferenceResponseDto[],
-    additionalAbilities: EntityReferenceResponseDto[],
+    references: {
+      improvedFrom: EntityReferenceResponseDto[];
+      requirements: EntityReferenceResponseDto[];
+      additionalAbilities: EntityReferenceResponseDto[];
+      improvements: ImprovementFlawItemResponseDto[];
+      flaws: ImprovementFlawItemResponseDto[];
+    },
   ): TalentResponseDto {
     const dto = new TalentResponseDto();
     dto.id = talent.id;
@@ -67,9 +86,11 @@ export class TalentResponseDto {
     dto.level = talent.level;
     dto.description = talent.description;
     dto.tags = (talent.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
-    dto.improvedFrom = improvedFrom;
-    dto.requirements = requirements;
-    dto.additionalAbilities = additionalAbilities;
+    dto.improvedFrom = references.improvedFrom;
+    dto.requirements = references.requirements;
+    dto.additionalAbilities = references.additionalAbilities;
+    dto.improvements = references.improvements;
+    dto.flaws = references.flaws;
     dto.createdAt = talent.createdAt;
     dto.updatedAt = talent.updatedAt;
     return dto;

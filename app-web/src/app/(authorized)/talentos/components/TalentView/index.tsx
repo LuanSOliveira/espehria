@@ -3,6 +3,8 @@
 import { useEffect } from 'react';
 import { Chip, CircularProgress } from '@mui/material';
 import {
+  FiArrowDownCircle,
+  FiArrowUpCircle,
   FiCheckSquare,
   FiFileText,
   FiPlusCircle,
@@ -11,6 +13,7 @@ import {
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
 import { EntityReferenceCard } from '@/shared/components/EntityReferenceCard';
+import { ImprovementDefectCard } from '@/shared/components/ImprovementDefectCard';
 import { useGetEntityById } from '@/hooks/Queries';
 import { ITalent } from '@/shared/interfaces';
 import { getContrastTextColor, showToast } from '@/shared/util';
@@ -111,6 +114,58 @@ export const TalentView = ({ talentId, onNotFound }: TalentViewProps) => {
         </div>
         <div className="px-3 py-3">
           <RichTextViewer value={talent.description} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div style={APP_CONTAINER_STYLES.detailSectionBox}>
+          <div
+            className="flex items-center gap-2 px-3 py-2"
+            style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
+          >
+            <FiArrowUpCircle
+              style={{ fontSize: 16, color: APP_COLORS.goldSoft }}
+            />
+            <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
+              Melhorias
+            </Label>
+          </div>
+          <div className="flex flex-col gap-2 px-3 py-3">
+            {talent.improvements.length === 0 && (
+              <DefaultText>Nenhum item adicionado.</DefaultText>
+            )}
+            {talent.improvements.map((item) => (
+              <ImprovementDefectCard
+                key={`${item.type.id}-${item.property.id}`}
+                item={item}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div style={APP_CONTAINER_STYLES.detailSectionBox}>
+          <div
+            className="flex items-center gap-2 px-3 py-2"
+            style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
+          >
+            <FiArrowDownCircle
+              style={{ fontSize: 16, color: APP_COLORS.goldSoft }}
+            />
+            <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
+              Defeitos
+            </Label>
+          </div>
+          <div className="flex flex-col gap-2 px-3 py-3">
+            {talent.flaws.length === 0 && (
+              <DefaultText>Nenhum item adicionado.</DefaultText>
+            )}
+            {talent.flaws.map((item) => (
+              <ImprovementDefectCard
+                key={`${item.type.id}-${item.property.id}`}
+                item={item}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
