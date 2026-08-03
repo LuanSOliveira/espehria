@@ -87,7 +87,10 @@ export const ImprovementDefectAddModal = ({
   return (
     <FormModal open={open} onClose={onClose} title={title} size="default">
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={(event) => {
+          event.stopPropagation();
+          void handleSubmit(onSubmit)(event);
+        }}
         className="flex flex-col gap-4"
       >
         <FormTextInput
