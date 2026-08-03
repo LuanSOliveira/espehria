@@ -58,9 +58,7 @@ export class TechniquesController {
     description:
       'URL de imagem de referência inválida, dados obrigatórios ausentes ou formato inválido de entityType/id',
   })
-  async create(
-    @Body() dto: CreateTechniqueDto,
-  ): Promise<TechniqueResponseDto> {
+  async create(@Body() dto: CreateTechniqueDto): Promise<TechniqueResponseDto> {
     const { technique, improvedFrom, requirements } =
       await this.techniquesService.create(dto);
     return TechniqueResponseDto.fromEntity(

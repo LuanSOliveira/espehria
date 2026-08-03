@@ -209,9 +209,8 @@ export class CharacteristicsService {
     const page = query.page ?? DEFAULT_PAGE;
     const perPage = query.perPage ?? DEFAULT_PER_PAGE;
 
-    const queryBuilder = this.characteristicsRepository.createQueryBuilder(
-      'characteristic',
-    );
+    const queryBuilder =
+      this.characteristicsRepository.createQueryBuilder('characteristic');
 
     if (query.name) {
       queryBuilder.andWhere('characteristic.name ILIKE :name', {
@@ -339,9 +338,7 @@ export class CharacteristicsService {
       await this.entityLinksService.resolveReferences(dto.requirements);
     }
     if (dto.additionalAbilities !== undefined) {
-      await this.entityLinksService.resolveReferences(
-        dto.additionalAbilities,
-      );
+      await this.entityLinksService.resolveReferences(dto.additionalAbilities);
     }
 
     let effectiveImprovements = dto.improvements;

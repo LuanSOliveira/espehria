@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddAdditionalAbilityToEntityLinksLinkTypeEnum1784306150000
-  implements MigrationInterface
-{
+export class AddAdditionalAbilityToEntityLinksLinkTypeEnum1784306150000 implements MigrationInterface {
   name = 'AddAdditionalAbilityToEntityLinksLinkTypeEnum1784306150000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

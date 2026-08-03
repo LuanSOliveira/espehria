@@ -19,7 +19,11 @@ export interface ResolvedImprovementFlawItem {
 }
 
 type OwnerColumn =
-  'ownerTalent' | 'ownerTraining' | 'ownerCharacteristic' | 'ownerBiography';
+  | 'ownerTalent'
+  | 'ownerTraining'
+  | 'ownerCharacteristic'
+  | 'ownerBiography'
+  | 'ownerRace';
 
 @Injectable()
 export class ImprovementFlawsService {
@@ -42,6 +46,8 @@ export class ImprovementFlawsService {
         return 'ownerCharacteristic';
       case ImprovementFlawOwnerType.BIOGRAPHY:
         return 'ownerBiography';
+      case ImprovementFlawOwnerType.RACE:
+        return 'ownerRace';
     }
   }
 

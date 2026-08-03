@@ -3,7 +3,9 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Campaign } from '../../campaigns/entities/campaign.entity';
 import { Race } from '../../races/entities/race.entity';
+import { Biography } from '../../biographies/entities/biography.entity';
 import { User } from '../../users/entities/user.entity';
+import type { SheetImprovementFlawSnapshot } from '../interfaces/sheet-improvement-flaw-snapshot.interface';
 
 @Entity('sheets')
 export class Sheet extends BaseEntity {
@@ -38,6 +40,35 @@ export class Sheet extends BaseEntity {
   @ManyToOne(() => Race, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'race_id' })
   race!: Race | null;
+
+  @ApiPropertyOptional({ type: () => Biography })
+  @ManyToOne(() => Biography, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'biography_id' })
+  biography!: Biography | null;
+
+  @Column({
+    type: 'jsonb',
+    default: {
+      race: [],
+      biography: [],
+      trainings: [],
+      talents: [],
+      characteristics: [],
+    },
+  })
+  melhorias!: SheetImprovementFlawSnapshot;
+
+  @Column({
+    type: 'jsonb',
+    default: {
+      race: [],
+      biography: [],
+      trainings: [],
+      talents: [],
+      characteristics: [],
+    },
+  })
+  defeitos!: SheetImprovementFlawSnapshot;
 
   @ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'created_by_id' })

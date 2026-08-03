@@ -24,7 +24,8 @@ export class PlannedSession extends BaseEntity {
 
   @ApiPropertyOptional({
     description: 'Introdução da sessão planejada (suporta HTML)',
-    example: '<p>Os aventureiros chegam às portas de Valgrim ao entardecer.</p>',
+    example:
+      '<p>Os aventureiros chegam às portas de Valgrim ao entardecer.</p>',
   })
   @Column({ type: 'text', nullable: true })
   introduction!: string | null;
@@ -49,10 +50,9 @@ export class PlannedSession extends BaseEntity {
     type: () => [PlannedSessionSection],
     description: 'Seções da sessão planejada',
   })
-  @OneToMany(
-    () => PlannedSessionSection,
-    (section) => section.plannedSession,
-    { cascade: true, orphanedRowAction: 'delete' },
-  )
+  @OneToMany(() => PlannedSessionSection, (section) => section.plannedSession, {
+    cascade: true,
+    orphanedRowAction: 'delete',
+  })
   sections!: PlannedSessionSection[];
 }

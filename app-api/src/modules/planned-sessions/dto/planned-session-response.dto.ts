@@ -46,9 +46,7 @@ export class PlannedSessionResponseDto {
   @ApiProperty({ description: 'Data da última atualização' })
   updatedAt: Date;
 
-  static fromEntity(
-    plannedSession: PlannedSession,
-  ): PlannedSessionResponseDto {
+  static fromEntity(plannedSession: PlannedSession): PlannedSessionResponseDto {
     const dto = new PlannedSessionResponseDto();
     dto.id = plannedSession.id;
     dto.name = plannedSession.name;

@@ -254,9 +254,7 @@ export class TrainingsService {
     if (dto.name && dto.name !== training.name) {
       const existing = await this.findByName(dto.name);
       if (existing) {
-        throw new ConflictException(
-          'Já existe um treinamento com este nome.',
-        );
+        throw new ConflictException('Já existe um treinamento com este nome.');
       }
       training.name = dto.name;
     }
@@ -323,9 +321,7 @@ export class TrainingsService {
       await this.entityLinksService.resolveReferences(dto.requirements);
     }
     if (dto.additionalAbilities !== undefined) {
-      await this.entityLinksService.resolveReferences(
-        dto.additionalAbilities,
-      );
+      await this.entityLinksService.resolveReferences(dto.additionalAbilities);
     }
 
     let effectiveImprovements = dto.improvements;

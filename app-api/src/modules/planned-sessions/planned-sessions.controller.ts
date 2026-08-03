@@ -74,7 +74,8 @@ export class PlannedSessionsController {
 
   @Get()
   @ApiOperation({
-    summary: 'Lista sessões planejadas de uma campanha com paginação e filtro, restritas ao usuário autenticado',
+    summary:
+      'Lista sessões planejadas de uma campanha com paginação e filtro, restritas ao usuário autenticado',
   })
   @ApiOkResponse({ type: PaginatedPlannedSessionsResponseDto })
   @ApiForbiddenResponse({
@@ -169,7 +170,9 @@ export class PlannedSessionsController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove uma sessão planejada' })
-  @ApiNoContentResponse({ description: 'Sessão planejada removida com sucesso' })
+  @ApiNoContentResponse({
+    description: 'Sessão planejada removida com sucesso',
+  })
   @ApiForbiddenResponse({
     description: 'Usuários Google não têm acesso a campanhas',
   })

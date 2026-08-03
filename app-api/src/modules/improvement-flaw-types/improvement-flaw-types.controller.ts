@@ -22,7 +22,9 @@ export class ImprovementFlawTypesController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'Lista todos os tipos de melhoria/defeito (lista fixa)' })
+  @ApiOperation({
+    summary: 'Lista todos os tipos de melhoria/defeito (lista fixa)',
+  })
   @ApiOkResponse({ type: [ImprovementFlawTypeResponseDto] })
   async findAll(): Promise<ImprovementFlawTypeResponseDto[]> {
     const types = await this.improvementFlawTypesService.findAll();

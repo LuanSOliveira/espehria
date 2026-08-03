@@ -5,12 +5,14 @@ import { RaceCategory } from './entities/race-category.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { Characteristic } from '../characteristics/entities/characteristic.entity';
 import { Talent } from '../talents/entities/talent.entity';
+import { ImprovementFlawsModule } from '../improvement-flaws/improvement-flaws.module';
 import { RacesController } from './races.controller';
 import { RacesService } from './races.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Race, RaceCategory, Tag, Characteristic, Talent]),
+    ImprovementFlawsModule,
   ],
   controllers: [RacesController],
   providers: [RacesService],

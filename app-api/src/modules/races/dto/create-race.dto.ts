@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsNotEmpty,
@@ -6,7 +7,9 @@ import {
   IsString,
   IsUrl,
   IsUUID,
+  ValidateNested,
 } from 'class-validator';
+import { ImprovementFlawItemInputDto } from '../../improvement-flaws/dto/improvement-flaw-item-input.dto';
 
 export class CreateRaceDto {
   @ApiProperty({
@@ -83,4 +86,40 @@ export class CreateRaceDto {
   @IsArray()
   @IsUUID('4', { each: true })
   talentIds?: string[];
+
+  @ApiPropertyOptional({
+    type: () => [ImprovementFlawItemInputDto],
+    description:
+      'Melhorias associadas a esta raça. Valor deve ser inteiro >= 1. Tipo e Propriedade devem ser compatíveis (validados via API). Não pode repetir a mesma combinação de Tipo e Propriedade nesta lista nem ter a mesma combinação em Defeitos simultaneamente.',
+    example: [
+      {
+        value: 3,
+        type: '550e8400-e29b-41d4-a716-446655440003',
+        property: '550e8400-e29b-41d4-a716-446655440004',
+      },
+    ],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ImprovementFlawItemInputDto)
+  improvements?: ImprovementFlawItemInputDto[];
+
+  @ApiPropertyOptional({
+    type: () => [ImprovementFlawItemInputDto],
+    description:
+      'Defeitos associados a esta raça. Valor deve ser inteiro >= 1. Tipo e Propriedade devem ser compatíveis (validados via API). Não pode repetir a mesma combinação de Tipo e Propriedade nesta lista nem ter a mesma combinação em Melhorias simultaneamente.',
+    example: [
+      {
+        value: 2,
+        type: '550e8400-e29b-41d4-a716-446655440003',
+        property: '550e8400-e29b-41d4-a716-446655440005',
+      },
+    ],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ImprovementFlawItemInputDto)
+  flaws?: ImprovementFlawItemInputDto[];
 }

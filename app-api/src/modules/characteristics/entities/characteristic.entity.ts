@@ -10,7 +10,10 @@ export class Characteristic extends BaseEntity {
   @Column()
   name!: string;
 
-  @ApiProperty({ description: 'Nível da característica (obrigatório)', example: 3 })
+  @ApiProperty({
+    description: 'Nível da característica (obrigatório)',
+    example: 3,
+  })
   @Column({ type: 'int' })
   level!: number;
 

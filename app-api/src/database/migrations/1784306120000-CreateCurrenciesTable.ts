@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateCurrenciesTable1784306120000
-  implements MigrationInterface
-{
+export class CreateCurrenciesTable1784306120000 implements MigrationInterface {
   name = 'CreateCurrenciesTable1784306120000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -15,7 +13,9 @@ export class CreateCurrenciesTable1784306120000
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP INDEX "public"."IDX_currencies_abbreviation"`);
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_currencies_abbreviation"`,
+    );
     await queryRunner.query(`DROP TABLE "currencies"`);
   }
 }

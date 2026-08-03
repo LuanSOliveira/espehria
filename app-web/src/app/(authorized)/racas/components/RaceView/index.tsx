@@ -3,12 +3,20 @@
 import { useEffect, useState } from 'react';
 import { Box, Chip, CircularProgress } from '@mui/material';
 import { IconType } from 'react-icons';
-import { FiFileText, FiImage, FiLock, FiTag } from 'react-icons/fi';
+import {
+  FiArrowDownCircle,
+  FiArrowUpCircle,
+  FiFileText,
+  FiImage,
+  FiLock,
+  FiTag,
+} from 'react-icons/fi';
 import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
 import { EntityReferenceCard } from '@/shared/components/EntityReferenceCard';
+import { ImprovementDefectCard } from '@/shared/components/ImprovementDefectCard';
 import { RaceTalentsListField } from '../RaceTalentsListField';
 import { useGetEntityById } from '@/hooks/Queries';
 import { IEntityReference, IRace, ITag } from '@/shared/interfaces';
@@ -235,6 +243,58 @@ export const RaceView = ({ raceId, onNotFound }: RaceViewProps) => {
         value={toEntityReferences(race.talents, 'talent')}
         readOnly
       />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div style={APP_CONTAINER_STYLES.detailSectionBox}>
+          <div
+            className="flex items-center gap-2 px-3 py-2"
+            style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
+          >
+            <FiArrowUpCircle
+              style={{ fontSize: 16, color: APP_COLORS.goldSoft }}
+            />
+            <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
+              Melhorias
+            </Label>
+          </div>
+          <div className="flex flex-col gap-2 px-3 py-3">
+            {race.improvements.length === 0 && (
+              <DefaultText>Nenhum item adicionado.</DefaultText>
+            )}
+            {race.improvements.map((item) => (
+              <ImprovementDefectCard
+                key={`${item.type.id}-${item.property.id}`}
+                item={item}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div style={APP_CONTAINER_STYLES.detailSectionBox}>
+          <div
+            className="flex items-center gap-2 px-3 py-2"
+            style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
+          >
+            <FiArrowDownCircle
+              style={{ fontSize: 16, color: APP_COLORS.goldSoft }}
+            />
+            <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
+              Defeitos
+            </Label>
+          </div>
+          <div className="flex flex-col gap-2 px-3 py-3">
+            {race.flaws.length === 0 && (
+              <DefaultText>Nenhum item adicionado.</DefaultText>
+            )}
+            {race.flaws.map((item) => (
+              <ImprovementDefectCard
+                key={`${item.type.id}-${item.property.id}`}
+                item={item}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
 
       {!isGoogleUser && (
         <div className="flex flex-col gap-4 sm:flex-row">

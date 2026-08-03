@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateCharacteristicTagsTable1784306080000
-  implements MigrationInterface
-{
+export class CreateCharacteristicTagsTable1784306080000 implements MigrationInterface {
   name = 'CreateCharacteristicTagsTable1784306080000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

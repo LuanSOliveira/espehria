@@ -5,6 +5,13 @@ import { ImprovementFlawPropertyResponseDto } from '../../improvement-flaw-prope
 
 export class ImprovementFlawItemResponseDto {
   @ApiProperty({
+    format: 'uuid',
+    example: 'b3f1c2a4-5d6e-4f7a-8b9c-0d1e2f3a4b5c',
+    description: 'Identificador do registro de melhoria/defeito',
+  })
+  id: string;
+
+  @ApiProperty({
     example: 3,
     description: 'Valor do item de melhoria/defeito',
   })
@@ -18,6 +25,7 @@ export class ImprovementFlawItemResponseDto {
 
   static fromResolved(item: ImprovementFlaw): ImprovementFlawItemResponseDto {
     const dto = new ImprovementFlawItemResponseDto();
+    dto.id = item.id;
     dto.value = item.value;
     dto.type = ImprovementFlawTypeResponseDto.fromEntity(item.type);
     dto.property = ImprovementFlawPropertyResponseDto.fromEntity(item.property);

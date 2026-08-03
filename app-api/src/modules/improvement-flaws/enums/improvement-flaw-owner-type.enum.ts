@@ -3,4 +3,5 @@ export enum ImprovementFlawOwnerType {
   TRAINING = 'training',
   CHARACTERISTIC = 'characteristic',
   BIOGRAPHY = 'biography',
+  RACE = 'race',
 }

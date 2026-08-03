@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class SeedImprovementFlawPropertiesTable1784306210000
-  implements MigrationInterface
-{
+export class SeedImprovementFlawPropertiesTable1784306210000 implements MigrationInterface {
   name = 'SeedImprovementFlawPropertiesTable1784306210000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

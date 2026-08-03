@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateTrainingTagsTable1784305900000
-  implements MigrationInterface
-{
+export class CreateTrainingTagsTable1784305900000 implements MigrationInterface {
   name = 'CreateTrainingTagsTable1784305900000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

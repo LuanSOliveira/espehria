@@ -15,9 +15,7 @@ export class ImprovementFlawTypeResponseDto {
   })
   name: string;
 
-  static fromEntity(
-    type: ImprovementFlawType,
-  ): ImprovementFlawTypeResponseDto {
+  static fromEntity(type: ImprovementFlawType): ImprovementFlawTypeResponseDto {
     const dto = new ImprovementFlawTypeResponseDto();
     dto.id = type.id;
     dto.name = type.name;

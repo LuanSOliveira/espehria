@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddLevelToCharacteristicsTalentsTechniquesSpellsTable1784306100000
-  implements MigrationInterface
-{
+export class AddLevelToCharacteristicsTalentsTechniquesSpellsTable1784306100000 implements MigrationInterface {
   name = 'AddLevelToCharacteristicsTalentsTechniquesSpellsTable1784306100000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -16,9 +14,7 @@ export class AddLevelToCharacteristicsTalentsTechniquesSpellsTable1784306100000
       `ALTER TABLE "characteristics" ALTER COLUMN "level" SET NOT NULL`,
     );
 
-    await queryRunner.query(
-      `ALTER TABLE "talents" ADD COLUMN "level" integer`,
-    );
+    await queryRunner.query(`ALTER TABLE "talents" ADD COLUMN "level" integer`);
     await queryRunner.query(
       `UPDATE "talents" SET "level" = 1 WHERE "level" IS NULL`,
     );

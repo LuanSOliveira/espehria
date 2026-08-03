@@ -48,7 +48,8 @@ export class UtilitiesController {
   @ApiCreatedResponse({ type: UtilityResponseDto })
   @ApiConflictResponse({ description: 'Já existe um utilitário com este nome' })
   @ApiNotFoundResponse({
-    description: 'Uma ou mais tags não foram encontradas, ou a moeda informada não existe',
+    description:
+      'Uma ou mais tags não foram encontradas, ou a moeda informada não existe',
   })
   @ApiBadRequestResponse({
     description:
@@ -86,7 +87,9 @@ export class UtilitiesController {
   @ApiOperation({ summary: 'Busca um utilitário pelo id' })
   @ApiOkResponse({ type: UtilityResponseDto })
   @ApiNotFoundResponse({ description: 'Utilitário não encontrado' })
-  @ApiBadRequestResponse({ description: 'ID de utilitário em formato inválido' })
+  @ApiBadRequestResponse({
+    description: 'ID de utilitário em formato inválido',
+  })
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<UtilityResponseDto> {
@@ -101,7 +104,8 @@ export class UtilitiesController {
   @ApiOperation({ summary: 'Atualiza um utilitário' })
   @ApiOkResponse({ type: UtilityResponseDto })
   @ApiNotFoundResponse({
-    description: 'Utilitário, uma ou mais tags, ou a moeda informados não foram encontrados',
+    description:
+      'Utilitário, uma ou mais tags, ou a moeda informados não foram encontrados',
   })
   @ApiConflictResponse({ description: 'Já existe um utilitário com este nome' })
   @ApiBadRequestResponse({
@@ -121,7 +125,9 @@ export class UtilitiesController {
   @ApiOperation({ summary: 'Remove um utilitário' })
   @ApiNoContentResponse({ description: 'Utilitário removido com sucesso' })
   @ApiNotFoundResponse({ description: 'Utilitário não encontrado' })
-  @ApiBadRequestResponse({ description: 'ID de utilitário em formato inválido' })
+  @ApiBadRequestResponse({
+    description: 'ID de utilitário em formato inválido',
+  })
   async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     await this.utilitiesService.remove(id);
   }

@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class ChangePriceAndAddCurrencyToItemTables1784306140000
-  implements MigrationInterface
-{
+export class ChangePriceAndAddCurrencyToItemTables1784306140000 implements MigrationInterface {
   name = 'ChangePriceAndAddCurrencyToItemTables1784306140000';
 
   private readonly tables = [
@@ -30,7 +28,9 @@ export class ChangePriceAndAddCurrencyToItemTables1784306140000
       await queryRunner.query(
         `ALTER TABLE "${table}" DROP CONSTRAINT "FK_${table}_currency_id"`,
       );
-      await queryRunner.query(`ALTER TABLE "${table}" DROP COLUMN "currency_id"`);
+      await queryRunner.query(
+        `ALTER TABLE "${table}" DROP COLUMN "currency_id"`,
+      );
       await queryRunner.query(
         `ALTER TABLE "${table}" ALTER COLUMN "price" TYPE character varying USING "price"::character varying`,
       );

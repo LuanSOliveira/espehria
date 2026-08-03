@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddKeyAttributeToSkillsTable1784306050000
-  implements MigrationInterface
-{
+export class AddKeyAttributeToSkillsTable1784306050000 implements MigrationInterface {
   name = 'AddKeyAttributeToSkillsTable1784306050000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

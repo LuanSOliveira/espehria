@@ -322,9 +322,7 @@ export class TalentsService {
       await this.entityLinksService.resolveReferences(dto.requirements);
     }
     if (dto.additionalAbilities !== undefined) {
-      await this.entityLinksService.resolveReferences(
-        dto.additionalAbilities,
-      );
+      await this.entityLinksService.resolveReferences(dto.additionalAbilities);
     }
 
     let effectiveImprovements = dto.improvements;

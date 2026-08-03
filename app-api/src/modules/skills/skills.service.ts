@@ -167,9 +167,7 @@ export class SkillsService {
     }
 
     if (dto.keyAttributeId && dto.keyAttributeId !== skill.keyAttribute.id) {
-      const keyAttribute = await this.findKeyAttributeById(
-        dto.keyAttributeId,
-      );
+      const keyAttribute = await this.findKeyAttributeById(dto.keyAttributeId);
       if (!keyAttribute) {
         throw new NotFoundException('Atributo chave não encontrado.');
       }

@@ -1,6 +1,7 @@
 import { IEntity } from '../Entity';
 import { IEntityReference } from '../EntityReference';
 import { ITag } from '../Tag';
+import { IImprovementDefectItem } from '../ImprovementDefectItem';
 
 export interface IRaceCategory {
   id: string;
@@ -24,6 +25,8 @@ export interface IRace extends IEntity {
   tags: ITag[];
   characteristics: IEntityReference[];
   talents: IEntityReference[];
+  improvements: IImprovementDefectItem[];
+  flaws: IImprovementDefectItem[];
   createdAt: string;
   updatedAt: string;
 }

@@ -70,7 +70,8 @@ export class CampaignsController {
 
   @Get()
   @ApiOperation({
-    summary: 'Lista campanhas com paginação e filtro, restritas ao usuário autenticado',
+    summary:
+      'Lista campanhas com paginação e filtro, restritas ao usuário autenticado',
   })
   @ApiOkResponse({ type: PaginatedCampaignsResponseDto })
   @ApiForbiddenResponse({

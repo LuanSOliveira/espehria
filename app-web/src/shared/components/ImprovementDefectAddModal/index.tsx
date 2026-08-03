@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { v4 as uuidv4 } from 'uuid';
 import { FormModal } from '@/shared/components/Modals';
 import { FormAutocompleteInput, FormTextInput } from '@/shared/components/Inputs';
 import { PrimaryButton } from '@/shared/components/Buttons';
@@ -79,7 +80,9 @@ export const ImprovementDefectAddModal = ({
       return;
     }
 
-    onAdd({ value: Number(data.value), type, property });
+    // Identificador local apenas para uso em keys/estado antes de o item ser
+    // persistido — descartado ao montar o payload de criação/edição.
+    onAdd({ id: uuidv4(), value: Number(data.value), type, property });
   };
 
   const { title, addButtonLabel } = ADD_MODAL_LABELS[category];

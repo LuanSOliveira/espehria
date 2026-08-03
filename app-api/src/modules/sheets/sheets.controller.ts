@@ -16,6 +16,7 @@ import {
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
@@ -30,6 +31,8 @@ import { CampaignOptionResponseDto } from '../campaigns/dto/campaign-option-resp
 import { User } from '../users/entities/user.entity';
 import { CreateSheetDto } from './dto/create-sheet.dto';
 import { FindSheetsQueryDto } from './dto/find-sheets-query.dto';
+import { LinkSheetBiographyDto } from './dto/link-sheet-biography.dto';
+import { LinkSheetRaceDto } from './dto/link-sheet-race.dto';
 import { PaginatedSheetsResponseDto } from './dto/paginated-sheets-response.dto';
 import { SheetListItemResponseDto } from './dto/sheet-list-item-response.dto';
 import { SheetResponseDto } from './dto/sheet-response.dto';
@@ -116,10 +119,7 @@ export class SheetsController {
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() currentUser: User,
   ): Promise<SheetResponseDto> {
-    const sheet = await this.sheetsService.findAccessibleById(
-      id,
-      currentUser,
-    );
+    const sheet = await this.sheetsService.findAccessibleById(id, currentUser);
     if (!sheet) {
       throw new NotFoundException(
         'Ficha não encontrada ou não pertence ao usuário.',
@@ -147,6 +147,90 @@ export class SheetsController {
     @CurrentUser() currentUser: User,
   ): Promise<SheetResponseDto> {
     const sheet = await this.sheetsService.update(id, dto, currentUser);
+    return SheetResponseDto.fromEntity(sheet);
+  }
+
+  @Put(':id/race')
+  @ApiOperation({
+    summary:
+      'Vincula ou troca a raça da ficha, substituindo completamente as entradas de melhorias e defeitos da raça anterior',
+  })
+  @ApiOkResponse({ type: SheetResponseDto })
+  @ApiNotFoundResponse({
+    description:
+      'Ficha não encontrada ou não pertence ao usuário, ou raça não encontrada',
+  })
+  @ApiBadRequestResponse({
+    description: 'ID de ficha ou de raça em formato inválido',
+  })
+  async linkRace(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: LinkSheetRaceDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetResponseDto> {
+    const sheet = await this.sheetsService.linkRace(id, dto, currentUser);
+    return SheetResponseDto.fromEntity(sheet);
+  }
+
+  @Delete(':id/race')
+  @ApiOperation({
+    summary:
+      'Desvincula a raça da ficha, limpando as entradas de melhorias e defeitos da raça',
+  })
+  @ApiOkResponse({ type: SheetResponseDto })
+  @ApiNotFoundResponse({
+    description: 'Ficha não encontrada ou não pertence ao usuário',
+  })
+  @ApiBadRequestResponse({ description: 'ID de ficha em formato inválido' })
+  async unlinkRace(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetResponseDto> {
+    const sheet = await this.sheetsService.unlinkRace(id, currentUser);
+    return SheetResponseDto.fromEntity(sheet);
+  }
+
+  @Put(':id/biography')
+  @ApiOperation({
+    summary:
+      'Vincula ou troca a biografia da ficha, substituindo completamente as entradas de melhorias de biografia anterior',
+  })
+  @ApiOkResponse({ type: SheetResponseDto })
+  @ApiNotFoundResponse({
+    description:
+      'Ficha, biografia, melhoria selecionada ou propriedade não encontrados',
+  })
+  @ApiConflictResponse({
+    description:
+      'Melhoria selecionada não pertence à biografia informada ou não é do tipo Atributo, ou propriedade da melhoria livre incompatível com o tipo Atributo',
+  })
+  @ApiBadRequestResponse({
+    description: 'ID de ficha ou demais UUIDs em formato inválido',
+  })
+  async linkBiography(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: LinkSheetBiographyDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetResponseDto> {
+    const sheet = await this.sheetsService.linkBiography(id, dto, currentUser);
+    return SheetResponseDto.fromEntity(sheet);
+  }
+
+  @Delete(':id/biography')
+  @ApiOperation({
+    summary:
+      'Desvincula a biografia da ficha, limpando as entradas de melhorias de biografia',
+  })
+  @ApiOkResponse({ type: SheetResponseDto })
+  @ApiNotFoundResponse({
+    description: 'Ficha não encontrada ou não pertence ao usuário',
+  })
+  @ApiBadRequestResponse({ description: 'ID de ficha em formato inválido' })
+  async unlinkBiography(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetResponseDto> {
+    const sheet = await this.sheetsService.unlinkBiography(id, currentUser);
     return SheetResponseDto.fromEntity(sheet);
   }
 

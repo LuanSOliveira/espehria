@@ -98,8 +98,7 @@ export class UtilitiesService {
     const page = query.page ?? DEFAULT_PAGE;
     const perPage = query.perPage ?? DEFAULT_PER_PAGE;
 
-    const queryBuilder =
-      this.utilitiesRepository.createQueryBuilder('utility');
+    const queryBuilder = this.utilitiesRepository.createQueryBuilder('utility');
 
     if (query.name) {
       queryBuilder.andWhere('utility.name ILIKE :name', {

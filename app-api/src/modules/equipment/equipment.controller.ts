@@ -50,7 +50,8 @@ export class EquipmentController {
     description: 'Já existe um equipamento com este nome',
   })
   @ApiNotFoundResponse({
-    description: 'Uma ou mais tags não foram encontradas, ou a moeda informada não existe',
+    description:
+      'Uma ou mais tags não foram encontradas, ou a moeda informada não existe',
   })
   @ApiBadRequestResponse({
     description:
@@ -105,7 +106,8 @@ export class EquipmentController {
   @ApiOperation({ summary: 'Atualiza um equipamento' })
   @ApiOkResponse({ type: EquipmentResponseDto })
   @ApiNotFoundResponse({
-    description: 'Equipamento, uma ou mais tags, ou a moeda informados não foram encontrados',
+    description:
+      'Equipamento, uma ou mais tags, ou a moeda informados não foram encontrados',
   })
   @ApiConflictResponse({
     description: 'Já existe um equipamento com este nome',

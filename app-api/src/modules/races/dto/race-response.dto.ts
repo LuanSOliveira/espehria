@@ -4,6 +4,7 @@ import { RaceCategoryResponseDto } from './race-category-response.dto';
 import { TagResponseDto } from '../../tags/dto/tag-response.dto';
 import { CharacteristicListItemResponseDto } from '../../characteristics/dto/characteristic-list-item-response.dto';
 import { TalentListItemResponseDto } from '../../talents/dto/talent-list-item-response.dto';
+import { ImprovementFlawItemResponseDto } from '../../improvement-flaws/dto/improvement-flaw-item-response.dto';
 
 export class RaceResponseDto {
   @ApiProperty({
@@ -64,6 +65,20 @@ export class RaceResponseDto {
   talents: TalentListItemResponseDto[];
 
   @ApiProperty({
+    type: () => [ImprovementFlawItemResponseDto],
+    description:
+      'Melhorias próprias desta raça, na ordem em que foram inseridas',
+  })
+  improvements: ImprovementFlawItemResponseDto[];
+
+  @ApiProperty({
+    type: () => [ImprovementFlawItemResponseDto],
+    description:
+      'Defeitos próprios desta raça, na ordem em que foram inseridos',
+  })
+  flaws: ImprovementFlawItemResponseDto[];
+
+  @ApiProperty({
     description: 'Data de criação do registro',
     example: '2025-01-15T10:30:00Z',
   })
@@ -75,7 +90,13 @@ export class RaceResponseDto {
   })
   updatedAt: Date;
 
-  static fromEntity(race: Race): RaceResponseDto {
+  static fromEntity(
+    race: Race,
+    references: {
+      improvements: ImprovementFlawItemResponseDto[];
+      flaws: ImprovementFlawItemResponseDto[];
+    } = { improvements: [], flaws: [] },
+  ): RaceResponseDto {
     const dto = new RaceResponseDto();
     dto.id = race.id;
     dto.name = race.name;
@@ -90,6 +111,8 @@ export class RaceResponseDto {
     dto.talents = (race.talents ?? []).map((talent) =>
       TalentListItemResponseDto.fromEntity(talent),
     );
+    dto.improvements = references.improvements;
+    dto.flaws = references.flaws;
     dto.createdAt = race.createdAt;
     dto.updatedAt = race.updatedAt;
     return dto;

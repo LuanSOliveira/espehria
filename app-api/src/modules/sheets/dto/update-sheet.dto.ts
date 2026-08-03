@@ -54,16 +54,4 @@ export class UpdateSheetDto {
   @ValidateIf((_object, value) => value !== null)
   @IsUUID()
   campaignId?: string | null;
-
-  @ApiPropertyOptional({
-    format: 'uuid',
-    nullable: true,
-    description:
-      'ID da raça vinculada à ficha. Omitir o campo mantém a raça atual inalterada; enviar "null" explicitamente desvincula',
-    example: '660e8400-e29b-41d4-a716-446655440000',
-  })
-  @IsOptional()
-  @ValidateIf((_object, value) => value !== null)
-  @IsUUID()
-  raceId?: string | null;
 }

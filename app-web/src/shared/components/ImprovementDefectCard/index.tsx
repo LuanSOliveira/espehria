@@ -7,7 +7,13 @@ import { IImprovementDefectItem } from '@/shared/interfaces';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 
 export interface ImprovementDefectCardProps {
-  item: IImprovementDefectItem;
+  /**
+   * Aceita tanto o item completo (`IImprovementDefectItem`, com `id` real)
+   * quanto um snapshot de ficha (`ISheetImprovementDefectSnapshotEntry`, cujo
+   * `id` pode ser `null` para a melhoria de atributo livre) — o card não usa
+   * `id`, só exibe valor/tipo/propriedade.
+   */
+  item: Omit<IImprovementDefectItem, 'id'> & { id?: string | null };
   onRemove?: () => void;
 }
 

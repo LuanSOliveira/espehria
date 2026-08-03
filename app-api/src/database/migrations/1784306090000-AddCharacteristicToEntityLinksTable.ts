@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddCharacteristicToEntityLinksTable1784306090000
-  implements MigrationInterface
-{
+export class AddCharacteristicToEntityLinksTable1784306090000 implements MigrationInterface {
   name = 'AddCharacteristicToEntityLinksTable1784306090000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

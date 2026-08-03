@@ -17,12 +17,23 @@ import { RaceCategory } from './entities/race-category.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { Characteristic } from '../characteristics/entities/characteristic.entity';
 import { Talent } from '../talents/entities/talent.entity';
+import { ImprovementFlawsService } from '../improvement-flaws/improvement-flaws.service';
+import { ImprovementFlawOwnerType } from '../improvement-flaws/enums/improvement-flaw-owner-type.enum';
+import { ImprovementFlawCategory } from '../improvement-flaws/enums/improvement-flaw-category.enum';
+import { ImprovementFlawItemInputDto } from '../improvement-flaws/dto/improvement-flaw-item-input.dto';
+import { ImprovementFlawItemResponseDto } from '../improvement-flaws/dto/improvement-flaw-item-response.dto';
 
 export interface PaginatedRaces {
   data: Race[];
   total: number;
   page: number;
   perPage: number;
+}
+
+export interface RaceWithReferences {
+  race: Race;
+  improvements: ImprovementFlawItemResponseDto[];
+  flaws: ImprovementFlawItemResponseDto[];
 }
 
 @Injectable()
@@ -38,14 +49,15 @@ export class RacesService {
     private readonly characteristicsRepository: Repository<Characteristic>,
     @InjectRepository(Talent)
     private readonly talentsRepository: Repository<Talent>,
+    private readonly improvementFlawsService: ImprovementFlawsService,
   ) {}
 
   findByName(name: string): Promise<Race | null> {
     return this.racesRepository.findOneBy({ name });
   }
 
-  findById(id: string): Promise<Race | null> {
-    return this.racesRepository.findOne({
+  async findById(id: string): Promise<RaceWithReferences | null> {
+    const race = await this.racesRepository.findOne({
       where: { id },
       relations: {
         category: true,
@@ -54,6 +66,17 @@ export class RacesService {
         talents: { tags: true },
       },
     });
+    if (!race) {
+      return null;
+    }
+
+    const { improvements, flaws } =
+      await this.improvementFlawsService.loadItemsFor(
+        ImprovementFlawOwnerType.RACE,
+        id,
+      );
+
+    return { race, improvements, flaws };
   }
 
   findCategoryById(id: string): Promise<RaceCategory | null> {
@@ -105,7 +128,7 @@ export class RacesService {
     return talents;
   }
 
-  async create(dto: CreateRaceDto): Promise<Race> {
+  async create(dto: CreateRaceDto): Promise<RaceWithReferences> {
     const existing = await this.findByName(dto.name);
     if (existing) {
       throw new ConflictException('Já existe uma raça com este nome.');
@@ -131,6 +154,20 @@ export class RacesService {
         ? await this.findTalentsByIds(dto.talentIds)
         : [];
 
+    const improvementsInput = dto.improvements ?? [];
+    const flawsInput = dto.flaws ?? [];
+
+    const resolvedImprovements =
+      await this.improvementFlawsService.validateAndResolveItems(
+        improvementsInput,
+      );
+    const resolvedFlaws =
+      await this.improvementFlawsService.validateAndResolveItems(flawsInput);
+    this.improvementFlawsService.validateLists({
+      improvements: improvementsInput,
+      flaws: flawsInput,
+    });
+
     const race = this.racesRepository.create({
       name: dto.name,
       category,
@@ -142,7 +179,30 @@ export class RacesService {
       talents,
     });
 
-    return this.racesRepository.save(race);
+    const savedRace = await this.racesRepository.save(race);
+
+    await this.improvementFlawsService.replaceItems(
+      ImprovementFlawOwnerType.RACE,
+      savedRace.id,
+      ImprovementFlawCategory.IMPROVEMENT,
+      improvementsInput,
+      resolvedImprovements,
+    );
+    await this.improvementFlawsService.replaceItems(
+      ImprovementFlawOwnerType.RACE,
+      savedRace.id,
+      ImprovementFlawCategory.FLAW,
+      flawsInput,
+      resolvedFlaws,
+    );
+
+    const { improvements, flaws } =
+      await this.improvementFlawsService.loadItemsFor(
+        ImprovementFlawOwnerType.RACE,
+        savedRace.id,
+      );
+
+    return { race: savedRace, improvements, flaws };
   }
 
   async findAllPaginated(query: FindRacesQueryDto): Promise<PaginatedRaces> {
@@ -189,11 +249,12 @@ export class RacesService {
     return { data, total, page, perPage };
   }
 
-  async update(id: string, dto: UpdateRaceDto): Promise<Race> {
-    const race = await this.findById(id);
-    if (!race) {
+  async update(id: string, dto: UpdateRaceDto): Promise<RaceWithReferences> {
+    const result = await this.findById(id);
+    if (!result) {
       throw new NotFoundException('Raça não encontrada.');
     }
+    const { race } = result;
 
     if (dto.name && dto.name !== race.name) {
       const existing = await this.findByName(dto.name);
@@ -237,7 +298,75 @@ export class RacesService {
           : [];
     }
 
-    return this.racesRepository.save(race);
+    let effectiveImprovements = dto.improvements;
+    let effectiveFlaws = dto.flaws;
+
+    if (effectiveImprovements === undefined || effectiveFlaws === undefined) {
+      const currentItems = await this.improvementFlawsService.loadItemsFor(
+        ImprovementFlawOwnerType.RACE,
+        id,
+      );
+      if (effectiveImprovements === undefined) {
+        effectiveImprovements = currentItems.improvements.map(
+          (item): ImprovementFlawItemInputDto => ({
+            value: item.value,
+            type: item.type.id,
+            property: item.property.id,
+          }),
+        );
+      }
+      if (effectiveFlaws === undefined) {
+        effectiveFlaws = currentItems.flaws.map(
+          (item): ImprovementFlawItemInputDto => ({
+            value: item.value,
+            type: item.type.id,
+            property: item.property.id,
+          }),
+        );
+      }
+    }
+
+    const resolvedImprovements =
+      await this.improvementFlawsService.validateAndResolveItems(
+        effectiveImprovements,
+      );
+    const resolvedFlaws =
+      await this.improvementFlawsService.validateAndResolveItems(
+        effectiveFlaws,
+      );
+    this.improvementFlawsService.validateLists({
+      improvements: effectiveImprovements,
+      flaws: effectiveFlaws,
+    });
+
+    const savedRace = await this.racesRepository.save(race);
+
+    if (dto.improvements !== undefined) {
+      await this.improvementFlawsService.replaceItems(
+        ImprovementFlawOwnerType.RACE,
+        id,
+        ImprovementFlawCategory.IMPROVEMENT,
+        dto.improvements,
+        resolvedImprovements,
+      );
+    }
+    if (dto.flaws !== undefined) {
+      await this.improvementFlawsService.replaceItems(
+        ImprovementFlawOwnerType.RACE,
+        id,
+        ImprovementFlawCategory.FLAW,
+        dto.flaws,
+        resolvedFlaws,
+      );
+    }
+
+    const { improvements, flaws } =
+      await this.improvementFlawsService.loadItemsFor(
+        ImprovementFlawOwnerType.RACE,
+        id,
+      );
+
+    return { race: savedRace, improvements, flaws };
   }
 
   async remove(id: string): Promise<void> {
