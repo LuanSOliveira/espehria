@@ -22,7 +22,9 @@ export class ImprovementFlawPropertiesController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'Lista todas as propriedades de melhoria/defeito (lista fixa)' })
+  @ApiOperation({
+    summary: 'Lista todas as propriedades de melhoria/defeito (lista fixa)',
+  })
   @ApiOkResponse({ type: [ImprovementFlawPropertyResponseDto] })
   async findAll(): Promise<ImprovementFlawPropertyResponseDto[]> {
     const properties = await this.improvementFlawPropertiesService.findAll();

@@ -66,7 +66,7 @@ export const ImprovementDefectAddModal = ({
   }, [selectedTypeId]);
 
   const propertyOptions = (properties ?? []).filter(
-    (property) => !selectedTypeId || property.typeId === selectedTypeId,
+    (property) => !selectedTypeId || property.typeIds.includes(selectedTypeId),
   );
 
   const onSubmit = (data: ImprovementDefectFormData) => {

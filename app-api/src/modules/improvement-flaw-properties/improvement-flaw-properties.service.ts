@@ -12,7 +12,7 @@ export class ImprovementFlawPropertiesService {
 
   findAll(): Promise<ImprovementFlawProperty[]> {
     return this.improvementFlawPropertiesRepository.find({
-      relations: { type: true },
+      relations: { types: true },
       order: { name: 'ASC' },
     });
   }

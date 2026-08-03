@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, JoinTable, ManyToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { ImprovementFlawType } from '../../improvement-flaw-types/entities/improvement-flaw-type.entity';
 
@@ -10,7 +10,16 @@ export class ImprovementFlawProperty extends BaseEntity {
   @Column()
   name!: string;
 
-  @ManyToOne(() => ImprovementFlawType, { nullable: false })
-  @JoinColumn({ name: 'type_id' })
-  type!: ImprovementFlawType;
+  @ApiProperty({
+    type: () => [ImprovementFlawType],
+    description:
+      'Tipos de melhoria/defeito aos quais esta propriedade pertence',
+  })
+  @ManyToMany(() => ImprovementFlawType)
+  @JoinTable({
+    name: 'improvement_flaw_property_types',
+    joinColumn: { name: 'property_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'type_id', referencedColumnName: 'id' },
+  })
+  types!: ImprovementFlawType[];
 }

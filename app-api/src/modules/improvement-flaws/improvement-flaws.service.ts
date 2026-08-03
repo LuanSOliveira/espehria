@@ -60,7 +60,7 @@ export class ImprovementFlawsService {
       this.improvementFlawTypesRepository.findBy({ id: In(typeIds) }),
       this.improvementFlawPropertiesRepository.find({
         where: { id: In(propertyIds) },
-        relations: { type: true },
+        relations: { types: true },
       }),
     ]);
 
@@ -86,7 +86,7 @@ export class ImprovementFlawsService {
           'Um ou mais tipos ou propriedades de melhoria/defeito não foram encontrados.',
         );
       }
-      if (property.type.id !== item.type) {
+      if (!property.types.some((type) => type.id === item.type)) {
         throw new ConflictException(
           'A propriedade selecionada não é compatível com o tipo selecionado.',
         );
@@ -196,7 +196,7 @@ export class ImprovementFlawsService {
 
     const items = await this.improvementFlawsRepository.find({
       where: whereCriteria as FindOptionsWhere<ImprovementFlaw>,
-      relations: { type: true, property: true },
+      relations: { type: true, property: { types: true } },
       order: { sortOrder: 'ASC' },
     });
 

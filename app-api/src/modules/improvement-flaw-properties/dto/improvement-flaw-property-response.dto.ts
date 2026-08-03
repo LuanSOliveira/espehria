@@ -16,12 +16,16 @@ export class ImprovementFlawPropertyResponseDto {
   name: string;
 
   @ApiProperty({
+    type: [String],
     format: 'uuid',
     description:
-      'Identificador do tipo de melhoria/defeito ao qual esta propriedade pertence',
-    example: '550e8400-e29b-41d4-a716-446655440000',
+      'Identificadores dos tipos de melhoria/defeito aos quais esta propriedade pertence',
+    example: [
+      '550e8400-e29b-41d4-a716-446655440000',
+      '550e8400-e29b-41d4-a716-446655440002',
+    ],
   })
-  typeId: string;
+  typeIds: string[];
 
   static fromEntity(
     property: ImprovementFlawProperty,
@@ -29,7 +33,7 @@ export class ImprovementFlawPropertyResponseDto {
     const dto = new ImprovementFlawPropertyResponseDto();
     dto.id = property.id;
     dto.name = property.name;
-    dto.typeId = property.type.id;
+    dto.typeIds = property.types.map((type) => type.id);
     return dto;
   }
 }
