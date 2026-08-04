@@ -237,7 +237,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
 
   const updateNameMutation = usePutEntity<ISheet, { name: string }>({
     url: `/sheets/${sheetId}`,
-    invalidateQueryKeys: [['/sheets']],
+    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
     onError: (mutationError) => {
       showToast({
         message:
@@ -250,7 +250,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
 
   const updateLevelMutation = usePutEntity<ISheet, { level: number }>({
     url: `/sheets/${sheetId}`,
-    invalidateQueryKeys: [['/sheets']],
+    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
     onError: (mutationError) => {
       showToast({
         message:
@@ -266,7 +266,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     { campaignId: string | null }
   >({
     url: `/sheets/${sheetId}`,
-    invalidateQueryKeys: [['/sheets']],
+    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
     onError: (mutationError) => {
       showToast({
         message:
@@ -282,7 +282,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     { referenceImage: string | null }
   >({
     url: `/sheets/${sheetId}`,
-    invalidateQueryKeys: [['/sheets']],
+    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
     onSuccess: (_data, payload) => {
       setReferenceImage(payload.referenceImage);
       showToast({
@@ -303,7 +303,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
 
   const linkRaceMutation = usePutEntity<ISheet, { raceId: string }>({
     url: `/sheets/${sheetId}/race`,
-    invalidateQueryKeys: [['/sheets']],
+    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
     onSuccess: (data) => {
       setRace(data.race ?? null);
       setMelhorias(data.melhorias);
@@ -322,7 +322,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
 
   const unlinkRaceMutation = useDeleteEntity<ISheet>({
     url: `/sheets/${sheetId}/race`,
-    invalidateQueryKeys: [['/sheets']],
+    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
     onSuccess: (data) => {
       setRace(null);
       setMelhorias(data.melhorias);
@@ -344,7 +344,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     SheetBiographyAssignPayload
   >({
     url: `/sheets/${sheetId}/biography`,
-    invalidateQueryKeys: [['/sheets']],
+    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
     onSuccess: (data) => {
       setBiography(data.biography ?? null);
       setMelhorias(data.melhorias);
@@ -366,7 +366,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
 
   const unlinkBiographyMutation = useDeleteEntity<ISheet>({
     url: `/sheets/${sheetId}/biography`,
-    invalidateQueryKeys: [['/sheets']],
+    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
     onSuccess: (data) => {
       setBiography(null);
       setMelhorias(data.melhorias);
