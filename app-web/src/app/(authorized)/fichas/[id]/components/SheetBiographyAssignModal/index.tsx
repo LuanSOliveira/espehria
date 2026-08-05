@@ -22,7 +22,7 @@ import {
   IBiographyListItem,
   IImprovementDefectItem,
 } from '@/shared/interfaces';
-import { getContrastTextColor } from '@/shared/util';
+import { getContrastTextColor, showToast } from '@/shared/util';
 import { APP_COLORS, APP_CONTAINER_STYLES, APP_INPUT_STYLES } from '@/shared/constants';
 
 const ATTRIBUTE_TYPE_NAME = 'Atributo';
@@ -161,6 +161,15 @@ export const SheetBiographyAssignModal = ({
 
   const handleConfirm = () => {
     if (!biography || !selectedImprovement || !freePropertyId) {
+      return;
+    }
+
+    if (selectedImprovement.property.id === freePropertyId) {
+      showToast({
+        message:
+          'A propriedade escolhida na melhoria da biografia não pode ser igual à propriedade da melhoria de atributo livre. Selecione propriedades diferentes.',
+        type: 'error',
+      });
       return;
     }
 

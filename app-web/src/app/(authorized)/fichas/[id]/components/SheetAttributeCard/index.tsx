@@ -39,10 +39,10 @@ export const SheetAttributeCard = ({
       <Box
         sx={{
           position: 'absolute',
-          right: 10,
-          bottom: 10,
-          width: 32,
-          height: 32,
+          right: 8,
+          bottom: 8,
+          width: 44,
+          height: 44,
           borderRadius: '50%',
           display: 'flex',
           alignItems: 'center',
@@ -51,7 +51,14 @@ export const SheetAttributeCard = ({
           border: `1px solid ${APP_COLORS.gold}`,
         }}
       >
-        <DefaultText sx={{ fontSize: '0.75rem', color: APP_COLORS.goldSoft }}>
+        <DefaultText
+          sx={{
+            fontSize: '1.7rem',
+            fontWeight: 700,
+            lineHeight: 1,
+            color: APP_COLORS.goldSoft,
+          }}
+        >
           {modifierLabel}
         </DefaultText>
       </Box>

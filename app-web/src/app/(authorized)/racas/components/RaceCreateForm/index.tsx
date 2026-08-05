@@ -305,8 +305,6 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
         ]}
       />
 
-      <RaceTalentsListField value={talents} onChange={setTalents} />
-
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <ImprovementDefectListField
           label="Melhorias"
@@ -326,6 +324,8 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
           otherListValue={improvements}
         />
       </div>
+
+      <RaceTalentsListField value={talents} onChange={setTalents} />
 
       <FormRichTextInput
         id="race-form-private-information"

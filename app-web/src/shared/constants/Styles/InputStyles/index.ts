@@ -28,6 +28,11 @@ export const APP_INPUT_STYLES: Record<string, SystemStyleObject<Theme>> = {
       color: APP_COLORS.inputText,
       padding: '12px 14px',
     },
+    '& .MuiOutlinedInput-input.Mui-disabled': {
+      color: APP_COLORS.inputText,
+      WebkitTextFillColor: APP_COLORS.inputText,
+      opacity: 0.7,
+    },
     '& .MuiOutlinedInput-input::placeholder': {
       color: APP_COLORS.inputPlaceholder,
       opacity: 1,
