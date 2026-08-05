@@ -9,14 +9,23 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateRaceDto } from './dto/create-race.dto';
 import { UpdateRaceDto } from './dto/update-race.dto';
 import { FindRacesQueryDto } from './dto/find-races-query.dto';
 import { Race } from './entities/race.entity';
+import { RaceTag } from './entities/race-tag.entity';
 import { RaceCategory } from './entities/race-category.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { Characteristic } from '../characteristics/entities/characteristic.entity';
+import { CharacteristicTag } from '../characteristics/entities/characteristic-tag.entity';
 import { Talent } from '../talents/entities/talent.entity';
+import { TalentTag } from '../talents/entities/talent-tag.entity';
 import { ImprovementFlawsService } from '../improvement-flaws/improvement-flaws.service';
 import { ImprovementFlawOwnerType } from '../improvement-flaws/enums/improvement-flaw-owner-type.enum';
 import { ImprovementFlawCategory } from '../improvement-flaws/enums/improvement-flaw-category.enum';
@@ -45,10 +54,16 @@ export class RacesService {
     private readonly raceCategoriesRepository: Repository<RaceCategory>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
+    @InjectRepository(RaceTag)
+    private readonly raceTagsRepository: Repository<RaceTag>,
     @InjectRepository(Characteristic)
     private readonly characteristicsRepository: Repository<Characteristic>,
+    @InjectRepository(CharacteristicTag)
+    private readonly characteristicTagsRepository: Repository<CharacteristicTag>,
     @InjectRepository(Talent)
     private readonly talentsRepository: Repository<Talent>,
+    @InjectRepository(TalentTag)
+    private readonly talentTagsRepository: Repository<TalentTag>,
     private readonly improvementFlawsService: ImprovementFlawsService,
   ) {}
 
@@ -56,19 +71,46 @@ export class RacesService {
     return this.racesRepository.findOneBy({ name });
   }
 
+  private async attachOrderedTags(race: Race): Promise<void> {
+    race.tags = await loadOrderedTagsForOwner(
+      this.raceTagsRepository,
+      race.id,
+      'race',
+    );
+
+    const characteristicTagsById = await loadOrderedTagsMap(
+      this.characteristicTagsRepository,
+      race.characteristics.map((characteristic) => characteristic.id),
+      'characteristic',
+    );
+    for (const characteristic of race.characteristics) {
+      characteristic.tags =
+        characteristicTagsById.get(characteristic.id) ?? [];
+    }
+
+    const talentTagsById = await loadOrderedTagsMap(
+      this.talentTagsRepository,
+      race.talents.map((talent) => talent.id),
+      'talent',
+    );
+    for (const talent of race.talents) {
+      talent.tags = talentTagsById.get(talent.id) ?? [];
+    }
+  }
+
   async findById(id: string): Promise<RaceWithReferences | null> {
     const race = await this.racesRepository.findOne({
       where: { id },
       relations: {
         category: true,
-        tags: true,
-        characteristics: { tags: true },
-        talents: { tags: true },
+        characteristics: true,
+        talents: true,
       },
     });
     if (!race) {
       return null;
     }
+    await this.attachOrderedTags(race);
 
     const { improvements, flaws } =
       await this.improvementFlawsService.loadItemsFor(
@@ -95,7 +137,8 @@ export class RacesService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   private async findCharacteristicsByIds(
@@ -174,12 +217,18 @@ export class RacesService {
       referenceImageUrl: dto.referenceImageUrl ?? null,
       description: dto.description ?? null,
       privateInformation: dto.privateInformation ?? null,
-      tags,
       characteristics,
       talents,
     });
 
     const savedRace = await this.racesRepository.save(race);
+    await createOrderedTagJunctions(
+      this.raceTagsRepository,
+      'race',
+      savedRace,
+      tags,
+    );
+    savedRace.tags = tags;
 
     await this.improvementFlawsService.replaceItems(
       ImprovementFlawOwnerType.RACE,
@@ -238,8 +287,17 @@ export class RacesService {
 
     const races = await this.racesRepository.find({
       where: { id: In(ids.map((race) => race.id)) },
-      relations: { category: true, tags: true },
+      relations: { category: true },
     });
+
+    const tagsByRaceId = await loadOrderedTagsMap(
+      this.raceTagsRepository,
+      races.map((race) => race.id),
+      'race',
+    );
+    for (const race of races) {
+      race.tags = tagsByRaceId.get(race.id) ?? [];
+    }
 
     const racesById = new Map(races.map((race) => [race.id, race]));
     const data = ids
@@ -281,9 +339,15 @@ export class RacesService {
     if (dto.privateInformation !== undefined) {
       race.privateInformation = dto.privateInformation;
     }
+    let tags = race.tags;
     if (dto.tagIds !== undefined) {
-      race.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.raceTagsRepository,
+        'race',
+        race,
+        tags,
+      );
     }
     if (dto.characteristicIds !== undefined) {
       race.characteristics =
@@ -340,6 +404,7 @@ export class RacesService {
     });
 
     const savedRace = await this.racesRepository.save(race);
+    await this.attachOrderedTags(savedRace);
 
     if (dto.improvements !== undefined) {
       await this.improvementFlawsService.replaceItems(

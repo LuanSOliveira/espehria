@@ -23,7 +23,7 @@ export class PlannedSessionResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas à sessão planejada',
+    description: 'Tags associadas à sessão planejada, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

@@ -14,9 +14,9 @@ import { EntityReferenceListField } from '@/shared/components/EntityReferenceLis
 import { ImprovementDefectListField } from '@/shared/components/ImprovementDefectListField';
 import {
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   CharacteristicFormData,
@@ -28,7 +28,6 @@ import {
   IEntityReference,
   IImprovementDefectItem,
   ITag,
-  ITagListFilters,
 } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedCharacteristicStore } from '@/store';
@@ -77,11 +76,7 @@ export const CharacteristicCreateForm = ({
   );
   const [flaws, setFlaws] = useState<IImprovementDefectItem[]>([]);
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const {
     data: characteristicDetail,

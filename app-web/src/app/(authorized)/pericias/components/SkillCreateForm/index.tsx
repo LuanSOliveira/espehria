@@ -14,16 +14,16 @@ import { DefaultText } from '@/shared/components/Texts';
 import {
   useAttributesQuery,
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   SkillFormData,
   skillFormDefaultValues,
   skillFormResolver,
 } from '@/shared/formSchemas';
-import { IAttribute, ISkill, ITag, ITagListFilters } from '@/shared/interfaces';
+import { IAttribute, ISkill, ITag } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedSkillStore } from '@/store';
 import { SkillSectionsField } from '../SkillSectionsField';
@@ -47,11 +47,7 @@ export const SkillCreateForm = ({ onSaved }: SkillCreateFormProps) => {
 
   const { data: attributes } = useAttributesQuery();
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const {
     data: skillDetail,

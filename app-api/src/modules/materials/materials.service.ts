@@ -9,10 +9,17 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import { FindMaterialsQueryDto } from './dto/find-materials-query.dto';
 import { Material } from './entities/material.entity';
+import { MaterialTag } from './entities/material-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { Currency } from '../currencies/entities/currency.entity';
 
@@ -28,6 +35,8 @@ export class MaterialsService {
   constructor(
     @InjectRepository(Material)
     private readonly materialsRepository: Repository<Material>,
+    @InjectRepository(MaterialTag)
+    private readonly materialTagsRepository: Repository<MaterialTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     @InjectRepository(Currency)
@@ -38,11 +47,20 @@ export class MaterialsService {
     return this.materialsRepository.findOneBy({ name });
   }
 
-  findById(id: string): Promise<Material | null> {
-    return this.materialsRepository.findOne({
+  async findById(id: string): Promise<Material | null> {
+    const material = await this.materialsRepository.findOne({
       where: { id },
-      relations: { tags: true, currency: true },
+      relations: { currency: true },
     });
+    if (!material) {
+      return null;
+    }
+    material.tags = await loadOrderedTagsForOwner(
+      this.materialTagsRepository,
+      id,
+      'material',
+    );
+    return material;
   }
 
   private async findTagsByIds(tagIds: string[]): Promise<Tag[]> {
@@ -51,7 +69,8 @@ export class MaterialsService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   private async findCurrencyById(currencyId: string): Promise<Currency> {
@@ -86,10 +105,17 @@ export class MaterialsService {
       price: dto.price ?? null,
       currency,
       privateInformation: dto.privateInformation ?? null,
-      tags,
     });
 
-    return this.materialsRepository.save(material);
+    const savedMaterial = await this.materialsRepository.save(material);
+    await createOrderedTagJunctions(
+      this.materialTagsRepository,
+      'material',
+      savedMaterial,
+      tags,
+    );
+    savedMaterial.tags = tags;
+    return savedMaterial;
   }
 
   async findAllPaginated(
@@ -120,9 +146,18 @@ export class MaterialsService {
 
     const materials = await this.materialsRepository.find({
       where: { id: In(ids.map((material) => material.id)) },
-      relations: { tags: true, currency: true },
+      relations: { currency: true },
       order: { name: 'ASC' },
     });
+
+    const tagsByMaterialId = await loadOrderedTagsMap(
+      this.materialTagsRepository,
+      materials.map((material) => material.id),
+      'material',
+    );
+    for (const material of materials) {
+      material.tags = tagsByMaterialId.get(material.id) ?? [];
+    }
 
     const materialsById = new Map(
       materials.map((material) => [material.id, material]),
@@ -165,12 +200,20 @@ export class MaterialsService {
     if (dto.privateInformation !== undefined) {
       material.privateInformation = dto.privateInformation;
     }
+    let tags = material.tags;
     if (dto.tagIds !== undefined) {
-      material.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.materialTagsRepository,
+        'material',
+        material,
+        tags,
+      );
     }
 
-    return this.materialsRepository.save(material);
+    const savedMaterial = await this.materialsRepository.save(material);
+    savedMaterial.tags = tags;
+    return savedMaterial;
   }
 
   async remove(id: string): Promise<void> {

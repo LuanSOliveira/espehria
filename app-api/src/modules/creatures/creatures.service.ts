@@ -9,10 +9,17 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateCreatureDto } from './dto/create-creature.dto';
 import { UpdateCreatureDto } from './dto/update-creature.dto';
 import { FindCreaturesQueryDto } from './dto/find-creatures-query.dto';
 import { Creature } from './entities/creature.entity';
+import { CreatureTag } from './entities/creature-tag.entity';
 import { CreatureCategory } from './entities/creature-category.entity';
 import { Tag } from '../tags/entities/tag.entity';
 
@@ -30,6 +37,8 @@ export class CreaturesService {
     private readonly creaturesRepository: Repository<Creature>,
     @InjectRepository(CreatureCategory)
     private readonly creatureCategoriesRepository: Repository<CreatureCategory>,
+    @InjectRepository(CreatureTag)
+    private readonly creatureTagsRepository: Repository<CreatureTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
   ) {}
@@ -38,11 +47,20 @@ export class CreaturesService {
     return this.creaturesRepository.findOneBy({ name });
   }
 
-  findById(id: string): Promise<Creature | null> {
-    return this.creaturesRepository.findOne({
+  async findById(id: string): Promise<Creature | null> {
+    const creature = await this.creaturesRepository.findOne({
       where: { id },
-      relations: { category: true, tags: true },
+      relations: { category: true },
     });
+    if (!creature) {
+      return null;
+    }
+    creature.tags = await loadOrderedTagsForOwner(
+      this.creatureTagsRepository,
+      id,
+      'creature',
+    );
+    return creature;
   }
 
   findCategoryById(id: string): Promise<CreatureCategory | null> {
@@ -61,7 +79,8 @@ export class CreaturesService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   async create(dto: CreateCreatureDto): Promise<Creature> {
@@ -110,10 +129,17 @@ export class CreaturesService {
       encounterRecord: dto.encounterRecord ?? null,
       scholarsCuriosity: dto.scholarsCuriosity ?? null,
       privateInformation: dto.privateInformation ?? null,
-      tags,
     });
 
-    return this.creaturesRepository.save(creature);
+    const savedCreature = await this.creaturesRepository.save(creature);
+    await createOrderedTagJunctions(
+      this.creatureTagsRepository,
+      'creature',
+      savedCreature,
+      tags,
+    );
+    savedCreature.tags = tags;
+    return savedCreature;
   }
 
   async findAllPaginated(
@@ -151,8 +177,17 @@ export class CreaturesService {
 
     const creatures = await this.creaturesRepository.find({
       where: { id: In(ids.map((creature) => creature.id)) },
-      relations: { category: true, tags: true },
+      relations: { category: true },
     });
+
+    const tagsByCreatureId = await loadOrderedTagsMap(
+      this.creatureTagsRepository,
+      creatures.map((creature) => creature.id),
+      'creature',
+    );
+    for (const creature of creatures) {
+      creature.tags = tagsByCreatureId.get(creature.id) ?? [];
+    }
 
     const creaturesById = new Map(
       creatures.map((creature) => [creature.id, creature]),
@@ -267,12 +302,20 @@ export class CreaturesService {
     if (dto.privateInformation !== undefined) {
       creature.privateInformation = dto.privateInformation;
     }
+    let tags = creature.tags;
     if (dto.tagIds !== undefined) {
-      creature.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.creatureTagsRepository,
+        'creature',
+        creature,
+        tags,
+      );
     }
 
-    return this.creaturesRepository.save(creature);
+    const savedCreature = await this.creaturesRepository.save(creature);
+    savedCreature.tags = tags;
+    return savedCreature;
   }
 
   async remove(id: string): Promise<void> {

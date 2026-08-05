@@ -25,7 +25,7 @@ export class TrainingResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas ao treinamento',
+    description: 'Tags associadas ao treinamento, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

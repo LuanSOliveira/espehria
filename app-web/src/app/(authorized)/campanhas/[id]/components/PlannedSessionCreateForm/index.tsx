@@ -12,16 +12,16 @@ import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
 import {
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   PlannedSessionFormData,
   plannedSessionFormDefaultValues,
   plannedSessionFormResolver,
 } from '@/shared/formSchemas';
-import { IPlannedSession, ITag, ITagListFilters } from '@/shared/interfaces';
+import { IPlannedSession, ITag } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedPlannedSessionStore } from '@/store';
 import { PlannedSessionSectionsField } from '../PlannedSessionSectionsField';
@@ -50,11 +50,7 @@ export const PlannedSessionCreateForm = ({
   );
   const isEditMode = !!selectedPlannedSession;
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const {
     data: plannedSessionDetail,

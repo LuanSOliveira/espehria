@@ -12,16 +12,16 @@ import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
 import {
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   ConditionFormData,
   conditionFormDefaultValues,
   conditionFormResolver,
 } from '@/shared/formSchemas';
-import { ICondition, ITag, ITagListFilters } from '@/shared/interfaces';
+import { ICondition, ITag } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedConditionStore } from '@/store';
 import { ConditionSectionsField } from '../ConditionSectionsField';
@@ -45,11 +45,7 @@ export const ConditionCreateForm = ({ onSaved }: ConditionCreateFormProps) => {
   );
   const isEditMode = !!selectedCondition;
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const {
     data: conditionDetail,

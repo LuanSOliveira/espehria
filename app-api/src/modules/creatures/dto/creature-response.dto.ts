@@ -136,7 +136,7 @@ export class CreatureResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas à criatura',
+    description: 'Tags associadas à criatura, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

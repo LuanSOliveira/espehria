@@ -9,10 +9,17 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateUtilityDto } from './dto/create-utility.dto';
 import { UpdateUtilityDto } from './dto/update-utility.dto';
 import { FindUtilitiesQueryDto } from './dto/find-utilities-query.dto';
 import { Utility } from './entities/utility.entity';
+import { UtilityTag } from './entities/utility-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { Currency } from '../currencies/entities/currency.entity';
 
@@ -28,6 +35,8 @@ export class UtilitiesService {
   constructor(
     @InjectRepository(Utility)
     private readonly utilitiesRepository: Repository<Utility>,
+    @InjectRepository(UtilityTag)
+    private readonly utilityTagsRepository: Repository<UtilityTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     @InjectRepository(Currency)
@@ -38,11 +47,20 @@ export class UtilitiesService {
     return this.utilitiesRepository.findOneBy({ name });
   }
 
-  findById(id: string): Promise<Utility | null> {
-    return this.utilitiesRepository.findOne({
+  async findById(id: string): Promise<Utility | null> {
+    const utility = await this.utilitiesRepository.findOne({
       where: { id },
-      relations: { tags: true, currency: true },
+      relations: { currency: true },
     });
+    if (!utility) {
+      return null;
+    }
+    utility.tags = await loadOrderedTagsForOwner(
+      this.utilityTagsRepository,
+      id,
+      'utility',
+    );
+    return utility;
   }
 
   private async findTagsByIds(tagIds: string[]): Promise<Tag[]> {
@@ -51,7 +69,8 @@ export class UtilitiesService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   private async findCurrencyById(currencyId: string): Promise<Currency> {
@@ -86,10 +105,17 @@ export class UtilitiesService {
       price: dto.price ?? null,
       currency,
       privateInformation: dto.privateInformation ?? null,
-      tags,
     });
 
-    return this.utilitiesRepository.save(utility);
+    const savedUtility = await this.utilitiesRepository.save(utility);
+    await createOrderedTagJunctions(
+      this.utilityTagsRepository,
+      'utility',
+      savedUtility,
+      tags,
+    );
+    savedUtility.tags = tags;
+    return savedUtility;
   }
 
   async findAllPaginated(
@@ -119,9 +145,18 @@ export class UtilitiesService {
 
     const utilities = await this.utilitiesRepository.find({
       where: { id: In(ids.map((utility) => utility.id)) },
-      relations: { tags: true, currency: true },
+      relations: { currency: true },
       order: { name: 'ASC' },
     });
+
+    const tagsByUtilityId = await loadOrderedTagsMap(
+      this.utilityTagsRepository,
+      utilities.map((utility) => utility.id),
+      'utility',
+    );
+    for (const utility of utilities) {
+      utility.tags = tagsByUtilityId.get(utility.id) ?? [];
+    }
 
     const utilitiesById = new Map(
       utilities.map((utility) => [utility.id, utility]),
@@ -164,12 +199,20 @@ export class UtilitiesService {
     if (dto.privateInformation !== undefined) {
       utility.privateInformation = dto.privateInformation;
     }
+    let tags = utility.tags;
     if (dto.tagIds !== undefined) {
-      utility.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.utilityTagsRepository,
+        'utility',
+        utility,
+        tags,
+      );
     }
 
-    return this.utilitiesRepository.save(utility);
+    const savedUtility = await this.utilitiesRepository.save(utility);
+    savedUtility.tags = tags;
+    return savedUtility;
   }
 
   async remove(id: string): Promise<void> {

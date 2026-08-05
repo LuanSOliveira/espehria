@@ -1,13 +1,17 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Technique } from './entities/technique.entity';
+import { TechniqueTag } from './entities/technique-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { EntityLinksModule } from '../entity-links/entity-links.module';
 import { TechniquesController } from './techniques.controller';
 import { TechniquesService } from './techniques.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Technique, Tag]), EntityLinksModule],
+  imports: [
+    TypeOrmModule.forFeature([Technique, TechniqueTag, Tag]),
+    EntityLinksModule,
+  ],
   controllers: [TechniquesController],
   providers: [TechniquesService],
   exports: [TechniquesService],

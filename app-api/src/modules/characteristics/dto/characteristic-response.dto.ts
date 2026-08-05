@@ -28,7 +28,7 @@ export class CharacteristicResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas à característica',
+    description: 'Tags associadas à característica, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

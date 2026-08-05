@@ -9,10 +9,17 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateConsumableDto } from './dto/create-consumable.dto';
 import { UpdateConsumableDto } from './dto/update-consumable.dto';
 import { FindConsumablesQueryDto } from './dto/find-consumables-query.dto';
 import { Consumable } from './entities/consumable.entity';
+import { ConsumableTag } from './entities/consumable-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { Currency } from '../currencies/entities/currency.entity';
 
@@ -28,6 +35,8 @@ export class ConsumablesService {
   constructor(
     @InjectRepository(Consumable)
     private readonly consumablesRepository: Repository<Consumable>,
+    @InjectRepository(ConsumableTag)
+    private readonly consumableTagsRepository: Repository<ConsumableTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     @InjectRepository(Currency)
@@ -38,11 +47,20 @@ export class ConsumablesService {
     return this.consumablesRepository.findOneBy({ name });
   }
 
-  findById(id: string): Promise<Consumable | null> {
-    return this.consumablesRepository.findOne({
+  async findById(id: string): Promise<Consumable | null> {
+    const consumable = await this.consumablesRepository.findOne({
       where: { id },
-      relations: { tags: true, currency: true },
+      relations: { currency: true },
     });
+    if (!consumable) {
+      return null;
+    }
+    consumable.tags = await loadOrderedTagsForOwner(
+      this.consumableTagsRepository,
+      id,
+      'consumable',
+    );
+    return consumable;
   }
 
   private async findTagsByIds(tagIds: string[]): Promise<Tag[]> {
@@ -51,7 +69,8 @@ export class ConsumablesService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   private async findCurrencyById(currencyId: string): Promise<Currency> {
@@ -86,10 +105,17 @@ export class ConsumablesService {
       price: dto.price ?? null,
       currency,
       privateInformation: dto.privateInformation ?? null,
-      tags,
     });
 
-    return this.consumablesRepository.save(consumable);
+    const savedConsumable = await this.consumablesRepository.save(consumable);
+    await createOrderedTagJunctions(
+      this.consumableTagsRepository,
+      'consumable',
+      savedConsumable,
+      tags,
+    );
+    savedConsumable.tags = tags;
+    return savedConsumable;
   }
 
   async findAllPaginated(
@@ -120,9 +146,18 @@ export class ConsumablesService {
 
     const consumables = await this.consumablesRepository.find({
       where: { id: In(ids.map((consumable) => consumable.id)) },
-      relations: { tags: true, currency: true },
+      relations: { currency: true },
       order: { name: 'ASC' },
     });
+
+    const tagsByConsumableId = await loadOrderedTagsMap(
+      this.consumableTagsRepository,
+      consumables.map((consumable) => consumable.id),
+      'consumable',
+    );
+    for (const consumable of consumables) {
+      consumable.tags = tagsByConsumableId.get(consumable.id) ?? [];
+    }
 
     const consumablesById = new Map(
       consumables.map((consumable) => [consumable.id, consumable]),
@@ -167,12 +202,20 @@ export class ConsumablesService {
     if (dto.privateInformation !== undefined) {
       consumable.privateInformation = dto.privateInformation;
     }
+    let tags = consumable.tags;
     if (dto.tagIds !== undefined) {
-      consumable.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.consumableTagsRepository,
+        'consumable',
+        consumable,
+        tags,
+      );
     }
 
-    return this.consumablesRepository.save(consumable);
+    const savedConsumable = await this.consumablesRepository.save(consumable);
+    savedConsumable.tags = tags;
+    return savedConsumable;
   }
 
   async remove(id: string): Promise<void> {

@@ -5,6 +5,12 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { Campaign } from '../campaigns/entities/campaign.entity';
 import { CampaignsService } from '../campaigns/campaigns.service';
 import { Tag } from '../tags/entities/tag.entity';
@@ -15,6 +21,7 @@ import { PlannedSessionSectionInputDto } from './dto/planned-session-section-inp
 import { UpdatePlannedSessionDto } from './dto/update-planned-session.dto';
 import { PlannedSessionSection } from './entities/planned-session-section.entity';
 import { PlannedSession } from './entities/planned-session.entity';
+import { PlannedSessionTag } from './entities/planned-session-tag.entity';
 
 export interface PaginatedPlannedSessions {
   data: PlannedSession[];
@@ -30,6 +37,8 @@ export class PlannedSessionsService {
     private readonly plannedSessionsRepository: Repository<PlannedSession>,
     @InjectRepository(PlannedSessionSection)
     private readonly plannedSessionSectionsRepository: Repository<PlannedSessionSection>,
+    @InjectRepository(PlannedSessionTag)
+    private readonly plannedSessionTagsRepository: Repository<PlannedSessionTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     private readonly campaignsService: CampaignsService,
@@ -48,14 +57,23 @@ export class PlannedSessionsService {
     }
   }
 
-  findOwnedById(
+  async findOwnedById(
     id: string,
     campaignId: string,
   ): Promise<PlannedSession | null> {
-    return this.plannedSessionsRepository.findOne({
+    const plannedSession = await this.plannedSessionsRepository.findOne({
       where: { id, campaign: { id: campaignId } },
-      relations: { tags: true, sections: true, campaign: true },
+      relations: { sections: true, campaign: true },
     });
+    if (!plannedSession) {
+      return null;
+    }
+    plannedSession.tags = await loadOrderedTagsForOwner(
+      this.plannedSessionTagsRepository,
+      id,
+      'plannedSession',
+    );
+    return plannedSession;
   }
 
   async findOneOwned(
@@ -90,7 +108,8 @@ export class PlannedSessionsService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   async create(
@@ -113,12 +132,20 @@ export class PlannedSessionsService {
     const plannedSession = this.plannedSessionsRepository.create({
       name: dto.name,
       introduction: dto.introduction ?? null,
-      tags,
       sections,
       campaign: { id: campaignId } as Campaign,
     });
 
-    return this.plannedSessionsRepository.save(plannedSession);
+    const savedPlannedSession =
+      await this.plannedSessionsRepository.save(plannedSession);
+    await createOrderedTagJunctions(
+      this.plannedSessionTagsRepository,
+      'plannedSession',
+      savedPlannedSession,
+      tags,
+    );
+    savedPlannedSession.tags = tags;
+    return savedPlannedSession;
   }
 
   async findAllPaginated(
@@ -154,8 +181,16 @@ export class PlannedSessionsService {
 
     const plannedSessions = await this.plannedSessionsRepository.find({
       where: { id: In(ids.map((session) => session.id)) },
-      relations: { tags: true },
     });
+
+    const tagsByPlannedSessionId = await loadOrderedTagsMap(
+      this.plannedSessionTagsRepository,
+      plannedSessions.map((session) => session.id),
+      'plannedSession',
+    );
+    for (const session of plannedSessions) {
+      session.tags = tagsByPlannedSessionId.get(session.id) ?? [];
+    }
 
     const plannedSessionsById = new Map(
       plannedSessions.map((session) => [session.id, session]),
@@ -181,9 +216,15 @@ export class PlannedSessionsService {
     if (dto.introduction !== undefined) {
       plannedSession.introduction = dto.introduction;
     }
+    let tags = plannedSession.tags;
     if (dto.tagIds !== undefined) {
-      plannedSession.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.plannedSessionTagsRepository,
+        'plannedSession',
+        plannedSession,
+        tags,
+      );
     }
     if (dto.sections !== undefined) {
       // Mesmo cuidado de LocationsService/CampaignsService: remover as seções
@@ -198,7 +239,10 @@ export class PlannedSessionsService {
         dto.sections.length > 0 ? this.buildSections(dto.sections) : [];
     }
 
-    return this.plannedSessionsRepository.save(plannedSession);
+    const savedPlannedSession =
+      await this.plannedSessionsRepository.save(plannedSession);
+    savedPlannedSession.tags = tags;
+    return savedPlannedSession;
   }
 
   async remove(

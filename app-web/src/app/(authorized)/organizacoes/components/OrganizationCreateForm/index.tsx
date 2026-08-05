@@ -12,16 +12,16 @@ import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
 import {
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   OrganizationFormData,
   organizationFormDefaultValues,
   organizationFormResolver,
 } from '@/shared/formSchemas';
-import { IOrganization, ITag, ITagListFilters } from '@/shared/interfaces';
+import { IOrganization, ITag } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedOrganizationStore } from '@/store';
 import {
@@ -55,11 +55,7 @@ export const OrganizationCreateForm = ({
 
   const [members, setMembers] = useState<OrganizationMemberDraft[]>([]);
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const {
     data: organizationDetail,

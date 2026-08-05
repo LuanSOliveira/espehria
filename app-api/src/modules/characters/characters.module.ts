@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Character } from './entities/character.entity';
+import { CharacterTag } from './entities/character-tag.entity';
 import { Race } from '../races/entities/race.entity';
+import { RaceTag } from '../races/entities/race-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { OrganizationMember } from '../organizations/entities/organization-member.entity';
 import { Family } from '../families/entities/family.entity';
@@ -14,7 +16,9 @@ import { CharactersService } from './characters.service';
   imports: [
     TypeOrmModule.forFeature([
       Character,
+      CharacterTag,
       Race,
+      RaceTag,
       Tag,
       OrganizationMember,
       Family,

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, Index, JoinTable, ManyToMany } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Tag } from '../../tags/entities/tag.entity';
 
@@ -16,12 +16,6 @@ export class Training extends BaseEntity {
   @ApiProperty({
     type: () => [Tag],
     description: 'Tags associadas ao treinamento',
-  })
-  @ManyToMany(() => Tag)
-  @JoinTable({
-    name: 'training_tags',
-    joinColumn: { name: 'training_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'tag_id', referencedColumnName: 'id' },
   })
   tags!: Tag[];
 }

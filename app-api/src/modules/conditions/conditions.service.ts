@@ -9,12 +9,19 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateConditionDto } from './dto/create-condition.dto';
 import { UpdateConditionDto } from './dto/update-condition.dto';
 import { FindConditionsQueryDto } from './dto/find-conditions-query.dto';
 import { ConditionSectionInputDto } from './dto/condition-section-input.dto';
 import { Condition } from './entities/condition.entity';
 import { ConditionSection } from './entities/condition-section.entity';
+import { ConditionTag } from './entities/condition-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 
 export interface PaginatedConditions {
@@ -33,17 +40,28 @@ export class ConditionsService {
     private readonly tagsRepository: Repository<Tag>,
     @InjectRepository(ConditionSection)
     private readonly conditionSectionsRepository: Repository<ConditionSection>,
+    @InjectRepository(ConditionTag)
+    private readonly conditionTagsRepository: Repository<ConditionTag>,
   ) {}
 
   findByName(name: string): Promise<Condition | null> {
     return this.conditionsRepository.findOneBy({ name });
   }
 
-  findById(id: string): Promise<Condition | null> {
-    return this.conditionsRepository.findOne({
+  async findById(id: string): Promise<Condition | null> {
+    const condition = await this.conditionsRepository.findOne({
       where: { id },
-      relations: { tags: true, sections: true },
+      relations: { sections: true },
     });
+    if (!condition) {
+      return null;
+    }
+    condition.tags = await loadOrderedTagsForOwner(
+      this.conditionTagsRepository,
+      id,
+      'condition',
+    );
+    return condition;
   }
 
   private buildSections(
@@ -64,7 +82,8 @@ export class ConditionsService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   async create(dto: CreateConditionDto): Promise<Condition> {
@@ -86,11 +105,18 @@ export class ConditionsService {
     const condition = this.conditionsRepository.create({
       name: dto.name,
       description: dto.description ?? null,
-      tags,
       sections,
     });
 
-    return this.conditionsRepository.save(condition);
+    const savedCondition = await this.conditionsRepository.save(condition);
+    await createOrderedTagJunctions(
+      this.conditionTagsRepository,
+      'condition',
+      savedCondition,
+      tags,
+    );
+    savedCondition.tags = tags;
+    return savedCondition;
   }
 
   async findAllPaginated(
@@ -121,8 +147,16 @@ export class ConditionsService {
 
     const conditions = await this.conditionsRepository.find({
       where: { id: In(ids.map((condition) => condition.id)) },
-      relations: { tags: true },
     });
+
+    const tagsByConditionId = await loadOrderedTagsMap(
+      this.conditionTagsRepository,
+      conditions.map((condition) => condition.id),
+      'condition',
+    );
+    for (const condition of conditions) {
+      condition.tags = tagsByConditionId.get(condition.id) ?? [];
+    }
 
     const conditionsById = new Map(
       conditions.map((condition) => [condition.id, condition]),
@@ -152,9 +186,15 @@ export class ConditionsService {
       condition.description = dto.description;
     }
 
+    let tags = condition.tags;
     if (dto.tagIds !== undefined) {
-      condition.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.conditionTagsRepository,
+        'condition',
+        condition,
+        tags,
+      );
     }
 
     if (dto.sections !== undefined) {
@@ -172,7 +212,9 @@ export class ConditionsService {
         dto.sections.length > 0 ? this.buildSections(dto.sections) : [];
     }
 
-    return this.conditionsRepository.save(condition);
+    const savedCondition = await this.conditionsRepository.save(condition);
+    savedCondition.tags = tags;
+    return savedCondition;
   }
 
   async remove(id: string): Promise<void> {

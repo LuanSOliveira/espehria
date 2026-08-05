@@ -46,7 +46,7 @@ export class RaceResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas à raça',
+    description: 'Tags associadas à raça, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

@@ -185,7 +185,7 @@ export class DivinityResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas à divindade',
+    description: 'Tags associadas à divindade, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

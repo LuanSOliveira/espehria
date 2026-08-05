@@ -1,13 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
-} from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { DivinityCategory } from './divinity-category.entity';
 import { Tag } from '../../tags/entities/tag.entity';
@@ -102,12 +94,6 @@ export class Divinity extends BaseEntity {
   @ApiProperty({
     type: () => [Tag],
     description: 'Tags associadas à divindade',
-  })
-  @ManyToMany(() => Tag)
-  @JoinTable({
-    name: 'divinity_tags',
-    joinColumn: { name: 'divinity_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'tag_id', referencedColumnName: 'id' },
   })
   tags!: Tag[];
 }

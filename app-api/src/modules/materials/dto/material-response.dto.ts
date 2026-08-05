@@ -47,7 +47,7 @@ export class MaterialResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas ao material',
+    description: 'Tags associadas ao material, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

@@ -10,10 +10,17 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateEraDto } from './dto/create-era.dto';
 import { UpdateEraDto } from './dto/update-era.dto';
 import { FindErasQueryDto } from './dto/find-eras-query.dto';
 import { Era } from './entities/era.entity';
+import { EraTag } from './entities/era-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 
 export interface PaginatedEras {
@@ -28,6 +35,8 @@ export class ErasService {
   constructor(
     @InjectRepository(Era)
     private readonly erasRepository: Repository<Era>,
+    @InjectRepository(EraTag)
+    private readonly eraTagsRepository: Repository<EraTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     private readonly dataSource: DataSource,
@@ -37,11 +46,17 @@ export class ErasService {
     return this.erasRepository.findOneBy({ name });
   }
 
-  findById(id: string): Promise<Era | null> {
-    return this.erasRepository.findOne({
-      where: { id },
-      relations: { tags: true },
-    });
+  async findById(id: string): Promise<Era | null> {
+    const era = await this.erasRepository.findOneBy({ id });
+    if (!era) {
+      return null;
+    }
+    era.tags = await loadOrderedTagsForOwner(
+      this.eraTagsRepository,
+      id,
+      'era',
+    );
+    return era;
   }
 
   findAllOrdered(): Promise<Era[]> {
@@ -57,7 +72,8 @@ export class ErasService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   async create(dto: CreateEraDto): Promise<Era> {
@@ -93,10 +109,17 @@ export class ErasService {
         description: dto.description ?? null,
         privateInformation: dto.privateInformation ?? null,
         order: dto.order,
-        tags,
       });
 
-      return erasRepository.save(era);
+      const savedEra = await erasRepository.save(era);
+      await createOrderedTagJunctions(
+        manager.getRepository(EraTag),
+        'era',
+        savedEra,
+        tags,
+      );
+      savedEra.tags = tags;
+      return savedEra;
     });
   }
 
@@ -125,9 +148,17 @@ export class ErasService {
 
     const eras = await this.erasRepository.find({
       where: { id: In(ids.map((era) => era.id)) },
-      relations: { tags: true },
       order: { order: 'ASC' },
     });
+
+    const tagsByEraId = await loadOrderedTagsMap(
+      this.eraTagsRepository,
+      eras.map((era) => era.id),
+      'era',
+    );
+    for (const era of eras) {
+      era.tags = tagsByEraId.get(era.id) ?? [];
+    }
 
     const erasById = new Map(eras.map((era) => [era.id, era]));
     const data = ids
@@ -141,13 +172,15 @@ export class ErasService {
     return this.dataSource.transaction(async (manager) => {
       const erasRepository = manager.getRepository(Era);
 
-      const era = await erasRepository.findOne({
-        where: { id },
-        relations: { tags: true },
-      });
+      const era = await erasRepository.findOneBy({ id });
       if (!era) {
         throw new NotFoundException('Era não encontrada.');
       }
+      era.tags = await loadOrderedTagsForOwner(
+        manager.getRepository(EraTag),
+        id,
+        'era',
+      );
 
       if (dto.name && dto.name !== era.name) {
         const existing = await erasRepository.findOneBy({ name: dto.name });
@@ -166,11 +199,18 @@ export class ErasService {
       if (dto.privateInformation !== undefined) {
         era.privateInformation = dto.privateInformation;
       }
+      let tags = era.tags;
       if (dto.tagIds !== undefined) {
-        era.tags =
+        tags =
           dto.tagIds.length > 0
             ? await this.findTagsByIds(dto.tagIds, manager.getRepository(Tag))
             : [];
+        await replaceOrderedTagJunctions(
+          manager.getRepository(EraTag),
+          'era',
+          era,
+          tags,
+        );
       }
 
       if (dto.order !== undefined && dto.order !== era.order) {
@@ -197,7 +237,9 @@ export class ErasService {
         era.order = newOrder;
       }
 
-      return erasRepository.save(era);
+      const savedEra = await erasRepository.save(era);
+      savedEra.tags = tags;
+      return savedEra;
     });
   }
 

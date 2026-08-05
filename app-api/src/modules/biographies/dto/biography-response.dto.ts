@@ -31,7 +31,7 @@ export class BiographyResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas à biografia',
+    description: 'Tags associadas à biografia, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

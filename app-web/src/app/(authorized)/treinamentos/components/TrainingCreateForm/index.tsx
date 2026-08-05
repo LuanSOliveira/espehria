@@ -14,9 +14,9 @@ import { EntityReferenceListField } from '@/shared/components/EntityReferenceLis
 import { ImprovementDefectListField } from '@/shared/components/ImprovementDefectListField';
 import {
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   TrainingFormData,
@@ -27,7 +27,6 @@ import {
   IEntityReference,
   IImprovementDefectItem,
   ITag,
-  ITagListFilters,
   ITraining,
 } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
@@ -73,11 +72,7 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
   );
   const [flaws, setFlaws] = useState<IImprovementDefectItem[]>([]);
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const {
     data: trainingDetail,

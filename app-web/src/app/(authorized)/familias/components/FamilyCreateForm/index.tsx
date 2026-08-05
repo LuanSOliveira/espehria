@@ -22,6 +22,7 @@ import {
   useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   FamilyFormData,
@@ -34,7 +35,6 @@ import {
   ICharacterSummary,
   IFamily,
   ITag,
-  ITagListFilters,
   FamilyRelationshipType,
 } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
@@ -96,11 +96,7 @@ export const FamilyCreateForm = ({ onSaved }: FamilyCreateFormProps) => {
   );
   const [characterSearchText, setCharacterSearchText] = useState('');
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const { data: characterSearchData } = useGetEntityList<
     ICharacterListItem,

@@ -36,7 +36,7 @@ export class LocationResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas ao local',
+    description: 'Tags associadas ao local, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

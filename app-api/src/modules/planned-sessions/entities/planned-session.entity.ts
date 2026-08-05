@@ -1,13 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
-  OneToMany,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Campaign } from '../../campaigns/entities/campaign.entity';
 import { Tag } from '../../tags/entities/tag.entity';
@@ -33,12 +25,6 @@ export class PlannedSession extends BaseEntity {
   @ApiProperty({
     type: () => [Tag],
     description: 'Tags associadas à sessão planejada',
-  })
-  @ManyToMany(() => Tag)
-  @JoinTable({
-    name: 'planned_session_tags',
-    joinColumn: { name: 'planned_session_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'tag_id', referencedColumnName: 'id' },
   })
   tags!: Tag[];
 

@@ -9,11 +9,19 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateCharacterDto } from './dto/create-character.dto';
 import { UpdateCharacterDto } from './dto/update-character.dto';
 import { FindCharactersQueryDto } from './dto/find-characters-query.dto';
 import { Character } from './entities/character.entity';
+import { CharacterTag } from './entities/character-tag.entity';
 import { Race } from '../races/entities/race.entity';
+import { RaceTag } from '../races/entities/race-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { OrganizationMember } from '../organizations/entities/organization-member.entity';
 import { Organization } from '../organizations/entities/organization.entity';
@@ -33,8 +41,12 @@ export class CharactersService {
   constructor(
     @InjectRepository(Character)
     private readonly charactersRepository: Repository<Character>,
+    @InjectRepository(CharacterTag)
+    private readonly characterTagsRepository: Repository<CharacterTag>,
     @InjectRepository(Race)
     private readonly racesRepository: Repository<Race>,
+    @InjectRepository(RaceTag)
+    private readonly raceTagsRepository: Repository<RaceTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     @InjectRepository(OrganizationMember)
@@ -48,16 +60,31 @@ export class CharactersService {
     private readonly dataSource: DataSource,
   ) {}
 
-  findById(id: string): Promise<Character | null> {
-    return this.charactersRepository.findOne({
+  async findById(id: string): Promise<Character | null> {
+    const character = await this.charactersRepository.findOne({
       where: { id },
       relations: {
-        race: { category: true, tags: true },
-        tags: true,
+        race: { category: true },
         family: true,
         secondaryFamily: true,
       },
     });
+    if (!character) {
+      return null;
+    }
+    character.tags = await loadOrderedTagsForOwner(
+      this.characterTagsRepository,
+      id,
+      'character',
+    );
+    if (character.race) {
+      character.race.tags = await loadOrderedTagsForOwner(
+        this.raceTagsRepository,
+        character.race.id,
+        'race',
+      );
+    }
+    return character;
   }
 
   async findOrganizationsForCharacter(
@@ -73,14 +100,16 @@ export class CharactersService {
   private async findRaceById(
     id: string,
     repository: Repository<Race> = this.racesRepository,
+    raceTagsRepository: Repository<RaceTag> = this.raceTagsRepository,
   ): Promise<Race> {
     const race = await repository.findOne({
       where: { id },
-      relations: { category: true, tags: true },
+      relations: { category: true },
     });
     if (!race) {
       throw new NotFoundException('Raça não encontrada.');
     }
+    race.tags = await loadOrderedTagsForOwner(raceTagsRepository, id, 'race');
     return race;
   }
 
@@ -104,7 +133,8 @@ export class CharactersService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   private assertFamiliesAreDifferent(
@@ -171,12 +201,19 @@ export class CharactersService {
       privateInformation: dto.privateInformation ?? null,
       isDead: dto.isDead ?? false,
       race,
-      tags,
       family,
       secondaryFamily,
     });
 
-    return this.charactersRepository.save(character);
+    const savedCharacter = await this.charactersRepository.save(character);
+    await createOrderedTagJunctions(
+      this.characterTagsRepository,
+      'character',
+      savedCharacter,
+      tags,
+    );
+    savedCharacter.tags = tags;
+    return savedCharacter;
   }
 
   async findAllPaginated(
@@ -207,9 +244,29 @@ export class CharactersService {
 
     const characters = await this.charactersRepository.find({
       where: { id: In(ids.map((character) => character.id)) },
-      relations: { race: { category: true, tags: true }, tags: true },
+      relations: { race: { category: true } },
       order: { name: 'ASC' },
     });
+
+    const tagsByCharacterId = await loadOrderedTagsMap(
+      this.characterTagsRepository,
+      characters.map((character) => character.id),
+      'character',
+    );
+    const raceIds = characters
+      .map((character) => character.race?.id)
+      .filter((raceId): raceId is string => raceId !== undefined);
+    const tagsByRaceId = await loadOrderedTagsMap(
+      this.raceTagsRepository,
+      raceIds,
+      'race',
+    );
+    for (const character of characters) {
+      character.tags = tagsByCharacterId.get(character.id) ?? [];
+      if (character.race) {
+        character.race.tags = tagsByRaceId.get(character.race.id) ?? [];
+      }
+    }
 
     const charactersById = new Map(
       characters.map((character) => [character.id, character]),
@@ -224,6 +281,7 @@ export class CharactersService {
   async update(id: string, dto: UpdateCharacterDto): Promise<Character> {
     await this.dataSource.transaction(async (manager) => {
       const charactersRepository = manager.getRepository(Character);
+      const characterTagsRepository = manager.getRepository(CharacterTag);
       const racesRepository = manager.getRepository(Race);
       const tagsRepository = manager.getRepository(Tag);
       const familiesRepository = manager.getRepository(Family);
@@ -234,14 +292,25 @@ export class CharactersService {
       const character = await charactersRepository.findOne({
         where: { id },
         relations: {
-          race: { category: true, tags: true },
-          tags: true,
+          race: { category: true },
           family: true,
           secondaryFamily: true,
         },
       });
       if (!character) {
         throw new NotFoundException('Personagem não encontrado.');
+      }
+      character.tags = await loadOrderedTagsForOwner(
+        characterTagsRepository,
+        id,
+        'character',
+      );
+      if (character.race) {
+        character.race.tags = await loadOrderedTagsForOwner(
+          this.raceTagsRepository,
+          character.race.id,
+          'race',
+        );
       }
 
       if (dto.name !== undefined) {
@@ -264,11 +333,18 @@ export class CharactersService {
           ? await this.findRaceById(dto.raceId, racesRepository)
           : null;
       }
+      let tags = character.tags;
       if (dto.tagIds !== undefined) {
-        character.tags =
+        tags =
           dto.tagIds.length > 0
             ? await this.findTagsByIds(dto.tagIds, tagsRepository)
             : [];
+        await replaceOrderedTagJunctions(
+          characterTagsRepository,
+          'character',
+          character,
+          tags,
+        );
       }
 
       const nextFamilyId =

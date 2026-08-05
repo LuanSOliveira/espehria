@@ -47,7 +47,7 @@ export class AmmunitionResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas ao item de munição',
+    description: 'Tags associadas ao item de munição, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

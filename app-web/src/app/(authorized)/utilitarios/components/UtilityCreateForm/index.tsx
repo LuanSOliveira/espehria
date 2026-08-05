@@ -14,16 +14,16 @@ import { DefaultText } from '@/shared/components/Texts';
 import {
   useCurrenciesQuery,
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   UtilityFormData,
   utilityFormDefaultValues,
   utilityFormResolver,
 } from '@/shared/formSchemas';
-import { ICurrency, IUtility, ITag, ITagListFilters } from '@/shared/interfaces';
+import { ICurrency, IUtility, ITag } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedUtilityStore } from '@/store';
 
@@ -49,11 +49,7 @@ export const UtilityCreateForm = ({ onSaved }: UtilityCreateFormProps) => {
   );
   const isEditMode = !!selectedUtility;
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const { data: currenciesData } = useCurrenciesQuery();
   const currencyOptions = currenciesData ?? [];

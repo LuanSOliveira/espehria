@@ -36,12 +36,6 @@ export class Race extends BaseEntity {
   privateInformation!: string | null;
 
   @ApiProperty({ type: () => [Tag], description: 'Tags associadas à raça' })
-  @ManyToMany(() => Tag)
-  @JoinTable({
-    name: 'race_tags',
-    joinColumn: { name: 'race_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'tag_id', referencedColumnName: 'id' },
-  })
   tags!: Tag[];
 
   @ApiProperty({

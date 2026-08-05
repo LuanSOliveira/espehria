@@ -9,10 +9,17 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateTechniqueDto } from './dto/create-technique.dto';
 import { UpdateTechniqueDto } from './dto/update-technique.dto';
 import { FindTechniquesQueryDto } from './dto/find-techniques-query.dto';
 import { Technique } from './entities/technique.entity';
+import { TechniqueTag } from './entities/technique-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { EntityLinksService } from '../entity-links/entity-links.service';
 import { EntityLinkType } from '../entity-links/enums/entity-link-type.enum';
@@ -38,6 +45,8 @@ export class TechniquesService {
   constructor(
     @InjectRepository(Technique)
     private readonly techniquesRepository: Repository<Technique>,
+    @InjectRepository(TechniqueTag)
+    private readonly techniqueTagsRepository: Repository<TechniqueTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     private readonly entityLinksService: EntityLinksService,
@@ -48,13 +57,15 @@ export class TechniquesService {
   }
 
   async findById(id: string): Promise<TechniqueWithReferences | null> {
-    const technique = await this.techniquesRepository.findOne({
-      where: { id },
-      relations: { tags: true },
-    });
+    const technique = await this.techniquesRepository.findOneBy({ id });
     if (!technique) {
       return null;
     }
+    technique.tags = await loadOrderedTagsForOwner(
+      this.techniqueTagsRepository,
+      id,
+      'technique',
+    );
 
     const { improvedFrom, requirements } =
       await this.entityLinksService.loadReferencesFor(
@@ -71,7 +82,8 @@ export class TechniquesService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   async create(dto: CreateTechniqueDto): Promise<TechniqueWithReferences> {
@@ -102,10 +114,16 @@ export class TechniquesService {
       level: dto.level,
       referenceImage: dto.referenceImage ?? null,
       description: dto.description ?? null,
-      tags,
     });
 
     const savedTechnique = await this.techniquesRepository.save(technique);
+    await createOrderedTagJunctions(
+      this.techniqueTagsRepository,
+      'technique',
+      savedTechnique,
+      tags,
+    );
+    savedTechnique.tags = tags;
 
     await this.entityLinksService.replaceLinks(
       ReferenceableEntityType.TECHNIQUE,
@@ -157,9 +175,17 @@ export class TechniquesService {
 
     const techniques = await this.techniquesRepository.find({
       where: { id: In(ids.map((technique) => technique.id)) },
-      relations: { tags: true },
       order: { name: 'ASC' },
     });
+
+    const tagsByTechniqueId = await loadOrderedTagsMap(
+      this.techniqueTagsRepository,
+      techniques.map((technique) => technique.id),
+      'technique',
+    );
+    for (const technique of techniques) {
+      technique.tags = tagsByTechniqueId.get(technique.id) ?? [];
+    }
 
     const techniquesById = new Map(
       techniques.map((technique) => [technique.id, technique]),
@@ -175,13 +201,15 @@ export class TechniquesService {
     id: string,
     dto: UpdateTechniqueDto,
   ): Promise<TechniqueWithReferences> {
-    const technique = await this.techniquesRepository.findOne({
-      where: { id },
-      relations: { tags: true },
-    });
+    const technique = await this.techniquesRepository.findOneBy({ id });
     if (!technique) {
       throw new NotFoundException('Técnica não encontrada.');
     }
+    technique.tags = await loadOrderedTagsForOwner(
+      this.techniqueTagsRepository,
+      id,
+      'technique',
+    );
 
     if (dto.name && dto.name !== technique.name) {
       const existing = await this.findByName(dto.name);
@@ -200,9 +228,15 @@ export class TechniquesService {
     if (dto.description !== undefined) {
       technique.description = dto.description;
     }
+    let tags = technique.tags;
     if (dto.tagIds !== undefined) {
-      technique.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.techniqueTagsRepository,
+        'technique',
+        technique,
+        tags,
+      );
     }
 
     let effectiveImprovedFrom = dto.improvedFrom;
@@ -249,6 +283,7 @@ export class TechniquesService {
     }
 
     const savedTechnique = await this.techniquesRepository.save(technique);
+    savedTechnique.tags = tags;
 
     if (dto.improvedFrom !== undefined) {
       await this.entityLinksService.replaceLinks(

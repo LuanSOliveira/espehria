@@ -14,16 +14,16 @@ import { DefaultText } from '@/shared/components/Texts';
 import {
   useErasAllQuery,
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   EraFormData,
   eraFormDefaultValues,
   eraFormResolver,
 } from '@/shared/formSchemas';
-import { IEra, ITag, ITagListFilters } from '@/shared/interfaces';
+import { IEra, ITag } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedEraStore } from '@/store';
 
@@ -40,11 +40,7 @@ export const EraCreateForm = ({ onSaved }: EraCreateFormProps) => {
   const selectedEra = useSelectedEraStore((state) => state.selectedEra);
   const isEditMode = !!selectedEra;
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const { data: erasAll } = useErasAllQuery();
   const totalErasCount = erasAll?.length ?? 0;

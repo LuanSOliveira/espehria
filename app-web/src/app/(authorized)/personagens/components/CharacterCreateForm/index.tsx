@@ -17,6 +17,7 @@ import {
   useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   CharacterFormData,
@@ -30,7 +31,6 @@ import {
   IRaceListFilters,
   IRaceListItem,
   ITag,
-  ITagListFilters,
 } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedCharacterStore } from '@/store';
@@ -61,11 +61,7 @@ export const CharacterCreateForm = ({ onSaved }: CharacterCreateFormProps) => {
   );
   const isEditMode = !!selectedCharacter;
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const { data: racesData } = useGetEntityList<IRaceListItem, IRaceListFilters>({
     url: '/races',

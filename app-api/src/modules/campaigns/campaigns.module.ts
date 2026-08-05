@@ -7,10 +7,18 @@ import { CampaignsController } from './campaigns.controller';
 import { CampaignsService } from './campaigns.service';
 import { CampaignSection } from './entities/campaign-section.entity';
 import { Campaign } from './entities/campaign.entity';
+import { CampaignTag } from './entities/campaign-tag.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Campaign, CampaignSection, Tag, User, Sheet]),
+    TypeOrmModule.forFeature([
+      Campaign,
+      CampaignSection,
+      CampaignTag,
+      Tag,
+      User,
+      Sheet,
+    ]),
   ],
   controllers: [CampaignsController],
   providers: [CampaignsService],

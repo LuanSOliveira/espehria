@@ -10,11 +10,18 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { FindOrganizationsQueryDto } from './dto/find-organizations-query.dto';
 import { OrganizationMemberInputDto } from './dto/organization-member-input.dto';
 import { Organization } from './entities/organization.entity';
+import { OrganizationTag } from './entities/organization-tag.entity';
 import { OrganizationMember } from './entities/organization-member.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { Character } from '../characters/entities/character.entity';
@@ -33,6 +40,8 @@ export class OrganizationsService {
     private readonly organizationsRepository: Repository<Organization>,
     @InjectRepository(OrganizationMember)
     private readonly organizationMembersRepository: Repository<OrganizationMember>,
+    @InjectRepository(OrganizationTag)
+    private readonly organizationTagsRepository: Repository<OrganizationTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     @InjectRepository(Character)
@@ -43,11 +52,20 @@ export class OrganizationsService {
     return this.organizationsRepository.findOneBy({ name });
   }
 
-  findById(id: string): Promise<Organization | null> {
-    return this.organizationsRepository.findOne({
+  async findById(id: string): Promise<Organization | null> {
+    const organization = await this.organizationsRepository.findOne({
       where: { id },
-      relations: { tags: true, members: { character: true } },
+      relations: { members: { character: true } },
     });
+    if (!organization) {
+      return null;
+    }
+    organization.tags = await loadOrderedTagsForOwner(
+      this.organizationTagsRepository,
+      id,
+      'organization',
+    );
+    return organization;
   }
 
   private async findTagsByIds(tagIds: string[]): Promise<Tag[]> {
@@ -56,7 +74,8 @@ export class OrganizationsService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   private async findCharactersByIds(ids: string[]): Promise<Character[]> {
@@ -199,11 +218,19 @@ export class OrganizationsService {
       referenceImage: dto.referenceImage ?? null,
       description: dto.description ?? null,
       privateInformation: dto.privateInformation ?? null,
-      tags,
       members,
     });
 
-    return this.organizationsRepository.save(organization);
+    const savedOrganization =
+      await this.organizationsRepository.save(organization);
+    await createOrderedTagJunctions(
+      this.organizationTagsRepository,
+      'organization',
+      savedOrganization,
+      tags,
+    );
+    savedOrganization.tags = tags;
+    return savedOrganization;
   }
 
   async findAllPaginated(
@@ -234,9 +261,17 @@ export class OrganizationsService {
 
     const organizations = await this.organizationsRepository.find({
       where: { id: In(ids.map((organization) => organization.id)) },
-      relations: { tags: true },
       order: { name: 'ASC' },
     });
+
+    const tagsByOrganizationId = await loadOrderedTagsMap(
+      this.organizationTagsRepository,
+      organizations.map((organization) => organization.id),
+      'organization',
+    );
+    for (const organization of organizations) {
+      organization.tags = tagsByOrganizationId.get(organization.id) ?? [];
+    }
 
     const organizationsById = new Map(
       organizations.map((organization) => [organization.id, organization]),
@@ -275,8 +310,14 @@ export class OrganizationsService {
       organization.privateInformation = dto.privateInformation;
     }
     if (dto.tagIds !== undefined) {
-      organization.tags =
+      const tags =
         dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.organizationTagsRepository,
+        'organization',
+        organization,
+        tags,
+      );
     }
 
     await this.organizationsRepository.save(organization);

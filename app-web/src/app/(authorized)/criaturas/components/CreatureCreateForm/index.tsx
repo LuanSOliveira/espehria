@@ -14,21 +14,16 @@ import { DefaultText } from '@/shared/components/Texts';
 import {
   useCreatureCategoriesQuery,
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   CreatureFormData,
   creatureFormDefaultValues,
   creatureFormResolver,
 } from '@/shared/formSchemas';
-import {
-  ICreature,
-  ICreatureCategory,
-  ITag,
-  ITagListFilters,
-} from '@/shared/interfaces';
+import { ICreature, ICreatureCategory, ITag } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedCreatureStore } from '@/store';
 
@@ -48,11 +43,7 @@ export const CreatureCreateForm = ({ onSaved }: CreatureCreateFormProps) => {
 
   const { data: categories } = useCreatureCategoriesQuery();
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const {
     data: creatureDetail,

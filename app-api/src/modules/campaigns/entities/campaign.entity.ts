@@ -42,12 +42,6 @@ export class Campaign extends BaseEntity {
     type: () => [Tag],
     description: 'Tags associadas à campanha',
   })
-  @ManyToMany(() => Tag)
-  @JoinTable({
-    name: 'campaign_tags',
-    joinColumn: { name: 'campaign_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'tag_id', referencedColumnName: 'id' },
-  })
   tags!: Tag[];
 
   @ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })

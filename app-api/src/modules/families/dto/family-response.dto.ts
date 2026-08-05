@@ -45,7 +45,7 @@ export class FamilyResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas à família',
+    description: 'Tags associadas à família, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

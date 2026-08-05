@@ -28,7 +28,7 @@ export class SkillResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas à perícia',
+    description: 'Tags associadas à perícia, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

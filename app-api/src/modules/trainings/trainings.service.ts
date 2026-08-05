@@ -9,10 +9,17 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateTrainingDto } from './dto/create-training.dto';
 import { UpdateTrainingDto } from './dto/update-training.dto';
 import { FindTrainingsQueryDto } from './dto/find-trainings-query.dto';
 import { Training } from './entities/training.entity';
+import { TrainingTag } from './entities/training-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { EntityLinksService } from '../entity-links/entity-links.service';
 import { EntityLinkType } from '../entity-links/enums/entity-link-type.enum';
@@ -46,6 +53,8 @@ export class TrainingsService {
   constructor(
     @InjectRepository(Training)
     private readonly trainingsRepository: Repository<Training>,
+    @InjectRepository(TrainingTag)
+    private readonly trainingTagsRepository: Repository<TrainingTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     private readonly entityLinksService: EntityLinksService,
@@ -57,13 +66,15 @@ export class TrainingsService {
   }
 
   async findById(id: string): Promise<TrainingWithReferences | null> {
-    const training = await this.trainingsRepository.findOne({
-      where: { id },
-      relations: { tags: true },
-    });
+    const training = await this.trainingsRepository.findOneBy({ id });
     if (!training) {
       return null;
     }
+    training.tags = await loadOrderedTagsForOwner(
+      this.trainingTagsRepository,
+      id,
+      'training',
+    );
 
     const { improvedFrom, requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
@@ -92,7 +103,8 @@ export class TrainingsService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   async create(dto: CreateTrainingDto): Promise<TrainingWithReferences> {
@@ -137,10 +149,16 @@ export class TrainingsService {
     const training = this.trainingsRepository.create({
       name: dto.name,
       description: dto.description ?? null,
-      tags,
     });
 
     const savedTraining = await this.trainingsRepository.save(training);
+    await createOrderedTagJunctions(
+      this.trainingTagsRepository,
+      'training',
+      savedTraining,
+      tags,
+    );
+    savedTraining.tags = tags;
 
     await this.entityLinksService.replaceLinks(
       ReferenceableEntityType.TRAINING,
@@ -225,9 +243,17 @@ export class TrainingsService {
 
     const trainings = await this.trainingsRepository.find({
       where: { id: In(ids.map((training) => training.id)) },
-      relations: { tags: true },
       order: { name: 'ASC' },
     });
+
+    const tagsByTrainingId = await loadOrderedTagsMap(
+      this.trainingTagsRepository,
+      trainings.map((training) => training.id),
+      'training',
+    );
+    for (const training of trainings) {
+      training.tags = tagsByTrainingId.get(training.id) ?? [];
+    }
 
     const trainingsById = new Map(
       trainings.map((training) => [training.id, training]),
@@ -243,13 +269,15 @@ export class TrainingsService {
     id: string,
     dto: UpdateTrainingDto,
   ): Promise<TrainingWithReferences> {
-    const training = await this.trainingsRepository.findOne({
-      where: { id },
-      relations: { tags: true },
-    });
+    const training = await this.trainingsRepository.findOneBy({ id });
     if (!training) {
       throw new NotFoundException('Treinamento não encontrado.');
     }
+    training.tags = await loadOrderedTagsForOwner(
+      this.trainingTagsRepository,
+      id,
+      'training',
+    );
 
     if (dto.name && dto.name !== training.name) {
       const existing = await this.findByName(dto.name);
@@ -262,9 +290,15 @@ export class TrainingsService {
     if (dto.description !== undefined) {
       training.description = dto.description;
     }
+    let tags = training.tags;
     if (dto.tagIds !== undefined) {
-      training.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.trainingTagsRepository,
+        'training',
+        training,
+        tags,
+      );
     }
 
     let effectiveImprovedFrom = dto.improvedFrom;
@@ -366,6 +400,7 @@ export class TrainingsService {
     });
 
     const savedTraining = await this.trainingsRepository.save(training);
+    savedTraining.tags = tags;
 
     if (dto.improvedFrom !== undefined) {
       await this.entityLinksService.replaceLinks(

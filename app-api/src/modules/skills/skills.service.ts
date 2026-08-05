@@ -9,12 +9,19 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import { FindSkillsQueryDto } from './dto/find-skills-query.dto';
 import { SkillSectionInputDto } from './dto/skill-section-input.dto';
 import { Skill } from './entities/skill.entity';
 import { SkillSection } from './entities/skill-section.entity';
+import { SkillTag } from './entities/skill-tag.entity';
 import { Attribute } from '../attributes/entities/attribute.entity';
 import { Tag } from '../tags/entities/tag.entity';
 
@@ -36,17 +43,28 @@ export class SkillsService {
     private readonly skillSectionsRepository: Repository<SkillSection>,
     @InjectRepository(Attribute)
     private readonly attributesRepository: Repository<Attribute>,
+    @InjectRepository(SkillTag)
+    private readonly skillTagsRepository: Repository<SkillTag>,
   ) {}
 
   findByName(name: string): Promise<Skill | null> {
     return this.skillsRepository.findOneBy({ name });
   }
 
-  findById(id: string): Promise<Skill | null> {
-    return this.skillsRepository.findOne({
+  async findById(id: string): Promise<Skill | null> {
+    const skill = await this.skillsRepository.findOne({
       where: { id },
-      relations: { keyAttribute: true, tags: true, sections: true },
+      relations: { keyAttribute: true, sections: true },
     });
+    if (!skill) {
+      return null;
+    }
+    skill.tags = await loadOrderedTagsForOwner(
+      this.skillTagsRepository,
+      id,
+      'skill',
+    );
+    return skill;
   }
 
   findKeyAttributeById(id: string): Promise<Attribute | null> {
@@ -69,7 +87,8 @@ export class SkillsService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   async create(dto: CreateSkillDto): Promise<Skill> {
@@ -97,11 +116,18 @@ export class SkillsService {
       name: dto.name,
       description: dto.description ?? null,
       keyAttribute,
-      tags,
       sections,
     });
 
-    return this.skillsRepository.save(skill);
+    const savedSkill = await this.skillsRepository.save(skill);
+    await createOrderedTagJunctions(
+      this.skillTagsRepository,
+      'skill',
+      savedSkill,
+      tags,
+    );
+    savedSkill.tags = tags;
+    return savedSkill;
   }
 
   async findAllPaginated(query: FindSkillsQueryDto): Promise<PaginatedSkills> {
@@ -137,8 +163,17 @@ export class SkillsService {
 
     const skills = await this.skillsRepository.find({
       where: { id: In(ids.map((skill) => skill.id)) },
-      relations: { keyAttribute: true, tags: true },
+      relations: { keyAttribute: true },
     });
+
+    const tagsBySkillId = await loadOrderedTagsMap(
+      this.skillTagsRepository,
+      skills.map((skill) => skill.id),
+      'skill',
+    );
+    for (const skill of skills) {
+      skill.tags = tagsBySkillId.get(skill.id) ?? [];
+    }
 
     const skillsById = new Map(skills.map((skill) => [skill.id, skill]));
     const data = ids
@@ -174,9 +209,15 @@ export class SkillsService {
       skill.keyAttribute = keyAttribute;
     }
 
+    let tags = skill.tags;
     if (dto.tagIds !== undefined) {
-      skill.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.skillTagsRepository,
+        'skill',
+        skill,
+        tags,
+      );
     }
 
     if (dto.sections !== undefined) {
@@ -194,7 +235,9 @@ export class SkillsService {
         dto.sections.length > 0 ? this.buildSections(dto.sections) : [];
     }
 
-    return this.skillsRepository.save(skill);
+    const savedSkill = await this.skillsRepository.save(skill);
+    savedSkill.tags = tags;
+    return savedSkill;
   }
 
   async remove(id: string): Promise<void> {

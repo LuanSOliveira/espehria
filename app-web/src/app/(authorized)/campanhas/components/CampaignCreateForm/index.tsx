@@ -12,16 +12,16 @@ import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
 import {
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   CampaignFormData,
   campaignFormDefaultValues,
   campaignFormResolver,
 } from '@/shared/formSchemas';
-import { ICampaign, ITag, ITagListFilters, IUser } from '@/shared/interfaces';
+import { ICampaign, ITag, IUser } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedCampaignStore } from '@/store';
 import { CampaignSectionsField } from '../CampaignSectionsField';
@@ -51,11 +51,7 @@ export const CampaignCreateForm = ({ onSaved }: CampaignCreateFormProps) => {
 
   const [allowedUsers, setAllowedUsers] = useState<IUser[]>([]);
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const {
     data: campaignDetail,

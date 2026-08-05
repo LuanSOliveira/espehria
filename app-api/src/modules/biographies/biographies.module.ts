@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Biography } from './entities/biography.entity';
+import { BiographyTag } from './entities/biography-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { EntityLinksModule } from '../entity-links/entity-links.module';
 import { ImprovementFlawsModule } from '../improvement-flaws/improvement-flaws.module';
@@ -9,7 +10,7 @@ import { BiographiesService } from './biographies.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Biography, Tag]),
+    TypeOrmModule.forFeature([Biography, BiographyTag, Tag]),
     EntityLinksModule,
     ImprovementFlawsModule,
   ],

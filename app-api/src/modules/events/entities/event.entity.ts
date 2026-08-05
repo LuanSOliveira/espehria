@@ -1,12 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Era } from '../../eras/entities/era.entity';
 import { Tag } from '../../tags/entities/tag.entity';
@@ -33,12 +26,6 @@ export class Event extends BaseEntity {
   privateInformation!: string | null;
 
   @ApiProperty({ type: () => [Tag], description: 'Tags associadas ao evento' })
-  @ManyToMany(() => Tag)
-  @JoinTable({
-    name: 'event_tags',
-    joinColumn: { name: 'event_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'tag_id', referencedColumnName: 'id' },
-  })
   tags!: Tag[];
 
   @ApiProperty({ type: () => Era, description: 'Era vinculada ao evento' })

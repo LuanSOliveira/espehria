@@ -9,10 +9,17 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { FindEquipmentQueryDto } from './dto/find-equipment-query.dto';
 import { Equipment } from './entities/equipment.entity';
+import { EquipmentTag } from './entities/equipment-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { Currency } from '../currencies/entities/currency.entity';
 
@@ -28,6 +35,8 @@ export class EquipmentService {
   constructor(
     @InjectRepository(Equipment)
     private readonly equipmentRepository: Repository<Equipment>,
+    @InjectRepository(EquipmentTag)
+    private readonly equipmentTagsRepository: Repository<EquipmentTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     @InjectRepository(Currency)
@@ -38,11 +47,20 @@ export class EquipmentService {
     return this.equipmentRepository.findOneBy({ name });
   }
 
-  findById(id: string): Promise<Equipment | null> {
-    return this.equipmentRepository.findOne({
+  async findById(id: string): Promise<Equipment | null> {
+    const equipment = await this.equipmentRepository.findOne({
       where: { id },
-      relations: { tags: true, currency: true },
+      relations: { currency: true },
     });
+    if (!equipment) {
+      return null;
+    }
+    equipment.tags = await loadOrderedTagsForOwner(
+      this.equipmentTagsRepository,
+      id,
+      'equipment',
+    );
+    return equipment;
   }
 
   private async findTagsByIds(tagIds: string[]): Promise<Tag[]> {
@@ -51,7 +69,8 @@ export class EquipmentService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   private async findCurrencyById(currencyId: string): Promise<Currency> {
@@ -86,10 +105,17 @@ export class EquipmentService {
       price: dto.price ?? null,
       currency,
       privateInformation: dto.privateInformation ?? null,
-      tags,
     });
 
-    return this.equipmentRepository.save(equipment);
+    const savedEquipment = await this.equipmentRepository.save(equipment);
+    await createOrderedTagJunctions(
+      this.equipmentTagsRepository,
+      'equipment',
+      savedEquipment,
+      tags,
+    );
+    savedEquipment.tags = tags;
+    return savedEquipment;
   }
 
   async findAllPaginated(
@@ -120,9 +146,18 @@ export class EquipmentService {
 
     const equipmentList = await this.equipmentRepository.find({
       where: { id: In(ids.map((item) => item.id)) },
-      relations: { tags: true, currency: true },
+      relations: { currency: true },
       order: { name: 'ASC' },
     });
+
+    const tagsByEquipmentId = await loadOrderedTagsMap(
+      this.equipmentTagsRepository,
+      equipmentList.map((item) => item.id),
+      'equipment',
+    );
+    for (const item of equipmentList) {
+      item.tags = tagsByEquipmentId.get(item.id) ?? [];
+    }
 
     const equipmentById = new Map(equipmentList.map((item) => [item.id, item]));
     const data = ids
@@ -163,12 +198,20 @@ export class EquipmentService {
     if (dto.privateInformation !== undefined) {
       equipment.privateInformation = dto.privateInformation;
     }
+    let tags = equipment.tags;
     if (dto.tagIds !== undefined) {
-      equipment.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.equipmentTagsRepository,
+        'equipment',
+        equipment,
+        tags,
+      );
     }
 
-    return this.equipmentRepository.save(equipment);
+    const savedEquipment = await this.equipmentRepository.save(equipment);
+    savedEquipment.tags = tags;
+    return savedEquipment;
   }
 
   async remove(id: string): Promise<void> {

@@ -5,10 +5,17 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { FindEventsQueryDto } from './dto/find-events-query.dto';
 import { Event } from './entities/event.entity';
+import { EventTag } from './entities/event-tag.entity';
 import { Era } from '../eras/entities/era.entity';
 import { Tag } from '../tags/entities/tag.entity';
 
@@ -26,15 +33,26 @@ export class EventsService {
     private readonly eventsRepository: Repository<Event>,
     @InjectRepository(Era)
     private readonly erasRepository: Repository<Era>,
+    @InjectRepository(EventTag)
+    private readonly eventTagsRepository: Repository<EventTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
   ) {}
 
-  findById(id: string): Promise<Event | null> {
-    return this.eventsRepository.findOne({
+  async findById(id: string): Promise<Event | null> {
+    const event = await this.eventsRepository.findOne({
       where: { id },
-      relations: { era: true, tags: true },
+      relations: { era: true },
     });
+    if (!event) {
+      return null;
+    }
+    event.tags = await loadOrderedTagsForOwner(
+      this.eventTagsRepository,
+      id,
+      'event',
+    );
+    return event;
   }
 
   findEraById(id: string): Promise<Era | null> {
@@ -47,7 +65,8 @@ export class EventsService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   async create(dto: CreateEventDto): Promise<Event> {
@@ -72,10 +91,17 @@ export class EventsService {
       description: dto.description ?? null,
       privateInformation: dto.privateInformation ?? null,
       era,
-      tags,
     });
 
-    return this.eventsRepository.save(event);
+    const savedEvent = await this.eventsRepository.save(event);
+    await createOrderedTagJunctions(
+      this.eventTagsRepository,
+      'event',
+      savedEvent,
+      tags,
+    );
+    savedEvent.tags = tags;
+    return savedEvent;
   }
 
   async findAllPaginated(query: FindEventsQueryDto): Promise<PaginatedEvents> {
@@ -121,8 +147,17 @@ export class EventsService {
 
     const events = await this.eventsRepository.find({
       where: { id: In(ids.map((event) => event.id)) },
-      relations: { era: true, tags: true },
+      relations: { era: true },
     });
+
+    const tagsByEventId = await loadOrderedTagsMap(
+      this.eventTagsRepository,
+      events.map((event) => event.id),
+      'event',
+    );
+    for (const event of events) {
+      event.tags = tagsByEventId.get(event.id) ?? [];
+    }
 
     const eventsById = new Map(events.map((event) => [event.id, event]));
     const data = ids
@@ -169,12 +204,20 @@ export class EventsService {
       }
     }
 
+    let tags = event.tags;
     if (dto.tagIds !== undefined) {
-      event.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.eventTagsRepository,
+        'event',
+        event,
+        tags,
+      );
     }
 
-    return this.eventsRepository.save(event);
+    const savedEvent = await this.eventsRepository.save(event);
+    savedEvent.tags = tags;
+    return savedEvent;
   }
 
   async remove(id: string): Promise<void> {

@@ -47,7 +47,7 @@ export class ConsumableResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas ao consumível',
+    description: 'Tags associadas ao consumível, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

@@ -9,10 +9,17 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateCharacteristicDto } from './dto/create-characteristic.dto';
 import { UpdateCharacteristicDto } from './dto/update-characteristic.dto';
 import { FindCharacteristicsQueryDto } from './dto/find-characteristics-query.dto';
 import { Characteristic } from './entities/characteristic.entity';
+import { CharacteristicTag } from './entities/characteristic-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { EntityLinksService } from '../entity-links/entity-links.service';
 import { EntityLinkType } from '../entity-links/enums/entity-link-type.enum';
@@ -46,6 +53,8 @@ export class CharacteristicsService {
   constructor(
     @InjectRepository(Characteristic)
     private readonly characteristicsRepository: Repository<Characteristic>,
+    @InjectRepository(CharacteristicTag)
+    private readonly characteristicTagsRepository: Repository<CharacteristicTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     private readonly entityLinksService: EntityLinksService,
@@ -57,13 +66,17 @@ export class CharacteristicsService {
   }
 
   async findById(id: string): Promise<CharacteristicWithReferences | null> {
-    const characteristic = await this.characteristicsRepository.findOne({
-      where: { id },
-      relations: { tags: true },
+    const characteristic = await this.characteristicsRepository.findOneBy({
+      id,
     });
     if (!characteristic) {
       return null;
     }
+    characteristic.tags = await loadOrderedTagsForOwner(
+      this.characteristicTagsRepository,
+      id,
+      'characteristic',
+    );
 
     const { improvedFrom, requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
@@ -92,7 +105,8 @@ export class CharacteristicsService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   async create(
@@ -142,11 +156,17 @@ export class CharacteristicsService {
       name: dto.name,
       level: dto.level,
       description: dto.description ?? null,
-      tags,
     });
 
     const savedCharacteristic =
       await this.characteristicsRepository.save(characteristic);
+    await createOrderedTagJunctions(
+      this.characteristicTagsRepository,
+      'characteristic',
+      savedCharacteristic,
+      tags,
+    );
+    savedCharacteristic.tags = tags;
 
     await this.entityLinksService.replaceLinks(
       ReferenceableEntityType.CHARACTERISTIC,
@@ -231,9 +251,18 @@ export class CharacteristicsService {
 
     const characteristics = await this.characteristicsRepository.find({
       where: { id: In(ids.map((characteristic) => characteristic.id)) },
-      relations: { tags: true },
       order: { name: 'ASC' },
     });
+
+    const tagsByCharacteristicId = await loadOrderedTagsMap(
+      this.characteristicTagsRepository,
+      characteristics.map((characteristic) => characteristic.id),
+      'characteristic',
+    );
+    for (const characteristic of characteristics) {
+      characteristic.tags =
+        tagsByCharacteristicId.get(characteristic.id) ?? [];
+    }
 
     const characteristicsById = new Map(
       characteristics.map((characteristic) => [
@@ -255,13 +284,17 @@ export class CharacteristicsService {
     id: string,
     dto: UpdateCharacteristicDto,
   ): Promise<CharacteristicWithReferences> {
-    const characteristic = await this.characteristicsRepository.findOne({
-      where: { id },
-      relations: { tags: true },
+    const characteristic = await this.characteristicsRepository.findOneBy({
+      id,
     });
     if (!characteristic) {
       throw new NotFoundException('Característica não encontrada.');
     }
+    characteristic.tags = await loadOrderedTagsForOwner(
+      this.characteristicTagsRepository,
+      id,
+      'characteristic',
+    );
 
     if (dto.name && dto.name !== characteristic.name) {
       const existing = await this.findByName(dto.name);
@@ -279,9 +312,15 @@ export class CharacteristicsService {
     if (dto.description !== undefined) {
       characteristic.description = dto.description;
     }
+    let tags = characteristic.tags;
     if (dto.tagIds !== undefined) {
-      characteristic.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.characteristicTagsRepository,
+        'characteristic',
+        characteristic,
+        tags,
+      );
     }
 
     let effectiveImprovedFrom = dto.improvedFrom;
@@ -384,6 +423,7 @@ export class CharacteristicsService {
 
     const savedCharacteristic =
       await this.characteristicsRepository.save(characteristic);
+    savedCharacteristic.tags = tags;
 
     if (dto.improvedFrom !== undefined) {
       await this.entityLinksService.replaceLinks(

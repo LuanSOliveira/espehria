@@ -14,16 +14,16 @@ import { DefaultText } from '@/shared/components/Texts';
 import {
   useCurrenciesQuery,
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   ConsumableFormData,
   consumableFormDefaultValues,
   consumableFormResolver,
 } from '@/shared/formSchemas';
-import { ICurrency, IConsumable, ITag, ITagListFilters } from '@/shared/interfaces';
+import { ICurrency, IConsumable, ITag } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedConsumableStore } from '@/store';
 
@@ -51,11 +51,7 @@ export const ConsumableCreateForm = ({
   );
   const isEditMode = !!selectedConsumable;
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const { data: currenciesData } = useCurrenciesQuery();
   const currencyOptions = currenciesData ?? [];

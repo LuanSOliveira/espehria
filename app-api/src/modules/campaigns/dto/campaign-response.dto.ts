@@ -30,7 +30,7 @@ export class CampaignResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas à campanha',
+    description: 'Tags associadas à campanha, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

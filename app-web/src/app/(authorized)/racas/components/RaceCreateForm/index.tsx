@@ -16,10 +16,10 @@ import { ImprovementDefectListField } from '@/shared/components/ImprovementDefec
 import { RaceTalentsListField } from '../RaceTalentsListField';
 import {
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
   useRaceCategoriesQuery,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   RaceFormData,
@@ -32,7 +32,6 @@ import {
   IRace,
   IRaceCategory,
   ITag,
-  ITagListFilters,
 } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedRaceStore } from '@/store';
@@ -79,11 +78,7 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
 
   const { data: categories } = useRaceCategoriesQuery();
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const {
     data: raceDetail,

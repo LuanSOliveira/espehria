@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Family } from './entities/family.entity';
+import { FamilyTag } from './entities/family-tag.entity';
 import { FamilyMember } from './entities/family-member.entity';
 import { FamilyRelationship } from './entities/family-relationship.entity';
 import { Tag } from '../tags/entities/tag.entity';
@@ -12,6 +13,7 @@ import { FamiliesService } from './families.service';
   imports: [
     TypeOrmModule.forFeature([
       Family,
+      FamilyTag,
       FamilyMember,
       FamilyRelationship,
       Tag,

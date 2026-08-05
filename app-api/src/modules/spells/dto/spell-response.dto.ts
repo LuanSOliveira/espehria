@@ -33,7 +33,7 @@ export class SpellResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas à magia',
+    description: 'Tags associadas à magia, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

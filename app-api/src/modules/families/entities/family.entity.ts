@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, JoinTable, ManyToMany, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Tag } from '../../tags/entities/tag.entity';
 import { FamilyClassification } from '../enums/family-classification.enum';
@@ -28,12 +28,6 @@ export class Family extends BaseEntity {
   @ApiProperty({
     type: () => [Tag],
     description: 'Tags associadas à família',
-  })
-  @ManyToMany(() => Tag)
-  @JoinTable({
-    name: 'family_tags',
-    joinColumn: { name: 'family_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'tag_id', referencedColumnName: 'id' },
   })
   tags!: Tag[];
 

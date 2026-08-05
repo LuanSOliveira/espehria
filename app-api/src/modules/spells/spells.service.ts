@@ -9,10 +9,17 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateSpellDto } from './dto/create-spell.dto';
 import { UpdateSpellDto } from './dto/update-spell.dto';
 import { FindSpellsQueryDto } from './dto/find-spells-query.dto';
 import { Spell } from './entities/spell.entity';
+import { SpellTag } from './entities/spell-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { EntityLinksService } from '../entity-links/entity-links.service';
 import { EntityLinkType } from '../entity-links/enums/entity-link-type.enum';
@@ -38,6 +45,8 @@ export class SpellsService {
   constructor(
     @InjectRepository(Spell)
     private readonly spellsRepository: Repository<Spell>,
+    @InjectRepository(SpellTag)
+    private readonly spellTagsRepository: Repository<SpellTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     private readonly entityLinksService: EntityLinksService,
@@ -48,13 +57,15 @@ export class SpellsService {
   }
 
   async findById(id: string): Promise<SpellWithReferences | null> {
-    const spell = await this.spellsRepository.findOne({
-      where: { id },
-      relations: { tags: true },
-    });
+    const spell = await this.spellsRepository.findOneBy({ id });
     if (!spell) {
       return null;
     }
+    spell.tags = await loadOrderedTagsForOwner(
+      this.spellTagsRepository,
+      id,
+      'spell',
+    );
 
     const { improvedFrom, requirements } =
       await this.entityLinksService.loadReferencesFor(
@@ -71,7 +82,8 @@ export class SpellsService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   async create(dto: CreateSpellDto): Promise<SpellWithReferences> {
@@ -102,10 +114,16 @@ export class SpellsService {
       level: dto.level,
       referenceImage: dto.referenceImage ?? null,
       description: dto.description ?? null,
-      tags,
     });
 
     const savedSpell = await this.spellsRepository.save(spell);
+    await createOrderedTagJunctions(
+      this.spellTagsRepository,
+      'spell',
+      savedSpell,
+      tags,
+    );
+    savedSpell.tags = tags;
 
     await this.entityLinksService.replaceLinks(
       ReferenceableEntityType.SPELL,
@@ -154,9 +172,17 @@ export class SpellsService {
 
     const spells = await this.spellsRepository.find({
       where: { id: In(ids.map((spell) => spell.id)) },
-      relations: { tags: true },
       order: { name: 'ASC' },
     });
+
+    const tagsBySpellId = await loadOrderedTagsMap(
+      this.spellTagsRepository,
+      spells.map((spell) => spell.id),
+      'spell',
+    );
+    for (const spell of spells) {
+      spell.tags = tagsBySpellId.get(spell.id) ?? [];
+    }
 
     const spellsById = new Map(spells.map((spell) => [spell.id, spell]));
     const data = ids
@@ -167,13 +193,15 @@ export class SpellsService {
   }
 
   async update(id: string, dto: UpdateSpellDto): Promise<SpellWithReferences> {
-    const spell = await this.spellsRepository.findOne({
-      where: { id },
-      relations: { tags: true },
-    });
+    const spell = await this.spellsRepository.findOneBy({ id });
     if (!spell) {
       throw new NotFoundException('Magia não encontrada.');
     }
+    spell.tags = await loadOrderedTagsForOwner(
+      this.spellTagsRepository,
+      id,
+      'spell',
+    );
 
     if (dto.name && dto.name !== spell.name) {
       const existing = await this.findByName(dto.name);
@@ -192,9 +220,15 @@ export class SpellsService {
     if (dto.description !== undefined) {
       spell.description = dto.description;
     }
+    let tags = spell.tags;
     if (dto.tagIds !== undefined) {
-      spell.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.spellTagsRepository,
+        'spell',
+        spell,
+        tags,
+      );
     }
 
     let effectiveImprovedFrom = dto.improvedFrom;
@@ -241,6 +275,7 @@ export class SpellsService {
     }
 
     const savedSpell = await this.spellsRepository.save(spell);
+    savedSpell.tags = tags;
 
     if (dto.improvedFrom !== undefined) {
       await this.entityLinksService.replaceLinks(

@@ -9,12 +9,19 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { FindLocationsQueryDto } from './dto/find-locations-query.dto';
 import { LocationSectionInputDto } from './dto/location-section-input.dto';
 import { Location } from './entities/location.entity';
 import { LocationSection } from './entities/location-section.entity';
+import { LocationTag } from './entities/location-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 
 export interface PaginatedLocations {
@@ -33,22 +40,32 @@ export class LocationsService {
     private readonly tagsRepository: Repository<Tag>,
     @InjectRepository(LocationSection)
     private readonly locationSectionsRepository: Repository<LocationSection>,
+    @InjectRepository(LocationTag)
+    private readonly locationTagsRepository: Repository<LocationTag>,
   ) {}
 
   findByName(name: string): Promise<Location | null> {
     return this.locationsRepository.findOneBy({ name });
   }
 
-  findById(id: string): Promise<Location | null> {
-    return this.locationsRepository.findOne({
+  async findById(id: string): Promise<Location | null> {
+    const location = await this.locationsRepository.findOne({
       where: { id },
       relations: {
-        tags: true,
         pointsOfInterest: true,
         pointsOfInterestOf: true,
         sections: true,
       },
     });
+    if (!location) {
+      return null;
+    }
+    location.tags = await loadOrderedTagsForOwner(
+      this.locationTagsRepository,
+      id,
+      'location',
+    );
+    return location;
   }
 
   private buildSections(
@@ -69,7 +86,8 @@ export class LocationsService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   private async findLocationsByIds(ids: string[]): Promise<Location[]> {
@@ -112,12 +130,19 @@ export class LocationsService {
       referenceImageUrl: dto.referenceImageUrl ?? null,
       description: dto.description ?? null,
       privateInformation: dto.privateInformation ?? null,
-      tags,
       pointsOfInterest,
       sections,
     });
 
-    return this.locationsRepository.save(location);
+    const savedLocation = await this.locationsRepository.save(location);
+    await createOrderedTagJunctions(
+      this.locationTagsRepository,
+      'location',
+      savedLocation,
+      tags,
+    );
+    savedLocation.tags = tags;
+    return savedLocation;
   }
 
   async findAllPaginated(
@@ -154,8 +179,16 @@ export class LocationsService {
 
     const locations = await this.locationsRepository.find({
       where: { id: In(ids.map((location) => location.id)) },
-      relations: { tags: true },
     });
+
+    const tagsByLocationId = await loadOrderedTagsMap(
+      this.locationTagsRepository,
+      locations.map((location) => location.id),
+      'location',
+    );
+    for (const location of locations) {
+      location.tags = tagsByLocationId.get(location.id) ?? [];
+    }
 
     const locationsById = new Map(
       locations.map((location) => [location.id, location]),
@@ -193,9 +226,15 @@ export class LocationsService {
     if (dto.privateInformation !== undefined) {
       location.privateInformation = dto.privateInformation;
     }
+    let tags = location.tags;
     if (dto.tagIds !== undefined) {
-      location.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.locationTagsRepository,
+        'location',
+        location,
+        tags,
+      );
     }
     if (dto.pointsOfInterestIds !== undefined) {
       location.pointsOfInterest =
@@ -218,7 +257,9 @@ export class LocationsService {
         dto.sections.length > 0 ? this.buildSections(dto.sections) : [];
     }
 
-    return this.locationsRepository.save(location);
+    const savedLocation = await this.locationsRepository.save(location);
+    savedLocation.tags = tags;
+    return savedLocation;
   }
 
   async remove(id: string): Promise<void> {

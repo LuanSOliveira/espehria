@@ -13,21 +13,16 @@ import { DefaultText } from '@/shared/components/Texts';
 import { EntityReferenceListField } from '@/shared/components/EntityReferenceListField';
 import {
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   SpellFormData,
   spellFormDefaultValues,
   spellFormResolver,
 } from '@/shared/formSchemas';
-import {
-  IEntityReference,
-  ISpell,
-  ITag,
-  ITagListFilters,
-} from '@/shared/interfaces';
+import { IEntityReference, ISpell, ITag } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedSpellStore } from '@/store';
 
@@ -56,11 +51,7 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
   const [improvedFrom, setImprovedFrom] = useState<IEntityReference[]>([]);
   const [requirements, setRequirements] = useState<IEntityReference[]>([]);
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const {
     data: spellDetail,

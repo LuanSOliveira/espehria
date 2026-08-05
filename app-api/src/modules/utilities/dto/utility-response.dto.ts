@@ -47,7 +47,7 @@ export class UtilityResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas ao utilitário',
+    description: 'Tags associadas ao utilitário, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

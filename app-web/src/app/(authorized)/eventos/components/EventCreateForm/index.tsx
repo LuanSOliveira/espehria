@@ -14,21 +14,16 @@ import { DefaultText } from '@/shared/components/Texts';
 import {
   useErasAllQuery,
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   EventFormData,
   eventFormDefaultValues,
   eventFormResolver,
 } from '@/shared/formSchemas';
-import {
-  IEraOption,
-  IEvent,
-  ITag,
-  ITagListFilters,
-} from '@/shared/interfaces';
+import { IEraOption, IEvent, ITag } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedEventStore } from '@/store';
 
@@ -51,11 +46,7 @@ export const EventCreateForm = ({ onSaved }: EventCreateFormProps) => {
   const selectedEvent = useSelectedEventStore((state) => state.selectedEvent);
   const isEditMode = !!selectedEvent;
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const { data: eras } = useErasAllQuery();
 

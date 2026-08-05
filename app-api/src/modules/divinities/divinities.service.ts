@@ -9,10 +9,17 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateDivinityDto } from './dto/create-divinity.dto';
 import { UpdateDivinityDto } from './dto/update-divinity.dto';
 import { FindDivinitiesQueryDto } from './dto/find-divinities-query.dto';
 import { Divinity } from './entities/divinity.entity';
+import { DivinityTag } from './entities/divinity-tag.entity';
 import { DivinityCategory } from './entities/divinity-category.entity';
 import { Tag } from '../tags/entities/tag.entity';
 
@@ -30,6 +37,8 @@ export class DivinitiesService {
     private readonly divinitiesRepository: Repository<Divinity>,
     @InjectRepository(DivinityCategory)
     private readonly divinityCategoriesRepository: Repository<DivinityCategory>,
+    @InjectRepository(DivinityTag)
+    private readonly divinityTagsRepository: Repository<DivinityTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
   ) {}
@@ -38,11 +47,20 @@ export class DivinitiesService {
     return this.divinitiesRepository.findOneBy({ name });
   }
 
-  findById(id: string): Promise<Divinity | null> {
-    return this.divinitiesRepository.findOne({
+  async findById(id: string): Promise<Divinity | null> {
+    const divinity = await this.divinitiesRepository.findOne({
       where: { id },
-      relations: { category: true, tags: true },
+      relations: { category: true },
     });
+    if (!divinity) {
+      return null;
+    }
+    divinity.tags = await loadOrderedTagsForOwner(
+      this.divinityTagsRepository,
+      id,
+      'divinity',
+    );
+    return divinity;
   }
 
   findCategoryById(id: string): Promise<DivinityCategory | null> {
@@ -61,7 +79,8 @@ export class DivinitiesService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   async create(dto: CreateDivinityDto): Promise<Divinity> {
@@ -107,10 +126,17 @@ export class DivinitiesService {
       oaths: dto.oaths ?? null,
       curiosities: dto.curiosities ?? null,
       privateInformation: dto.privateInformation ?? null,
-      tags,
     });
 
-    return this.divinitiesRepository.save(divinity);
+    const savedDivinity = await this.divinitiesRepository.save(divinity);
+    await createOrderedTagJunctions(
+      this.divinityTagsRepository,
+      'divinity',
+      savedDivinity,
+      tags,
+    );
+    savedDivinity.tags = tags;
+    return savedDivinity;
   }
 
   async findAllPaginated(
@@ -148,9 +174,18 @@ export class DivinitiesService {
 
     const divinities = await this.divinitiesRepository.find({
       where: { id: In(ids.map((divinity) => divinity.id)) },
-      relations: { category: true, tags: true },
+      relations: { category: true },
       order: { name: 'ASC' },
     });
+
+    const tagsByDivinityId = await loadOrderedTagsMap(
+      this.divinityTagsRepository,
+      divinities.map((divinity) => divinity.id),
+      'divinity',
+    );
+    for (const divinity of divinities) {
+      divinity.tags = tagsByDivinityId.get(divinity.id) ?? [];
+    }
 
     const divinitiesById = new Map(
       divinities.map((divinity) => [divinity.id, divinity]),
@@ -165,11 +200,16 @@ export class DivinitiesService {
   async update(id: string, dto: UpdateDivinityDto): Promise<Divinity> {
     const divinity = await this.divinitiesRepository.findOne({
       where: { id },
-      relations: { category: true, tags: true },
+      relations: { category: true },
     });
     if (!divinity) {
       throw new NotFoundException('Divindade não encontrada.');
     }
+    divinity.tags = await loadOrderedTagsForOwner(
+      this.divinityTagsRepository,
+      id,
+      'divinity',
+    );
 
     if (dto.name && dto.name !== divinity.name) {
       const existing = await this.findByName(dto.name);
@@ -259,12 +299,20 @@ export class DivinitiesService {
     if (dto.privateInformation !== undefined) {
       divinity.privateInformation = dto.privateInformation;
     }
+    let tags = divinity.tags;
     if (dto.tagIds !== undefined) {
-      divinity.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.divinityTagsRepository,
+        'divinity',
+        divinity,
+        tags,
+      );
     }
 
-    return this.divinitiesRepository.save(divinity);
+    const savedDivinity = await this.divinitiesRepository.save(divinity);
+    savedDivinity.tags = tags;
+    return savedDivinity;
   }
 
   async remove(id: string): Promise<void> {

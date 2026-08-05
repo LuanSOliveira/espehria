@@ -13,21 +13,16 @@ import { DefaultText } from '@/shared/components/Texts';
 import { EntityReferenceListField } from '@/shared/components/EntityReferenceListField';
 import {
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   TechniqueFormData,
   techniqueFormDefaultValues,
   techniqueFormResolver,
 } from '@/shared/formSchemas';
-import {
-  IEntityReference,
-  ITag,
-  ITagListFilters,
-  ITechnique,
-} from '@/shared/interfaces';
+import { IEntityReference, ITag, ITechnique } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedTechniqueStore } from '@/store';
 
@@ -58,11 +53,7 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
   const [improvedFrom, setImprovedFrom] = useState<IEntityReference[]>([]);
   const [requirements, setRequirements] = useState<IEntityReference[]>([]);
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const {
     data: techniqueDetail,

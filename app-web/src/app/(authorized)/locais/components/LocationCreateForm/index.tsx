@@ -12,21 +12,16 @@ import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
 import {
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   LocationFormData,
   locationFormDefaultValues,
   locationFormResolver,
 } from '@/shared/formSchemas';
-import {
-  ILocation,
-  ILocationSummary,
-  ITag,
-  ITagListFilters,
-} from '@/shared/interfaces';
+import { ILocation, ILocationSummary, ITag } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedLocationStore } from '@/store';
 import { LocationPointsOfInterestField } from '../LocationPointsOfInterestField';
@@ -58,11 +53,7 @@ export const LocationCreateForm = ({ onSaved }: LocationCreateFormProps) => {
     [],
   );
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const {
     data: locationDetail,

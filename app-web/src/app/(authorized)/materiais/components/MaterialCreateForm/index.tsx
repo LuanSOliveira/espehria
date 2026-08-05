@@ -14,16 +14,16 @@ import { DefaultText } from '@/shared/components/Texts';
 import {
   useCurrenciesQuery,
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   MaterialFormData,
   materialFormDefaultValues,
   materialFormResolver,
 } from '@/shared/formSchemas';
-import { ICurrency, IMaterial, ITag, ITagListFilters } from '@/shared/interfaces';
+import { ICurrency, IMaterial, ITag } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedMaterialStore } from '@/store';
 
@@ -49,11 +49,7 @@ export const MaterialCreateForm = ({ onSaved }: MaterialCreateFormProps) => {
   );
   const isEditMode = !!selectedMaterial;
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const { data: currenciesData } = useCurrenciesQuery();
   const currencyOptions = currenciesData ?? [];

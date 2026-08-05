@@ -1,12 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Race } from '../../races/entities/race.entity';
 import { Tag } from '../../tags/entities/tag.entity';
@@ -39,12 +32,6 @@ export class Character extends BaseEntity {
   @ApiProperty({
     type: () => [Tag],
     description: 'Tags associadas ao personagem',
-  })
-  @ManyToMany(() => Tag)
-  @JoinTable({
-    name: 'character_tags',
-    joinColumn: { name: 'character_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'tag_id', referencedColumnName: 'id' },
   })
   tags!: Tag[];
 

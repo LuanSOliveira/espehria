@@ -31,12 +31,6 @@ export class Location extends BaseEntity {
   privateInformation!: string | null;
 
   @ApiProperty({ type: () => [Tag], description: 'Tags associadas ao local' })
-  @ManyToMany(() => Tag)
-  @JoinTable({
-    name: 'location_tags',
-    joinColumn: { name: 'location_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'tag_id', referencedColumnName: 'id' },
-  })
   tags!: Tag[];
 
   @ManyToMany(() => Location, (location) => location.pointsOfInterestOf)

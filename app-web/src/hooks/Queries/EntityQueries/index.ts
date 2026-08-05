@@ -8,3 +8,4 @@ export * from './useSheetCampaignOptionsQuery';
 export * from './useCampaignSheetsQuery';
 export * from './useImprovementDefectTypesQuery';
 export * from './useImprovementDefectPropertiesQuery';
+export * from './useTagOptionsQuery';

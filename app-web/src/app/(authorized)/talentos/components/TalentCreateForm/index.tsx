@@ -14,9 +14,9 @@ import { EntityReferenceListField } from '@/shared/components/EntityReferenceLis
 import { ImprovementDefectListField } from '@/shared/components/ImprovementDefectListField';
 import {
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   TalentFormData,
@@ -27,7 +27,6 @@ import {
   IEntityReference,
   IImprovementDefectItem,
   ITag,
-  ITagListFilters,
   ITalent,
 } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
@@ -72,11 +71,7 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
   );
   const [flaws, setFlaws] = useState<IImprovementDefectItem[]>([]);
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const {
     data: talentDetail,

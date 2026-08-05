@@ -9,10 +9,17 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateAmmunitionDto } from './dto/create-ammunition.dto';
 import { UpdateAmmunitionDto } from './dto/update-ammunition.dto';
 import { FindAmmunitionQueryDto } from './dto/find-ammunition-query.dto';
 import { Ammunition } from './entities/ammunition.entity';
+import { AmmunitionTag } from './entities/ammunition-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { Currency } from '../currencies/entities/currency.entity';
 
@@ -28,6 +35,8 @@ export class AmmunitionService {
   constructor(
     @InjectRepository(Ammunition)
     private readonly ammunitionRepository: Repository<Ammunition>,
+    @InjectRepository(AmmunitionTag)
+    private readonly ammunitionTagsRepository: Repository<AmmunitionTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     @InjectRepository(Currency)
@@ -38,11 +47,20 @@ export class AmmunitionService {
     return this.ammunitionRepository.findOneBy({ name });
   }
 
-  findById(id: string): Promise<Ammunition | null> {
-    return this.ammunitionRepository.findOne({
+  async findById(id: string): Promise<Ammunition | null> {
+    const ammunition = await this.ammunitionRepository.findOne({
       where: { id },
-      relations: { tags: true, currency: true },
+      relations: { currency: true },
     });
+    if (!ammunition) {
+      return null;
+    }
+    ammunition.tags = await loadOrderedTagsForOwner(
+      this.ammunitionTagsRepository,
+      id,
+      'ammunition',
+    );
+    return ammunition;
   }
 
   private async findTagsByIds(tagIds: string[]): Promise<Tag[]> {
@@ -51,7 +69,8 @@ export class AmmunitionService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   private async findCurrencyById(currencyId: string): Promise<Currency> {
@@ -88,10 +107,17 @@ export class AmmunitionService {
       price: dto.price ?? null,
       currency,
       privateInformation: dto.privateInformation ?? null,
-      tags,
     });
 
-    return this.ammunitionRepository.save(ammunition);
+    const savedAmmunition = await this.ammunitionRepository.save(ammunition);
+    await createOrderedTagJunctions(
+      this.ammunitionTagsRepository,
+      'ammunition',
+      savedAmmunition,
+      tags,
+    );
+    savedAmmunition.tags = tags;
+    return savedAmmunition;
   }
 
   async findAllPaginated(
@@ -122,9 +148,18 @@ export class AmmunitionService {
 
     const ammunitionList = await this.ammunitionRepository.find({
       where: { id: In(ids.map((item) => item.id)) },
-      relations: { tags: true, currency: true },
+      relations: { currency: true },
       order: { name: 'ASC' },
     });
+
+    const tagsByAmmunitionId = await loadOrderedTagsMap(
+      this.ammunitionTagsRepository,
+      ammunitionList.map((item) => item.id),
+      'ammunition',
+    );
+    for (const item of ammunitionList) {
+      item.tags = tagsByAmmunitionId.get(item.id) ?? [];
+    }
 
     const ammunitionById = new Map(
       ammunitionList.map((item) => [item.id, item]),
@@ -169,12 +204,20 @@ export class AmmunitionService {
     if (dto.privateInformation !== undefined) {
       ammunition.privateInformation = dto.privateInformation;
     }
+    let tags = ammunition.tags;
     if (dto.tagIds !== undefined) {
-      ammunition.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.ammunitionTagsRepository,
+        'ammunition',
+        ammunition,
+        tags,
+      );
     }
 
-    return this.ammunitionRepository.save(ammunition);
+    const savedAmmunition = await this.ammunitionRepository.save(ammunition);
+    savedAmmunition.tags = tags;
+    return savedAmmunition;
   }
 
   async remove(id: string): Promise<void> {

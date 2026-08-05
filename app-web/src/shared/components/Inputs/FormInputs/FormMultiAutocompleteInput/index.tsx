@@ -50,11 +50,11 @@ export const FormMultiAutocompleteInput = <
             id={id}
             options={options}
             getOptionLabel={getOptionLabel}
-            value={options.filter((option) =>
-              ((field.value as string[] | undefined) ?? []).includes(
-                getOptionValue(option),
-              ),
-            )}
+            value={((field.value as string[] | undefined) ?? [])
+              .map((selectedId) =>
+                options.find((option) => getOptionValue(option) === selectedId),
+              )
+              .filter((option): option is TOption => option !== undefined)}
             onChange={(_event, newValue) =>
               field.onChange(newValue.map(getOptionValue))
             }

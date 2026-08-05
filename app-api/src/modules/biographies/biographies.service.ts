@@ -9,10 +9,17 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateBiographyDto } from './dto/create-biography.dto';
 import { UpdateBiographyDto } from './dto/update-biography.dto';
 import { FindBiographiesQueryDto } from './dto/find-biographies-query.dto';
 import { Biography } from './entities/biography.entity';
+import { BiographyTag } from './entities/biography-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { EntityLinksService } from '../entity-links/entity-links.service';
 import { EntityLinkType } from '../entity-links/enums/entity-link-type.enum';
@@ -43,6 +50,8 @@ export class BiographiesService {
   constructor(
     @InjectRepository(Biography)
     private readonly biographiesRepository: Repository<Biography>,
+    @InjectRepository(BiographyTag)
+    private readonly biographyTagsRepository: Repository<BiographyTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     private readonly entityLinksService: EntityLinksService,
@@ -54,13 +63,15 @@ export class BiographiesService {
   }
 
   async findById(id: string): Promise<BiographyWithReferences | null> {
-    const biography = await this.biographiesRepository.findOne({
-      where: { id },
-      relations: { tags: true },
-    });
+    const biography = await this.biographiesRepository.findOneBy({ id });
     if (!biography) {
       return null;
     }
+    biography.tags = await loadOrderedTagsForOwner(
+      this.biographyTagsRepository,
+      id,
+      'biography',
+    );
 
     const { additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
@@ -81,7 +92,8 @@ export class BiographiesService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   async create(dto: CreateBiographyDto): Promise<BiographyWithReferences> {
@@ -120,10 +132,16 @@ export class BiographiesService {
       name: dto.name,
       description: dto.description ?? null,
       imageReference: dto.imageReference ?? null,
-      tags,
     });
 
     const savedBiography = await this.biographiesRepository.save(biography);
+    await createOrderedTagJunctions(
+      this.biographyTagsRepository,
+      'biography',
+      savedBiography,
+      tags,
+    );
+    savedBiography.tags = tags;
 
     await this.entityLinksService.replaceLinks(
       ReferenceableEntityType.BIOGRAPHY,
@@ -181,9 +199,17 @@ export class BiographiesService {
 
     const biographies = await this.biographiesRepository.find({
       where: { id: In(ids.map((biography) => biography.id)) },
-      relations: { tags: true },
       order: { name: 'ASC' },
     });
+
+    const tagsByBiographyId = await loadOrderedTagsMap(
+      this.biographyTagsRepository,
+      biographies.map((biography) => biography.id),
+      'biography',
+    );
+    for (const biography of biographies) {
+      biography.tags = tagsByBiographyId.get(biography.id) ?? [];
+    }
 
     const biographiesById = new Map(
       biographies.map((biography) => [biography.id, biography]),
@@ -199,13 +225,15 @@ export class BiographiesService {
     id: string,
     dto: UpdateBiographyDto,
   ): Promise<BiographyWithReferences> {
-    const biography = await this.biographiesRepository.findOne({
-      where: { id },
-      relations: { tags: true },
-    });
+    const biography = await this.biographiesRepository.findOneBy({ id });
     if (!biography) {
       throw new NotFoundException('Biografia não encontrada.');
     }
+    biography.tags = await loadOrderedTagsForOwner(
+      this.biographyTagsRepository,
+      id,
+      'biography',
+    );
 
     if (dto.name && dto.name !== biography.name) {
       const existing = await this.findByName(dto.name);
@@ -221,9 +249,15 @@ export class BiographiesService {
     if (dto.imageReference !== undefined) {
       biography.imageReference = dto.imageReference;
     }
+    let tags = biography.tags;
     if (dto.tagIds !== undefined) {
-      biography.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.biographyTagsRepository,
+        'biography',
+        biography,
+        tags,
+      );
     }
 
     let effectiveAdditionalAbilities = dto.additionalAbilities;
@@ -277,6 +311,7 @@ export class BiographiesService {
     });
 
     const savedBiography = await this.biographiesRepository.save(biography);
+    savedBiography.tags = tags;
 
     if (dto.additionalAbilities !== undefined) {
       await this.entityLinksService.replaceLinks(

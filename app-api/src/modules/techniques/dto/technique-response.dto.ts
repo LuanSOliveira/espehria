@@ -33,7 +33,7 @@ export class TechniqueResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas à técnica',
+    description: 'Tags associadas à técnica, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

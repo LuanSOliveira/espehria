@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Training } from './entities/training.entity';
+import { TrainingTag } from './entities/training-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { EntityLinksModule } from '../entity-links/entity-links.module';
 import { ImprovementFlawsModule } from '../improvement-flaws/improvement-flaws.module';
@@ -9,7 +10,7 @@ import { TrainingsService } from './trainings.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Training, Tag]),
+    TypeOrmModule.forFeature([Training, TrainingTag, Tag]),
     EntityLinksModule,
     ImprovementFlawsModule,
   ],

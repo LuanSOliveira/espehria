@@ -43,7 +43,7 @@ export class EraResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas à era',
+    description: 'Tags associadas à era, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

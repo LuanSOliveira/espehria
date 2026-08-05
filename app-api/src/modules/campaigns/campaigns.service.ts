@@ -10,6 +10,12 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { Sheet } from '../sheets/entities/sheet.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { AuthProvider } from '../users/enums/auth-provider.enum';
@@ -20,6 +26,7 @@ import { FindCampaignsQueryDto } from './dto/find-campaigns-query.dto';
 import { UpdateCampaignDto } from './dto/update-campaign.dto';
 import { CampaignSection } from './entities/campaign-section.entity';
 import { Campaign } from './entities/campaign.entity';
+import { CampaignTag } from './entities/campaign-tag.entity';
 
 export interface PaginatedCampaigns {
   data: Campaign[];
@@ -35,6 +42,8 @@ export class CampaignsService {
     private readonly campaignsRepository: Repository<Campaign>,
     @InjectRepository(CampaignSection)
     private readonly campaignSectionsRepository: Repository<CampaignSection>,
+    @InjectRepository(CampaignTag)
+    private readonly campaignTagsRepository: Repository<CampaignTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     @InjectRepository(User)
@@ -54,16 +63,24 @@ export class CampaignsService {
     });
   }
 
-  findOwnedById(id: string, userId: string): Promise<Campaign | null> {
-    return this.campaignsRepository.findOne({
+  async findOwnedById(id: string, userId: string): Promise<Campaign | null> {
+    const campaign = await this.campaignsRepository.findOne({
       where: { id, createdBy: { id: userId } },
       relations: {
-        tags: true,
         sections: true,
         createdBy: true,
         allowedUsers: true,
       },
     });
+    if (!campaign) {
+      return null;
+    }
+    campaign.tags = await loadOrderedTagsForOwner(
+      this.campaignTagsRepository,
+      id,
+      'campaign',
+    );
+    return campaign;
   }
 
   async findVisibleForUser(currentUser: User): Promise<Campaign[]> {
@@ -97,7 +114,8 @@ export class CampaignsService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   private async findAllowedUsersByIds(userIds: string[]): Promise<User[]> {
@@ -139,13 +157,20 @@ export class CampaignsService {
       name: dto.name,
       referenceImageUrl: dto.referenceImageUrl ?? null,
       description: dto.description ?? null,
-      tags,
       sections,
       allowedUsers,
       createdBy: currentUser,
     });
 
-    return this.campaignsRepository.save(campaign);
+    const savedCampaign = await this.campaignsRepository.save(campaign);
+    await createOrderedTagJunctions(
+      this.campaignTagsRepository,
+      'campaign',
+      savedCampaign,
+      tags,
+    );
+    savedCampaign.tags = tags;
+    return savedCampaign;
   }
 
   async findAllPaginated(
@@ -178,8 +203,16 @@ export class CampaignsService {
 
     const campaigns = await this.campaignsRepository.find({
       where: { id: In(ids.map((campaign) => campaign.id)) },
-      relations: { tags: true },
     });
+
+    const tagsByCampaignId = await loadOrderedTagsMap(
+      this.campaignTagsRepository,
+      campaigns.map((campaign) => campaign.id),
+      'campaign',
+    );
+    for (const campaign of campaigns) {
+      campaign.tags = tagsByCampaignId.get(campaign.id) ?? [];
+    }
 
     const campaignsById = new Map(
       campaigns.map((campaign) => [campaign.id, campaign]),
@@ -215,9 +248,9 @@ export class CampaignsService {
     if (dto.description !== undefined) {
       campaign.description = dto.description;
     }
+    let tags = campaign.tags;
     if (dto.tagIds !== undefined) {
-      campaign.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
     }
 
     let removedUserIds: string[] = [];
@@ -242,6 +275,16 @@ export class CampaignsService {
     return this.dataSource.transaction(async (manager) => {
       const campaignsRepository = manager.getRepository(Campaign);
       const campaignSectionsRepository = manager.getRepository(CampaignSection);
+      const campaignTagsRepository = manager.getRepository(CampaignTag);
+
+      if (dto.tagIds !== undefined) {
+        await replaceOrderedTagJunctions(
+          campaignTagsRepository,
+          'campaign',
+          campaign,
+          tags,
+        );
+      }
 
       if (newSections !== undefined) {
         // Reatribuir `campaign.sections` inteiro e deixar o cascade save cuidar da
@@ -256,6 +299,7 @@ export class CampaignsService {
       }
 
       const savedCampaign = await campaignsRepository.save(campaign);
+      savedCampaign.tags = tags;
 
       if (removedUserIds.length > 0) {
         await this.unassignSheetsOfRemovedAllowedUsers(

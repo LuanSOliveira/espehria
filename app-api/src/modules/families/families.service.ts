@@ -9,12 +9,19 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateFamilyDto } from './dto/create-family.dto';
 import { UpdateFamilyDto } from './dto/update-family.dto';
 import { FindFamiliesQueryDto } from './dto/find-families-query.dto';
 import { FamilyMemberInputDto } from './dto/family-member-input.dto';
 import { FamilyRelationshipInputDto } from './dto/family-relationship-input.dto';
 import { Family } from './entities/family.entity';
+import { FamilyTag } from './entities/family-tag.entity';
 import { FamilyMember } from './entities/family-member.entity';
 import { FamilyRelationship } from './entities/family-relationship.entity';
 import { FamilyRelationshipType } from './enums/family-relationship-type.enum';
@@ -37,6 +44,8 @@ export class FamiliesService {
     private readonly familyMembersRepository: Repository<FamilyMember>,
     @InjectRepository(FamilyRelationship)
     private readonly familyRelationshipsRepository: Repository<FamilyRelationship>,
+    @InjectRepository(FamilyTag)
+    private readonly familyTagsRepository: Repository<FamilyTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     @InjectRepository(Character)
@@ -44,18 +53,27 @@ export class FamiliesService {
     private readonly dataSource: DataSource,
   ) {}
 
-  private findFamilyWithRelations(
+  private async findFamilyWithRelations(
     id: string,
     repository: Repository<Family> = this.familiesRepository,
+    familyTagsRepository: Repository<FamilyTag> = this.familyTagsRepository,
   ): Promise<Family | null> {
-    return repository.findOne({
+    const family = await repository.findOne({
       where: { id },
       relations: {
-        tags: true,
         members: { character: true },
         relationships: { sourceCharacter: true, targetCharacter: true },
       },
     });
+    if (!family) {
+      return null;
+    }
+    family.tags = await loadOrderedTagsForOwner(
+      familyTagsRepository,
+      id,
+      'family',
+    );
+    return family;
   }
 
   findById(id: string): Promise<Family | null> {
@@ -88,7 +106,8 @@ export class FamiliesService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   private async findCharactersByIds(
@@ -556,12 +575,17 @@ export class FamiliesService {
         description: dto.description ?? null,
         privateInformation: dto.privateInformation ?? null,
         classification: dto.classification,
-        tags,
         members,
         relationships,
       });
 
       const saved = await familiesRepository.save(family);
+      await createOrderedTagJunctions(
+        manager.getRepository(FamilyTag),
+        'family',
+        saved,
+        tags,
+      );
 
       if (members.length > 0) {
         await this.applyFamilyAssignments(
@@ -608,9 +632,17 @@ export class FamiliesService {
 
     const families = await this.familiesRepository.find({
       where: { id: In(ids.map((family) => family.id)) },
-      relations: { tags: true },
       order: { name: 'ASC' },
     });
+
+    const tagsByFamilyId = await loadOrderedTagsMap(
+      this.familyTagsRepository,
+      families.map((family) => family.id),
+      'family',
+    );
+    for (const family of families) {
+      family.tags = tagsByFamilyId.get(family.id) ?? [];
+    }
 
     const familiesById = new Map(families.map((family) => [family.id, family]));
     const data = ids
@@ -650,10 +682,16 @@ export class FamiliesService {
         family.classification = dto.classification;
       }
       if (dto.tagIds !== undefined) {
-        family.tags =
+        const tags =
           dto.tagIds.length > 0
             ? await this.findTagsByIds(dto.tagIds, tagsRepository)
             : [];
+        await replaceOrderedTagJunctions(
+          manager.getRepository(FamilyTag),
+          'family',
+          family,
+          tags,
+        );
       }
 
       await familiesRepository.save(family);

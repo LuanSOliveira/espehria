@@ -9,10 +9,17 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  createOrderedTagJunctions,
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+  replaceOrderedTagJunctions,
+} from '../../common/utils/ordered-tags.util';
 import { CreateTalentDto } from './dto/create-talent.dto';
 import { UpdateTalentDto } from './dto/update-talent.dto';
 import { FindTalentsQueryDto } from './dto/find-talents-query.dto';
 import { Talent } from './entities/talent.entity';
+import { TalentTag } from './entities/talent-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { EntityLinksService } from '../entity-links/entity-links.service';
 import { EntityLinkType } from '../entity-links/enums/entity-link-type.enum';
@@ -46,6 +53,8 @@ export class TalentsService {
   constructor(
     @InjectRepository(Talent)
     private readonly talentsRepository: Repository<Talent>,
+    @InjectRepository(TalentTag)
+    private readonly talentTagsRepository: Repository<TalentTag>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     private readonly entityLinksService: EntityLinksService,
@@ -57,13 +66,15 @@ export class TalentsService {
   }
 
   async findById(id: string): Promise<TalentWithReferences | null> {
-    const talent = await this.talentsRepository.findOne({
-      where: { id },
-      relations: { tags: true },
-    });
+    const talent = await this.talentsRepository.findOneBy({ id });
     if (!talent) {
       return null;
     }
+    talent.tags = await loadOrderedTagsForOwner(
+      this.talentTagsRepository,
+      id,
+      'talent',
+    );
 
     const { improvedFrom, requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
@@ -92,7 +103,8 @@ export class TalentsService {
     if (tags.length !== uniqueIds.length) {
       throw new NotFoundException('Uma ou mais tags não foram encontradas.');
     }
-    return tags;
+    const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
+    return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
   async create(dto: CreateTalentDto): Promise<TalentWithReferences> {
@@ -138,10 +150,16 @@ export class TalentsService {
       name: dto.name,
       level: dto.level,
       description: dto.description ?? null,
-      tags,
     });
 
     const savedTalent = await this.talentsRepository.save(talent);
+    await createOrderedTagJunctions(
+      this.talentTagsRepository,
+      'talent',
+      savedTalent,
+      tags,
+    );
+    savedTalent.tags = tags;
 
     await this.entityLinksService.replaceLinks(
       ReferenceableEntityType.TALENT,
@@ -225,9 +243,17 @@ export class TalentsService {
 
     const talents = await this.talentsRepository.find({
       where: { id: In(ids.map((talent) => talent.id)) },
-      relations: { tags: true },
       order: { name: 'ASC' },
     });
+
+    const tagsByTalentId = await loadOrderedTagsMap(
+      this.talentTagsRepository,
+      talents.map((talent) => talent.id),
+      'talent',
+    );
+    for (const talent of talents) {
+      talent.tags = tagsByTalentId.get(talent.id) ?? [];
+    }
 
     const talentsById = new Map(talents.map((talent) => [talent.id, talent]));
     const data = ids
@@ -241,13 +267,15 @@ export class TalentsService {
     id: string,
     dto: UpdateTalentDto,
   ): Promise<TalentWithReferences> {
-    const talent = await this.talentsRepository.findOne({
-      where: { id },
-      relations: { tags: true },
-    });
+    const talent = await this.talentsRepository.findOneBy({ id });
     if (!talent) {
       throw new NotFoundException('Talento não encontrado.');
     }
+    talent.tags = await loadOrderedTagsForOwner(
+      this.talentTagsRepository,
+      id,
+      'talent',
+    );
 
     if (dto.name && dto.name !== talent.name) {
       const existing = await this.findByName(dto.name);
@@ -263,9 +291,15 @@ export class TalentsService {
     if (dto.description !== undefined) {
       talent.description = dto.description;
     }
+    let tags = talent.tags;
     if (dto.tagIds !== undefined) {
-      talent.tags =
-        dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
+      await replaceOrderedTagJunctions(
+        this.talentTagsRepository,
+        'talent',
+        talent,
+        tags,
+      );
     }
 
     let effectiveImprovedFrom = dto.improvedFrom;
@@ -367,6 +401,7 @@ export class TalentsService {
     });
 
     const savedTalent = await this.talentsRepository.save(talent);
+    savedTalent.tags = tags;
 
     if (dto.improvedFrom !== undefined) {
       await this.entityLinksService.replaceLinks(

@@ -14,16 +14,16 @@ import { DefaultText } from '@/shared/components/Texts';
 import {
   useCurrenciesQuery,
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   EquipmentFormData,
   equipmentFormDefaultValues,
   equipmentFormResolver,
 } from '@/shared/formSchemas';
-import { ICurrency, IEquipment, ITag, ITagListFilters } from '@/shared/interfaces';
+import { ICurrency, IEquipment, ITag } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedEquipmentStore } from '@/store';
 
@@ -49,11 +49,7 @@ export const EquipmentCreateForm = ({ onSaved }: EquipmentCreateFormProps) => {
   );
   const isEditMode = !!selectedEquipment;
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const { data: currenciesData } = useCurrenciesQuery();
   const currencyOptions = currenciesData ?? [];

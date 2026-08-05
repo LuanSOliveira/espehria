@@ -14,9 +14,9 @@ import { EntityReferenceListField } from '@/shared/components/EntityReferenceLis
 import { ImprovementDefectListField } from '@/shared/components/ImprovementDefectListField';
 import {
   useGetEntityById,
-  useGetEntityList,
   usePostEntity,
   usePutEntity,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   BiographyFormData,
@@ -28,7 +28,6 @@ import {
   IEntityReference,
   IImprovementDefectItem,
   ITag,
-  ITagListFilters,
 } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { useSelectedBiographyStore } from '@/store';
@@ -69,11 +68,7 @@ export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
     [],
   );
 
-  const { data: tagsData } = useGetEntityList<ITag, ITagListFilters>({
-    url: '/tags',
-    filters: { perPage: 100 },
-  });
-  const tagOptions = tagsData?.data ?? [];
+  const { tagOptions } = useTagOptionsQuery();
 
   const {
     data: biographyDetail,

@@ -47,7 +47,7 @@ export class EquipmentResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas ao equipamento',
+    description: 'Tags associadas ao equipamento, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

@@ -9,9 +9,17 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
 } from '../../common/variables/pagination';
+import {
+  loadOrderedTagsForOwner,
+  loadOrderedTagsMap,
+} from '../../common/utils/ordered-tags.util';
 import { Campaign } from '../campaigns/entities/campaign.entity';
 import { Race } from '../races/entities/race.entity';
+import { RaceTag } from '../races/entities/race-tag.entity';
+import { CharacteristicTag } from '../characteristics/entities/characteristic-tag.entity';
+import { TalentTag } from '../talents/entities/talent-tag.entity';
 import { Biography } from '../biographies/entities/biography.entity';
+import { BiographyTag } from '../biographies/entities/biography-tag.entity';
 import { ImprovementFlaw } from '../improvement-flaws/entities/improvement-flaw.entity';
 import { ImprovementFlawType } from '../improvement-flaw-types/entities/improvement-flaw-type.entity';
 import { ImprovementFlawProperty } from '../improvement-flaw-properties/entities/improvement-flaw-property.entity';
@@ -45,8 +53,16 @@ export class SheetsService {
     private readonly campaignsRepository: Repository<Campaign>,
     @InjectRepository(Race)
     private readonly racesRepository: Repository<Race>,
+    @InjectRepository(RaceTag)
+    private readonly raceTagsRepository: Repository<RaceTag>,
+    @InjectRepository(CharacteristicTag)
+    private readonly characteristicTagsRepository: Repository<CharacteristicTag>,
+    @InjectRepository(TalentTag)
+    private readonly talentTagsRepository: Repository<TalentTag>,
     @InjectRepository(Biography)
     private readonly biographiesRepository: Repository<Biography>,
+    @InjectRepository(BiographyTag)
+    private readonly biographyTagsRepository: Repository<BiographyTag>,
     @InjectRepository(ImprovementFlaw)
     private readonly improvementFlawsRepository: Repository<ImprovementFlaw>,
     @InjectRepository(ImprovementFlawType)
@@ -63,19 +79,46 @@ export class SheetsService {
     return campaign;
   }
 
+  private async attachRaceOrderedTags(race: Race): Promise<void> {
+    race.tags = await loadOrderedTagsForOwner(
+      this.raceTagsRepository,
+      race.id,
+      'race',
+    );
+
+    const characteristicTagsById = await loadOrderedTagsMap(
+      this.characteristicTagsRepository,
+      race.characteristics.map((characteristic) => characteristic.id),
+      'characteristic',
+    );
+    for (const characteristic of race.characteristics) {
+      characteristic.tags =
+        characteristicTagsById.get(characteristic.id) ?? [];
+    }
+
+    const talentTagsById = await loadOrderedTagsMap(
+      this.talentTagsRepository,
+      race.talents.map((talent) => talent.id),
+      'talent',
+    );
+    for (const talent of race.talents) {
+      talent.tags = talentTagsById.get(talent.id) ?? [];
+    }
+  }
+
   private async findRaceById(id: string): Promise<Race> {
     const race = await this.racesRepository.findOne({
       where: { id },
       relations: {
         category: true,
-        tags: true,
-        characteristics: { tags: true },
-        talents: { tags: true },
+        characteristics: true,
+        talents: true,
       },
     });
     if (!race) {
       throw new NotFoundException('Raça não encontrada.');
     }
+    await this.attachRaceOrderedTags(race);
     return race;
   }
 
@@ -158,11 +201,10 @@ export class SheetsService {
         campaign: true,
         race: {
           category: true,
-          tags: true,
-          characteristics: { tags: true },
-          talents: { tags: true },
+          characteristics: true,
+          talents: true,
         },
-        biography: { tags: true },
+        biography: true,
         createdBy: true,
       },
     });
@@ -174,6 +216,16 @@ export class SheetsService {
       sheet.createdBy.id !== currentUser.id
     ) {
       return null;
+    }
+    if (sheet.race) {
+      await this.attachRaceOrderedTags(sheet.race);
+    }
+    if (sheet.biography) {
+      sheet.biography.tags = await loadOrderedTagsForOwner(
+        this.biographyTagsRepository,
+        sheet.biography.id,
+        'biography',
+      );
     }
     return sheet;
   }
@@ -279,9 +331,8 @@ export class SheetsService {
       );
     }
 
-    const biography = await this.biographiesRepository.findOne({
-      where: { id: dto.biographyId },
-      relations: { tags: true },
+    const biography = await this.biographiesRepository.findOneBy({
+      id: dto.biographyId,
     });
     if (!biography) {
       throw new NotFoundException('Biografia não encontrada.');

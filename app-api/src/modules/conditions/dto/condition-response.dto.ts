@@ -21,7 +21,7 @@ export class ConditionResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas à condição',
+    description: 'Tags associadas à condição, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

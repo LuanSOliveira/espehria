@@ -35,7 +35,7 @@ export class OrganizationResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas à organização',
+    description: 'Tags associadas à organização, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Organization } from './entities/organization.entity';
+import { OrganizationTag } from './entities/organization-tag.entity';
 import { OrganizationMember } from './entities/organization-member.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { Character } from '../characters/entities/character.entity';
@@ -11,6 +12,7 @@ import { OrganizationsService } from './organizations.service';
   imports: [
     TypeOrmModule.forFeature([
       Organization,
+      OrganizationTag,
       OrganizationMember,
       Tag,
       Character,

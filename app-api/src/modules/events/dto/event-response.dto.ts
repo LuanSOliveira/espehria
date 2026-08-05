@@ -58,7 +58,7 @@ export class EventResponseDto {
 
   @ApiProperty({
     type: () => [TagResponseDto],
-    description: 'Tags associadas ao evento',
+    description: 'Tags associadas ao evento, na ordem de inserção',
   })
   tags: TagResponseDto[];
 

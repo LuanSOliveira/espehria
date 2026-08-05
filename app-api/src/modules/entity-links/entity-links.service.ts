@@ -5,12 +5,19 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, FindOptionsWhere, In, Repository } from 'typeorm';
+import { loadOrderedTagsMap } from '../../common/utils/ordered-tags.util';
 import { Training } from '../trainings/entities/training.entity';
+import { TrainingTag } from '../trainings/entities/training-tag.entity';
 import { Talent } from '../talents/entities/talent.entity';
+import { TalentTag } from '../talents/entities/talent-tag.entity';
 import { Technique } from '../techniques/entities/technique.entity';
+import { TechniqueTag } from '../techniques/entities/technique-tag.entity';
 import { Spell } from '../spells/entities/spell.entity';
+import { SpellTag } from '../spells/entities/spell-tag.entity';
 import { Characteristic } from '../characteristics/entities/characteristic.entity';
+import { CharacteristicTag } from '../characteristics/entities/characteristic-tag.entity';
 import { Biography } from '../biographies/entities/biography.entity';
+import { BiographyTag } from '../biographies/entities/biography-tag.entity';
 import { EntityLink } from './entities/entity-link.entity';
 import { EntityLinkType } from './enums/entity-link-type.enum';
 import { ReferenceableEntityType } from './enums/referenceable-entity-type.enum';
@@ -46,16 +53,28 @@ export class EntityLinksService {
     private readonly entityLinksRepository: Repository<EntityLink>,
     @InjectRepository(Training)
     private readonly trainingsRepository: Repository<Training>,
+    @InjectRepository(TrainingTag)
+    private readonly trainingTagsRepository: Repository<TrainingTag>,
     @InjectRepository(Talent)
     private readonly talentsRepository: Repository<Talent>,
+    @InjectRepository(TalentTag)
+    private readonly talentTagsRepository: Repository<TalentTag>,
     @InjectRepository(Technique)
     private readonly techniquesRepository: Repository<Technique>,
+    @InjectRepository(TechniqueTag)
+    private readonly techniqueTagsRepository: Repository<TechniqueTag>,
     @InjectRepository(Spell)
     private readonly spellsRepository: Repository<Spell>,
+    @InjectRepository(SpellTag)
+    private readonly spellTagsRepository: Repository<SpellTag>,
     @InjectRepository(Characteristic)
     private readonly characteristicsRepository: Repository<Characteristic>,
+    @InjectRepository(CharacteristicTag)
+    private readonly characteristicTagsRepository: Repository<CharacteristicTag>,
     @InjectRepository(Biography)
     private readonly biographiesRepository: Repository<Biography>,
+    @InjectRepository(BiographyTag)
+    private readonly biographyTagsRepository: Repository<BiographyTag>,
   ) {}
 
   private repositoryFor(
@@ -285,14 +304,82 @@ export class EntityLinksService {
     const links = await this.entityLinksRepository.find({
       where: whereCriteria as FindOptionsWhere<EntityLink>,
       relations: {
-        targetTraining: { tags: true },
-        targetTalent: { tags: true },
-        targetTechnique: { tags: true },
-        targetSpell: { tags: true },
-        targetCharacteristic: { tags: true },
-        targetBiography: { tags: true },
+        targetTraining: true,
+        targetTalent: true,
+        targetTechnique: true,
+        targetSpell: true,
+        targetCharacteristic: true,
+        targetBiography: true,
       },
     });
+
+    const trainingTagsById = await loadOrderedTagsMap(
+      this.trainingTagsRepository,
+      links
+        .map((link) => link.targetTraining?.id)
+        .filter((linkId): linkId is string => linkId !== undefined),
+      'training',
+    );
+    const talentTagsById = await loadOrderedTagsMap(
+      this.talentTagsRepository,
+      links
+        .map((link) => link.targetTalent?.id)
+        .filter((linkId): linkId is string => linkId !== undefined),
+      'talent',
+    );
+    const techniqueTagsById = await loadOrderedTagsMap(
+      this.techniqueTagsRepository,
+      links
+        .map((link) => link.targetTechnique?.id)
+        .filter((linkId): linkId is string => linkId !== undefined),
+      'technique',
+    );
+    const spellTagsById = await loadOrderedTagsMap(
+      this.spellTagsRepository,
+      links
+        .map((link) => link.targetSpell?.id)
+        .filter((linkId): linkId is string => linkId !== undefined),
+      'spell',
+    );
+    const characteristicTagsById = await loadOrderedTagsMap(
+      this.characteristicTagsRepository,
+      links
+        .map((link) => link.targetCharacteristic?.id)
+        .filter((linkId): linkId is string => linkId !== undefined),
+      'characteristic',
+    );
+    const biographyTagsById = await loadOrderedTagsMap(
+      this.biographyTagsRepository,
+      links
+        .map((link) => link.targetBiography?.id)
+        .filter((linkId): linkId is string => linkId !== undefined),
+      'biography',
+    );
+
+    for (const link of links) {
+      if (link.targetTraining) {
+        link.targetTraining.tags =
+          trainingTagsById.get(link.targetTraining.id) ?? [];
+      }
+      if (link.targetTalent) {
+        link.targetTalent.tags = talentTagsById.get(link.targetTalent.id) ?? [];
+      }
+      if (link.targetTechnique) {
+        link.targetTechnique.tags =
+          techniqueTagsById.get(link.targetTechnique.id) ?? [];
+      }
+      if (link.targetSpell) {
+        link.targetSpell.tags = spellTagsById.get(link.targetSpell.id) ?? [];
+      }
+      if (link.targetCharacteristic) {
+        link.targetCharacteristic.tags =
+          characteristicTagsById.get(link.targetCharacteristic.id) ?? [];
+      }
+      if (link.targetBiography) {
+        link.targetBiography.tags =
+          biographyTagsById.get(link.targetBiography.id) ?? [];
+      }
+    }
 
     const toResponse = (link: EntityLink): EntityReferenceResponseDto => {
       if (link.targetTraining) {
