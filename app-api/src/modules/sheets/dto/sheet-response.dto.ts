@@ -5,6 +5,8 @@ import { BiographyOptionResponseDto } from '../../biographies/dto/biography-opti
 import { UserResponseDto } from '../../users/dto/user-response.dto';
 import { Sheet } from '../entities/sheet.entity';
 import { SheetImprovementFlawSnapshotResponseDto } from './sheet-improvement-flaw-snapshot-response.dto';
+import { SheetProficiencySnapshotResponseDto } from './sheet-proficiency-snapshot-response.dto';
+import { SheetProficiencyAdjustmentResponseDto } from './sheet-proficiency-adjustment-response.dto';
 
 export class SheetResponseDto {
   @ApiProperty({
@@ -64,6 +66,20 @@ export class SheetResponseDto {
   defeitos: SheetImprovementFlawSnapshotResponseDto;
 
   @ApiProperty({
+    type: () => SheetProficiencySnapshotResponseDto,
+    description:
+      'Snapshot das proficiências efetivas da ficha, agrupadas por origem',
+  })
+  proficiencias: SheetProficiencySnapshotResponseDto;
+
+  @ApiProperty({
+    type: () => [SheetProficiencyAdjustmentResponseDto],
+    description:
+      'Proficiências em conflito que aguardam ou já receberam uma propriedade substituta',
+  })
+  proficienciasAjustadas: SheetProficiencyAdjustmentResponseDto[];
+
+  @ApiProperty({
     type: () => UserResponseDto,
     description:
       'Usuário dono da ficha. Campo somente leitura — preenchido a partir do usuário autenticado na criação',
@@ -94,6 +110,13 @@ export class SheetResponseDto {
     );
     dto.defeitos = SheetImprovementFlawSnapshotResponseDto.fromEntity(
       sheet.defeitos,
+    );
+    dto.proficiencias = SheetProficiencySnapshotResponseDto.fromEntity(
+      sheet.proficiencias,
+    );
+    dto.proficienciasAjustadas = sheet.proficienciasAjustadas.map(
+      (adjustment) =>
+        SheetProficiencyAdjustmentResponseDto.fromRaw(adjustment),
     );
     dto.createdBy = UserResponseDto.fromEntity(sheet.createdBy);
     dto.createdAt = sheet.createdAt;

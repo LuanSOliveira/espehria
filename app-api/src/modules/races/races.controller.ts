@@ -49,19 +49,24 @@ export class RacesController {
   @ApiCreatedResponse({ type: RaceResponseDto })
   @ApiConflictResponse({
     description:
-      'Nome da raça já existe, ou violação de regra em Melhorias/Defeitos (duplicidade de combinação Tipo×Propriedade na mesma lista, exclusividade entre listas ou incompatibilidade entre o Tipo e a Propriedade selecionados)',
+      'Nome da raça já existe, ou violação de regra em Melhorias/Defeitos (duplicidade de combinação Tipo×Propriedade na mesma lista, exclusividade entre listas ou incompatibilidade entre o Tipo e a Propriedade selecionados), ou violação de regra em Proficiências (duplicidade de propriedade na mesma lista)',
   })
   @ApiNotFoundResponse({
     description:
-      'Categoria não encontrada, uma ou mais tags não encontradas, uma ou mais características não encontradas, um ou mais talentos não encontrados, ou tipos/propriedades de Melhorias/Defeitos não encontrados',
+      'Categoria não encontrada, uma ou mais tags não encontradas, uma ou mais características não encontradas, um ou mais talentos não encontrados, tipos/propriedades de Melhorias/Defeitos, ou propriedades/graduações de Proficiências não encontrados',
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida, dados obrigatórios ausentes, ou formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas)',
+      'URL de imagem de referência inválida, dados obrigatórios ausentes, formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas), ou formato inválido de property/gradation em Proficiências (devem ser UUIDs válidas)',
   })
   async create(@Body() dto: CreateRaceDto): Promise<RaceResponseDto> {
-    const { race, improvements, flaws } = await this.racesService.create(dto);
-    return RaceResponseDto.fromEntity(race, { improvements, flaws });
+    const { race, improvements, flaws, proficiencies } =
+      await this.racesService.create(dto);
+    return RaceResponseDto.fromEntity(race, {
+      improvements,
+      flaws,
+      proficiencies,
+    });
   }
 
   @Get()
@@ -110,6 +115,7 @@ export class RacesController {
     return RaceResponseDto.fromEntity(result.race, {
       improvements: result.improvements,
       flaws: result.flaws,
+      proficiencies: result.proficiencies,
     });
   }
 
@@ -118,25 +124,27 @@ export class RacesController {
   @ApiOkResponse({ type: RaceResponseDto })
   @ApiNotFoundResponse({
     description:
-      'Raça, categoria, uma ou mais tags, uma ou mais características, um ou mais talentos não encontrados, ou tipos/propriedades de Melhorias/Defeitos não encontrados',
+      'Raça, categoria, uma ou mais tags, uma ou mais características, um ou mais talentos, tipos/propriedades de Melhorias/Defeitos, ou propriedades/graduações de Proficiências não encontrados',
   })
   @ApiConflictResponse({
     description:
-      'Nome da raça já existe, ou violação de regra em Melhorias/Defeitos (duplicidade de combinação Tipo×Propriedade na mesma lista, exclusividade entre listas ou incompatibilidade entre o Tipo e a Propriedade selecionados)',
+      'Nome da raça já existe, ou violação de regra em Melhorias/Defeitos (duplicidade de combinação Tipo×Propriedade na mesma lista, exclusividade entre listas ou incompatibilidade entre o Tipo e a Propriedade selecionados), ou violação de regra em Proficiências (duplicidade de propriedade na mesma lista)',
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida, ID em formato inválido, ou formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas)',
+      'URL de imagem de referência inválida, ID em formato inválido, formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas), ou formato inválido de property/gradation em Proficiências (devem ser UUIDs válidas)',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateRaceDto,
   ): Promise<RaceResponseDto> {
-    const { race, improvements, flaws } = await this.racesService.update(
-      id,
-      dto,
-    );
-    return RaceResponseDto.fromEntity(race, { improvements, flaws });
+    const { race, improvements, flaws, proficiencies } =
+      await this.racesService.update(id, dto);
+    return RaceResponseDto.fromEntity(race, {
+      improvements,
+      flaws,
+      proficiencies,
+    });
   }
 
   @Delete(':id')

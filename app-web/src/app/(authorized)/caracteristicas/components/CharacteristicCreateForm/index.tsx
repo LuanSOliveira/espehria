@@ -12,6 +12,7 @@ import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
 import { EntityReferenceListField } from '@/shared/components/EntityReferenceListField';
 import { ImprovementDefectListField } from '@/shared/components/ImprovementDefectListField';
+import { ProficiencyListField } from '@/shared/components/ProficiencyListField';
 import {
   useGetEntityById,
   usePostEntity,
@@ -27,6 +28,7 @@ import {
   ICharacteristic,
   IEntityReference,
   IImprovementDefectItem,
+  IProficiencyItem,
   ITag,
 } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
@@ -47,6 +49,11 @@ interface ImprovementDefectInputPayload {
   property: string;
 }
 
+interface ProficiencyInputPayload {
+  property: string;
+  gradation: string;
+}
+
 interface CharacteristicPayload
   extends Omit<CharacteristicFormData, 'description' | 'level'> {
   description?: string;
@@ -56,6 +63,7 @@ interface CharacteristicPayload
   additionalAbilities: EntityReferenceInputPayload[];
   improvements: ImprovementDefectInputPayload[];
   flaws: ImprovementDefectInputPayload[];
+  proficiencies: ProficiencyInputPayload[];
 }
 
 export const CharacteristicCreateForm = ({
@@ -75,6 +83,7 @@ export const CharacteristicCreateForm = ({
     [],
   );
   const [flaws, setFlaws] = useState<IImprovementDefectItem[]>([]);
+  const [proficiencies, setProficiencies] = useState<IProficiencyItem[]>([]);
 
   const { tagOptions } = useTagOptionsQuery();
 
@@ -106,6 +115,8 @@ export const CharacteristicCreateForm = ({
       setImprovements([]);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setFlaws([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setProficiencies([]);
       return;
     }
 
@@ -124,6 +135,7 @@ export const CharacteristicCreateForm = ({
     setAdditionalAbilities(characteristicDetail.additionalAbilities ?? []);
     setImprovements(characteristicDetail.improvements ?? []);
     setFlaws(characteristicDetail.flaws ?? []);
+    setProficiencies(characteristicDetail.proficiencies ?? []);
   }, [isEditMode, characteristicDetail, reset]);
 
   useEffect(() => {
@@ -146,6 +158,7 @@ export const CharacteristicCreateForm = ({
     additionalAbilities: IEntityReference[],
     improvements: IImprovementDefectItem[],
     flaws: IImprovementDefectItem[],
+    proficiencies: IProficiencyItem[],
   ): CharacteristicPayload => ({
     ...data,
     description: data.description || undefined,
@@ -173,6 +186,10 @@ export const CharacteristicCreateForm = ({
       type: item.type.id,
       property: item.property.id,
     })),
+    proficiencies: proficiencies.map((item) => ({
+      property: item.property.id,
+      gradation: item.gradation.id,
+    })),
   });
 
   const createCharacteristicMutation = usePostEntity<
@@ -192,6 +209,7 @@ export const CharacteristicCreateForm = ({
       setAdditionalAbilities([]);
       setImprovements([]);
       setFlaws([]);
+      setProficiencies([]);
       onSaved();
     },
     onError: (error) => {
@@ -235,6 +253,7 @@ export const CharacteristicCreateForm = ({
       additionalAbilities,
       improvements,
       flaws,
+      proficiencies,
     );
 
     if (isEditMode) {
@@ -319,6 +338,13 @@ export const CharacteristicCreateForm = ({
           otherListValue={improvements}
         />
       </div>
+
+      <ProficiencyListField
+        label="Proficiências"
+        addButtonLabel="Adicionar Proficiências"
+        value={proficiencies}
+        onChange={setProficiencies}
+      />
 
       <EntityReferenceListField
         label="Habilidades Adicionais"

@@ -5,6 +5,7 @@ import { CharacteristicTag } from './entities/characteristic-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { EntityLinksModule } from '../entity-links/entity-links.module';
 import { ImprovementFlawsModule } from '../improvement-flaws/improvement-flaws.module';
+import { ProficienciesModule } from '../proficiencies/proficiencies.module';
 import { CharacteristicsController } from './characteristics.controller';
 import { CharacteristicsService } from './characteristics.service';
 
@@ -13,6 +14,7 @@ import { CharacteristicsService } from './characteristics.service';
     TypeOrmModule.forFeature([Characteristic, CharacteristicTag, Tag]),
     EntityLinksModule,
     ImprovementFlawsModule,
+    ProficienciesModule,
   ],
   controllers: [CharacteristicsController],
   providers: [CharacteristicsService],

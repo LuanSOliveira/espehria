@@ -3,6 +3,7 @@ import { Talent } from '../entities/talent.entity';
 import { TagResponseDto } from '../../tags/dto/tag-response.dto';
 import { EntityReferenceResponseDto } from '../../entity-links/dto/entity-reference-response.dto';
 import { ImprovementFlawItemResponseDto } from '../../improvement-flaws/dto/improvement-flaw-item-response.dto';
+import { ProficiencyItemResponseDto } from '../../proficiencies/dto/proficiency-item-response.dto';
 
 export class TalentResponseDto {
   @ApiProperty({
@@ -64,6 +65,13 @@ export class TalentResponseDto {
   })
   flaws: ImprovementFlawItemResponseDto[];
 
+  @ApiProperty({
+    type: () => [ProficiencyItemResponseDto],
+    description:
+      'Proficiências associadas a este talento, na ordem em que foram inseridas',
+  })
+  proficiencies: ProficiencyItemResponseDto[];
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -78,6 +86,7 @@ export class TalentResponseDto {
       additionalAbilities: EntityReferenceResponseDto[];
       improvements: ImprovementFlawItemResponseDto[];
       flaws: ImprovementFlawItemResponseDto[];
+      proficiencies: ProficiencyItemResponseDto[];
     },
   ): TalentResponseDto {
     const dto = new TalentResponseDto();
@@ -91,6 +100,7 @@ export class TalentResponseDto {
     dto.additionalAbilities = references.additionalAbilities;
     dto.improvements = references.improvements;
     dto.flaws = references.flaws;
+    dto.proficiencies = references.proficiencies;
     dto.createdAt = talent.createdAt;
     dto.updatedAt = talent.updatedAt;
     return dto;

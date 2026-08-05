@@ -31,6 +31,10 @@ import { ImprovementFlawOwnerType } from '../improvement-flaws/enums/improvement
 import { ImprovementFlawCategory } from '../improvement-flaws/enums/improvement-flaw-category.enum';
 import { ImprovementFlawItemInputDto } from '../improvement-flaws/dto/improvement-flaw-item-input.dto';
 import { ImprovementFlawItemResponseDto } from '../improvement-flaws/dto/improvement-flaw-item-response.dto';
+import { ProficienciesService } from '../proficiencies/proficiencies.service';
+import { ProficiencyOwnerType } from '../proficiencies/enums/proficiency-owner-type.enum';
+import { ProficiencyItemInputDto } from '../proficiencies/dto/proficiency-item-input.dto';
+import { ProficiencyItemResponseDto } from '../proficiencies/dto/proficiency-item-response.dto';
 
 export interface PaginatedTalents {
   data: Talent[];
@@ -46,6 +50,7 @@ export interface TalentWithReferences {
   additionalAbilities: EntityReferenceResponseDto[];
   improvements: ImprovementFlawItemResponseDto[];
   flaws: ImprovementFlawItemResponseDto[];
+  proficiencies: ProficiencyItemResponseDto[];
 }
 
 @Injectable()
@@ -59,6 +64,7 @@ export class TalentsService {
     private readonly tagsRepository: Repository<Tag>,
     private readonly entityLinksService: EntityLinksService,
     private readonly improvementFlawsService: ImprovementFlawsService,
+    private readonly proficienciesService: ProficienciesService,
   ) {}
 
   findByName(name: string): Promise<Talent | null> {
@@ -86,6 +92,10 @@ export class TalentsService {
         ImprovementFlawOwnerType.TALENT,
         id,
       );
+    const proficiencies = await this.proficienciesService.loadItemsFor(
+      ProficiencyOwnerType.TALENT,
+      id,
+    );
 
     return {
       talent,
@@ -94,6 +104,7 @@ export class TalentsService {
       additionalAbilities,
       improvements,
       flaws,
+      proficiencies,
     };
   }
 
@@ -123,6 +134,7 @@ export class TalentsService {
     const additionalAbilitiesInput = dto.additionalAbilities ?? [];
     const improvementsInput = dto.improvements ?? [];
     const flawsInput = dto.flaws ?? [];
+    const proficienciesInput = dto.proficiencies ?? [];
 
     this.entityLinksService.validateLists({
       ownerEntityType: ReferenceableEntityType.TALENT,
@@ -145,6 +157,12 @@ export class TalentsService {
       improvements: improvementsInput,
       flaws: flawsInput,
     });
+
+    const resolvedProficiencies =
+      await this.proficienciesService.validateAndResolveItems(
+        proficienciesInput,
+      );
+    this.proficienciesService.validateList(proficienciesInput);
 
     const talent = this.talentsRepository.create({
       name: dto.name,
@@ -194,6 +212,12 @@ export class TalentsService {
       flawsInput,
       resolvedFlaws,
     );
+    await this.proficienciesService.replaceItems(
+      ProficiencyOwnerType.TALENT,
+      savedTalent.id,
+      proficienciesInput,
+      resolvedProficiencies,
+    );
 
     const { improvedFrom, requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
@@ -205,6 +229,10 @@ export class TalentsService {
         ImprovementFlawOwnerType.TALENT,
         savedTalent.id,
       );
+    const proficiencies = await this.proficienciesService.loadItemsFor(
+      ProficiencyOwnerType.TALENT,
+      savedTalent.id,
+    );
 
     return {
       talent: savedTalent,
@@ -213,6 +241,7 @@ export class TalentsService {
       additionalAbilities,
       improvements,
       flaws,
+      proficiencies,
     };
   }
 
@@ -400,6 +429,26 @@ export class TalentsService {
       flaws: effectiveFlaws,
     });
 
+    let effectiveProficiencies = dto.proficiencies;
+    if (effectiveProficiencies === undefined) {
+      const currentProficiencies = await this.proficienciesService.loadItemsFor(
+        ProficiencyOwnerType.TALENT,
+        id,
+      );
+      effectiveProficiencies = currentProficiencies.map(
+        (item): ProficiencyItemInputDto => ({
+          property: item.property.id,
+          gradation: item.gradation.id,
+        }),
+      );
+    }
+
+    const resolvedProficiencies =
+      await this.proficienciesService.validateAndResolveItems(
+        effectiveProficiencies,
+      );
+    this.proficienciesService.validateList(effectiveProficiencies);
+
     const savedTalent = await this.talentsRepository.save(talent);
     savedTalent.tags = tags;
 
@@ -445,6 +494,14 @@ export class TalentsService {
         resolvedFlaws,
       );
     }
+    if (dto.proficiencies !== undefined) {
+      await this.proficienciesService.replaceItems(
+        ProficiencyOwnerType.TALENT,
+        id,
+        dto.proficiencies,
+        resolvedProficiencies,
+      );
+    }
 
     const { improvedFrom, requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
@@ -456,6 +513,10 @@ export class TalentsService {
         ImprovementFlawOwnerType.TALENT,
         id,
       );
+    const proficiencies = await this.proficienciesService.loadItemsFor(
+      ProficiencyOwnerType.TALENT,
+      id,
+    );
 
     return {
       talent: savedTalent,
@@ -464,6 +525,7 @@ export class TalentsService {
       additionalAbilities,
       improvements,
       flaws,
+      proficiencies,
     };
   }
 

@@ -48,22 +48,23 @@ export class BiographiesController {
   @ApiCreatedResponse({ type: BiographyResponseDto })
   @ApiConflictResponse({
     description:
-      'Já existe uma biografia com este nome, ou violação de regra em Habilidades Adicionais (autorreferência ou duplicata), ou violação de regra em Melhorias (duplicidade de combinação Tipo×Propriedade na mesma lista ou incompatibilidade entre o Tipo e a Propriedade selecionados)',
+      'Já existe uma biografia com este nome, ou violação de regra em Habilidades Adicionais (autorreferência ou duplicata), ou violação de regra em Melhorias (duplicidade de combinação Tipo×Propriedade na mesma lista ou incompatibilidade entre o Tipo e a Propriedade selecionados), ou violação de regra em Proficiências (duplicidade de propriedade na mesma lista)',
   })
   @ApiNotFoundResponse({
     description:
-      'Uma ou mais tags, entidades referenciadas em Habilidades Adicionais, ou tipos/propriedades de Melhorias não foram encontrados',
+      'Uma ou mais tags, entidades referenciadas em Habilidades Adicionais, tipos/propriedades de Melhorias, ou propriedades/graduações de Proficiências não foram encontrados',
   })
   @ApiBadRequestResponse({
     description:
-      'Dados obrigatórios ausentes, formato inválido de entityType/id, ou formato inválido de value/type/property em Melhorias (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas)',
+      'Dados obrigatórios ausentes, formato inválido de entityType/id, formato inválido de value/type/property em Melhorias (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas), ou formato inválido de property/gradation em Proficiências (devem ser UUIDs válidas)',
   })
   async create(@Body() dto: CreateBiographyDto): Promise<BiographyResponseDto> {
-    const { biography, additionalAbilities, improvements } =
+    const { biography, additionalAbilities, improvements, proficiencies } =
       await this.biographiesService.create(dto);
     return BiographyResponseDto.fromEntity(biography, {
       additionalAbilities,
       improvements,
+      proficiencies,
     });
   }
 
@@ -107,6 +108,7 @@ export class BiographiesController {
     return BiographyResponseDto.fromEntity(result.biography, {
       additionalAbilities: result.additionalAbilities,
       improvements: result.improvements,
+      proficiencies: result.proficiencies,
     });
   }
 
@@ -115,25 +117,26 @@ export class BiographiesController {
   @ApiOkResponse({ type: BiographyResponseDto })
   @ApiNotFoundResponse({
     description:
-      'Biografia ou uma ou mais tags/entidades referenciadas em Habilidades Adicionais, ou tipos/propriedades de Melhorias não encontrados',
+      'Biografia, uma ou mais tags/entidades referenciadas em Habilidades Adicionais, tipos/propriedades de Melhorias, ou propriedades/graduações de Proficiências não encontrados',
   })
   @ApiConflictResponse({
     description:
-      'Já existe uma biografia com este nome, ou violação de regra em Habilidades Adicionais (autorreferência ou duplicata), ou violação de regra em Melhorias (duplicidade de combinação Tipo×Propriedade na mesma lista ou incompatibilidade entre o Tipo e a Propriedade selecionados)',
+      'Já existe uma biografia com este nome, ou violação de regra em Habilidades Adicionais (autorreferência ou duplicata), ou violação de regra em Melhorias (duplicidade de combinação Tipo×Propriedade na mesma lista ou incompatibilidade entre o Tipo e a Propriedade selecionados), ou violação de regra em Proficiências (duplicidade de propriedade na mesma lista)',
   })
   @ApiBadRequestResponse({
     description:
-      'ID em formato inválido, formato inválido de entityType/id em Habilidades Adicionais, ou formato inválido de value/type/property em Melhorias (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas)',
+      'ID em formato inválido, formato inválido de entityType/id em Habilidades Adicionais, formato inválido de value/type/property em Melhorias (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas), ou formato inválido de property/gradation em Proficiências (devem ser UUIDs válidas)',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateBiographyDto,
   ): Promise<BiographyResponseDto> {
-    const { biography, additionalAbilities, improvements } =
+    const { biography, additionalAbilities, improvements, proficiencies } =
       await this.biographiesService.update(id, dto);
     return BiographyResponseDto.fromEntity(biography, {
       additionalAbilities,
       improvements,
+      proficiencies,
     });
   }
 

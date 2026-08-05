@@ -14,16 +14,21 @@ import {
   useGetEntityList,
   useImprovementDefectPropertiesQuery,
   useImprovementDefectTypesQuery,
+  useProficiencyPropertiesQuery,
   usePutEntity,
+  useResolveProficiencyAdjustmentMutation,
   useSheetCampaignOptionsQuery,
 } from '@/hooks/Queries';
 import {
   IBiographyListItem,
+  IProficiencyProperty,
   IRaceListFilters,
   IRaceListItem,
   ISheet,
   ISheetCampaignOption,
   ISheetImprovementDefectSnapshot,
+  ISheetProficiencySnapshot,
+  ISheetProficiencyAdjustmentEntry,
 } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { APP_COLORS } from '@/shared/constants';
@@ -42,23 +47,34 @@ import {
 import { SheetAttributesPanel } from './components/SheetAttributesPanel';
 import { SheetAttributesDetailModal } from './components/SheetAttributesDetailModal';
 import { SheetImprovementDefectCategoryAccordions } from './components/SheetImprovementDefectCategoryAccordions';
+import { SheetProficienciesGrid } from './components/SheetProficienciesGrid';
+import { SheetAdjustedProficienciesSection } from './components/SheetAdjustedProficienciesSection';
 import { useFieldAutosave } from './hooks/useFieldAutosave';
 import {
   SHEET_ATTRIBUTE_PROPERTY_ORDER,
   SHEET_EMPTY_IMPROVEMENT_DEFECT_SNAPSHOT,
+  SHEET_EMPTY_PROFICIENCY_SNAPSHOT,
   SHEET_IMPROVEMENT_DEFECT_CATEGORIES,
 } from './data';
 
 const ATTRIBUTE_TYPE_NAME = 'Atributo';
 const ATTRIBUTE_BASE_VALUE = 10;
 
-type SheetDetailTab = 'estatisticas' | 'melhorias' | 'defeitos';
+type SheetDetailTab = 'estatisticas' | 'melhorias' | 'defeitos' | 'proficiencias';
 
 interface SheetDetailsPageProps {
   params: Promise<{ id: string }>;
 }
 
 const flattenSnapshot = (snapshot: ISheetImprovementDefectSnapshot) => [
+  ...snapshot.race,
+  ...snapshot.biography,
+  ...snapshot.trainings,
+  ...snapshot.talents,
+  ...snapshot.characteristics,
+];
+
+const flattenProficiencySnapshot = (snapshot: ISheetProficiencySnapshot) => [
   ...snapshot.race,
   ...snapshot.biography,
   ...snapshot.trainings,
@@ -108,6 +124,12 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
   const [defeitos, setDefeitos] = useState<ISheetImprovementDefectSnapshot>(
     SHEET_EMPTY_IMPROVEMENT_DEFECT_SNAPSHOT,
   );
+  const [proficiencias, setProficiencias] = useState<ISheetProficiencySnapshot>(
+    SHEET_EMPTY_PROFICIENCY_SNAPSHOT,
+  );
+  const [proficienciasAjustadas, setProficienciasAjustadas] = useState<
+    ISheetProficiencyAdjustmentEntry[]
+  >([]);
   const [referenceImage, setReferenceImage] = useState<string | null>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<SheetDetailTab>('estatisticas');
@@ -125,6 +147,8 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     setBiography(sheet.biography ?? null);
     setMelhorias(sheet.melhorias);
     setDefeitos(sheet.defeitos);
+    setProficiencias(sheet.proficiencias);
+    setProficienciasAjustadas(sheet.proficienciasAjustadas);
     setReferenceImage(sheet.referenceImage ?? null);
     setHasHydrated(true);
   }, [sheet, hasHydrated]);
@@ -220,7 +244,10 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
       }
 
       const selectedEntry = melhorias.biography.find(
-        (entry) => entry.id !== null,
+        (entry) =>
+          attributeType &&
+          entry.type.id === attributeType.id &&
+          entry.id !== null,
       );
       const freeEntry = melhorias.biography.find((entry) => entry.id === null);
 
@@ -233,7 +260,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
         selectedImprovementId: selectedEntry.id as string,
         freeImprovementPropertyId: freeEntry.property.id,
       };
-    }, [biography, melhorias]);
+    }, [biography, melhorias, attributeType]);
 
   const updateNameMutation = usePutEntity<ISheet, { name: string }>({
     url: `/sheets/${sheetId}`,
@@ -308,6 +335,8 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
       setRace(data.race ?? null);
       setMelhorias(data.melhorias);
       setDefeitos(data.defeitos);
+      setProficiencias(data.proficiencias);
+      setProficienciasAjustadas(data.proficienciasAjustadas);
       showToast({ message: 'Raça vinculada com sucesso.', type: 'success' });
     },
     onError: (mutationError) => {
@@ -327,6 +356,8 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
       setRace(null);
       setMelhorias(data.melhorias);
       setDefeitos(data.defeitos);
+      setProficiencias(data.proficiencias);
+      setProficienciasAjustadas(data.proficienciasAjustadas);
       showToast({ message: 'Raça removida com sucesso.', type: 'success' });
     },
     onError: (mutationError) => {
@@ -349,6 +380,8 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
       setBiography(data.biography ?? null);
       setMelhorias(data.melhorias);
       setDefeitos(data.defeitos);
+      setProficiencias(data.proficiencias);
+      setProficienciasAjustadas(data.proficienciasAjustadas);
       showToast({
         message: 'Biografia vinculada com sucesso.',
         type: 'success',
@@ -371,6 +404,8 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
       setBiography(null);
       setMelhorias(data.melhorias);
       setDefeitos(data.defeitos);
+      setProficiencias(data.proficiencias);
+      setProficienciasAjustadas(data.proficienciasAjustadas);
       showToast({
         message: 'Biografia removida com sucesso.',
         type: 'success',
@@ -385,6 +420,47 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
       });
     },
   });
+
+  const resolveProficiencyAdjustmentMutation =
+    useResolveProficiencyAdjustmentMutation({
+      sheetId,
+      invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
+      onSuccess: (data) => {
+        setProficiencias(data.proficiencias);
+        setProficienciasAjustadas(data.proficienciasAjustadas);
+        showToast({
+          message: 'Proficiência ajustada com sucesso.',
+          type: 'success',
+        });
+      },
+      onError: (mutationError) => {
+        showToast({
+          message:
+            mutationError.response?.data?.message ??
+            'Não foi possível ajustar a proficiência.',
+          type: 'error',
+        });
+      },
+    });
+
+  const handleSelectProficiencySubstitute = (
+    adjustmentId: string,
+    propertyId: string,
+  ) => {
+    resolveProficiencyAdjustmentMutation.mutate({ adjustmentId, propertyId });
+  };
+
+  const { data: allProficiencyProperties } = useProficiencyPropertiesQuery();
+
+  const adjustedProficienciesPropertyOptions: IProficiencyProperty[] = useMemo(() => {
+    const appliedPropertyIds = new Set(
+      flattenProficiencySnapshot(proficiencias).map((entry) => entry.property.id),
+    );
+
+    return (allProficiencyProperties ?? []).filter(
+      (property) => !appliedPropertyIds.has(property.id),
+    );
+  }, [allProficiencyProperties, proficiencias]);
 
   useFieldAutosave({
     value: name,
@@ -519,6 +595,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
           <Tab value="estatisticas" label="Estatísticas" />
           <Tab value="melhorias" label="Melhorias" />
           <Tab value="defeitos" label="Defeitos" />
+          <Tab value="proficiencias" label="Proficiências" />
         </Tabs>
 
         <div className="mt-4">
@@ -535,6 +612,25 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
 
           {activeTab === 'defeitos' && (
             <SheetImprovementDefectCategoryAccordions items={defeitos} />
+          )}
+
+          {activeTab === 'proficiencias' && (
+            <div className="flex flex-col gap-6">
+              <SheetProficienciesGrid
+                items={flattenProficiencySnapshot(proficiencias)}
+              />
+
+              <SheetAdjustedProficienciesSection
+                items={proficienciasAjustadas}
+                propertyOptions={adjustedProficienciesPropertyOptions}
+                onSelectSubstitute={handleSelectProficiencySubstitute}
+                isSaving={(adjustmentId) =>
+                  resolveProficiencyAdjustmentMutation.isPending &&
+                  resolveProficiencyAdjustmentMutation.variables?.adjustmentId ===
+                    adjustmentId
+                }
+              />
+            </div>
           )}
         </div>
       </div>

@@ -4,7 +4,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { randomUUID } from 'crypto';
+import { FindOptionsWhere, In, Not, Repository } from 'typeorm';
 import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
@@ -24,18 +25,35 @@ import { ImprovementFlaw } from '../improvement-flaws/entities/improvement-flaw.
 import { ImprovementFlawType } from '../improvement-flaw-types/entities/improvement-flaw-type.entity';
 import { ImprovementFlawProperty } from '../improvement-flaw-properties/entities/improvement-flaw-property.entity';
 import { ImprovementFlawCategory } from '../improvement-flaws/enums/improvement-flaw-category.enum';
+import { Proficiency } from '../proficiencies/entities/proficiency.entity';
+import { ProficiencyProperty } from '../proficiency-properties/entities/proficiency-property.entity';
 import { AuthProvider } from '../users/enums/auth-provider.enum';
 import { User } from '../users/entities/user.entity';
 import { CreateSheetDto } from './dto/create-sheet.dto';
 import { FindSheetsQueryDto } from './dto/find-sheets-query.dto';
 import { LinkSheetBiographyDto } from './dto/link-sheet-biography.dto';
 import { LinkSheetRaceDto } from './dto/link-sheet-race.dto';
+import { ResolveProficiencyAdjustmentDto } from './dto/resolve-proficiency-adjustment.dto';
 import { UpdateSheetDto } from './dto/update-sheet.dto';
 import { Sheet } from './entities/sheet.entity';
 import { SheetImprovementFlawSnapshotEntry } from './interfaces/sheet-improvement-flaw-snapshot.interface';
+import {
+  SheetProficiencySnapshot,
+  SheetProficiencySnapshotEntry,
+} from './interfaces/sheet-proficiency-snapshot.interface';
+import {
+  SheetProficiencyAdjustment,
+  SheetProficiencyAdjustmentSourceType,
+} from './interfaces/sheet-proficiency-adjustment.interface';
 
 const ATTRIBUTE_TYPE_NAME = 'Atributo';
 const FREE_IMPROVEMENT_VALUE = 2;
+
+interface ProficiencySource {
+  type: Extract<SheetProficiencyAdjustmentSourceType, 'race' | 'biography'>;
+  id: string;
+  name: string;
+}
 
 export interface PaginatedSheets {
   data: Sheet[];
@@ -69,6 +87,10 @@ export class SheetsService {
     private readonly improvementFlawTypesRepository: Repository<ImprovementFlawType>,
     @InjectRepository(ImprovementFlawProperty)
     private readonly improvementFlawPropertiesRepository: Repository<ImprovementFlawProperty>,
+    @InjectRepository(Proficiency)
+    private readonly proficienciesRepository: Repository<Proficiency>,
+    @InjectRepository(ProficiencyProperty)
+    private readonly proficiencyPropertiesRepository: Repository<ProficiencyProperty>,
   ) {}
 
   private async findCampaignById(id: string): Promise<Campaign> {
@@ -124,6 +146,98 @@ export class SheetsService {
 
   private isRestrictedToOwnSheets(currentUser: User): boolean {
     return currentUser.provider === AuthProvider.GOOGLE;
+  }
+
+  /**
+   * Recalcula `proficiencias`/`proficienciasAjustadas` do zero a partir dos dados
+   * brutos atuais de `proficiencies` para as origens vinculadas informadas em
+   * `orderedSources`. Nunca reaproveita escolhas de substituta feitas
+   * anteriormente — mesmo ajustes vindos da origem que não mudou nesta operação
+   * são recalculados integralmente, conforme decisão explícita do spec ("toda
+   * troca de entidade recalcula conflitos e ajustes integralmente, do zero").
+   *
+   * A ordem de `orderedSources` é significativa: a origem que não é o alvo da
+   * operação em curso deve vir primeiro (estado inicial), e a origem que acabou
+   * de ser (re)vinculada deve vir por último, mesclando seus itens sobre o
+   * estado já construído. Isso implementa literalmente a regra de que o
+   * resultado pode variar conforme a ordem de vínculo das entidades.
+   */
+  private async recomputeProficiencies(
+    sheet: Sheet,
+    orderedSources: ProficiencySource[],
+  ): Promise<void> {
+    const activeByPropertyId = new Map<
+      string,
+      {
+        gradationLevel: number;
+        sourceType: ProficiencySource['type'];
+        entry: SheetProficiencySnapshotEntry;
+      }
+    >();
+    const adjustments: SheetProficiencyAdjustment[] = [];
+
+    for (const source of orderedSources) {
+      const ownerColumn: string =
+        source.type === 'race' ? 'ownerRace' : 'ownerBiography';
+      const whereCriteria: Record<string, unknown> = {
+        [ownerColumn]: { id: source.id },
+      };
+      const items = await this.proficienciesRepository.find({
+        where: whereCriteria as FindOptionsWhere<Proficiency>,
+        relations: { property: true, gradation: true },
+        order: { sortOrder: 'ASC' },
+      });
+
+      for (const item of items) {
+        const existing = activeByPropertyId.get(item.property.id);
+
+        if (!existing || item.gradation.level > existing.gradationLevel) {
+          activeByPropertyId.set(item.property.id, {
+            gradationLevel: item.gradation.level,
+            sourceType: source.type,
+            entry: {
+              id: item.id,
+              property: { id: item.property.id, name: item.property.name },
+              gradation: {
+                id: item.gradation.id,
+                name: item.gradation.name,
+                level: item.gradation.level,
+              },
+              sourceName: source.name,
+            },
+          });
+          continue;
+        }
+
+        adjustments.push({
+          id: randomUUID(),
+          sourceType: source.type,
+          sourceName: source.name,
+          originalProperty: { id: item.property.id, name: item.property.name },
+          originalGradation: {
+            id: item.gradation.id,
+            name: item.gradation.name,
+            level: item.gradation.level,
+          },
+          adjustedPropertyId: null,
+          adjustedProperty: null,
+        });
+      }
+    }
+
+    const proficiencias: SheetProficiencySnapshot = {
+      race: [],
+      biography: [],
+      trainings: [],
+      talents: [],
+      characteristics: [],
+    };
+    for (const { sourceType, entry } of activeByPropertyId.values()) {
+      proficiencias[sourceType].push(entry);
+    }
+
+    sheet.proficiencias = proficiencias;
+    sheet.proficienciasAjustadas = adjustments;
   }
 
   async create(dto: CreateSheetDto, currentUser: User): Promise<Sheet> {
@@ -301,6 +415,17 @@ export class SheetsService {
     sheet.melhorias = { ...sheet.melhorias, race: improvements };
     sheet.defeitos = { ...sheet.defeitos, race: flaws };
 
+    const proficiencySources: ProficiencySource[] = [];
+    if (sheet.biography) {
+      proficiencySources.push({
+        type: 'biography',
+        id: sheet.biography.id,
+        name: sheet.biography.name,
+      });
+    }
+    proficiencySources.push({ type: 'race', id: race.id, name: race.name });
+    await this.recomputeProficiencies(sheet, proficiencySources);
+
     return this.sheetsRepository.save(sheet);
   }
 
@@ -315,6 +440,17 @@ export class SheetsService {
     sheet.race = null;
     sheet.melhorias = { ...sheet.melhorias, race: [] };
     sheet.defeitos = { ...sheet.defeitos, race: [] };
+
+    const proficiencySources: ProficiencySource[] = sheet.biography
+      ? [
+          {
+            type: 'biography',
+            id: sheet.biography.id,
+            name: sheet.biography.name,
+          },
+        ]
+      : [];
+    await this.recomputeProficiencies(sheet, proficiencySources);
 
     return this.sheetsRepository.save(sheet);
   }
@@ -384,6 +520,27 @@ export class SheetsService {
       );
     }
 
+    const otherBiographyImprovements =
+      await this.improvementFlawsRepository.find({
+        where: {
+          ownerBiography: { id: biography.id },
+          category: ImprovementFlawCategory.IMPROVEMENT,
+          type: { name: Not(ATTRIBUTE_TYPE_NAME) },
+        },
+        relations: { type: true, property: { types: true } },
+        order: { sortOrder: 'ASC' },
+      });
+
+    const toBiographyEntry = (
+      item: ImprovementFlaw,
+    ): SheetImprovementFlawSnapshotEntry => ({
+      id: item.id,
+      value: item.value,
+      type: { id: item.type.id, name: item.type.name },
+      property: { id: item.property.id, name: item.property.name },
+      sourceName: biography.name,
+    });
+
     const biographyImprovements: SheetImprovementFlawSnapshotEntry[] = [
       {
         id: selectedImprovement.id,
@@ -408,11 +565,27 @@ export class SheetsService {
         },
         sourceName: biography.name,
       },
+      ...otherBiographyImprovements.map(toBiographyEntry),
     ];
 
     sheet.biography = biography;
     sheet.melhorias = { ...sheet.melhorias, biography: biographyImprovements };
     sheet.defeitos = { ...sheet.defeitos, biography: [] };
+
+    const proficiencySources: ProficiencySource[] = [];
+    if (sheet.race) {
+      proficiencySources.push({
+        type: 'race',
+        id: sheet.race.id,
+        name: sheet.race.name,
+      });
+    }
+    proficiencySources.push({
+      type: 'biography',
+      id: biography.id,
+      name: biography.name,
+    });
+    await this.recomputeProficiencies(sheet, proficiencySources);
 
     return this.sheetsRepository.save(sheet);
   }
@@ -428,6 +601,80 @@ export class SheetsService {
     sheet.biography = null;
     sheet.melhorias = { ...sheet.melhorias, biography: [] };
     sheet.defeitos = { ...sheet.defeitos, biography: [] };
+
+    const proficiencySources: ProficiencySource[] = sheet.race
+      ? [{ type: 'race', id: sheet.race.id, name: sheet.race.name }]
+      : [];
+    await this.recomputeProficiencies(sheet, proficiencySources);
+
+    return this.sheetsRepository.save(sheet);
+  }
+
+  async resolveProficiencyAdjustment(
+    id: string,
+    adjustmentId: string,
+    dto: ResolveProficiencyAdjustmentDto,
+    currentUser: User,
+  ): Promise<Sheet> {
+    const sheet = await this.findAccessibleById(id, currentUser);
+    if (!sheet) {
+      throw new NotFoundException(
+        'Ficha não encontrada ou não pertence ao usuário.',
+      );
+    }
+
+    const adjustmentIndex = sheet.proficienciasAjustadas.findIndex(
+      (adjustment) => adjustment.id === adjustmentId,
+    );
+    if (adjustmentIndex === -1) {
+      throw new NotFoundException('Ajuste de proficiência não encontrado.');
+    }
+
+    const occupiedPropertyIds = new Set<string>();
+    const activeGroups: SheetProficiencySnapshotEntry[][] = [
+      sheet.proficiencias.race,
+      sheet.proficiencias.biography,
+      sheet.proficiencias.trainings,
+      sheet.proficiencias.talents,
+      sheet.proficiencias.characteristics,
+    ];
+    for (const group of activeGroups) {
+      for (const entry of group) {
+        occupiedPropertyIds.add(entry.property.id);
+      }
+    }
+    sheet.proficienciasAjustadas.forEach((adjustment, index) => {
+      if (index !== adjustmentIndex && adjustment.adjustedPropertyId) {
+        occupiedPropertyIds.add(adjustment.adjustedPropertyId);
+      }
+    });
+
+    if (occupiedPropertyIds.has(dto.propertyId)) {
+      throw new ConflictException(
+        'A propriedade selecionada já está aplicada na ficha.',
+      );
+    }
+
+    const property = await this.proficiencyPropertiesRepository.findOneBy({
+      id: dto.propertyId,
+    });
+    if (!property) {
+      throw new NotFoundException(
+        'Propriedade de proficiência não encontrada.',
+      );
+    }
+
+    const currentAdjustment = sheet.proficienciasAjustadas[adjustmentIndex];
+    const updatedAdjustment: SheetProficiencyAdjustment = {
+      ...currentAdjustment,
+      adjustedPropertyId: property.id,
+      adjustedProperty: { id: property.id, name: property.name },
+    };
+
+    sheet.proficienciasAjustadas = sheet.proficienciasAjustadas.map(
+      (adjustment, index) =>
+        index === adjustmentIndex ? updatedAdjustment : adjustment,
+    );
 
     return this.sheetsRepository.save(sheet);
   }

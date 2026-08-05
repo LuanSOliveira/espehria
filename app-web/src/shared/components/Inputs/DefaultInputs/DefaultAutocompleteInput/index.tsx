@@ -15,6 +15,7 @@ export interface DefaultAutocompleteInputProps<TOption> {
   placeholder?: string;
   inputValue?: string;
   onInputChange?: (value: string) => void;
+  disabled?: boolean;
 }
 
 export const DefaultAutocompleteInput = <TOption,>({
@@ -27,6 +28,7 @@ export const DefaultAutocompleteInput = <TOption,>({
   placeholder,
   inputValue,
   onInputChange,
+  disabled,
 }: DefaultAutocompleteInputProps<TOption>) => {
   const fontSize = useAccessibleFontSize(APP_INPUT_BASE_FONT_SIZE.text);
 
@@ -39,6 +41,7 @@ export const DefaultAutocompleteInput = <TOption,>({
         getOptionLabel={getOptionLabel}
         value={value}
         onChange={(_event, newValue) => onChange(newValue)}
+        disabled={disabled}
         inputValue={inputValue}
         onInputChange={
           onInputChange

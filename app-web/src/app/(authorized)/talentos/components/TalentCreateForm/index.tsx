@@ -12,6 +12,7 @@ import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
 import { EntityReferenceListField } from '@/shared/components/EntityReferenceListField';
 import { ImprovementDefectListField } from '@/shared/components/ImprovementDefectListField';
+import { ProficiencyListField } from '@/shared/components/ProficiencyListField';
 import {
   useGetEntityById,
   usePostEntity,
@@ -26,6 +27,7 @@ import {
 import {
   IEntityReference,
   IImprovementDefectItem,
+  IProficiencyItem,
   ITag,
   ITalent,
 } from '@/shared/interfaces';
@@ -47,6 +49,11 @@ interface ImprovementDefectInputPayload {
   property: string;
 }
 
+interface ProficiencyInputPayload {
+  property: string;
+  gradation: string;
+}
+
 interface TalentPayload extends Omit<TalentFormData, 'description' | 'level'> {
   description?: string;
   level: number;
@@ -55,6 +62,7 @@ interface TalentPayload extends Omit<TalentFormData, 'description' | 'level'> {
   additionalAbilities: EntityReferenceInputPayload[];
   improvements: ImprovementDefectInputPayload[];
   flaws: ImprovementDefectInputPayload[];
+  proficiencies: ProficiencyInputPayload[];
 }
 
 export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
@@ -70,6 +78,7 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
     [],
   );
   const [flaws, setFlaws] = useState<IImprovementDefectItem[]>([]);
+  const [proficiencies, setProficiencies] = useState<IProficiencyItem[]>([]);
 
   const { tagOptions } = useTagOptionsQuery();
 
@@ -101,6 +110,8 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
       setImprovements([]);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setFlaws([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setProficiencies([]);
       return;
     }
 
@@ -119,6 +130,7 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
     setAdditionalAbilities(talentDetail.additionalAbilities ?? []);
     setImprovements(talentDetail.improvements ?? []);
     setFlaws(talentDetail.flaws ?? []);
+    setProficiencies(talentDetail.proficiencies ?? []);
   }, [isEditMode, talentDetail, reset]);
 
   useEffect(() => {
@@ -141,6 +153,7 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
     additionalAbilities: IEntityReference[],
     improvements: IImprovementDefectItem[],
     flaws: IImprovementDefectItem[],
+    proficiencies: IProficiencyItem[],
   ): TalentPayload => ({
     ...data,
     description: data.description || undefined,
@@ -168,6 +181,10 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
       type: item.type.id,
       property: item.property.id,
     })),
+    proficiencies: proficiencies.map((item) => ({
+      property: item.property.id,
+      gradation: item.gradation.id,
+    })),
   });
 
   const createTalentMutation = usePostEntity<ITalent, TalentPayload>({
@@ -184,6 +201,7 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
       setAdditionalAbilities([]);
       setImprovements([]);
       setFlaws([]);
+      setProficiencies([]);
       onSaved();
     },
     onError: (error) => {
@@ -224,6 +242,7 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
       additionalAbilities,
       improvements,
       flaws,
+      proficiencies,
     );
 
     if (isEditMode) {
@@ -307,6 +326,13 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
           otherListValue={improvements}
         />
       </div>
+
+      <ProficiencyListField
+        label="Proficiências"
+        addButtonLabel="Adicionar Proficiências"
+        value={proficiencies}
+        onChange={setProficiencies}
+      />
 
       <EntityReferenceListField
         label="Habilidades Adicionais"

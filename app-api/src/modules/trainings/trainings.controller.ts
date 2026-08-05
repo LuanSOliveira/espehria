@@ -48,15 +48,15 @@ export class TrainingsController {
   @ApiCreatedResponse({ type: TrainingResponseDto })
   @ApiConflictResponse({
     description:
-      'Já existe um treinamento com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas), ou violação de regra em Melhorias/Defeitos (duplicidade de combinação Tipo×Propriedade na mesma lista, exclusividade entre listas ou incompatibilidade entre o Tipo e a Propriedade selecionados)',
+      'Já existe um treinamento com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas), ou violação de regra em Melhorias/Defeitos (duplicidade de combinação Tipo×Propriedade na mesma lista, exclusividade entre listas ou incompatibilidade entre o Tipo e a Propriedade selecionados), ou violação de regra em Proficiências (duplicidade de propriedade na mesma lista)',
   })
   @ApiNotFoundResponse({
     description:
-      'Uma ou mais tags, entidades referenciadas em Aprimorado de/Requisitos/Habilidades Adicionais, ou tipos/propriedades de Melhorias/Defeitos não foram encontrados',
+      'Uma ou mais tags, entidades referenciadas em Aprimorado de/Requisitos/Habilidades Adicionais, tipos/propriedades de Melhorias/Defeitos, ou propriedades/graduações de Proficiências não foram encontrados',
   })
   @ApiBadRequestResponse({
     description:
-      'Dados obrigatórios ausentes, formato inválido de entityType/id, ou formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas)',
+      'Dados obrigatórios ausentes, formato inválido de entityType/id, formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas), ou formato inválido de property/gradation em Proficiências (devem ser UUIDs válidas)',
   })
   async create(@Body() dto: CreateTrainingDto): Promise<TrainingResponseDto> {
     const {
@@ -66,6 +66,7 @@ export class TrainingsController {
       additionalAbilities,
       improvements,
       flaws,
+      proficiencies,
     } = await this.trainingsService.create(dto);
     return TrainingResponseDto.fromEntity(training, {
       improvedFrom,
@@ -73,6 +74,7 @@ export class TrainingsController {
       additionalAbilities,
       improvements,
       flaws,
+      proficiencies,
     });
   }
 
@@ -119,6 +121,7 @@ export class TrainingsController {
       additionalAbilities: result.additionalAbilities,
       improvements: result.improvements,
       flaws: result.flaws,
+      proficiencies: result.proficiencies,
     });
   }
 
@@ -127,15 +130,15 @@ export class TrainingsController {
   @ApiOkResponse({ type: TrainingResponseDto })
   @ApiNotFoundResponse({
     description:
-      'Treinamento ou uma ou mais tags/entidades referenciadas em Aprimorado de/Requisitos/Habilidades Adicionais, ou tipos/propriedades de Melhorias/Defeitos não encontrados',
+      'Treinamento, uma ou mais tags/entidades referenciadas em Aprimorado de/Requisitos/Habilidades Adicionais, tipos/propriedades de Melhorias/Defeitos, ou propriedades/graduações de Proficiências não encontrados',
   })
   @ApiConflictResponse({
     description:
-      'Já existe um treinamento com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas), ou violação de regra em Melhorias/Defeitos (duplicidade de combinação Tipo×Propriedade na mesma lista, exclusividade entre listas ou incompatibilidade entre o Tipo e a Propriedade selecionados)',
+      'Já existe um treinamento com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas), ou violação de regra em Melhorias/Defeitos (duplicidade de combinação Tipo×Propriedade na mesma lista, exclusividade entre listas ou incompatibilidade entre o Tipo e a Propriedade selecionados), ou violação de regra em Proficiências (duplicidade de propriedade na mesma lista)',
   })
   @ApiBadRequestResponse({
     description:
-      'ID em formato inválido, formato inválido de entityType/id em Aprimorado de/Requisitos/Habilidades Adicionais, ou formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas)',
+      'ID em formato inválido, formato inválido de entityType/id em Aprimorado de/Requisitos/Habilidades Adicionais, formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas), ou formato inválido de property/gradation em Proficiências (devem ser UUIDs válidas)',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -148,6 +151,7 @@ export class TrainingsController {
       additionalAbilities,
       improvements,
       flaws,
+      proficiencies,
     } = await this.trainingsService.update(id, dto);
     return TrainingResponseDto.fromEntity(training, {
       improvedFrom,
@@ -155,6 +159,7 @@ export class TrainingsController {
       additionalAbilities,
       improvements,
       flaws,
+      proficiencies,
     });
   }
 

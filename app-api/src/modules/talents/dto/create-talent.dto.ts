@@ -12,6 +12,7 @@ import {
 } from 'class-validator';
 import { EntityReferenceInputDto } from '../../entity-links/dto/entity-reference-input.dto';
 import { ImprovementFlawItemInputDto } from '../../improvement-flaws/dto/improvement-flaw-item-input.dto';
+import { ProficiencyItemInputDto } from '../../proficiencies/dto/proficiency-item-input.dto';
 
 export class CreateTalentDto {
   @ApiProperty({
@@ -135,4 +136,21 @@ export class CreateTalentDto {
   @ValidateNested({ each: true })
   @Type(() => ImprovementFlawItemInputDto)
   flaws?: ImprovementFlawItemInputDto[];
+
+  @ApiPropertyOptional({
+    type: () => [ProficiencyItemInputDto],
+    description:
+      'Proficiências associadas a este talento. Não pode repetir a mesma propriedade nesta lista.',
+    example: [
+      {
+        property: '550e8400-e29b-41d4-a716-446655440006',
+        gradation: '550e8400-e29b-41d4-a716-446655440007',
+      },
+    ],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProficiencyItemInputDto)
+  proficiencies?: ProficiencyItemInputDto[];
 }

@@ -42,6 +42,8 @@ import { SheetsModule } from './modules/sheets/sheets.module';
 import { ImprovementFlawTypesModule } from './modules/improvement-flaw-types/improvement-flaw-types.module';
 import { ImprovementFlawPropertiesModule } from './modules/improvement-flaw-properties/improvement-flaw-properties.module';
 import { BiographiesModule } from './modules/biographies/biographies.module';
+import { ProficiencyPropertiesModule } from './modules/proficiency-properties/proficiency-properties.module';
+import { ProficiencyGradationsModule } from './modules/proficiency-gradations/proficiency-gradations.module';
 
 @Module({
   imports: [
@@ -105,6 +107,8 @@ import { BiographiesModule } from './modules/biographies/biographies.module';
     ImprovementFlawTypesModule,
     ImprovementFlawPropertiesModule,
     BiographiesModule,
+    ProficiencyPropertiesModule,
+    ProficiencyGradationsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

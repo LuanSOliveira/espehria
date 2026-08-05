@@ -1,4 +1,7 @@
-import { ISheetImprovementDefectSnapshot } from '@/shared/interfaces';
+import {
+  ISheetImprovementDefectSnapshot,
+  ISheetProficiencySnapshot,
+} from '@/shared/interfaces';
 
 /**
  * Ordem de exibição dos 6 atributos na aba Estatísticas, conforme wireframe
@@ -44,3 +47,11 @@ export const SHEET_EMPTY_IMPROVEMENT_DEFECT_SNAPSHOT: ISheetImprovementDefectSna
     talents: [],
     characteristics: [],
   };
+
+export const SHEET_EMPTY_PROFICIENCY_SNAPSHOT: ISheetProficiencySnapshot = {
+  race: [],
+  biography: [],
+  trainings: [],
+  talents: [],
+  characteristics: [],
+};

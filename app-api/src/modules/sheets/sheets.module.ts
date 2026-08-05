@@ -11,6 +11,9 @@ import { BiographyTag } from '../biographies/entities/biography-tag.entity';
 import { ImprovementFlaw } from '../improvement-flaws/entities/improvement-flaw.entity';
 import { ImprovementFlawType } from '../improvement-flaw-types/entities/improvement-flaw-type.entity';
 import { ImprovementFlawProperty } from '../improvement-flaw-properties/entities/improvement-flaw-property.entity';
+import { Proficiency } from '../proficiencies/entities/proficiency.entity';
+import { ProficiencyProperty } from '../proficiency-properties/entities/proficiency-property.entity';
+import { ProficiencyGradation } from '../proficiency-gradations/entities/proficiency-gradation.entity';
 import { Sheet } from './entities/sheet.entity';
 import { SheetsController } from './sheets.controller';
 import { SheetsService } from './sheets.service';
@@ -29,6 +32,9 @@ import { SheetsService } from './sheets.service';
       ImprovementFlaw,
       ImprovementFlawType,
       ImprovementFlawProperty,
+      Proficiency,
+      ProficiencyProperty,
+      ProficiencyGradation,
     ]),
     CampaignsModule,
   ],

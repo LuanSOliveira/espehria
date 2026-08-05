@@ -31,6 +31,10 @@ import { ImprovementFlawOwnerType } from '../improvement-flaws/enums/improvement
 import { ImprovementFlawCategory } from '../improvement-flaws/enums/improvement-flaw-category.enum';
 import { ImprovementFlawItemInputDto } from '../improvement-flaws/dto/improvement-flaw-item-input.dto';
 import { ImprovementFlawItemResponseDto } from '../improvement-flaws/dto/improvement-flaw-item-response.dto';
+import { ProficienciesService } from '../proficiencies/proficiencies.service';
+import { ProficiencyOwnerType } from '../proficiencies/enums/proficiency-owner-type.enum';
+import { ProficiencyItemInputDto } from '../proficiencies/dto/proficiency-item-input.dto';
+import { ProficiencyItemResponseDto } from '../proficiencies/dto/proficiency-item-response.dto';
 
 export interface PaginatedTrainings {
   data: Training[];
@@ -46,6 +50,7 @@ export interface TrainingWithReferences {
   additionalAbilities: EntityReferenceResponseDto[];
   improvements: ImprovementFlawItemResponseDto[];
   flaws: ImprovementFlawItemResponseDto[];
+  proficiencies: ProficiencyItemResponseDto[];
 }
 
 @Injectable()
@@ -59,6 +64,7 @@ export class TrainingsService {
     private readonly tagsRepository: Repository<Tag>,
     private readonly entityLinksService: EntityLinksService,
     private readonly improvementFlawsService: ImprovementFlawsService,
+    private readonly proficienciesService: ProficienciesService,
   ) {}
 
   findByName(name: string): Promise<Training | null> {
@@ -86,6 +92,10 @@ export class TrainingsService {
         ImprovementFlawOwnerType.TRAINING,
         id,
       );
+    const proficiencies = await this.proficienciesService.loadItemsFor(
+      ProficiencyOwnerType.TRAINING,
+      id,
+    );
 
     return {
       training,
@@ -94,6 +104,7 @@ export class TrainingsService {
       additionalAbilities,
       improvements,
       flaws,
+      proficiencies,
     };
   }
 
@@ -123,6 +134,7 @@ export class TrainingsService {
     const additionalAbilitiesInput = dto.additionalAbilities ?? [];
     const improvementsInput = dto.improvements ?? [];
     const flawsInput = dto.flaws ?? [];
+    const proficienciesInput = dto.proficiencies ?? [];
 
     this.entityLinksService.validateLists({
       ownerEntityType: ReferenceableEntityType.TRAINING,
@@ -145,6 +157,12 @@ export class TrainingsService {
       improvements: improvementsInput,
       flaws: flawsInput,
     });
+
+    const resolvedProficiencies =
+      await this.proficienciesService.validateAndResolveItems(
+        proficienciesInput,
+      );
+    this.proficienciesService.validateList(proficienciesInput);
 
     const training = this.trainingsRepository.create({
       name: dto.name,
@@ -193,6 +211,12 @@ export class TrainingsService {
       flawsInput,
       resolvedFlaws,
     );
+    await this.proficienciesService.replaceItems(
+      ProficiencyOwnerType.TRAINING,
+      savedTraining.id,
+      proficienciesInput,
+      resolvedProficiencies,
+    );
 
     const { improvedFrom, requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
@@ -204,6 +228,10 @@ export class TrainingsService {
         ImprovementFlawOwnerType.TRAINING,
         savedTraining.id,
       );
+    const proficiencies = await this.proficienciesService.loadItemsFor(
+      ProficiencyOwnerType.TRAINING,
+      savedTraining.id,
+    );
 
     return {
       training: savedTraining,
@@ -212,6 +240,7 @@ export class TrainingsService {
       additionalAbilities,
       improvements,
       flaws,
+      proficiencies,
     };
   }
 
@@ -399,6 +428,26 @@ export class TrainingsService {
       flaws: effectiveFlaws,
     });
 
+    let effectiveProficiencies = dto.proficiencies;
+    if (effectiveProficiencies === undefined) {
+      const currentProficiencies = await this.proficienciesService.loadItemsFor(
+        ProficiencyOwnerType.TRAINING,
+        id,
+      );
+      effectiveProficiencies = currentProficiencies.map(
+        (item): ProficiencyItemInputDto => ({
+          property: item.property.id,
+          gradation: item.gradation.id,
+        }),
+      );
+    }
+
+    const resolvedProficiencies =
+      await this.proficienciesService.validateAndResolveItems(
+        effectiveProficiencies,
+      );
+    this.proficienciesService.validateList(effectiveProficiencies);
+
     const savedTraining = await this.trainingsRepository.save(training);
     savedTraining.tags = tags;
 
@@ -444,6 +493,14 @@ export class TrainingsService {
         resolvedFlaws,
       );
     }
+    if (dto.proficiencies !== undefined) {
+      await this.proficienciesService.replaceItems(
+        ProficiencyOwnerType.TRAINING,
+        id,
+        dto.proficiencies,
+        resolvedProficiencies,
+      );
+    }
 
     const { improvedFrom, requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
@@ -455,6 +512,10 @@ export class TrainingsService {
         ImprovementFlawOwnerType.TRAINING,
         id,
       );
+    const proficiencies = await this.proficienciesService.loadItemsFor(
+      ProficiencyOwnerType.TRAINING,
+      id,
+    );
 
     return {
       training: savedTraining,
@@ -463,6 +524,7 @@ export class TrainingsService {
       additionalAbilities,
       improvements,
       flaws,
+      proficiencies,
     };
   }
 

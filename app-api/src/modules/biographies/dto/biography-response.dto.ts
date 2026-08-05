@@ -3,6 +3,7 @@ import { Biography } from '../entities/biography.entity';
 import { TagResponseDto } from '../../tags/dto/tag-response.dto';
 import { EntityReferenceResponseDto } from '../../entity-links/dto/entity-reference-response.dto';
 import { ImprovementFlawItemResponseDto } from '../../improvement-flaws/dto/improvement-flaw-item-response.dto';
+import { ProficiencyItemResponseDto } from '../../proficiencies/dto/proficiency-item-response.dto';
 
 export class BiographyResponseDto {
   @ApiProperty({
@@ -48,6 +49,13 @@ export class BiographyResponseDto {
   })
   improvements: ImprovementFlawItemResponseDto[];
 
+  @ApiProperty({
+    type: () => [ProficiencyItemResponseDto],
+    description:
+      'Proficiências associadas a esta biografia, na ordem em que foram inseridas',
+  })
+  proficiencies: ProficiencyItemResponseDto[];
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -59,6 +67,7 @@ export class BiographyResponseDto {
     references: {
       additionalAbilities: EntityReferenceResponseDto[];
       improvements: ImprovementFlawItemResponseDto[];
+      proficiencies: ProficiencyItemResponseDto[];
     },
   ): BiographyResponseDto {
     const dto = new BiographyResponseDto();
@@ -71,6 +80,7 @@ export class BiographyResponseDto {
     );
     dto.additionalAbilities = references.additionalAbilities;
     dto.improvements = references.improvements;
+    dto.proficiencies = references.proficiencies;
     dto.createdAt = biography.createdAt;
     dto.updatedAt = biography.updatedAt;
     return dto;

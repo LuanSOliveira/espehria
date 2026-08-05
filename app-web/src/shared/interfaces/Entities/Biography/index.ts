@@ -2,6 +2,7 @@ import { IEntity } from '../Entity';
 import { ITag } from '../Tag';
 import { IEntityReference } from '../EntityReference';
 import { IImprovementDefectItem } from '../ImprovementDefectItem';
+import { IProficiencyItem } from '../ProficiencyItem';
 
 export interface IBiography extends IEntity {
   name: string;
@@ -9,6 +10,7 @@ export interface IBiography extends IEntity {
   imageReference?: string | null;
   tags: ITag[];
   improvements: IImprovementDefectItem[];
+  proficiencies: IProficiencyItem[];
   additionalAbilities: IEntityReference[];
   createdAt: string;
   updatedAt: string;

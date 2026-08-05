@@ -8,4 +8,7 @@ export * from './useSheetCampaignOptionsQuery';
 export * from './useCampaignSheetsQuery';
 export * from './useImprovementDefectTypesQuery';
 export * from './useImprovementDefectPropertiesQuery';
+export * from './useProficiencyPropertiesQuery';
+export * from './useProficiencyGradationsQuery';
+export * from './useResolveProficiencyAdjustmentMutation';
 export * from './useTagOptionsQuery';

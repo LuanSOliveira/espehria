@@ -12,6 +12,7 @@ import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
 import { EntityReferenceListField } from '@/shared/components/EntityReferenceListField';
 import { ImprovementDefectListField } from '@/shared/components/ImprovementDefectListField';
+import { ProficiencyListField } from '@/shared/components/ProficiencyListField';
 import {
   useGetEntityById,
   usePostEntity,
@@ -26,6 +27,7 @@ import {
 import {
   IEntityReference,
   IImprovementDefectItem,
+  IProficiencyItem,
   ITag,
   ITraining,
 } from '@/shared/interfaces';
@@ -47,6 +49,11 @@ interface ImprovementDefectInputPayload {
   property: string;
 }
 
+interface ProficiencyInputPayload {
+  property: string;
+  gradation: string;
+}
+
 interface TrainingPayload extends Omit<TrainingFormData, 'description'> {
   description?: string;
   improvedFrom: EntityReferenceInputPayload[];
@@ -54,6 +61,7 @@ interface TrainingPayload extends Omit<TrainingFormData, 'description'> {
   additionalAbilities: EntityReferenceInputPayload[];
   improvements: ImprovementDefectInputPayload[];
   flaws: ImprovementDefectInputPayload[];
+  proficiencies: ProficiencyInputPayload[];
 }
 
 export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
@@ -71,6 +79,7 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
     [],
   );
   const [flaws, setFlaws] = useState<IImprovementDefectItem[]>([]);
+  const [proficiencies, setProficiencies] = useState<IProficiencyItem[]>([]);
 
   const { tagOptions } = useTagOptionsQuery();
 
@@ -102,6 +111,8 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
       setImprovements([]);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setFlaws([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setProficiencies([]);
       return;
     }
 
@@ -119,6 +130,7 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
     setAdditionalAbilities(trainingDetail.additionalAbilities ?? []);
     setImprovements(trainingDetail.improvements ?? []);
     setFlaws(trainingDetail.flaws ?? []);
+    setProficiencies(trainingDetail.proficiencies ?? []);
   }, [isEditMode, trainingDetail, reset]);
 
   useEffect(() => {
@@ -141,6 +153,7 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
     additionalAbilities: IEntityReference[],
     improvements: IImprovementDefectItem[],
     flaws: IImprovementDefectItem[],
+    proficiencies: IProficiencyItem[],
   ): TrainingPayload => ({
     ...data,
     description: data.description || undefined,
@@ -167,6 +180,10 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
       type: item.type.id,
       property: item.property.id,
     })),
+    proficiencies: proficiencies.map((item) => ({
+      property: item.property.id,
+      gradation: item.gradation.id,
+    })),
   });
 
   const createTrainingMutation = usePostEntity<ITraining, TrainingPayload>({
@@ -183,6 +200,7 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
       setAdditionalAbilities([]);
       setImprovements([]);
       setFlaws([]);
+      setProficiencies([]);
       onSaved();
     },
     onError: (error) => {
@@ -223,6 +241,7 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
       additionalAbilities,
       improvements,
       flaws,
+      proficiencies,
     );
 
     if (isEditMode) {
@@ -296,6 +315,13 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
           otherListValue={improvements}
         />
       </div>
+
+      <ProficiencyListField
+        label="Proficiências"
+        addButtonLabel="Adicionar Proficiências"
+        value={proficiencies}
+        onChange={setProficiencies}
+      />
 
       <EntityReferenceListField
         label="Habilidades Adicionais"

@@ -13,6 +13,7 @@ import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
 import { EntityReferenceListField } from '@/shared/components/EntityReferenceListField';
 import { ImprovementDefectListField } from '@/shared/components/ImprovementDefectListField';
+import { ProficiencyListField } from '@/shared/components/ProficiencyListField';
 import { RaceTalentsListField } from '../RaceTalentsListField';
 import {
   useGetEntityById,
@@ -29,6 +30,7 @@ import {
 import {
   IEntityReference,
   IImprovementDefectItem,
+  IProficiencyItem,
   IRace,
   IRaceCategory,
   ITag,
@@ -46,6 +48,11 @@ interface ImprovementDefectInputPayload {
   property: string;
 }
 
+interface ProficiencyInputPayload {
+  property: string;
+  gradation: string;
+}
+
 interface RacePayload
   extends Omit<
     RaceFormData,
@@ -56,6 +63,7 @@ interface RacePayload
   talentIds: string[];
   improvements: ImprovementDefectInputPayload[];
   flaws: ImprovementDefectInputPayload[];
+  proficiencies: ProficiencyInputPayload[];
 }
 
 const toEntityReferences = (
@@ -75,6 +83,7 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
     [],
   );
   const [flaws, setFlaws] = useState<IImprovementDefectItem[]>([]);
+  const [proficiencies, setProficiencies] = useState<IProficiencyItem[]>([]);
 
   const { data: categories } = useRaceCategoriesQuery();
 
@@ -106,6 +115,8 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
       setImprovements([]);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setFlaws([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setProficiencies([]);
       return;
     }
 
@@ -127,6 +138,7 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
     setTalents(toEntityReferences(raceDetail.talents ?? [], 'talent'));
     setImprovements(raceDetail.improvements ?? []);
     setFlaws(raceDetail.flaws ?? []);
+    setProficiencies(raceDetail.proficiencies ?? []);
   }, [isEditMode, raceDetail, reset]);
 
   useEffect(() => {
@@ -148,6 +160,7 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
     talents: IEntityReference[],
     improvements: IImprovementDefectItem[],
     flaws: IImprovementDefectItem[],
+    proficiencies: IProficiencyItem[],
   ): RacePayload => ({
     ...data,
     referenceImageUrl: data.referenceImageUrl || undefined,
@@ -164,6 +177,10 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
       type: item.type.id,
       property: item.property.id,
     })),
+    proficiencies: proficiencies.map((item) => ({
+      property: item.property.id,
+      gradation: item.gradation.id,
+    })),
   });
 
   const createRaceMutation = usePostEntity<IRace, RacePayload>({
@@ -179,6 +196,7 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
       setTalents([]);
       setImprovements([]);
       setFlaws([]);
+      setProficiencies([]);
       onSaved();
     },
     onError: (error) => {
@@ -216,6 +234,7 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
       talents,
       improvements,
       flaws,
+      proficiencies,
     );
 
     if (isEditMode) {
@@ -324,6 +343,13 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
           otherListValue={improvements}
         />
       </div>
+
+      <ProficiencyListField
+        label="Proficiências"
+        addButtonLabel="Adicionar Proficiências"
+        value={proficiencies}
+        onChange={setProficiencies}
+      />
 
       <RaceTalentsListField value={talents} onChange={setTalents} />
 

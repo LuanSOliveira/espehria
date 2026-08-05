@@ -3,6 +3,7 @@ import { Characteristic } from '../entities/characteristic.entity';
 import { TagResponseDto } from '../../tags/dto/tag-response.dto';
 import { EntityReferenceResponseDto } from '../../entity-links/dto/entity-reference-response.dto';
 import { ImprovementFlawItemResponseDto } from '../../improvement-flaws/dto/improvement-flaw-item-response.dto';
+import { ProficiencyItemResponseDto } from '../../proficiencies/dto/proficiency-item-response.dto';
 
 export class CharacteristicResponseDto {
   @ApiProperty({
@@ -64,6 +65,13 @@ export class CharacteristicResponseDto {
   })
   flaws: ImprovementFlawItemResponseDto[];
 
+  @ApiProperty({
+    type: () => [ProficiencyItemResponseDto],
+    description:
+      'Proficiências associadas a esta característica, na ordem em que foram inseridas',
+  })
+  proficiencies: ProficiencyItemResponseDto[];
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -78,6 +86,7 @@ export class CharacteristicResponseDto {
       additionalAbilities: EntityReferenceResponseDto[];
       improvements: ImprovementFlawItemResponseDto[];
       flaws: ImprovementFlawItemResponseDto[];
+      proficiencies: ProficiencyItemResponseDto[];
     },
   ): CharacteristicResponseDto {
     const dto = new CharacteristicResponseDto();
@@ -93,6 +102,7 @@ export class CharacteristicResponseDto {
     dto.additionalAbilities = references.additionalAbilities;
     dto.improvements = references.improvements;
     dto.flaws = references.flaws;
+    dto.proficiencies = references.proficiencies;
     dto.createdAt = characteristic.createdAt;
     dto.updatedAt = characteristic.updatedAt;
     return dto;

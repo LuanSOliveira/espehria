@@ -2,6 +2,8 @@ import { IEntity } from '../Entity';
 import { IRaceListItem } from '../Race';
 import { IBiographyListItem } from '../Biography';
 import { IImprovementDefectItem } from '../ImprovementDefectItem';
+import { IProficiencyProperty } from '../ProficiencyProperty';
+import { IProficiencyGradation } from '../ProficiencyGradation';
 import { IUser } from '../User';
 
 export interface ISheetListItem {
@@ -30,6 +32,48 @@ export interface ISheetImprovementDefectSnapshot {
   characteristics: ISheetImprovementDefectSnapshotEntry[];
 }
 
+/**
+ * Item de `proficiencias` da ficha: snapshot congelado no momento do vínculo
+ * (não uma referência viva a `proficiencies`), já resolvido pela regra de
+ * conflito de maior graduação — mesmo espírito de
+ * ISheetImprovementDefectSnapshotEntry.
+ */
+export interface ISheetProficiencySnapshotEntry {
+  id: string;
+  property: IProficiencyProperty;
+  gradation: IProficiencyGradation;
+  sourceName: string;
+}
+
+export interface ISheetProficiencySnapshot {
+  race: ISheetProficiencySnapshotEntry[];
+  biography: ISheetProficiencySnapshotEntry[];
+  trainings: ISheetProficiencySnapshotEntry[];
+  talents: ISheetProficiencySnapshotEntry[];
+  characteristics: ISheetProficiencySnapshotEntry[];
+}
+
+export type ISheetProficiencyAdjustmentSourceType =
+  | 'race'
+  | 'biography'
+  | 'training'
+  | 'talent'
+  | 'characteristic';
+
+/**
+ * Item de `proficienciasAjustadas`: uma proficiência recebida em conflito
+ * (graduação menor ou igual à já existente para a mesma propriedade), à
+ * espera (ou não) de uma propriedade substituta escolhida pelo usuário.
+ */
+export interface ISheetProficiencyAdjustmentEntry {
+  id: string;
+  sourceType: ISheetProficiencyAdjustmentSourceType;
+  sourceName: string;
+  originalProperty: IProficiencyProperty;
+  originalGradation: IProficiencyGradation;
+  adjustedProperty: IProficiencyProperty | null;
+}
+
 export interface ISheet extends IEntity {
   name: string;
   referenceImage?: string | null;
@@ -39,6 +83,8 @@ export interface ISheet extends IEntity {
   biography?: IBiographyListItem | null;
   melhorias: ISheetImprovementDefectSnapshot;
   defeitos: ISheetImprovementDefectSnapshot;
+  proficiencias: ISheetProficiencySnapshot;
+  proficienciasAjustadas: ISheetProficiencyAdjustmentEntry[];
   createdBy: IUser;
   createdAt: string;
   updatedAt: string;

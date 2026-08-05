@@ -142,6 +142,9 @@ export const SheetBiographyAssignModal = ({
   const attributeImprovements = (biographyDetail?.improvements ?? []).filter(
     (item) => item.type.name === ATTRIBUTE_TYPE_NAME,
   );
+  const otherImprovements = (biographyDetail?.improvements ?? []).filter(
+    (item) => item.type.name !== ATTRIBUTE_TYPE_NAME,
+  );
   const selectedImprovement = attributeImprovements.find(
     (item) => getImprovementKey(item) === selectedImprovementKey,
   );
@@ -260,6 +263,18 @@ export const SheetBiographyAssignModal = ({
             )
           )}
         </div>
+
+        {showSelectionSteps && otherImprovements.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <DefaultText>Demais melhorias da biografia</DefaultText>
+
+            <div className="flex flex-col gap-2">
+              {otherImprovements.map((item) => (
+                <ImprovementDefectCard key={getImprovementKey(item)} item={item} />
+              ))}
+            </div>
+          </div>
+        )}
 
         {showSelectionSteps && (
           <div className="flex flex-col gap-2">

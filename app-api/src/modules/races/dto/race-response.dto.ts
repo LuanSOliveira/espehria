@@ -5,6 +5,7 @@ import { TagResponseDto } from '../../tags/dto/tag-response.dto';
 import { CharacteristicListItemResponseDto } from '../../characteristics/dto/characteristic-list-item-response.dto';
 import { TalentListItemResponseDto } from '../../talents/dto/talent-list-item-response.dto';
 import { ImprovementFlawItemResponseDto } from '../../improvement-flaws/dto/improvement-flaw-item-response.dto';
+import { ProficiencyItemResponseDto } from '../../proficiencies/dto/proficiency-item-response.dto';
 
 export class RaceResponseDto {
   @ApiProperty({
@@ -79,6 +80,13 @@ export class RaceResponseDto {
   flaws: ImprovementFlawItemResponseDto[];
 
   @ApiProperty({
+    type: () => [ProficiencyItemResponseDto],
+    description:
+      'Proficiências próprias desta raça, na ordem em que foram inseridas',
+  })
+  proficiencies: ProficiencyItemResponseDto[];
+
+  @ApiProperty({
     description: 'Data de criação do registro',
     example: '2025-01-15T10:30:00Z',
   })
@@ -95,7 +103,8 @@ export class RaceResponseDto {
     references: {
       improvements: ImprovementFlawItemResponseDto[];
       flaws: ImprovementFlawItemResponseDto[];
-    } = { improvements: [], flaws: [] },
+      proficiencies: ProficiencyItemResponseDto[];
+    } = { improvements: [], flaws: [], proficiencies: [] },
   ): RaceResponseDto {
     const dto = new RaceResponseDto();
     dto.id = race.id;
@@ -113,6 +122,7 @@ export class RaceResponseDto {
     );
     dto.improvements = references.improvements;
     dto.flaws = references.flaws;
+    dto.proficiencies = references.proficiencies;
     dto.createdAt = race.createdAt;
     dto.updatedAt = race.updatedAt;
     return dto;

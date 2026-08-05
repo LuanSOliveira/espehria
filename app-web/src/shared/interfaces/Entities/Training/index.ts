@@ -2,6 +2,7 @@ import { IEntity } from '../Entity';
 import { ITag } from '../Tag';
 import { IEntityReference } from '../EntityReference';
 import { IImprovementDefectItem } from '../ImprovementDefectItem';
+import { IProficiencyItem } from '../ProficiencyItem';
 
 export interface ITraining extends IEntity {
   name: string;
@@ -12,6 +13,7 @@ export interface ITraining extends IEntity {
   additionalAbilities: IEntityReference[];
   improvements: IImprovementDefectItem[];
   flaws: IImprovementDefectItem[];
+  proficiencies: IProficiencyItem[];
   createdAt: string;
   updatedAt: string;
 }

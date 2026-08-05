@@ -12,6 +12,7 @@ import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
 import { EntityReferenceListField } from '@/shared/components/EntityReferenceListField';
 import { ImprovementDefectListField } from '@/shared/components/ImprovementDefectListField';
+import { ProficiencyListField } from '@/shared/components/ProficiencyListField';
 import {
   useGetEntityById,
   usePostEntity,
@@ -27,6 +28,7 @@ import {
   IBiography,
   IEntityReference,
   IImprovementDefectItem,
+  IProficiencyItem,
   ITag,
 } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
@@ -47,12 +49,18 @@ interface ImprovementDefectInputPayload {
   property: string;
 }
 
+interface ProficiencyInputPayload {
+  property: string;
+  gradation: string;
+}
+
 interface BiographyPayload
   extends Omit<BiographyFormData, 'description' | 'imageReference'> {
   description?: string;
   imageReference?: string;
   additionalAbilities: EntityReferenceInputPayload[];
   improvements: ImprovementDefectInputPayload[];
+  proficiencies: ProficiencyInputPayload[];
 }
 
 export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
@@ -67,6 +75,7 @@ export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
   const [improvements, setImprovements] = useState<IImprovementDefectItem[]>(
     [],
   );
+  const [proficiencies, setProficiencies] = useState<IProficiencyItem[]>([]);
 
   const { tagOptions } = useTagOptionsQuery();
 
@@ -92,6 +101,8 @@ export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
       setAdditionalAbilities([]);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setImprovements([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setProficiencies([]);
       return;
     }
 
@@ -107,6 +118,7 @@ export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
     });
     setAdditionalAbilities(biographyDetail.additionalAbilities ?? []);
     setImprovements(biographyDetail.improvements ?? []);
+    setProficiencies(biographyDetail.proficiencies ?? []);
   }, [isEditMode, biographyDetail, reset]);
 
   useEffect(() => {
@@ -126,6 +138,7 @@ export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
     data: BiographyFormData,
     additionalAbilities: IEntityReference[],
     improvements: IImprovementDefectItem[],
+    proficiencies: IProficiencyItem[],
   ): BiographyPayload => ({
     ...data,
     description: data.description || undefined,
@@ -140,6 +153,10 @@ export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
       type: item.type.id,
       property: item.property.id,
     })),
+    proficiencies: proficiencies.map((item) => ({
+      property: item.property.id,
+      gradation: item.gradation.id,
+    })),
   });
 
   const createBiographyMutation = usePostEntity<IBiography, BiographyPayload>({
@@ -153,6 +170,7 @@ export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
       reset(biographyFormDefaultValues);
       setAdditionalAbilities([]);
       setImprovements([]);
+      setProficiencies([]);
       onSaved();
     },
     onError: (error) => {
@@ -186,7 +204,12 @@ export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
   });
 
   const onSubmit = (data: BiographyFormData) => {
-    const payload = buildPayload(data, additionalAbilities, improvements);
+    const payload = buildPayload(
+      data,
+      additionalAbilities,
+      improvements,
+      proficiencies,
+    );
 
     if (isEditMode) {
       updateBiographyMutation.mutate(payload);
@@ -255,6 +278,13 @@ export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
         value={improvements}
         onChange={setImprovements}
         otherListValue={[]}
+      />
+
+      <ProficiencyListField
+        label="Proficiências"
+        addButtonLabel="Adicionar Proficiências"
+        value={proficiencies}
+        onChange={setProficiencies}
       />
 
       <EntityReferenceListField

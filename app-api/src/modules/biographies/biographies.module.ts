@@ -5,6 +5,7 @@ import { BiographyTag } from './entities/biography-tag.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { EntityLinksModule } from '../entity-links/entity-links.module';
 import { ImprovementFlawsModule } from '../improvement-flaws/improvement-flaws.module';
+import { ProficienciesModule } from '../proficiencies/proficiencies.module';
 import { BiographiesController } from './biographies.controller';
 import { BiographiesService } from './biographies.service';
 
@@ -13,6 +14,7 @@ import { BiographiesService } from './biographies.service';
     TypeOrmModule.forFeature([Biography, BiographyTag, Tag]),
     EntityLinksModule,
     ImprovementFlawsModule,
+    ProficienciesModule,
   ],
   controllers: [BiographiesController],
   providers: [BiographiesService],

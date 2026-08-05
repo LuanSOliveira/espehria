@@ -9,11 +9,13 @@ import {
   FiFileText,
   FiPlusCircle,
   FiTrendingUp,
+  FiZap,
 } from 'react-icons/fi';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
 import { EntityReferenceCard } from '@/shared/components/EntityReferenceCard';
 import { ImprovementDefectCard } from '@/shared/components/ImprovementDefectCard';
+import { ProficiencyCard } from '@/shared/components/ProficiencyCard';
 import { useGetEntityById } from '@/hooks/Queries';
 import { ITraining } from '@/shared/interfaces';
 import { getContrastTextColor, showToast } from '@/shared/util';
@@ -167,6 +169,26 @@ export const TrainingView = ({
               />
             ))}
           </div>
+        </div>
+      </div>
+
+      <div style={APP_CONTAINER_STYLES.detailSectionBox}>
+        <div
+          className="flex items-center gap-2 px-3 py-2"
+          style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
+        >
+          <FiZap style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
+          <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
+            Proficiências
+          </Label>
+        </div>
+        <div className="flex flex-col gap-2 px-3 py-3">
+          {training.proficiencies.length === 0 && (
+            <DefaultText>Nenhum item adicionado.</DefaultText>
+          )}
+          {training.proficiencies.map((item) => (
+            <ProficiencyCard key={item.property.id} item={item} />
+          ))}
         </div>
       </div>
 

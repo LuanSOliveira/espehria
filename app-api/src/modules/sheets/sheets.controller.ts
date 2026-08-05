@@ -34,6 +34,7 @@ import { FindSheetsQueryDto } from './dto/find-sheets-query.dto';
 import { LinkSheetBiographyDto } from './dto/link-sheet-biography.dto';
 import { LinkSheetRaceDto } from './dto/link-sheet-race.dto';
 import { PaginatedSheetsResponseDto } from './dto/paginated-sheets-response.dto';
+import { ResolveProficiencyAdjustmentDto } from './dto/resolve-proficiency-adjustment.dto';
 import { SheetListItemResponseDto } from './dto/sheet-list-item-response.dto';
 import { SheetResponseDto } from './dto/sheet-response.dto';
 import { UpdateSheetDto } from './dto/update-sheet.dto';
@@ -153,7 +154,7 @@ export class SheetsController {
   @Put(':id/race')
   @ApiOperation({
     summary:
-      'Vincula ou troca a raça da ficha, substituindo completamente as entradas de melhorias e defeitos da raça anterior',
+      'Vincula ou troca a raça da ficha, substituindo completamente as entradas de melhorias, defeitos e proficiências da raça anterior',
   })
   @ApiOkResponse({ type: SheetResponseDto })
   @ApiNotFoundResponse({
@@ -175,7 +176,7 @@ export class SheetsController {
   @Delete(':id/race')
   @ApiOperation({
     summary:
-      'Desvincula a raça da ficha, limpando as entradas de melhorias e defeitos da raça',
+      'Desvincula a raça da ficha, limpando as entradas de melhorias, defeitos e proficiências da raça',
   })
   @ApiOkResponse({ type: SheetResponseDto })
   @ApiNotFoundResponse({
@@ -193,7 +194,7 @@ export class SheetsController {
   @Put(':id/biography')
   @ApiOperation({
     summary:
-      'Vincula ou troca a biografia da ficha, substituindo completamente as entradas de melhorias de biografia anterior',
+      'Vincula ou troca a biografia da ficha, incluindo no snapshot melhorias de atributo, proficiências e demais melhorias da biografia',
   })
   @ApiOkResponse({ type: SheetResponseDto })
   @ApiNotFoundResponse({
@@ -219,7 +220,7 @@ export class SheetsController {
   @Delete(':id/biography')
   @ApiOperation({
     summary:
-      'Desvincula a biografia da ficha, limpando as entradas de melhorias de biografia',
+      'Desvincula a biografia da ficha, limpando as entradas de melhorias e proficiências de biografia',
   })
   @ApiOkResponse({ type: SheetResponseDto })
   @ApiNotFoundResponse({
@@ -231,6 +232,38 @@ export class SheetsController {
     @CurrentUser() currentUser: User,
   ): Promise<SheetResponseDto> {
     const sheet = await this.sheetsService.unlinkBiography(id, currentUser);
+    return SheetResponseDto.fromEntity(sheet);
+  }
+
+  @Put(':id/proficiency-adjustments/:adjustmentId')
+  @ApiOperation({
+    summary:
+      'Resolve um conflito de proficiência, escolhendo uma propriedade substituta para uma proficiência em conflito',
+  })
+  @ApiOkResponse({ type: SheetResponseDto })
+  @ApiNotFoundResponse({
+    description:
+      'Ficha não encontrada ou não pertence ao usuário, ajuste de proficiência não encontrado, ou propriedade selecionada não encontrada',
+  })
+  @ApiConflictResponse({
+    description:
+      'A propriedade selecionada já está aplicada na ficha',
+  })
+  @ApiBadRequestResponse({
+    description: 'ID de ficha, ajuste ou propriedade em formato inválido',
+  })
+  async resolveProficiencyAdjustment(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('adjustmentId', ParseUUIDPipe) adjustmentId: string,
+    @Body() dto: ResolveProficiencyAdjustmentDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetResponseDto> {
+    const sheet = await this.sheetsService.resolveProficiencyAdjustment(
+      id,
+      adjustmentId,
+      dto,
+      currentUser,
+    );
     return SheetResponseDto.fromEntity(sheet);
   }
 
