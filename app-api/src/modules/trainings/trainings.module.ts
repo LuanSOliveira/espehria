@@ -6,6 +6,7 @@ import { Tag } from '../tags/entities/tag.entity';
 import { EntityLinksModule } from '../entity-links/entity-links.module';
 import { ImprovementFlawsModule } from '../improvement-flaws/improvement-flaws.module';
 import { ProficienciesModule } from '../proficiencies/proficiencies.module';
+import { KnowledgesModule } from '../knowledges/knowledges.module';
 import { TrainingsController } from './trainings.controller';
 import { TrainingsService } from './trainings.service';
 
@@ -15,6 +16,7 @@ import { TrainingsService } from './trainings.service';
     EntityLinksModule,
     ImprovementFlawsModule,
     ProficienciesModule,
+    KnowledgesModule,
   ],
   controllers: [TrainingsController],
   providers: [TrainingsService],

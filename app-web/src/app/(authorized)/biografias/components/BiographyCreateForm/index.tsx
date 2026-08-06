@@ -13,6 +13,7 @@ import { DefaultText } from '@/shared/components/Texts';
 import { EntityReferenceListField } from '@/shared/components/EntityReferenceListField';
 import { ImprovementDefectListField } from '@/shared/components/ImprovementDefectListField';
 import { ProficiencyListField } from '@/shared/components/ProficiencyListField';
+import { KnowledgeListField } from '@/shared/components/KnowledgeListField';
 import {
   useGetEntityById,
   usePostEntity,
@@ -28,6 +29,7 @@ import {
   IBiography,
   IEntityReference,
   IImprovementDefectItem,
+  IKnowledgeItem,
   IProficiencyItem,
   ITag,
 } from '@/shared/interfaces';
@@ -54,6 +56,11 @@ interface ProficiencyInputPayload {
   gradation: string;
 }
 
+interface KnowledgeInputPayload {
+  title: string;
+  gradation: string;
+}
+
 interface BiographyPayload
   extends Omit<BiographyFormData, 'description' | 'imageReference'> {
   description?: string;
@@ -61,6 +68,7 @@ interface BiographyPayload
   additionalAbilities: EntityReferenceInputPayload[];
   improvements: ImprovementDefectInputPayload[];
   proficiencies: ProficiencyInputPayload[];
+  knowledges: KnowledgeInputPayload[];
 }
 
 export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
@@ -76,6 +84,7 @@ export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
     [],
   );
   const [proficiencies, setProficiencies] = useState<IProficiencyItem[]>([]);
+  const [knowledges, setKnowledges] = useState<IKnowledgeItem[]>([]);
 
   const { tagOptions } = useTagOptionsQuery();
 
@@ -103,6 +112,8 @@ export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
       setImprovements([]);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setProficiencies([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setKnowledges([]);
       return;
     }
 
@@ -119,6 +130,7 @@ export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
     setAdditionalAbilities(biographyDetail.additionalAbilities ?? []);
     setImprovements(biographyDetail.improvements ?? []);
     setProficiencies(biographyDetail.proficiencies ?? []);
+    setKnowledges(biographyDetail.knowledges ?? []);
   }, [isEditMode, biographyDetail, reset]);
 
   useEffect(() => {
@@ -139,6 +151,7 @@ export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
     additionalAbilities: IEntityReference[],
     improvements: IImprovementDefectItem[],
     proficiencies: IProficiencyItem[],
+    knowledges: IKnowledgeItem[],
   ): BiographyPayload => ({
     ...data,
     description: data.description || undefined,
@@ -157,6 +170,10 @@ export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
       property: item.property.id,
       gradation: item.gradation.id,
     })),
+    knowledges: knowledges.map((item) => ({
+      title: item.title,
+      gradation: item.gradation.id,
+    })),
   });
 
   const createBiographyMutation = usePostEntity<IBiography, BiographyPayload>({
@@ -171,6 +188,7 @@ export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
       setAdditionalAbilities([]);
       setImprovements([]);
       setProficiencies([]);
+      setKnowledges([]);
       onSaved();
     },
     onError: (error) => {
@@ -209,6 +227,7 @@ export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
       additionalAbilities,
       improvements,
       proficiencies,
+      knowledges,
     );
 
     if (isEditMode) {
@@ -285,6 +304,13 @@ export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
         addButtonLabel="Adicionar Proficiências"
         value={proficiencies}
         onChange={setProficiencies}
+      />
+
+      <KnowledgeListField
+        label="Saber"
+        addButtonLabel="Adicionar Saber"
+        value={knowledges}
+        onChange={setKnowledges}
       />
 
       <EntityReferenceListField

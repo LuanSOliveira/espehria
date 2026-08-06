@@ -35,6 +35,10 @@ import { ProficienciesService } from '../proficiencies/proficiencies.service';
 import { ProficiencyOwnerType } from '../proficiencies/enums/proficiency-owner-type.enum';
 import { ProficiencyItemInputDto } from '../proficiencies/dto/proficiency-item-input.dto';
 import { ProficiencyItemResponseDto } from '../proficiencies/dto/proficiency-item-response.dto';
+import { KnowledgesService } from '../knowledges/knowledges.service';
+import { KnowledgeOwnerType } from '../knowledges/enums/knowledge-owner-type.enum';
+import { KnowledgeItemInputDto } from '../knowledges/dto/knowledge-item-input.dto';
+import { KnowledgeItemResponseDto } from '../knowledges/dto/knowledge-item-response.dto';
 
 export interface PaginatedBiographies {
   data: Biography[];
@@ -48,6 +52,7 @@ export interface BiographyWithReferences {
   additionalAbilities: EntityReferenceResponseDto[];
   improvements: ImprovementFlawItemResponseDto[];
   proficiencies: ProficiencyItemResponseDto[];
+  knowledges: KnowledgeItemResponseDto[];
 }
 
 @Injectable()
@@ -62,6 +67,7 @@ export class BiographiesService {
     private readonly entityLinksService: EntityLinksService,
     private readonly improvementFlawsService: ImprovementFlawsService,
     private readonly proficienciesService: ProficienciesService,
+    private readonly knowledgesService: KnowledgesService,
   ) {}
 
   findByName(name: string): Promise<Biography | null> {
@@ -92,8 +98,18 @@ export class BiographiesService {
       ProficiencyOwnerType.BIOGRAPHY,
       id,
     );
+    const knowledges = await this.knowledgesService.loadItemsFor(
+      KnowledgeOwnerType.BIOGRAPHY,
+      id,
+    );
 
-    return { biography, additionalAbilities, improvements, proficiencies };
+    return {
+      biography,
+      additionalAbilities,
+      improvements,
+      proficiencies,
+      knowledges,
+    };
   }
 
   private async findTagsByIds(tagIds: string[]): Promise<Tag[]> {
@@ -120,6 +136,7 @@ export class BiographiesService {
     const additionalAbilitiesInput = dto.additionalAbilities ?? [];
     const improvementsInput = dto.improvements ?? [];
     const proficienciesInput = dto.proficiencies ?? [];
+    const knowledgesInput = dto.knowledges ?? [];
 
     this.entityLinksService.validateLists({
       ownerEntityType: ReferenceableEntityType.BIOGRAPHY,
@@ -144,6 +161,10 @@ export class BiographiesService {
         proficienciesInput,
       );
     this.proficienciesService.validateList(proficienciesInput);
+
+    const resolvedKnowledges =
+      await this.knowledgesService.validateAndResolveItems(knowledgesInput);
+    this.knowledgesService.validateList(knowledgesInput);
 
     const biography = this.biographiesRepository.create({
       name: dto.name,
@@ -180,6 +201,12 @@ export class BiographiesService {
       proficienciesInput,
       resolvedProficiencies,
     );
+    await this.knowledgesService.replaceItems(
+      KnowledgeOwnerType.BIOGRAPHY,
+      savedBiography.id,
+      knowledgesInput,
+      resolvedKnowledges,
+    );
 
     const { additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
@@ -194,12 +221,17 @@ export class BiographiesService {
       ProficiencyOwnerType.BIOGRAPHY,
       savedBiography.id,
     );
+    const knowledges = await this.knowledgesService.loadItemsFor(
+      KnowledgeOwnerType.BIOGRAPHY,
+      savedBiography.id,
+    );
 
     return {
       biography: savedBiography,
       additionalAbilities,
       improvements,
       proficiencies,
+      knowledges,
     };
   }
 
@@ -362,6 +394,26 @@ export class BiographiesService {
       );
     this.proficienciesService.validateList(effectiveProficiencies);
 
+    let effectiveKnowledges = dto.knowledges;
+    if (effectiveKnowledges === undefined) {
+      const currentKnowledges = await this.knowledgesService.loadItemsFor(
+        KnowledgeOwnerType.BIOGRAPHY,
+        id,
+      );
+      effectiveKnowledges = currentKnowledges.map(
+        (item): KnowledgeItemInputDto => ({
+          title: item.title,
+          gradation: item.gradation.id,
+        }),
+      );
+    }
+
+    const resolvedKnowledges =
+      await this.knowledgesService.validateAndResolveItems(
+        effectiveKnowledges,
+      );
+    this.knowledgesService.validateList(effectiveKnowledges);
+
     const savedBiography = await this.biographiesRepository.save(biography);
     savedBiography.tags = tags;
 
@@ -390,6 +442,14 @@ export class BiographiesService {
         resolvedProficiencies,
       );
     }
+    if (dto.knowledges !== undefined) {
+      await this.knowledgesService.replaceItems(
+        KnowledgeOwnerType.BIOGRAPHY,
+        id,
+        dto.knowledges,
+        resolvedKnowledges,
+      );
+    }
 
     const { additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
@@ -404,12 +464,17 @@ export class BiographiesService {
       ProficiencyOwnerType.BIOGRAPHY,
       id,
     );
+    const knowledges = await this.knowledgesService.loadItemsFor(
+      KnowledgeOwnerType.BIOGRAPHY,
+      id,
+    );
 
     return {
       biography: savedBiography,
       additionalAbilities,
       improvements,
       proficiencies,
+      knowledges,
     };
   }
 

@@ -35,6 +35,10 @@ import { ProficienciesService } from '../proficiencies/proficiencies.service';
 import { ProficiencyOwnerType } from '../proficiencies/enums/proficiency-owner-type.enum';
 import { ProficiencyItemInputDto } from '../proficiencies/dto/proficiency-item-input.dto';
 import { ProficiencyItemResponseDto } from '../proficiencies/dto/proficiency-item-response.dto';
+import { KnowledgesService } from '../knowledges/knowledges.service';
+import { KnowledgeOwnerType } from '../knowledges/enums/knowledge-owner-type.enum';
+import { KnowledgeItemInputDto } from '../knowledges/dto/knowledge-item-input.dto';
+import { KnowledgeItemResponseDto } from '../knowledges/dto/knowledge-item-response.dto';
 
 export interface PaginatedRaces {
   data: Race[];
@@ -48,6 +52,7 @@ export interface RaceWithReferences {
   improvements: ImprovementFlawItemResponseDto[];
   flaws: ImprovementFlawItemResponseDto[];
   proficiencies: ProficiencyItemResponseDto[];
+  knowledges: KnowledgeItemResponseDto[];
 }
 
 @Injectable()
@@ -71,6 +76,7 @@ export class RacesService {
     private readonly talentTagsRepository: Repository<TalentTag>,
     private readonly improvementFlawsService: ImprovementFlawsService,
     private readonly proficienciesService: ProficienciesService,
+    private readonly knowledgesService: KnowledgesService,
   ) {}
 
   findByName(name: string): Promise<Race | null> {
@@ -127,8 +133,12 @@ export class RacesService {
       ProficiencyOwnerType.RACE,
       id,
     );
+    const knowledges = await this.knowledgesService.loadItemsFor(
+      KnowledgeOwnerType.RACE,
+      id,
+    );
 
-    return { race, improvements, flaws, proficiencies };
+    return { race, improvements, flaws, proficiencies, knowledges };
   }
 
   findCategoryById(id: string): Promise<RaceCategory | null> {
@@ -210,6 +220,7 @@ export class RacesService {
     const improvementsInput = dto.improvements ?? [];
     const flawsInput = dto.flaws ?? [];
     const proficienciesInput = dto.proficiencies ?? [];
+    const knowledgesInput = dto.knowledges ?? [];
 
     const resolvedImprovements =
       await this.improvementFlawsService.validateAndResolveItems(
@@ -227,6 +238,10 @@ export class RacesService {
         proficienciesInput,
       );
     this.proficienciesService.validateList(proficienciesInput);
+
+    const resolvedKnowledges =
+      await this.knowledgesService.validateAndResolveItems(knowledgesInput);
+    this.knowledgesService.validateList(knowledgesInput);
 
     const race = this.racesRepository.create({
       name: dto.name,
@@ -267,6 +282,12 @@ export class RacesService {
       proficienciesInput,
       resolvedProficiencies,
     );
+    await this.knowledgesService.replaceItems(
+      KnowledgeOwnerType.RACE,
+      savedRace.id,
+      knowledgesInput,
+      resolvedKnowledges,
+    );
 
     const { improvements, flaws } =
       await this.improvementFlawsService.loadItemsFor(
@@ -277,8 +298,18 @@ export class RacesService {
       ProficiencyOwnerType.RACE,
       savedRace.id,
     );
+    const knowledges = await this.knowledgesService.loadItemsFor(
+      KnowledgeOwnerType.RACE,
+      savedRace.id,
+    );
 
-    return { race: savedRace, improvements, flaws, proficiencies };
+    return {
+      race: savedRace,
+      improvements,
+      flaws,
+      proficiencies,
+      knowledges,
+    };
   }
 
   async findAllPaginated(query: FindRacesQueryDto): Promise<PaginatedRaces> {
@@ -450,6 +481,26 @@ export class RacesService {
       );
     this.proficienciesService.validateList(effectiveProficiencies);
 
+    let effectiveKnowledges = dto.knowledges;
+    if (effectiveKnowledges === undefined) {
+      const currentKnowledges = await this.knowledgesService.loadItemsFor(
+        KnowledgeOwnerType.RACE,
+        id,
+      );
+      effectiveKnowledges = currentKnowledges.map(
+        (item): KnowledgeItemInputDto => ({
+          title: item.title,
+          gradation: item.gradation.id,
+        }),
+      );
+    }
+
+    const resolvedKnowledges =
+      await this.knowledgesService.validateAndResolveItems(
+        effectiveKnowledges,
+      );
+    this.knowledgesService.validateList(effectiveKnowledges);
+
     const savedRace = await this.racesRepository.save(race);
     await this.attachOrderedTags(savedRace);
 
@@ -479,6 +530,14 @@ export class RacesService {
         resolvedProficiencies,
       );
     }
+    if (dto.knowledges !== undefined) {
+      await this.knowledgesService.replaceItems(
+        KnowledgeOwnerType.RACE,
+        id,
+        dto.knowledges,
+        resolvedKnowledges,
+      );
+    }
 
     const { improvements, flaws } =
       await this.improvementFlawsService.loadItemsFor(
@@ -489,8 +548,18 @@ export class RacesService {
       ProficiencyOwnerType.RACE,
       id,
     );
+    const knowledges = await this.knowledgesService.loadItemsFor(
+      KnowledgeOwnerType.RACE,
+      id,
+    );
 
-    return { race: savedRace, improvements, flaws, proficiencies };
+    return {
+      race: savedRace,
+      improvements,
+      flaws,
+      proficiencies,
+      knowledges,
+    };
   }
 
   async remove(id: string): Promise<void> {

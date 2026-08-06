@@ -3,6 +3,7 @@ import { ITag } from '../Tag';
 import { IEntityReference } from '../EntityReference';
 import { IImprovementDefectItem } from '../ImprovementDefectItem';
 import { IProficiencyItem } from '../ProficiencyItem';
+import { IKnowledgeItem } from '../KnowledgeItem';
 
 export interface ICharacteristic extends IEntity {
   name: string;
@@ -15,6 +16,7 @@ export interface ICharacteristic extends IEntity {
   improvements: IImprovementDefectItem[];
   flaws: IImprovementDefectItem[];
   proficiencies: IProficiencyItem[];
+  knowledges: IKnowledgeItem[];
   createdAt: string;
   updatedAt: string;
 }

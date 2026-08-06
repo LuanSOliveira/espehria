@@ -4,6 +4,7 @@ import { TagResponseDto } from '../../tags/dto/tag-response.dto';
 import { EntityReferenceResponseDto } from '../../entity-links/dto/entity-reference-response.dto';
 import { ImprovementFlawItemResponseDto } from '../../improvement-flaws/dto/improvement-flaw-item-response.dto';
 import { ProficiencyItemResponseDto } from '../../proficiencies/dto/proficiency-item-response.dto';
+import { KnowledgeItemResponseDto } from '../../knowledges/dto/knowledge-item-response.dto';
 
 export class TrainingResponseDto {
   @ApiProperty({
@@ -69,6 +70,13 @@ export class TrainingResponseDto {
   })
   proficiencies: ProficiencyItemResponseDto[];
 
+  @ApiProperty({
+    type: () => [KnowledgeItemResponseDto],
+    description:
+      'Saberes associados a este treinamento, na ordem em que foram inseridos',
+  })
+  knowledges: KnowledgeItemResponseDto[];
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -84,6 +92,7 @@ export class TrainingResponseDto {
       improvements: ImprovementFlawItemResponseDto[];
       flaws: ImprovementFlawItemResponseDto[];
       proficiencies: ProficiencyItemResponseDto[];
+      knowledges: KnowledgeItemResponseDto[];
     },
   ): TrainingResponseDto {
     const dto = new TrainingResponseDto();
@@ -99,6 +108,7 @@ export class TrainingResponseDto {
     dto.improvements = references.improvements;
     dto.flaws = references.flaws;
     dto.proficiencies = references.proficiencies;
+    dto.knowledges = references.knowledges;
     dto.createdAt = training.createdAt;
     dto.updatedAt = training.updatedAt;
     return dto;

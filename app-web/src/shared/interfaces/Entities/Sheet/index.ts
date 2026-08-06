@@ -53,6 +53,26 @@ export interface ISheetProficiencySnapshot {
   characteristics: ISheetProficiencySnapshotEntry[];
 }
 
+/**
+ * Item de `saberes` da ficha: snapshot congelado no momento do vínculo (não
+ * uma referência viva a `knowledges`) — mesmo espírito de
+ * ISheetProficiencySnapshotEntry, porém sem regra de ajuste/conflito.
+ */
+export interface ISheetKnowledgeSnapshotEntry {
+  id: string;
+  title: string;
+  gradation: IProficiencyGradation;
+  sourceName: string;
+}
+
+export interface ISheetKnowledgeSnapshot {
+  race: ISheetKnowledgeSnapshotEntry[];
+  biography: ISheetKnowledgeSnapshotEntry[];
+  trainings: ISheetKnowledgeSnapshotEntry[];
+  talents: ISheetKnowledgeSnapshotEntry[];
+  characteristics: ISheetKnowledgeSnapshotEntry[];
+}
+
 export type ISheetProficiencyAdjustmentSourceType =
   | 'race'
   | 'biography'
@@ -85,6 +105,7 @@ export interface ISheet extends IEntity {
   defeitos: ISheetImprovementDefectSnapshot;
   proficiencias: ISheetProficiencySnapshot;
   proficienciasAjustadas: ISheetProficiencyAdjustmentEntry[];
+  saberes: ISheetKnowledgeSnapshot;
   createdBy: IUser;
   createdAt: string;
   updatedAt: string;

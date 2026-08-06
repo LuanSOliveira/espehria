@@ -10,6 +10,7 @@ import { Talent } from '../talents/entities/talent.entity';
 import { TalentTag } from '../talents/entities/talent-tag.entity';
 import { ImprovementFlawsModule } from '../improvement-flaws/improvement-flaws.module';
 import { ProficienciesModule } from '../proficiencies/proficiencies.module';
+import { KnowledgesModule } from '../knowledges/knowledges.module';
 import { RacesController } from './races.controller';
 import { RacesService } from './races.service';
 
@@ -27,6 +28,7 @@ import { RacesService } from './races.service';
     ]),
     ImprovementFlawsModule,
     ProficienciesModule,
+    KnowledgesModule,
   ],
   controllers: [RacesController],
   providers: [RacesService],

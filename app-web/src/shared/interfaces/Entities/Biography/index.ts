@@ -3,6 +3,7 @@ import { ITag } from '../Tag';
 import { IEntityReference } from '../EntityReference';
 import { IImprovementDefectItem } from '../ImprovementDefectItem';
 import { IProficiencyItem } from '../ProficiencyItem';
+import { IKnowledgeItem } from '../KnowledgeItem';
 
 export interface IBiography extends IEntity {
   name: string;
@@ -11,6 +12,7 @@ export interface IBiography extends IEntity {
   tags: ITag[];
   improvements: IImprovementDefectItem[];
   proficiencies: IProficiencyItem[];
+  knowledges: IKnowledgeItem[];
   additionalAbilities: IEntityReference[];
   createdAt: string;
   updatedAt: string;

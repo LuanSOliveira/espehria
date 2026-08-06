@@ -154,7 +154,7 @@ export class SheetsController {
   @Put(':id/race')
   @ApiOperation({
     summary:
-      'Vincula ou troca a raça da ficha, substituindo completamente as entradas de melhorias, defeitos e proficiências da raça anterior',
+      'Vincula ou troca a raça da ficha, substituindo completamente as entradas de melhorias, defeitos, proficiências e saberes da raça anterior',
   })
   @ApiOkResponse({ type: SheetResponseDto })
   @ApiNotFoundResponse({
@@ -176,7 +176,7 @@ export class SheetsController {
   @Delete(':id/race')
   @ApiOperation({
     summary:
-      'Desvincula a raça da ficha, limpando as entradas de melhorias, defeitos e proficiências da raça',
+      'Desvincula a raça da ficha, limpando as entradas de melhorias, defeitos, proficiências e saberes da raça',
   })
   @ApiOkResponse({ type: SheetResponseDto })
   @ApiNotFoundResponse({
@@ -194,7 +194,7 @@ export class SheetsController {
   @Put(':id/biography')
   @ApiOperation({
     summary:
-      'Vincula ou troca a biografia da ficha, incluindo no snapshot melhorias de atributo, proficiências e demais melhorias da biografia',
+      'Vincula ou troca a biografia da ficha, incluindo no snapshot melhorias de atributo, proficiências, saberes e demais melhorias da biografia',
   })
   @ApiOkResponse({ type: SheetResponseDto })
   @ApiNotFoundResponse({
@@ -220,7 +220,7 @@ export class SheetsController {
   @Delete(':id/biography')
   @ApiOperation({
     summary:
-      'Desvincula a biografia da ficha, limpando as entradas de melhorias e proficiências de biografia',
+      'Desvincula a biografia da ficha, limpando as entradas de melhorias, proficiências e saberes de biografia',
   })
   @ApiOkResponse({ type: SheetResponseDto })
   @ApiNotFoundResponse({

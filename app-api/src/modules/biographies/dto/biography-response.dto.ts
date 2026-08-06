@@ -4,6 +4,7 @@ import { TagResponseDto } from '../../tags/dto/tag-response.dto';
 import { EntityReferenceResponseDto } from '../../entity-links/dto/entity-reference-response.dto';
 import { ImprovementFlawItemResponseDto } from '../../improvement-flaws/dto/improvement-flaw-item-response.dto';
 import { ProficiencyItemResponseDto } from '../../proficiencies/dto/proficiency-item-response.dto';
+import { KnowledgeItemResponseDto } from '../../knowledges/dto/knowledge-item-response.dto';
 
 export class BiographyResponseDto {
   @ApiProperty({
@@ -56,6 +57,13 @@ export class BiographyResponseDto {
   })
   proficiencies: ProficiencyItemResponseDto[];
 
+  @ApiProperty({
+    type: () => [KnowledgeItemResponseDto],
+    description:
+      'Saberes associados a esta biografia, na ordem em que foram inseridos',
+  })
+  knowledges: KnowledgeItemResponseDto[];
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -68,6 +76,7 @@ export class BiographyResponseDto {
       additionalAbilities: EntityReferenceResponseDto[];
       improvements: ImprovementFlawItemResponseDto[];
       proficiencies: ProficiencyItemResponseDto[];
+      knowledges: KnowledgeItemResponseDto[];
     },
   ): BiographyResponseDto {
     const dto = new BiographyResponseDto();
@@ -81,6 +90,7 @@ export class BiographyResponseDto {
     dto.additionalAbilities = references.additionalAbilities;
     dto.improvements = references.improvements;
     dto.proficiencies = references.proficiencies;
+    dto.knowledges = references.knowledges;
     dto.createdAt = biography.createdAt;
     dto.updatedAt = biography.updatedAt;
     return dto;

@@ -50,15 +50,15 @@ export class CharacteristicsController {
   @ApiCreatedResponse({ type: CharacteristicResponseDto })
   @ApiConflictResponse({
     description:
-      'Já existe uma característica com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas), ou violação de regra em Melhorias/Defeitos (duplicidade de combinação Tipo×Propriedade na mesma lista, exclusividade entre listas ou incompatibilidade entre o Tipo e a Propriedade selecionados), ou violação de regra em Proficiências (duplicidade de propriedade na mesma lista)',
+      'Já existe uma característica com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas), ou violação de regra em Melhorias/Defeitos (duplicidade de combinação Tipo×Propriedade na mesma lista, exclusividade entre listas ou incompatibilidade entre o Tipo e a Propriedade selecionados), ou violação de regra em Proficiências (duplicidade de propriedade na mesma lista), ou violação de regra em Saberes (título duplicado na mesma lista)',
   })
   @ApiNotFoundResponse({
     description:
-      'Uma ou mais tags, entidades referenciadas em Aprimorado de/Requisitos/Habilidades Adicionais, tipos/propriedades de Melhorias/Defeitos, ou propriedades/graduações de Proficiências não foram encontrados',
+      'Uma ou mais tags, entidades referenciadas em Aprimorado de/Requisitos/Habilidades Adicionais, tipos/propriedades de Melhorias/Defeitos, propriedades/graduações de Proficiências, ou graduações de Saberes não foram encontrados',
   })
   @ApiBadRequestResponse({
     description:
-      'Dados obrigatórios ausentes, formato inválido de entityType/id, formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas), ou formato inválido de property/gradation em Proficiências (devem ser UUIDs válidas)',
+      'Dados obrigatórios ausentes, formato inválido de entityType/id, formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas), formato inválido de property/gradation em Proficiências (devem ser UUIDs válidas), ou formato inválido de title/gradation em Saberes (title deve ser string não vazia, gradation deve ser UUID válido)',
   })
   async create(
     @Body() dto: CreateCharacteristicDto,
@@ -71,6 +71,7 @@ export class CharacteristicsController {
       improvements,
       flaws,
       proficiencies,
+      knowledges,
     } = await this.characteristicsService.create(dto);
     return CharacteristicResponseDto.fromEntity(characteristic, {
       improvedFrom,
@@ -79,6 +80,7 @@ export class CharacteristicsController {
       improvements,
       flaws,
       proficiencies,
+      knowledges,
     });
   }
 
@@ -126,6 +128,7 @@ export class CharacteristicsController {
       improvements: result.improvements,
       flaws: result.flaws,
       proficiencies: result.proficiencies,
+      knowledges: result.knowledges,
     });
   }
 
@@ -134,15 +137,15 @@ export class CharacteristicsController {
   @ApiOkResponse({ type: CharacteristicResponseDto })
   @ApiNotFoundResponse({
     description:
-      'Característica, uma ou mais tags/entidades referenciadas em Aprimorado de/Requisitos/Habilidades Adicionais, tipos/propriedades de Melhorias/Defeitos, ou propriedades/graduações de Proficiências não encontrados',
+      'Característica, uma ou mais tags/entidades referenciadas em Aprimorado de/Requisitos/Habilidades Adicionais, tipos/propriedades de Melhorias/Defeitos, propriedades/graduações de Proficiências, ou graduações de Saberes não encontrados',
   })
   @ApiConflictResponse({
     description:
-      'Já existe uma característica com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas), ou violação de regra em Melhorias/Defeitos (duplicidade de combinação Tipo×Propriedade na mesma lista, exclusividade entre listas ou incompatibilidade entre o Tipo e a Propriedade selecionados), ou violação de regra em Proficiências (duplicidade de propriedade na mesma lista)',
+      'Já existe uma característica com este nome, ou violação de regra em Aprimorado de/Requisitos/Habilidades Adicionais (autorreferência, duplicata ou item em mais de uma das três listas), ou violação de regra em Melhorias/Defeitos (duplicidade de combinação Tipo×Propriedade na mesma lista, exclusividade entre listas ou incompatibilidade entre o Tipo e a Propriedade selecionados), ou violação de regra em Proficiências (duplicidade de propriedade na mesma lista), ou violação de regra em Saberes (título duplicado na mesma lista)',
   })
   @ApiBadRequestResponse({
     description:
-      'ID em formato inválido, formato inválido de entityType/id em Aprimorado de/Requisitos/Habilidades Adicionais, formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas), ou formato inválido de property/gradation em Proficiências (devem ser UUIDs válidas)',
+      'ID em formato inválido, formato inválido de entityType/id em Aprimorado de/Requisitos/Habilidades Adicionais, formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas), formato inválido de property/gradation em Proficiências (devem ser UUIDs válidas), ou formato inválido de title/gradation em Saberes (title deve ser string não vazia, gradation deve ser UUID válido)',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -156,6 +159,7 @@ export class CharacteristicsController {
       improvements,
       flaws,
       proficiencies,
+      knowledges,
     } = await this.characteristicsService.update(id, dto);
     return CharacteristicResponseDto.fromEntity(characteristic, {
       improvedFrom,
@@ -164,6 +168,7 @@ export class CharacteristicsController {
       improvements,
       flaws,
       proficiencies,
+      knowledges,
     });
   }
 

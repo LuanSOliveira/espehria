@@ -36,6 +36,7 @@ export * from './ImprovementDefectItem';
 export * from './ProficiencyProperty';
 export * from './ProficiencyGradation';
 export * from './ProficiencyItem';
+export * from './KnowledgeItem';
 export * from './Campaign';
 export * from './PlannedSession';
 export * from './Sheet';

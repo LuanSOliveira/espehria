@@ -29,3 +29,4 @@ export * from './SheetFormSchema';
 export * from './ImprovementDefectFormSchema';
 export * from './ProficiencyFormSchema';
 export * from './BiographyFormSchema';
+export * from './KnowledgeFormSchema';

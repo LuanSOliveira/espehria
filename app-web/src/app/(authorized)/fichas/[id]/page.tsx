@@ -27,6 +27,7 @@ import {
   ISheet,
   ISheetCampaignOption,
   ISheetImprovementDefectSnapshot,
+  ISheetKnowledgeSnapshot,
   ISheetProficiencySnapshot,
   ISheetProficiencyAdjustmentEntry,
 } from '@/shared/interfaces';
@@ -49,10 +50,12 @@ import { SheetAttributesDetailModal } from './components/SheetAttributesDetailMo
 import { SheetImprovementDefectCategoryAccordions } from './components/SheetImprovementDefectCategoryAccordions';
 import { SheetProficienciesGrid } from './components/SheetProficienciesGrid';
 import { SheetAdjustedProficienciesSection } from './components/SheetAdjustedProficienciesSection';
+import { SheetKnowledgesPanel } from './components/SheetKnowledgesPanel';
 import { useFieldAutosave } from './hooks/useFieldAutosave';
 import {
   SHEET_ATTRIBUTE_PROPERTY_ORDER,
   SHEET_EMPTY_IMPROVEMENT_DEFECT_SNAPSHOT,
+  SHEET_EMPTY_KNOWLEDGE_SNAPSHOT,
   SHEET_EMPTY_PROFICIENCY_SNAPSHOT,
   SHEET_IMPROVEMENT_DEFECT_CATEGORIES,
 } from './data';
@@ -75,6 +78,14 @@ const flattenSnapshot = (snapshot: ISheetImprovementDefectSnapshot) => [
 ];
 
 const flattenProficiencySnapshot = (snapshot: ISheetProficiencySnapshot) => [
+  ...snapshot.race,
+  ...snapshot.biography,
+  ...snapshot.trainings,
+  ...snapshot.talents,
+  ...snapshot.characteristics,
+];
+
+const flattenKnowledgeSnapshot = (snapshot: ISheetKnowledgeSnapshot) => [
   ...snapshot.race,
   ...snapshot.biography,
   ...snapshot.trainings,
@@ -130,6 +141,9 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
   const [proficienciasAjustadas, setProficienciasAjustadas] = useState<
     ISheetProficiencyAdjustmentEntry[]
   >([]);
+  const [saberes, setSaberes] = useState<ISheetKnowledgeSnapshot>(
+    SHEET_EMPTY_KNOWLEDGE_SNAPSHOT,
+  );
   const [referenceImage, setReferenceImage] = useState<string | null>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<SheetDetailTab>('estatisticas');
@@ -149,6 +163,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     setDefeitos(sheet.defeitos);
     setProficiencias(sheet.proficiencias);
     setProficienciasAjustadas(sheet.proficienciasAjustadas);
+    setSaberes(sheet.saberes);
     setReferenceImage(sheet.referenceImage ?? null);
     setHasHydrated(true);
   }, [sheet, hasHydrated]);
@@ -337,6 +352,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
       setDefeitos(data.defeitos);
       setProficiencias(data.proficiencias);
       setProficienciasAjustadas(data.proficienciasAjustadas);
+      setSaberes(data.saberes);
       showToast({ message: 'Raça vinculada com sucesso.', type: 'success' });
     },
     onError: (mutationError) => {
@@ -358,6 +374,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
       setDefeitos(data.defeitos);
       setProficiencias(data.proficiencias);
       setProficienciasAjustadas(data.proficienciasAjustadas);
+      setSaberes(data.saberes);
       showToast({ message: 'Raça removida com sucesso.', type: 'success' });
     },
     onError: (mutationError) => {
@@ -382,6 +399,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
       setDefeitos(data.defeitos);
       setProficiencias(data.proficiencias);
       setProficienciasAjustadas(data.proficienciasAjustadas);
+      setSaberes(data.saberes);
       showToast({
         message: 'Biografia vinculada com sucesso.',
         type: 'success',
@@ -406,6 +424,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
       setDefeitos(data.defeitos);
       setProficiencias(data.proficiencias);
       setProficienciasAjustadas(data.proficienciasAjustadas);
+      setSaberes(data.saberes);
       showToast({
         message: 'Biografia removida com sucesso.',
         type: 'success',
@@ -600,10 +619,16 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
 
         <div className="mt-4">
           {activeTab === 'estatisticas' && (
-            <SheetAttributesPanel
-              attributes={attributes}
-              onOpenDetails={() => setIsAttributesDetailOpen(true)}
-            />
+            <div className="flex flex-col gap-6">
+              <SheetAttributesPanel
+                attributes={attributes}
+                onOpenDetails={() => setIsAttributesDetailOpen(true)}
+              />
+
+              <SheetKnowledgesPanel
+                items={flattenKnowledgeSnapshot(saberes)}
+              />
+            </div>
           )}
 
           {activeTab === 'melhorias' && (

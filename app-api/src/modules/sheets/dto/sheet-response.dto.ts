@@ -7,6 +7,7 @@ import { Sheet } from '../entities/sheet.entity';
 import { SheetImprovementFlawSnapshotResponseDto } from './sheet-improvement-flaw-snapshot-response.dto';
 import { SheetProficiencySnapshotResponseDto } from './sheet-proficiency-snapshot-response.dto';
 import { SheetProficiencyAdjustmentResponseDto } from './sheet-proficiency-adjustment-response.dto';
+import { SheetKnowledgeSnapshotResponseDto } from './sheet-knowledge-snapshot-response.dto';
 
 export class SheetResponseDto {
   @ApiProperty({
@@ -80,6 +81,12 @@ export class SheetResponseDto {
   proficienciasAjustadas: SheetProficiencyAdjustmentResponseDto[];
 
   @ApiProperty({
+    type: () => SheetKnowledgeSnapshotResponseDto,
+    description: 'Snapshot dos saberes efetivos da ficha, agrupados por origem',
+  })
+  saberes: SheetKnowledgeSnapshotResponseDto;
+
+  @ApiProperty({
     type: () => UserResponseDto,
     description:
       'Usuário dono da ficha. Campo somente leitura — preenchido a partir do usuário autenticado na criação',
@@ -118,6 +125,7 @@ export class SheetResponseDto {
       (adjustment) =>
         SheetProficiencyAdjustmentResponseDto.fromRaw(adjustment),
     );
+    dto.saberes = SheetKnowledgeSnapshotResponseDto.fromEntity(sheet.saberes);
     dto.createdBy = UserResponseDto.fromEntity(sheet.createdBy);
     dto.createdAt = sheet.createdAt;
     dto.updatedAt = sheet.updatedAt;

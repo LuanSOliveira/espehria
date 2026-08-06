@@ -27,6 +27,7 @@ import { ImprovementFlawProperty } from '../improvement-flaw-properties/entities
 import { ImprovementFlawCategory } from '../improvement-flaws/enums/improvement-flaw-category.enum';
 import { Proficiency } from '../proficiencies/entities/proficiency.entity';
 import { ProficiencyProperty } from '../proficiency-properties/entities/proficiency-property.entity';
+import { Knowledge } from '../knowledges/entities/knowledge.entity';
 import { AuthProvider } from '../users/enums/auth-provider.enum';
 import { User } from '../users/entities/user.entity';
 import { CreateSheetDto } from './dto/create-sheet.dto';
@@ -45,6 +46,10 @@ import {
   SheetProficiencyAdjustment,
   SheetProficiencyAdjustmentSourceType,
 } from './interfaces/sheet-proficiency-adjustment.interface';
+import {
+  SheetKnowledgeSnapshot,
+  SheetKnowledgeSnapshotEntry,
+} from './interfaces/sheet-knowledge-snapshot.interface';
 
 const ATTRIBUTE_TYPE_NAME = 'Atributo';
 const FREE_IMPROVEMENT_VALUE = 2;
@@ -91,6 +96,8 @@ export class SheetsService {
     private readonly proficienciesRepository: Repository<Proficiency>,
     @InjectRepository(ProficiencyProperty)
     private readonly proficiencyPropertiesRepository: Repository<ProficiencyProperty>,
+    @InjectRepository(Knowledge)
+    private readonly knowledgesRepository: Repository<Knowledge>,
   ) {}
 
   private async findCampaignById(id: string): Promise<Campaign> {
@@ -238,6 +245,73 @@ export class SheetsService {
 
     sheet.proficiencias = proficiencias;
     sheet.proficienciasAjustadas = adjustments;
+  }
+
+  /**
+   * Espelha `recomputeProficiencies`, mas para Saber: a graduação maior
+   * prevalece e a menor é descartada integralmente, sem qualquer lista de
+   * ajustes (não existe mecanismo de "Saber Ajustado").
+   */
+  private async recomputeKnowledges(
+    sheet: Sheet,
+    orderedSources: ProficiencySource[],
+  ): Promise<void> {
+    const activeByNormalizedTitle = new Map<
+      string,
+      {
+        gradationLevel: number;
+        sourceType: ProficiencySource['type'];
+        entry: SheetKnowledgeSnapshotEntry;
+      }
+    >();
+
+    for (const source of orderedSources) {
+      const ownerColumn: string =
+        source.type === 'race' ? 'ownerRace' : 'ownerBiography';
+      const whereCriteria: Record<string, unknown> = {
+        [ownerColumn]: { id: source.id },
+      };
+      const items = await this.knowledgesRepository.find({
+        where: whereCriteria as FindOptionsWhere<Knowledge>,
+        relations: { gradation: true },
+        order: { sortOrder: 'ASC' },
+      });
+
+      for (const item of items) {
+        const normalizedTitle = item.title.trim().toLowerCase();
+        const existing = activeByNormalizedTitle.get(normalizedTitle);
+
+        if (!existing || item.gradation.level > existing.gradationLevel) {
+          activeByNormalizedTitle.set(normalizedTitle, {
+            gradationLevel: item.gradation.level,
+            sourceType: source.type,
+            entry: {
+              id: item.id,
+              title: item.title,
+              gradation: {
+                id: item.gradation.id,
+                name: item.gradation.name,
+                level: item.gradation.level,
+              },
+              sourceName: source.name,
+            },
+          });
+        }
+      }
+    }
+
+    const saberes: SheetKnowledgeSnapshot = {
+      race: [],
+      biography: [],
+      trainings: [],
+      talents: [],
+      characteristics: [],
+    };
+    for (const { sourceType, entry } of activeByNormalizedTitle.values()) {
+      saberes[sourceType].push(entry);
+    }
+
+    sheet.saberes = saberes;
   }
 
   async create(dto: CreateSheetDto, currentUser: User): Promise<Sheet> {
@@ -425,6 +499,7 @@ export class SheetsService {
     }
     proficiencySources.push({ type: 'race', id: race.id, name: race.name });
     await this.recomputeProficiencies(sheet, proficiencySources);
+    await this.recomputeKnowledges(sheet, proficiencySources);
 
     return this.sheetsRepository.save(sheet);
   }
@@ -451,6 +526,7 @@ export class SheetsService {
         ]
       : [];
     await this.recomputeProficiencies(sheet, proficiencySources);
+    await this.recomputeKnowledges(sheet, proficiencySources);
 
     return this.sheetsRepository.save(sheet);
   }
@@ -586,6 +662,7 @@ export class SheetsService {
       name: biography.name,
     });
     await this.recomputeProficiencies(sheet, proficiencySources);
+    await this.recomputeKnowledges(sheet, proficiencySources);
 
     return this.sheetsRepository.save(sheet);
   }
@@ -606,6 +683,7 @@ export class SheetsService {
       ? [{ type: 'race', id: sheet.race.id, name: sheet.race.name }]
       : [];
     await this.recomputeProficiencies(sheet, proficiencySources);
+    await this.recomputeKnowledges(sheet, proficiencySources);
 
     return this.sheetsRepository.save(sheet);
   }

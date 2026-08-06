@@ -35,6 +35,10 @@ import { ProficienciesService } from '../proficiencies/proficiencies.service';
 import { ProficiencyOwnerType } from '../proficiencies/enums/proficiency-owner-type.enum';
 import { ProficiencyItemInputDto } from '../proficiencies/dto/proficiency-item-input.dto';
 import { ProficiencyItemResponseDto } from '../proficiencies/dto/proficiency-item-response.dto';
+import { KnowledgesService } from '../knowledges/knowledges.service';
+import { KnowledgeOwnerType } from '../knowledges/enums/knowledge-owner-type.enum';
+import { KnowledgeItemInputDto } from '../knowledges/dto/knowledge-item-input.dto';
+import { KnowledgeItemResponseDto } from '../knowledges/dto/knowledge-item-response.dto';
 
 export interface PaginatedTrainings {
   data: Training[];
@@ -51,6 +55,7 @@ export interface TrainingWithReferences {
   improvements: ImprovementFlawItemResponseDto[];
   flaws: ImprovementFlawItemResponseDto[];
   proficiencies: ProficiencyItemResponseDto[];
+  knowledges: KnowledgeItemResponseDto[];
 }
 
 @Injectable()
@@ -65,6 +70,7 @@ export class TrainingsService {
     private readonly entityLinksService: EntityLinksService,
     private readonly improvementFlawsService: ImprovementFlawsService,
     private readonly proficienciesService: ProficienciesService,
+    private readonly knowledgesService: KnowledgesService,
   ) {}
 
   findByName(name: string): Promise<Training | null> {
@@ -96,6 +102,10 @@ export class TrainingsService {
       ProficiencyOwnerType.TRAINING,
       id,
     );
+    const knowledges = await this.knowledgesService.loadItemsFor(
+      KnowledgeOwnerType.TRAINING,
+      id,
+    );
 
     return {
       training,
@@ -105,6 +115,7 @@ export class TrainingsService {
       improvements,
       flaws,
       proficiencies,
+      knowledges,
     };
   }
 
@@ -135,6 +146,7 @@ export class TrainingsService {
     const improvementsInput = dto.improvements ?? [];
     const flawsInput = dto.flaws ?? [];
     const proficienciesInput = dto.proficiencies ?? [];
+    const knowledgesInput = dto.knowledges ?? [];
 
     this.entityLinksService.validateLists({
       ownerEntityType: ReferenceableEntityType.TRAINING,
@@ -163,6 +175,10 @@ export class TrainingsService {
         proficienciesInput,
       );
     this.proficienciesService.validateList(proficienciesInput);
+
+    const resolvedKnowledges =
+      await this.knowledgesService.validateAndResolveItems(knowledgesInput);
+    this.knowledgesService.validateList(knowledgesInput);
 
     const training = this.trainingsRepository.create({
       name: dto.name,
@@ -217,6 +233,12 @@ export class TrainingsService {
       proficienciesInput,
       resolvedProficiencies,
     );
+    await this.knowledgesService.replaceItems(
+      KnowledgeOwnerType.TRAINING,
+      savedTraining.id,
+      knowledgesInput,
+      resolvedKnowledges,
+    );
 
     const { improvedFrom, requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
@@ -232,6 +254,10 @@ export class TrainingsService {
       ProficiencyOwnerType.TRAINING,
       savedTraining.id,
     );
+    const knowledges = await this.knowledgesService.loadItemsFor(
+      KnowledgeOwnerType.TRAINING,
+      savedTraining.id,
+    );
 
     return {
       training: savedTraining,
@@ -241,6 +267,7 @@ export class TrainingsService {
       improvements,
       flaws,
       proficiencies,
+      knowledges,
     };
   }
 
@@ -448,6 +475,26 @@ export class TrainingsService {
       );
     this.proficienciesService.validateList(effectiveProficiencies);
 
+    let effectiveKnowledges = dto.knowledges;
+    if (effectiveKnowledges === undefined) {
+      const currentKnowledges = await this.knowledgesService.loadItemsFor(
+        KnowledgeOwnerType.TRAINING,
+        id,
+      );
+      effectiveKnowledges = currentKnowledges.map(
+        (item): KnowledgeItemInputDto => ({
+          title: item.title,
+          gradation: item.gradation.id,
+        }),
+      );
+    }
+
+    const resolvedKnowledges =
+      await this.knowledgesService.validateAndResolveItems(
+        effectiveKnowledges,
+      );
+    this.knowledgesService.validateList(effectiveKnowledges);
+
     const savedTraining = await this.trainingsRepository.save(training);
     savedTraining.tags = tags;
 
@@ -501,6 +548,14 @@ export class TrainingsService {
         resolvedProficiencies,
       );
     }
+    if (dto.knowledges !== undefined) {
+      await this.knowledgesService.replaceItems(
+        KnowledgeOwnerType.TRAINING,
+        id,
+        dto.knowledges,
+        resolvedKnowledges,
+      );
+    }
 
     const { improvedFrom, requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
@@ -516,6 +571,10 @@ export class TrainingsService {
       ProficiencyOwnerType.TRAINING,
       id,
     );
+    const knowledges = await this.knowledgesService.loadItemsFor(
+      KnowledgeOwnerType.TRAINING,
+      id,
+    );
 
     return {
       training: savedTraining,
@@ -525,6 +584,7 @@ export class TrainingsService {
       improvements,
       flaws,
       proficiencies,
+      knowledges,
     };
   }
 

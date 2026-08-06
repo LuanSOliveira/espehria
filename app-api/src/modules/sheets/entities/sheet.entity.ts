@@ -8,6 +8,7 @@ import { User } from '../../users/entities/user.entity';
 import type { SheetImprovementFlawSnapshot } from '../interfaces/sheet-improvement-flaw-snapshot.interface';
 import type { SheetProficiencySnapshot } from '../interfaces/sheet-proficiency-snapshot.interface';
 import type { SheetProficiencyAdjustment } from '../interfaces/sheet-proficiency-adjustment.interface';
+import type { SheetKnowledgeSnapshot } from '../interfaces/sheet-knowledge-snapshot.interface';
 
 @Entity('sheets')
 export class Sheet extends BaseEntity {
@@ -90,6 +91,18 @@ export class Sheet extends BaseEntity {
     name: 'proficiencias_ajustadas',
   })
   proficienciasAjustadas!: SheetProficiencyAdjustment[];
+
+  @Column({
+    type: 'jsonb',
+    default: {
+      race: [],
+      biography: [],
+      trainings: [],
+      talents: [],
+      characteristics: [],
+    },
+  })
+  saberes!: SheetKnowledgeSnapshot;
 
   @ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'created_by_id' })

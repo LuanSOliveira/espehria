@@ -3,6 +3,7 @@ import { IEntityReference } from '../EntityReference';
 import { ITag } from '../Tag';
 import { IImprovementDefectItem } from '../ImprovementDefectItem';
 import { IProficiencyItem } from '../ProficiencyItem';
+import { IKnowledgeItem } from '../KnowledgeItem';
 
 export interface IRaceCategory {
   id: string;
@@ -29,6 +30,7 @@ export interface IRace extends IEntity {
   improvements: IImprovementDefectItem[];
   flaws: IImprovementDefectItem[];
   proficiencies: IProficiencyItem[];
+  knowledges: IKnowledgeItem[];
   createdAt: string;
   updatedAt: string;
 }

@@ -13,6 +13,7 @@ import {
 import { EntityReferenceInputDto } from '../../entity-links/dto/entity-reference-input.dto';
 import { ImprovementFlawItemInputDto } from '../../improvement-flaws/dto/improvement-flaw-item-input.dto';
 import { ProficiencyItemInputDto } from '../../proficiencies/dto/proficiency-item-input.dto';
+import { KnowledgeItemInputDto } from '../../knowledges/dto/knowledge-item-input.dto';
 
 export class CreateCharacteristicDto {
   @ApiProperty({
@@ -154,4 +155,21 @@ export class CreateCharacteristicDto {
   @ValidateNested({ each: true })
   @Type(() => ProficiencyItemInputDto)
   proficiencies?: ProficiencyItemInputDto[];
+
+  @ApiPropertyOptional({
+    type: () => [KnowledgeItemInputDto],
+    description:
+      'Saberes associados a esta característica. Não pode repetir o mesmo título (case-insensitive e trim) nesta lista.',
+    example: [
+      {
+        title: 'Astronomia Élfica',
+        gradation: '550e8400-e29b-41d4-a716-446655440008',
+      },
+    ],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => KnowledgeItemInputDto)
+  knowledges?: KnowledgeItemInputDto[];
 }

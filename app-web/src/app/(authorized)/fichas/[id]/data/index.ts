@@ -1,5 +1,6 @@
 import {
   ISheetImprovementDefectSnapshot,
+  ISheetKnowledgeSnapshot,
   ISheetProficiencySnapshot,
 } from '@/shared/interfaces';
 
@@ -49,6 +50,14 @@ export const SHEET_EMPTY_IMPROVEMENT_DEFECT_SNAPSHOT: ISheetImprovementDefectSna
   };
 
 export const SHEET_EMPTY_PROFICIENCY_SNAPSHOT: ISheetProficiencySnapshot = {
+  race: [],
+  biography: [],
+  trainings: [],
+  talents: [],
+  characteristics: [],
+};
+
+export const SHEET_EMPTY_KNOWLEDGE_SNAPSHOT: ISheetKnowledgeSnapshot = {
   race: [],
   biography: [],
   trainings: [],

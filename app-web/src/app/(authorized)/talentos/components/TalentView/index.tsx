@@ -5,6 +5,7 @@ import { Chip, CircularProgress } from '@mui/material';
 import {
   FiArrowDownCircle,
   FiArrowUpCircle,
+  FiBookOpen,
   FiCheckSquare,
   FiFileText,
   FiPlusCircle,
@@ -16,6 +17,7 @@ import { RichTextViewer } from '@/shared/components/RichTextViewer';
 import { EntityReferenceCard } from '@/shared/components/EntityReferenceCard';
 import { ImprovementDefectCard } from '@/shared/components/ImprovementDefectCard';
 import { ProficiencyCard } from '@/shared/components/ProficiencyCard';
+import { KnowledgeCard } from '@/shared/components/KnowledgeCard';
 import { useGetEntityById } from '@/hooks/Queries';
 import { ITalent } from '@/shared/interfaces';
 import { getContrastTextColor, showToast } from '@/shared/util';
@@ -187,6 +189,26 @@ export const TalentView = ({ talentId, onNotFound }: TalentViewProps) => {
           )}
           {talent.proficiencies.map((item) => (
             <ProficiencyCard key={item.property.id} item={item} />
+          ))}
+        </div>
+      </div>
+
+      <div style={APP_CONTAINER_STYLES.detailSectionBox}>
+        <div
+          className="flex items-center gap-2 px-3 py-2"
+          style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
+        >
+          <FiBookOpen style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
+          <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
+            Saber
+          </Label>
+        </div>
+        <div className="flex flex-col gap-2 px-3 py-3">
+          {talent.knowledges.length === 0 && (
+            <DefaultText>Nenhum item adicionado.</DefaultText>
+          )}
+          {talent.knowledges.map((item) => (
+            <KnowledgeCard key={item.id} item={item} />
           ))}
         </div>
       </div>

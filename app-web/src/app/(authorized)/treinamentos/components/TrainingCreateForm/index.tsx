@@ -13,6 +13,7 @@ import { DefaultText } from '@/shared/components/Texts';
 import { EntityReferenceListField } from '@/shared/components/EntityReferenceListField';
 import { ImprovementDefectListField } from '@/shared/components/ImprovementDefectListField';
 import { ProficiencyListField } from '@/shared/components/ProficiencyListField';
+import { KnowledgeListField } from '@/shared/components/KnowledgeListField';
 import {
   useGetEntityById,
   usePostEntity,
@@ -27,6 +28,7 @@ import {
 import {
   IEntityReference,
   IImprovementDefectItem,
+  IKnowledgeItem,
   IProficiencyItem,
   ITag,
   ITraining,
@@ -54,6 +56,11 @@ interface ProficiencyInputPayload {
   gradation: string;
 }
 
+interface KnowledgeInputPayload {
+  title: string;
+  gradation: string;
+}
+
 interface TrainingPayload extends Omit<TrainingFormData, 'description'> {
   description?: string;
   improvedFrom: EntityReferenceInputPayload[];
@@ -62,6 +69,7 @@ interface TrainingPayload extends Omit<TrainingFormData, 'description'> {
   improvements: ImprovementDefectInputPayload[];
   flaws: ImprovementDefectInputPayload[];
   proficiencies: ProficiencyInputPayload[];
+  knowledges: KnowledgeInputPayload[];
 }
 
 export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
@@ -80,6 +88,7 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
   );
   const [flaws, setFlaws] = useState<IImprovementDefectItem[]>([]);
   const [proficiencies, setProficiencies] = useState<IProficiencyItem[]>([]);
+  const [knowledges, setKnowledges] = useState<IKnowledgeItem[]>([]);
 
   const { tagOptions } = useTagOptionsQuery();
 
@@ -113,6 +122,8 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
       setFlaws([]);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setProficiencies([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
+      setKnowledges([]);
       return;
     }
 
@@ -131,6 +142,7 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
     setImprovements(trainingDetail.improvements ?? []);
     setFlaws(trainingDetail.flaws ?? []);
     setProficiencies(trainingDetail.proficiencies ?? []);
+    setKnowledges(trainingDetail.knowledges ?? []);
   }, [isEditMode, trainingDetail, reset]);
 
   useEffect(() => {
@@ -154,6 +166,7 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
     improvements: IImprovementDefectItem[],
     flaws: IImprovementDefectItem[],
     proficiencies: IProficiencyItem[],
+    knowledges: IKnowledgeItem[],
   ): TrainingPayload => ({
     ...data,
     description: data.description || undefined,
@@ -184,6 +197,10 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
       property: item.property.id,
       gradation: item.gradation.id,
     })),
+    knowledges: knowledges.map((item) => ({
+      title: item.title,
+      gradation: item.gradation.id,
+    })),
   });
 
   const createTrainingMutation = usePostEntity<ITraining, TrainingPayload>({
@@ -201,6 +218,7 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
       setImprovements([]);
       setFlaws([]);
       setProficiencies([]);
+      setKnowledges([]);
       onSaved();
     },
     onError: (error) => {
@@ -242,6 +260,7 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
       improvements,
       flaws,
       proficiencies,
+      knowledges,
     );
 
     if (isEditMode) {
@@ -321,6 +340,13 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
         addButtonLabel="Adicionar Proficiências"
         value={proficiencies}
         onChange={setProficiencies}
+      />
+
+      <KnowledgeListField
+        label="Saber"
+        addButtonLabel="Adicionar Saber"
+        value={knowledges}
+        onChange={setKnowledges}
       />
 
       <EntityReferenceListField
