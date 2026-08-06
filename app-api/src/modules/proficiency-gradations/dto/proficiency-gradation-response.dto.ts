@@ -20,6 +20,13 @@ export class ProficiencyGradationResponseDto {
   })
   level: number;
 
+  @ApiProperty({
+    description:
+      'Valor numérico somado ao modificador do atributo-chave no cálculo de perícia da ficha. Diferente de `level`, que serve apenas para comparar graduações entre si',
+    example: 3,
+  })
+  bonus: number;
+
   static fromEntity(
     gradation: ProficiencyGradation,
   ): ProficiencyGradationResponseDto {
@@ -27,6 +34,7 @@ export class ProficiencyGradationResponseDto {
     dto.id = gradation.id;
     dto.name = gradation.name;
     dto.level = gradation.level;
+    dto.bonus = gradation.bonus;
     return dto;
   }
 }

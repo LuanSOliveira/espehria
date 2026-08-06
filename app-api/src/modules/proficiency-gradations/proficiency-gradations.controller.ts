@@ -24,6 +24,8 @@ export class ProficiencyGradationsController {
   @Get()
   @ApiOperation({
     summary: 'Lista todas as graduações de proficiência (lista fixa)',
+    description:
+      'Retorna a lista completa de graduações de proficiência. Cada graduação contém um nível (usado para comparação entre graduações) e um bônus (valor somado ao modificador de perícia da ficha)',
   })
   @ApiOkResponse({ type: [ProficiencyGradationResponseDto] })
   async findAll(): Promise<ProficiencyGradationResponseDto[]> {

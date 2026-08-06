@@ -16,4 +16,11 @@ export class ProficiencyGradation extends BaseEntity {
   @Index({ unique: true })
   @Column({ type: 'int' })
   level!: number;
+
+  @ApiProperty({
+    description:
+      'Valor numérico somado ao modificador do atributo-chave no cálculo de perícia da ficha. Diferente de `level`, que serve apenas para comparar graduações entre si',
+  })
+  @Column({ type: 'int' })
+  bonus!: number;
 }

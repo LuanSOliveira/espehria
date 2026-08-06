@@ -14,6 +14,7 @@ import {
   useGetEntityList,
   useImprovementDefectPropertiesQuery,
   useImprovementDefectTypesQuery,
+  useProficiencyGradationsQuery,
   useProficiencyPropertiesQuery,
   usePutEntity,
   useResolveProficiencyAdjustmentMutation,
@@ -30,6 +31,8 @@ import {
   ISheetKnowledgeSnapshot,
   ISheetProficiencySnapshot,
   ISheetProficiencyAdjustmentEntry,
+  ISkillListFilters,
+  ISkillListItem,
 } from '@/shared/interfaces';
 import { showToast } from '@/shared/util';
 import { APP_COLORS } from '@/shared/constants';
@@ -51,33 +54,40 @@ import { SheetImprovementDefectCategoryAccordions } from './components/SheetImpr
 import { SheetProficienciesGrid } from './components/SheetProficienciesGrid';
 import { SheetAdjustedProficienciesSection } from './components/SheetAdjustedProficienciesSection';
 import { SheetKnowledgesPanel } from './components/SheetKnowledgesPanel';
+import { SheetSkillsPanel } from './components/SheetSkillsPanel';
+import { SheetSkillBonusDetailModal } from './components/SheetSkillBonusDetailModal';
 import { useFieldAutosave } from './hooks/useFieldAutosave';
+import {
+  SheetSkillModifierResult,
+  useSheetSkillModifiers,
+} from './hooks/useSheetSkillModifiers';
 import {
   SHEET_ATTRIBUTE_PROPERTY_ORDER,
   SHEET_EMPTY_IMPROVEMENT_DEFECT_SNAPSHOT,
   SHEET_EMPTY_KNOWLEDGE_SNAPSHOT,
   SHEET_EMPTY_PROFICIENCY_SNAPSHOT,
   SHEET_IMPROVEMENT_DEFECT_CATEGORIES,
+  flattenProficiencySnapshot,
 } from './data';
 
 const ATTRIBUTE_TYPE_NAME = 'Atributo';
 const ATTRIBUTE_BASE_VALUE = 10;
 
-type SheetDetailTab = 'estatisticas' | 'melhorias' | 'defeitos' | 'proficiencias';
+const SHEET_TABS_SX = {
+  borderBottom: `1px solid ${APP_COLORS.gold}`,
+  '& .MuiTab-root': { color: APP_COLORS.textBrownDark },
+  '& .Mui-selected': { color: `${APP_COLORS.goldDark} !important` },
+  '& .MuiTabs-indicator': { backgroundColor: APP_COLORS.goldDark },
+};
+
+type SheetDetailTab = 'estatisticas' | 'bonus';
+type SheetBonusSubTab = 'melhorias' | 'defeitos' | 'proficiencias';
 
 interface SheetDetailsPageProps {
   params: Promise<{ id: string }>;
 }
 
 const flattenSnapshot = (snapshot: ISheetImprovementDefectSnapshot) => [
-  ...snapshot.race,
-  ...snapshot.biography,
-  ...snapshot.trainings,
-  ...snapshot.talents,
-  ...snapshot.characteristics,
-];
-
-const flattenProficiencySnapshot = (snapshot: ISheetProficiencySnapshot) => [
   ...snapshot.race,
   ...snapshot.biography,
   ...snapshot.trainings,
@@ -147,7 +157,11 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
   const [referenceImage, setReferenceImage] = useState<string | null>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<SheetDetailTab>('estatisticas');
+  const [activeBonusSubTab, setActiveBonusSubTab] =
+    useState<SheetBonusSubTab>('melhorias');
   const [isAttributesDetailOpen, setIsAttributesDetailOpen] = useState(false);
+  const [skillPendingBonusDetail, setSkillPendingBonusDetail] =
+    useState<SheetSkillModifierResult | null>(null);
 
   useEffect(() => {
     if (!sheet || hasHydrated) {
@@ -236,6 +250,22 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
       };
     });
   }, [attributeProperties, attributeType, melhorias, defeitos]);
+
+  const { data: skillsData } = useGetEntityList<ISkillListItem, ISkillListFilters>({
+    url: '/skills',
+    filters: { page: 1, perPage: 100 },
+  });
+  const skills = skillsData?.data ?? [];
+
+  const { data: proficiencyGradations } = useProficiencyGradationsQuery();
+
+  const skillModifiers = useSheetSkillModifiers({
+    skills,
+    attributes,
+    proficiencias,
+    proficienciasAjustadas,
+    gradations: proficiencyGradations ?? [],
+  });
 
   const attributesDetailGroups = useMemo(
     () =>
@@ -604,18 +634,25 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
           onChange={(_event, newValue: SheetDetailTab) =>
             setActiveTab(newValue)
           }
-          sx={{
-            borderBottom: `1px solid ${APP_COLORS.gold}`,
-            '& .MuiTab-root': { color: APP_COLORS.textBrownDark },
-            '& .Mui-selected': { color: `${APP_COLORS.goldDark} !important` },
-            '& .MuiTabs-indicator': { backgroundColor: APP_COLORS.goldDark },
-          }}
+          sx={SHEET_TABS_SX}
         >
           <Tab value="estatisticas" label="Estatísticas" />
-          <Tab value="melhorias" label="Melhorias" />
-          <Tab value="defeitos" label="Defeitos" />
-          <Tab value="proficiencias" label="Proficiências" />
+          <Tab value="bonus" label="Bônus" />
         </Tabs>
+
+        {activeTab === 'bonus' && (
+          <Tabs
+            value={activeBonusSubTab}
+            onChange={(_event, newValue: SheetBonusSubTab) =>
+              setActiveBonusSubTab(newValue)
+            }
+            sx={SHEET_TABS_SX}
+          >
+            <Tab value="melhorias" label="Melhorias" />
+            <Tab value="defeitos" label="Defeitos" />
+            <Tab value="proficiencias" label="Proficiências" />
+          </Tabs>
+        )}
 
         <div className="mt-4">
           {activeTab === 'estatisticas' && (
@@ -625,21 +662,30 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
                 onOpenDetails={() => setIsAttributesDetailOpen(true)}
               />
 
+              <SheetSkillsPanel
+                items={skillModifiers}
+                onOpenDetail={(skillId) =>
+                  setSkillPendingBonusDetail(
+                    skillModifiers.find((s) => s.id === skillId) ?? null,
+                  )
+                }
+              />
+
               <SheetKnowledgesPanel
                 items={flattenKnowledgeSnapshot(saberes)}
               />
             </div>
           )}
 
-          {activeTab === 'melhorias' && (
+          {activeTab === 'bonus' && activeBonusSubTab === 'melhorias' && (
             <SheetImprovementDefectCategoryAccordions items={melhorias} />
           )}
 
-          {activeTab === 'defeitos' && (
+          {activeTab === 'bonus' && activeBonusSubTab === 'defeitos' && (
             <SheetImprovementDefectCategoryAccordions items={defeitos} />
           )}
 
-          {activeTab === 'proficiencias' && (
+          {activeTab === 'bonus' && activeBonusSubTab === 'proficiencias' && (
             <div className="flex flex-col gap-6">
               <SheetProficienciesGrid
                 items={flattenProficiencySnapshot(proficiencias)}
@@ -664,6 +710,12 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
         open={isAttributesDetailOpen}
         onClose={() => setIsAttributesDetailOpen(false)}
         groups={attributesDetailGroups}
+      />
+
+      <SheetSkillBonusDetailModal
+        open={!!skillPendingBonusDetail}
+        onClose={() => setSkillPendingBonusDetail(null)}
+        skill={skillPendingBonusDetail}
       />
 
       <SheetImageEditModal

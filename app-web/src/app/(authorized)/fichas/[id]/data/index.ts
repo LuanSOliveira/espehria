@@ -64,3 +64,20 @@ export const SHEET_EMPTY_KNOWLEDGE_SNAPSHOT: ISheetKnowledgeSnapshot = {
   talents: [],
   characteristics: [],
 };
+
+/**
+ * Achata um snapshot de proficiências (`ISheetProficiencySnapshot`) em uma
+ * única lista, unindo as 5 origens (`race`, `biography`, `trainings`,
+ * `talents`, `characteristics`). Reaproveitado tanto pela renderização da
+ * aba Bônus > Proficiências quanto pelo cálculo de modificador de perícia
+ * (`useSheetSkillModifiers`).
+ */
+export const flattenProficiencySnapshot = (
+  snapshot: ISheetProficiencySnapshot,
+) => [
+  ...snapshot.race,
+  ...snapshot.biography,
+  ...snapshot.trainings,
+  ...snapshot.talents,
+  ...snapshot.characteristics,
+];
