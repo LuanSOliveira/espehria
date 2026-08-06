@@ -9,4 +9,10 @@ export interface IKnowledgeItem {
   id: string;
   title: string;
   gradation: IProficiencyGradation;
+  /**
+   * Indica se este saber permite anotações livres na ficha (define a
+   * permissão no saber original). Sempre preenchido pelo modal de
+   * cadastro/edição, com `false` como padrão quando não marcado.
+   */
+  editable: boolean;
 }

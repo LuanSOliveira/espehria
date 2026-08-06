@@ -19,6 +19,7 @@ import {
   usePutEntity,
   useResolveProficiencyAdjustmentMutation,
   useSheetCampaignOptionsQuery,
+  useUpdateSheetKnowledgeNoteMutation,
 } from '@/hooks/Queries';
 import {
   IBiographyListItem,
@@ -55,18 +56,23 @@ import { SheetProficienciesGrid } from './components/SheetProficienciesGrid';
 import { SheetAdjustedProficienciesSection } from './components/SheetAdjustedProficienciesSection';
 import { SheetKnowledgesPanel } from './components/SheetKnowledgesPanel';
 import { SheetSkillsPanel } from './components/SheetSkillsPanel';
-import { SheetSkillBonusDetailModal } from './components/SheetSkillBonusDetailModal';
+import {
+  SheetBonusDetail,
+  SheetBonusDetailModal,
+} from './components/SheetBonusDetailModal';
 import { useFieldAutosave } from './hooks/useFieldAutosave';
 import {
   SheetSkillModifierResult,
   useSheetSkillModifiers,
 } from './hooks/useSheetSkillModifiers';
+import { useSheetKnowledgeModifiers } from './hooks/useSheetKnowledgeModifiers';
 import {
   SHEET_ATTRIBUTE_PROPERTY_ORDER,
   SHEET_EMPTY_IMPROVEMENT_DEFECT_SNAPSHOT,
   SHEET_EMPTY_KNOWLEDGE_SNAPSHOT,
   SHEET_EMPTY_PROFICIENCY_SNAPSHOT,
   SHEET_IMPROVEMENT_DEFECT_CATEGORIES,
+  flattenKnowledgeSnapshot,
   flattenProficiencySnapshot,
 } from './data';
 
@@ -88,14 +94,6 @@ interface SheetDetailsPageProps {
 }
 
 const flattenSnapshot = (snapshot: ISheetImprovementDefectSnapshot) => [
-  ...snapshot.race,
-  ...snapshot.biography,
-  ...snapshot.trainings,
-  ...snapshot.talents,
-  ...snapshot.characteristics,
-];
-
-const flattenKnowledgeSnapshot = (snapshot: ISheetKnowledgeSnapshot) => [
   ...snapshot.race,
   ...snapshot.biography,
   ...snapshot.trainings,
@@ -162,6 +160,8 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
   const [isAttributesDetailOpen, setIsAttributesDetailOpen] = useState(false);
   const [skillPendingBonusDetail, setSkillPendingBonusDetail] =
     useState<SheetSkillModifierResult | null>(null);
+  const [knowledgePendingBonusDetail, setKnowledgePendingBonusDetail] =
+    useState<SheetBonusDetail | null>(null);
 
   useEffect(() => {
     if (!sheet || hasHydrated) {
@@ -264,6 +264,12 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     attributes,
     proficiencias,
     proficienciasAjustadas,
+    gradations: proficiencyGradations ?? [],
+  });
+
+  const knowledgeModifiers = useSheetKnowledgeModifiers({
+    entries: flattenKnowledgeSnapshot(saberes),
+    attributes,
     gradations: proficiencyGradations ?? [],
   });
 
@@ -499,6 +505,26 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     resolveProficiencyAdjustmentMutation.mutate({ adjustmentId, propertyId });
   };
 
+  const updateKnowledgeNoteMutation = useUpdateSheetKnowledgeNoteMutation({
+    sheetId,
+    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
+    onSuccess: (data) => {
+      setSaberes(data.saberes);
+      showToast({
+        message: 'Nota do saber salva com sucesso.',
+        type: 'success',
+      });
+    },
+    onError: (mutationError) => {
+      showToast({
+        message:
+          mutationError.response?.data?.message ??
+          'Não foi possível salvar a nota do saber.',
+        type: 'error',
+      });
+    },
+  });
+
   const { data: allProficiencyProperties } = useProficiencyPropertiesQuery();
 
   const adjustedProficienciesPropertyOptions: IProficiencyProperty[] = useMemo(() => {
@@ -672,7 +698,30 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
               />
 
               <SheetKnowledgesPanel
-                items={flattenKnowledgeSnapshot(saberes)}
+                items={knowledgeModifiers}
+                onOpenDetail={(knowledgeId) => {
+                  const item = knowledgeModifiers.find(
+                    (k) => k.id === knowledgeId,
+                  );
+
+                  setKnowledgePendingBonusDetail(
+                    item
+                      ? {
+                          name: item.title,
+                          total: item.total,
+                          breakdown: item.breakdown,
+                        }
+                      : null,
+                  );
+                }}
+                onSaveNote={(knowledgeId, note) =>
+                  updateKnowledgeNoteMutation.mutate({ knowledgeId, note })
+                }
+                isSavingNote={(knowledgeId) =>
+                  updateKnowledgeNoteMutation.isPending &&
+                  updateKnowledgeNoteMutation.variables?.knowledgeId ===
+                    knowledgeId
+                }
               />
             </div>
           )}
@@ -712,10 +761,16 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
         groups={attributesDetailGroups}
       />
 
-      <SheetSkillBonusDetailModal
+      <SheetBonusDetailModal
         open={!!skillPendingBonusDetail}
         onClose={() => setSkillPendingBonusDetail(null)}
-        skill={skillPendingBonusDetail}
+        detail={skillPendingBonusDetail}
+      />
+
+      <SheetBonusDetailModal
+        open={!!knowledgePendingBonusDetail}
+        onClose={() => setKnowledgePendingBonusDetail(null)}
+        detail={knowledgePendingBonusDetail}
       />
 
       <SheetImageEditModal

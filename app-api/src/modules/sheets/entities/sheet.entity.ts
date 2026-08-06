@@ -104,6 +104,9 @@ export class Sheet extends BaseEntity {
   })
   saberes!: SheetKnowledgeSnapshot;
 
+  @Column({ type: 'jsonb', default: {}, name: 'saberes_anotacoes' })
+  saberesAnotacoes!: Record<string, string>;
+
   @ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'created_by_id' })
   createdBy!: User;

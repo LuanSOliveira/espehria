@@ -12,3 +12,4 @@ export * from './useProficiencyPropertiesQuery';
 export * from './useProficiencyGradationsQuery';
 export * from './useResolveProficiencyAdjustmentMutation';
 export * from './useTagOptionsQuery';
+export * from './useUpdateSheetKnowledgeNoteMutation';

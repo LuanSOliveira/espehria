@@ -22,6 +22,13 @@ export class KnowledgeItemResponseDto {
   })
   gradation: ProficiencyGradationResponseDto;
 
+  @ApiProperty({
+    description:
+      'Indica se este saber permite anotações livres na ficha',
+    example: false,
+  })
+  editable: boolean;
+
   static fromResolved(item: Knowledge): KnowledgeItemResponseDto {
     const dto = new KnowledgeItemResponseDto();
     dto.id = item.id;
@@ -29,6 +36,7 @@ export class KnowledgeItemResponseDto {
     dto.gradation = ProficiencyGradationResponseDto.fromEntity(
       item.gradation,
     );
+    dto.editable = item.editable;
     return dto;
   }
 }

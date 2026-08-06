@@ -81,3 +81,19 @@ export const flattenProficiencySnapshot = (
   ...snapshot.talents,
   ...snapshot.characteristics,
 ];
+
+/**
+ * Achata um snapshot de saberes (`ISheetKnowledgeSnapshot`) em uma única
+ * lista, unindo as 5 origens — mesmo espírito de `flattenProficiencySnapshot`.
+ * Reaproveitado tanto pela renderização de `SheetKnowledgesPanel` quanto pelo
+ * cálculo de modificador de saber (`useSheetKnowledgeModifiers`).
+ */
+export const flattenKnowledgeSnapshot = (
+  snapshot: ISheetKnowledgeSnapshot,
+) => [
+  ...snapshot.race,
+  ...snapshot.biography,
+  ...snapshot.trainings,
+  ...snapshot.talents,
+  ...snapshot.characteristics,
+];

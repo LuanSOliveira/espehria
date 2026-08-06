@@ -2,15 +2,23 @@
 
 import { FiBookOpen } from 'react-icons/fi';
 import { DefaultText, Label } from '@/shared/components/Texts';
-import { KnowledgeCard } from '@/shared/components/KnowledgeCard';
-import { ISheetKnowledgeSnapshotEntry } from '@/shared/interfaces';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
+import { SheetKnowledgeModifierResult } from '../../hooks/useSheetKnowledgeModifiers';
+import { SheetKnowledgeCard } from '../SheetKnowledgeCard';
 
 export interface SheetKnowledgesPanelProps {
-  items: ISheetKnowledgeSnapshotEntry[];
+  items: SheetKnowledgeModifierResult[];
+  onOpenDetail: (knowledgeId: string) => void;
+  onSaveNote: (knowledgeId: string, note: string) => void;
+  isSavingNote: (knowledgeId: string) => boolean;
 }
 
-export const SheetKnowledgesPanel = ({ items }: SheetKnowledgesPanelProps) => {
+export const SheetKnowledgesPanel = ({
+  items,
+  onOpenDetail,
+  onSaveNote,
+  isSavingNote,
+}: SheetKnowledgesPanelProps) => {
   return (
     <div style={APP_CONTAINER_STYLES.detailSectionBox}>
       <div
@@ -29,12 +37,18 @@ export const SheetKnowledgesPanel = ({ items }: SheetKnowledgesPanelProps) => {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((item) => (
-              <div key={item.id} className="flex flex-col gap-1">
-                <KnowledgeCard item={item} />
-                <DefaultText sx={{ fontStyle: 'italic', marginLeft: '8px' }}>
-                  {`Concedida por: ${item.sourceName}`}
-                </DefaultText>
-              </div>
+              <SheetKnowledgeCard
+                key={item.id}
+                title={item.title}
+                gradationName={item.gradationName}
+                sourceName={item.sourceName}
+                editable={item.editable}
+                note={item.note}
+                total={item.total}
+                onOpenDetail={() => onOpenDetail(item.id)}
+                onSaveNote={(note) => onSaveNote(item.id, note)}
+                isSavingNote={isSavingNote(item.id)}
+              />
             ))}
           </div>
         )}

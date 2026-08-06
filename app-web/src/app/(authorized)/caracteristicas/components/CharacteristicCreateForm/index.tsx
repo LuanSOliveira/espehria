@@ -59,6 +59,7 @@ interface ProficiencyInputPayload {
 interface KnowledgeInputPayload {
   title: string;
   gradation: string;
+  editable?: boolean;
 }
 
 interface CharacteristicPayload
@@ -206,6 +207,7 @@ export const CharacteristicCreateForm = ({
     knowledges: knowledges.map((item) => ({
       title: item.title,
       gradation: item.gradation.id,
+      editable: item.editable,
     })),
   });
 

@@ -125,7 +125,10 @@ export class SheetResponseDto {
       (adjustment) =>
         SheetProficiencyAdjustmentResponseDto.fromRaw(adjustment),
     );
-    dto.saberes = SheetKnowledgeSnapshotResponseDto.fromEntity(sheet.saberes);
+    dto.saberes = SheetKnowledgeSnapshotResponseDto.fromEntity(
+      sheet.saberes,
+      sheet.saberesAnotacoes,
+    );
     dto.createdBy = UserResponseDto.fromEntity(sheet.createdBy);
     dto.createdAt = sheet.createdAt;
     dto.updatedAt = sheet.updatedAt;

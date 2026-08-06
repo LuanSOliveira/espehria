@@ -404,6 +404,7 @@ export class BiographiesService {
         (item): KnowledgeItemInputDto => ({
           title: item.title,
           gradation: item.gradation.id,
+          editable: item.editable,
         }),
       );
     }

@@ -3,6 +3,7 @@ export interface SheetKnowledgeSnapshotEntry {
   title: string;
   gradation: { id: string; name: string; level: number };
   sourceName: string;
+  editable: boolean;
 }
 
 export interface SheetKnowledgeSnapshot {

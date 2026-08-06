@@ -26,7 +26,10 @@ export const SheetSkillCard = ({
     <Box sx={{ position: 'relative', ...APP_CONTAINER_STYLES.detailSectionBox }}>
       <div className="flex items-start justify-between gap-3 p-3">
         <div className="flex flex-1 flex-col gap-1">
-          <Label component="span" sx={{ margin: 0 }}>
+          <Label
+            component="span"
+            sx={{ margin: 0, fontWeight: 700, textTransform: 'uppercase' }}
+          >
             {name}
           </Label>
           <DefaultText sx={{ fontStyle: 'italic' }}>
@@ -42,7 +45,7 @@ export const SheetSkillCard = ({
               onClick={onOpenDetail}
               size="small"
               sx={{
-                color: APP_COLORS.goldSoft,
+                color: APP_COLORS.textBrownDark,
                 border: `1px solid ${APP_COLORS.gold}`,
               }}
             >

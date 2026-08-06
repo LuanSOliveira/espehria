@@ -59,6 +59,7 @@ interface ProficiencyInputPayload {
 interface KnowledgeInputPayload {
   title: string;
   gradation: string;
+  editable?: boolean;
 }
 
 interface TalentPayload extends Omit<TalentFormData, 'description' | 'level'> {
@@ -201,6 +202,7 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
     knowledges: knowledges.map((item) => ({
       title: item.title,
       gradation: item.gradation.id,
+      editable: item.editable,
     })),
   });
 

@@ -14,6 +14,7 @@ import { KnowledgeItemResponseDto } from './dto/knowledge-item-response.dto';
 export interface ResolvedKnowledgeItem {
   title: string;
   gradation: ProficiencyGradation;
+  editable: boolean;
 }
 
 type OwnerColumn =
@@ -79,7 +80,11 @@ export class KnowledgesService {
         );
       }
       const normalizedTitle = item.title.trim().toLowerCase();
-      resolved.set(normalizedTitle, { title: item.title.trim(), gradation });
+      resolved.set(normalizedTitle, {
+        title: item.title.trim(),
+        gradation,
+        editable: item.editable ?? false,
+      });
     }
 
     return resolved;
@@ -128,6 +133,7 @@ export class KnowledgesService {
         sortOrder: index,
         title: resolvedItem.title,
         gradation: { id: resolvedItem.gradation.id },
+        editable: resolvedItem.editable,
         [ownerColumn]: { id: ownerId },
       };
       return this.knowledgesRepository.create(

@@ -63,6 +63,8 @@ export interface ISheetKnowledgeSnapshotEntry {
   title: string;
   gradation: IProficiencyGradation;
   sourceName: string;
+  editable: boolean;
+  note: string | null;
 }
 
 export interface ISheetKnowledgeSnapshot {

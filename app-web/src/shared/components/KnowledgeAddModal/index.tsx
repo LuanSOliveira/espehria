@@ -4,7 +4,11 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { v4 as uuidv4 } from 'uuid';
 import { FormModal } from '@/shared/components/Modals';
-import { FormAutocompleteInput, FormTextInput } from '@/shared/components/Inputs';
+import {
+  FormAutocompleteInput,
+  FormCheckboxInput,
+  FormTextInput,
+} from '@/shared/components/Inputs';
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { useProficiencyGradationsQuery } from '@/hooks/Queries';
 import {
@@ -51,7 +55,12 @@ export const KnowledgeAddModal = ({
 
     // Identificador local apenas para uso em keys/estado antes de o item ser
     // persistido — descartado ao montar o payload de criação/edição.
-    onAdd({ id: uuidv4(), title: data.title.trim(), gradation });
+    onAdd({
+      id: uuidv4(),
+      title: data.title.trim(),
+      gradation,
+      editable: data.editable,
+    });
   };
 
   return (
@@ -85,6 +94,13 @@ export const KnowledgeAddModal = ({
           getOptionLabel={(gradation) => gradation.name}
           getOptionValue={(gradation) => gradation.id}
           placeholder="Selecione a graduação"
+        />
+
+        <FormCheckboxInput
+          id="knowledge-form-editable"
+          name="editable"
+          control={control}
+          label="Editável?"
         />
 
         <PrimaryButton type="submit" sx={{ marginTop: '8px' }}>

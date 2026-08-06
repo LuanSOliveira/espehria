@@ -23,6 +23,9 @@ export class Knowledge extends BaseEntity {
   @JoinColumn({ name: 'gradation_id' })
   gradation!: ProficiencyGradation;
 
+  @Column({ type: 'boolean', default: false })
+  editable!: boolean;
+
   @ManyToOne(() => Talent, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'owner_talent_id' })
   ownerTalent!: Talent | null;

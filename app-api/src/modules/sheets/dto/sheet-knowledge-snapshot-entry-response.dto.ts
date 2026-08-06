@@ -30,8 +30,24 @@ export class SheetKnowledgeSnapshotEntryResponseDto {
   })
   sourceName: string;
 
+  @ApiProperty({
+    description:
+      'Indica se este saber permite anotações livres (define a permissão no saber original)',
+    example: false,
+  })
+  editable: boolean;
+
+  @ApiProperty({
+    nullable: true,
+    description:
+      'Nota livre associada a este saber na ficha (computada por lookup, máx. 2000 caracteres). Nula quando nenhuma nota foi salva ainda. Não é persistida dentro do snapshot — sobrevive a recomputes enquanto o saber permanecer na ficha',
+    example: 'Aprendido com o mestre ferreiro da aldeia',
+  })
+  note: string | null;
+
   static fromRaw(
     entry: SheetKnowledgeSnapshotEntry,
+    note: string | null,
   ): SheetKnowledgeSnapshotEntryResponseDto {
     const dto = new SheetKnowledgeSnapshotEntryResponseDto();
     dto.id = entry.id;
@@ -42,6 +58,8 @@ export class SheetKnowledgeSnapshotEntryResponseDto {
       level: entry.gradation.level,
     };
     dto.sourceName = entry.sourceName;
+    dto.editable = entry.editable;
+    dto.note = note;
     return dto;
   }
 }

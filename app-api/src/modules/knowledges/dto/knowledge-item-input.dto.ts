@@ -1,5 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 
 export class KnowledgeItemInputDto {
   @ApiProperty({
@@ -17,4 +23,13 @@ export class KnowledgeItemInputDto {
   })
   @IsUUID('4')
   gradation!: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Indica se este saber permite anotações livres na ficha (padrão: false quando ausente)',
+    example: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  editable?: boolean;
 }

@@ -38,6 +38,7 @@ import { ResolveProficiencyAdjustmentDto } from './dto/resolve-proficiency-adjus
 import { SheetListItemResponseDto } from './dto/sheet-list-item-response.dto';
 import { SheetResponseDto } from './dto/sheet-response.dto';
 import { UpdateSheetDto } from './dto/update-sheet.dto';
+import { UpdateSheetKnowledgeNoteDto } from './dto/update-sheet-knowledge-note.dto';
 import { SheetsService } from './sheets.service';
 
 @ApiTags('sheets')
@@ -261,6 +262,39 @@ export class SheetsController {
     const sheet = await this.sheetsService.resolveProficiencyAdjustment(
       id,
       adjustmentId,
+      dto,
+      currentUser,
+    );
+    return SheetResponseDto.fromEntity(sheet);
+  }
+
+  @Put(':id/knowledge-notes/:knowledgeId')
+  @ApiOperation({
+    summary:
+      'Salva ou limpa a nota livre associada a um saber editável da ficha',
+  })
+  @ApiOkResponse({ type: SheetResponseDto })
+  @ApiNotFoundResponse({
+    description:
+      'Ficha não encontrada ou não pertence ao usuário, ou saber (knowledgeId) não encontrado nesta ficha',
+  })
+  @ApiConflictResponse({
+    description:
+      'O saber referenciado não permite anotações (editable = false)',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'ID de ficha ou de saber em formato inválido, ou nota ausente/inválida (deve ser string com máx. 2000 caracteres)',
+  })
+  async updateKnowledgeNote(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('knowledgeId', ParseUUIDPipe) knowledgeId: string,
+    @Body() dto: UpdateSheetKnowledgeNoteDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetResponseDto> {
+    const sheet = await this.sheetsService.updateKnowledgeNote(
+      id,
+      knowledgeId,
       dto,
       currentUser,
     );

@@ -59,6 +59,7 @@ interface ProficiencyInputPayload {
 interface KnowledgeInputPayload {
   title: string;
   gradation: string;
+  editable?: boolean;
 }
 
 interface BiographyPayload
@@ -173,6 +174,7 @@ export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
     knowledges: knowledges.map((item) => ({
       title: item.title,
       gradation: item.gradation.id,
+      editable: item.editable,
     })),
   });
 

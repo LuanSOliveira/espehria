@@ -36,6 +36,7 @@ import { LinkSheetBiographyDto } from './dto/link-sheet-biography.dto';
 import { LinkSheetRaceDto } from './dto/link-sheet-race.dto';
 import { ResolveProficiencyAdjustmentDto } from './dto/resolve-proficiency-adjustment.dto';
 import { UpdateSheetDto } from './dto/update-sheet.dto';
+import { UpdateSheetKnowledgeNoteDto } from './dto/update-sheet-knowledge-note.dto';
 import { Sheet } from './entities/sheet.entity';
 import { SheetImprovementFlawSnapshotEntry } from './interfaces/sheet-improvement-flaw-snapshot.interface';
 import {
@@ -294,6 +295,7 @@ export class SheetsService {
                 level: item.gradation.level,
               },
               sourceName: source.name,
+              editable: item.editable,
             },
           });
         }
@@ -312,6 +314,21 @@ export class SheetsService {
     }
 
     sheet.saberes = saberes;
+
+    const activeKnowledgeIds = new Set(
+      [
+        ...saberes.race,
+        ...saberes.biography,
+        ...saberes.trainings,
+        ...saberes.talents,
+        ...saberes.characteristics,
+      ].map((entry) => entry.id),
+    );
+    sheet.saberesAnotacoes = Object.fromEntries(
+      Object.entries(sheet.saberesAnotacoes).filter(([knowledgeId]) =>
+        activeKnowledgeIds.has(knowledgeId),
+      ),
+    );
   }
 
   async create(dto: CreateSheetDto, currentUser: User): Promise<Sheet> {
@@ -753,6 +770,45 @@ export class SheetsService {
       (adjustment, index) =>
         index === adjustmentIndex ? updatedAdjustment : adjustment,
     );
+
+    return this.sheetsRepository.save(sheet);
+  }
+
+  async updateKnowledgeNote(
+    id: string,
+    knowledgeId: string,
+    dto: UpdateSheetKnowledgeNoteDto,
+    currentUser: User,
+  ): Promise<Sheet> {
+    const sheet = await this.findAccessibleById(id, currentUser);
+    if (!sheet) {
+      throw new NotFoundException(
+        'Ficha não encontrada ou não pertence ao usuário.',
+      );
+    }
+
+    const allEntries: SheetKnowledgeSnapshotEntry[] = [
+      ...sheet.saberes.race,
+      ...sheet.saberes.biography,
+      ...sheet.saberes.trainings,
+      ...sheet.saberes.talents,
+      ...sheet.saberes.characteristics,
+    ];
+    const entry = allEntries.find((item) => item.id === knowledgeId);
+    if (!entry) {
+      throw new NotFoundException('Saber não encontrado nesta ficha.');
+    }
+
+    if (!entry.editable) {
+      throw new ConflictException(
+        'Este saber não é editável e não pode receber uma nota.',
+      );
+    }
+
+    sheet.saberesAnotacoes = {
+      ...sheet.saberesAnotacoes,
+      [knowledgeId]: dto.note,
+    };
 
     return this.sheetsRepository.save(sheet);
   }

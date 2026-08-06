@@ -18,42 +18,58 @@ export class SheetKnowledgeSnapshotResponseDto {
   @ApiProperty({
     type: () => [SheetKnowledgeSnapshotEntryResponseDto],
     description:
-      'Saberes provenientes de treinamentos (estrutura pronta para uso futuro, sempre vazia por ora)',
+      'Saberes provenientes de treinamentos (estrutura pronta para uso futuro, sempre vazia no momento)',
   })
   trainings: SheetKnowledgeSnapshotEntryResponseDto[];
 
   @ApiProperty({
     type: () => [SheetKnowledgeSnapshotEntryResponseDto],
     description:
-      'Saberes provenientes de talentos (estrutura pronta para uso futuro, sempre vazia por ora)',
+      'Saberes provenientes de talentos (estrutura pronta para uso futuro, sempre vazia no momento)',
   })
   talents: SheetKnowledgeSnapshotEntryResponseDto[];
 
   @ApiProperty({
     type: () => [SheetKnowledgeSnapshotEntryResponseDto],
     description:
-      'Saberes provenientes de características (estrutura pronta para uso futuro, sempre vazia por ora)',
+      'Saberes provenientes de características (estrutura pronta para uso futuro, sempre vazia no momento)',
   })
   characteristics: SheetKnowledgeSnapshotEntryResponseDto[];
 
   static fromEntity(
     snapshot: SheetKnowledgeSnapshot,
+    notes: Record<string, string>,
   ): SheetKnowledgeSnapshotResponseDto {
     const dto = new SheetKnowledgeSnapshotResponseDto();
     dto.race = snapshot.race.map((entry) =>
-      SheetKnowledgeSnapshotEntryResponseDto.fromRaw(entry),
+      SheetKnowledgeSnapshotEntryResponseDto.fromRaw(
+        entry,
+        notes[entry.id] ?? null,
+      ),
     );
     dto.biography = snapshot.biography.map((entry) =>
-      SheetKnowledgeSnapshotEntryResponseDto.fromRaw(entry),
+      SheetKnowledgeSnapshotEntryResponseDto.fromRaw(
+        entry,
+        notes[entry.id] ?? null,
+      ),
     );
     dto.trainings = snapshot.trainings.map((entry) =>
-      SheetKnowledgeSnapshotEntryResponseDto.fromRaw(entry),
+      SheetKnowledgeSnapshotEntryResponseDto.fromRaw(
+        entry,
+        notes[entry.id] ?? null,
+      ),
     );
     dto.talents = snapshot.talents.map((entry) =>
-      SheetKnowledgeSnapshotEntryResponseDto.fromRaw(entry),
+      SheetKnowledgeSnapshotEntryResponseDto.fromRaw(
+        entry,
+        notes[entry.id] ?? null,
+      ),
     );
     dto.characteristics = snapshot.characteristics.map((entry) =>
-      SheetKnowledgeSnapshotEntryResponseDto.fromRaw(entry),
+      SheetKnowledgeSnapshotEntryResponseDto.fromRaw(
+        entry,
+        notes[entry.id] ?? null,
+      ),
     );
     return dto;
   }

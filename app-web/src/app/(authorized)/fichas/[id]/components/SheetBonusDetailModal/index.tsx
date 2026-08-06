@@ -3,33 +3,49 @@
 import { ViewModal } from '@/shared/components/Modals';
 import { DefaultText, Label } from '@/shared/components/Texts';
 import { APP_CONTAINER_STYLES } from '@/shared/constants';
-import { SheetSkillModifierResult } from '../../hooks/useSheetSkillModifiers';
 
-export interface SheetSkillBonusDetailModalProps {
+export interface SheetBonusDetailBreakdownEntry {
+  label: string;
+  value: number;
+}
+
+/**
+ * Detalhamento genérico de bônus (fontes + total), reaproveitado pelos fluxos
+ * de Perícias (`useSheetSkillModifiers`) e Saberes
+ * (`useSheetKnowledgeModifiers`) — cada hook já embute o `name`/`total`/
+ * `breakdown` calculados no próprio item retornado.
+ */
+export interface SheetBonusDetail {
+  name: string;
+  total: number;
+  breakdown: SheetBonusDetailBreakdownEntry[];
+}
+
+export interface SheetBonusDetailModalProps {
   open: boolean;
   onClose: () => void;
-  skill: SheetSkillModifierResult | null;
+  detail: SheetBonusDetail | null;
 }
 
 const formatSigned = (value: number) => (value >= 0 ? `+${value}` : `${value}`);
 
-export const SheetSkillBonusDetailModal = ({
+export const SheetBonusDetailModal = ({
   open,
   onClose,
-  skill,
-}: SheetSkillBonusDetailModalProps) => {
+  detail,
+}: SheetBonusDetailModalProps) => {
   return (
     <ViewModal
       open={open}
       onClose={onClose}
-      title={`Bônus de ${skill?.name ?? ''}`}
+      title={`Bônus de ${detail?.name ?? ''}`}
     >
       <div className="flex flex-col gap-3">
         <div
           className="flex flex-col gap-2 p-3"
           style={APP_CONTAINER_STYLES.detailSectionBox}
         >
-          {skill?.breakdown.map((entry) => (
+          {detail?.breakdown.map((entry) => (
             <DefaultText key={entry.label}>
               {`${formatSigned(entry.value)} ${entry.label}`}
             </DefaultText>
@@ -37,7 +53,7 @@ export const SheetSkillBonusDetailModal = ({
         </div>
 
         <Label component="span" sx={{ margin: 0 }}>
-          {`Total: ${formatSigned(skill?.total ?? 0)}`}
+          {`Total: ${formatSigned(detail?.total ?? 0)}`}
         </Label>
       </div>
     </ViewModal>
