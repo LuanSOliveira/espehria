@@ -9,6 +9,7 @@ import { PageContainer } from '@/shared/components/Containers';
 import { DefaultText } from '@/shared/components/Texts';
 import { SecondaryButton } from '@/shared/components/Buttons';
 import {
+  useAttributesQuery,
   useDeleteEntity,
   useGetEntityById,
   useGetEntityList,
@@ -22,6 +23,7 @@ import {
   useUpdateSheetKnowledgeNoteMutation,
 } from '@/hooks/Queries';
 import {
+  IAttribute,
   IBiographyListItem,
   IProficiencyProperty,
   IRaceListFilters,
@@ -56,6 +58,8 @@ import { SheetProficienciesGrid } from './components/SheetProficienciesGrid';
 import { SheetAdjustedProficienciesSection } from './components/SheetAdjustedProficienciesSection';
 import { SheetKnowledgesPanel } from './components/SheetKnowledgesPanel';
 import { SheetSkillsPanel } from './components/SheetSkillsPanel';
+import { SheetArmorClassPanel } from './components/SheetArmorClassPanel';
+import { SheetSavingThrowsPanel } from './components/SheetSavingThrowsPanel';
 import {
   SheetBonusDetail,
   SheetBonusDetailModal,
@@ -66,18 +70,20 @@ import {
   useSheetSkillModifiers,
 } from './hooks/useSheetSkillModifiers';
 import { useSheetKnowledgeModifiers } from './hooks/useSheetKnowledgeModifiers';
+import { useSheetSavingThrowModifiers } from './hooks/useSheetSavingThrowModifiers';
 import {
-  SHEET_ATTRIBUTE_PROPERTY_ORDER,
   SHEET_EMPTY_IMPROVEMENT_DEFECT_SNAPSHOT,
   SHEET_EMPTY_KNOWLEDGE_SNAPSHOT,
   SHEET_EMPTY_PROFICIENCY_SNAPSHOT,
   SHEET_IMPROVEMENT_DEFECT_CATEGORIES,
   flattenKnowledgeSnapshot,
   flattenProficiencySnapshot,
+  sortByAttributeOrder,
 } from './data';
 
 const ATTRIBUTE_TYPE_NAME = 'Atributo';
 const ATTRIBUTE_BASE_VALUE = 10;
+const ARMOR_CLASS_BASE_VALUE = 10;
 
 const SHEET_TABS_SX = {
   borderBottom: `1px solid ${APP_COLORS.gold}`,
@@ -152,6 +158,8 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
   const [saberes, setSaberes] = useState<ISheetKnowledgeSnapshot>(
     SHEET_EMPTY_KNOWLEDGE_SNAPSHOT,
   );
+  const [armorClassKeyAttribute, setArmorClassKeyAttribute] =
+    useState<IAttribute | null>(null);
   const [referenceImage, setReferenceImage] = useState<string | null>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<SheetDetailTab>('estatisticas');
@@ -162,6 +170,9 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     useState<SheetSkillModifierResult | null>(null);
   const [knowledgePendingBonusDetail, setKnowledgePendingBonusDetail] =
     useState<SheetBonusDetail | null>(null);
+  const [isArmorClassDetailOpen, setIsArmorClassDetailOpen] = useState(false);
+  const [savingThrowPendingBonusDetail, setSavingThrowPendingBonusDetail] =
+    useState<SheetSkillModifierResult | null>(null);
 
   useEffect(() => {
     if (!sheet || hasHydrated) {
@@ -178,6 +189,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     setProficiencias(sheet.proficiencias);
     setProficienciasAjustadas(sheet.proficienciasAjustadas);
     setSaberes(sheet.saberes);
+    setArmorClassKeyAttribute(sheet.armorClassKeyAttribute ?? null);
     setReferenceImage(sheet.referenceImage ?? null);
     setHasHydrated(true);
   }, [sheet, hasHydrated]);
@@ -206,15 +218,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
         attributeType && property.typeIds.includes(attributeType.id),
     );
 
-    return [...filtered].sort(
-      (a, b) =>
-        SHEET_ATTRIBUTE_PROPERTY_ORDER.indexOf(
-          a.name as (typeof SHEET_ATTRIBUTE_PROPERTY_ORDER)[number],
-        ) -
-        SHEET_ATTRIBUTE_PROPERTY_ORDER.indexOf(
-          b.name as (typeof SHEET_ATTRIBUTE_PROPERTY_ORDER)[number],
-        ),
-    );
+    return [...filtered].sort(sortByAttributeOrder);
   }, [improvementDefectProperties, attributeType]);
 
   const attributes = useMemo(() => {
@@ -272,6 +276,36 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     attributes,
     gradations: proficiencyGradations ?? [],
   });
+
+  const savingThrowModifiers = useSheetSavingThrowModifiers({
+    attributes,
+    proficiencias,
+    proficienciasAjustadas,
+    gradations: proficiencyGradations ?? [],
+  });
+
+  const { data: attributesData } = useAttributesQuery();
+  const armorClassKeyAttributeOptions = useMemo(
+    () => [...(attributesData ?? [])].sort(sortByAttributeOrder),
+    [attributesData],
+  );
+
+  const armorClassMatchedAttribute = useMemo(
+    () =>
+      attributes.find(
+        (attribute) =>
+          armorClassKeyAttribute &&
+          attribute.label.trim().toLowerCase() ===
+            armorClassKeyAttribute.name.trim().toLowerCase(),
+      ),
+    [attributes, armorClassKeyAttribute],
+  );
+
+  const armorClassAttributeModifier = armorClassMatchedAttribute?.modifier ?? 0;
+  const armorClassTotal = ARMOR_CLASS_BASE_VALUE + armorClassAttributeModifier;
+  const armorClassBreakdown = [
+    { label: armorClassKeyAttribute?.name ?? '', value: armorClassAttributeModifier },
+  ];
 
   const attributesDetailGroups = useMemo(
     () =>
@@ -350,6 +384,22 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
         message:
           mutationError.response?.data?.message ??
           'Não foi possível salvar a campanha da ficha.',
+        type: 'error',
+      });
+    },
+  });
+
+  const updateArmorClassKeyAttributeMutation = usePutEntity<
+    ISheet,
+    { armorClassKeyAttributeId: string }
+  >({
+    url: `/sheets/${sheetId}`,
+    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
+    onError: (mutationError) => {
+      showToast({
+        message:
+          mutationError.response?.data?.message ??
+          'Não foi possível salvar o atributo-chave da Classe de Armadura.',
         type: 'error',
       });
     },
@@ -557,6 +607,21 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
       updateCampaignMutation.mutate({ campaignId: newCampaignId }),
   });
 
+  const armorClassKeyAttributeId = armorClassKeyAttribute?.id ?? null;
+  useFieldAutosave({
+    value: armorClassKeyAttributeId,
+    enabled: hasHydrated,
+    onSave: (newAttributeId) => {
+      if (!newAttributeId) {
+        return;
+      }
+
+      updateArmorClassKeyAttributeMutation.mutate({
+        armorClassKeyAttributeId: newAttributeId,
+      });
+    },
+  });
+
   const handleImageSave = (url: string) => {
     updateImageMutation.mutate({ referenceImage: url || null });
   };
@@ -683,10 +748,32 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
         <div className="mt-4">
           {activeTab === 'estatisticas' && (
             <div className="flex flex-col gap-6">
-              <SheetAttributesPanel
-                attributes={attributes}
-                onOpenDetails={() => setIsAttributesDetailOpen(true)}
-              />
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <SheetAttributesPanel
+                  attributes={attributes}
+                  onOpenDetails={() => setIsAttributesDetailOpen(true)}
+                />
+
+                <div className="flex flex-col gap-6">
+                  <SheetArmorClassPanel
+                    total={armorClassTotal}
+                    keyAttribute={armorClassKeyAttribute}
+                    keyAttributeOptions={armorClassKeyAttributeOptions}
+                    onKeyAttributeChange={setArmorClassKeyAttribute}
+                    onOpenDetail={() => setIsArmorClassDetailOpen(true)}
+                  />
+
+                  <SheetSavingThrowsPanel
+                    items={savingThrowModifiers}
+                    onOpenDetail={(id) =>
+                      setSavingThrowPendingBonusDetail(
+                        savingThrowModifiers.find((item) => item.id === id) ??
+                          null,
+                      )
+                    }
+                  />
+                </div>
+              </div>
 
               <SheetSkillsPanel
                 items={skillModifiers}
@@ -771,6 +858,22 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
         open={!!knowledgePendingBonusDetail}
         onClose={() => setKnowledgePendingBonusDetail(null)}
         detail={knowledgePendingBonusDetail}
+      />
+
+      <SheetBonusDetailModal
+        open={isArmorClassDetailOpen}
+        onClose={() => setIsArmorClassDetailOpen(false)}
+        detail={{
+          name: 'Classe de Armadura',
+          total: armorClassTotal,
+          breakdown: armorClassBreakdown,
+        }}
+      />
+
+      <SheetBonusDetailModal
+        open={!!savingThrowPendingBonusDetail}
+        onClose={() => setSavingThrowPendingBonusDetail(null)}
+        detail={savingThrowPendingBonusDetail}
       />
 
       <SheetImageEditModal

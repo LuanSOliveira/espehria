@@ -15,6 +15,7 @@ import { Proficiency } from '../proficiencies/entities/proficiency.entity';
 import { ProficiencyProperty } from '../proficiency-properties/entities/proficiency-property.entity';
 import { ProficiencyGradation } from '../proficiency-gradations/entities/proficiency-gradation.entity';
 import { Knowledge } from '../knowledges/entities/knowledge.entity';
+import { Attribute } from '../attributes/entities/attribute.entity';
 import { Sheet } from './entities/sheet.entity';
 import { SheetsController } from './sheets.controller';
 import { SheetsService } from './sheets.service';
@@ -37,6 +38,7 @@ import { SheetsService } from './sheets.service';
       ProficiencyProperty,
       ProficiencyGradation,
       Knowledge,
+      Attribute,
     ]),
     CampaignsModule,
   ],

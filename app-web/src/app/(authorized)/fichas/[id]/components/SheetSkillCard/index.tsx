@@ -4,6 +4,7 @@ import { Box, IconButton, Tooltip } from '@mui/material';
 import { FiHelpCircle } from 'react-icons/fi';
 import { DefaultText, Label } from '@/shared/components/Texts';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
+import { SheetModifierCircle } from '../SheetModifierCircle';
 
 export interface SheetSkillCardProps {
   name: string;
@@ -20,8 +21,6 @@ export const SheetSkillCard = ({
   total,
   onOpenDetail,
 }: SheetSkillCardProps) => {
-  const totalLabel = total > 0 ? `+${total}` : `${total}`;
-
   return (
     <Box sx={{ position: 'relative', ...APP_CONTAINER_STYLES.detailSectionBox }}>
       <div className="flex items-start justify-between gap-3 p-3">
@@ -53,29 +52,7 @@ export const SheetSkillCard = ({
             </IconButton>
           </Tooltip>
 
-          <Box
-            sx={{
-              width: 44,
-              height: 44,
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: APP_COLORS.wood,
-              border: `1px solid ${APP_COLORS.gold}`,
-            }}
-          >
-            <DefaultText
-              sx={{
-                fontSize: '1.1rem',
-                fontWeight: 700,
-                lineHeight: 1,
-                color: APP_COLORS.goldSoft,
-              }}
-            >
-              {totalLabel}
-            </DefaultText>
-          </Box>
+          <SheetModifierCircle value={total} />
         </div>
       </div>
     </Box>

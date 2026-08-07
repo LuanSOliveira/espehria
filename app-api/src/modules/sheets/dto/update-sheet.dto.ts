@@ -54,4 +54,14 @@ export class UpdateSheetDto {
   @ValidateIf((_object, value) => value !== null)
   @IsUUID()
   campaignId?: string | null;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'ID do atributo chave selecionado para a Classe de Armadura. Deve ser um dos ids retornados por GET /attributes. Omitir o campo mantém o atributo chave atual inalterado',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @IsOptional()
+  @IsUUID()
+  armorClassKeyAttributeId?: string;
 }

@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CampaignOptionResponseDto } from '../../campaigns/dto/campaign-option-response.dto';
 import { RaceResponseDto } from '../../races/dto/race-response.dto';
 import { BiographyOptionResponseDto } from '../../biographies/dto/biography-option-response.dto';
+import { AttributeResponseDto } from '../../attributes/dto/attribute-response.dto';
 import { UserResponseDto } from '../../users/dto/user-response.dto';
 import { Sheet } from '../entities/sheet.entity';
 import { SheetImprovementFlawSnapshotResponseDto } from './sheet-improvement-flaw-snapshot-response.dto';
@@ -51,6 +52,13 @@ export class SheetResponseDto {
     description: 'Biografia vinculada à ficha (pode ser nula se não informada)',
   })
   biography: BiographyOptionResponseDto | null;
+
+  @ApiProperty({
+    type: () => AttributeResponseDto,
+    description:
+      'Atributo chave selecionado para a Classe de Armadura (10 + modificador deste atributo é a Classe de Armadura base, calculada no client)',
+  })
+  armorClassKeyAttribute: AttributeResponseDto;
 
   @ApiProperty({
     type: () => SheetImprovementFlawSnapshotResponseDto,
@@ -112,6 +120,9 @@ export class SheetResponseDto {
     dto.biography = sheet.biography
       ? BiographyOptionResponseDto.fromEntity(sheet.biography)
       : null;
+    dto.armorClassKeyAttribute = AttributeResponseDto.fromEntity(
+      sheet.armorClassKeyAttribute,
+    );
     dto.melhorias = SheetImprovementFlawSnapshotResponseDto.fromEntity(
       sheet.melhorias,
     );

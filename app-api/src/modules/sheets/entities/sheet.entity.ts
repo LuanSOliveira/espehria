@@ -4,6 +4,7 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 import { Campaign } from '../../campaigns/entities/campaign.entity';
 import { Race } from '../../races/entities/race.entity';
 import { Biography } from '../../biographies/entities/biography.entity';
+import { Attribute } from '../../attributes/entities/attribute.entity';
 import { User } from '../../users/entities/user.entity';
 import type { SheetImprovementFlawSnapshot } from '../interfaces/sheet-improvement-flaw-snapshot.interface';
 import type { SheetProficiencySnapshot } from '../interfaces/sheet-proficiency-snapshot.interface';
@@ -48,6 +49,15 @@ export class Sheet extends BaseEntity {
   @ManyToOne(() => Biography, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'biography_id' })
   biography!: Biography | null;
+
+  @ApiProperty({
+    type: () => Attribute,
+    description:
+      'Atributo chave selecionado para a Classe de Armadura (10 + modificador deste atributo é a Classe de Armadura base, calculada no client)',
+  })
+  @ManyToOne(() => Attribute, { nullable: false, onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'armor_class_key_attribute_id' })
+  armorClassKeyAttribute!: Attribute;
 
   @Column({
     type: 'jsonb',

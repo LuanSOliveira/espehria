@@ -18,6 +18,34 @@ export const SHEET_ATTRIBUTE_PROPERTY_ORDER = [
   'Carisma',
 ] as const;
 
+/**
+ * Comparador reaproveitável para ordenar qualquer lista de itens nomeados
+ * conforme `SHEET_ATTRIBUTE_PROPERTY_ORDER` (ex.: propriedades de
+ * melhoria/defeito do tipo "Atributo" e as opções de `GET /attributes`) —
+ * evita duplicar a mesma comparação por `indexOf` em mais de um `useMemo`.
+ */
+export const sortByAttributeOrder = <T extends { name: string }>(
+  a: T,
+  b: T,
+) =>
+  SHEET_ATTRIBUTE_PROPERTY_ORDER.indexOf(
+    a.name as (typeof SHEET_ATTRIBUTE_PROPERTY_ORDER)[number],
+  ) -
+  SHEET_ATTRIBUTE_PROPERTY_ORDER.indexOf(
+    b.name as (typeof SHEET_ATTRIBUTE_PROPERTY_ORDER)[number],
+  );
+
+/**
+ * Definições fixas dos 3 Salvamentos (Fortitude, Reflexo, Vontade), cada um
+ * com seu atributo-chave fixo, não editável pelo usuário — ver
+ * `.claude/tasks/ficha-classe-armadura-salvamentos/spec.md`.
+ */
+export const SHEET_SAVING_THROW_DEFINITIONS = [
+  { id: 'fortitude', name: 'Fortitude', keyAttributeName: 'Constituição' },
+  { id: 'reflexo', name: 'Reflexo', keyAttributeName: 'Destreza' },
+  { id: 'vontade', name: 'Vontade', keyAttributeName: 'Sabedoria' },
+] as const;
+
 export type SheetImprovementDefectCategoryKey =
   keyof ISheetImprovementDefectSnapshot;
 

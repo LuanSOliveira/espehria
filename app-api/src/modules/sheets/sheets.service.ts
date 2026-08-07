@@ -28,6 +28,7 @@ import { ImprovementFlawCategory } from '../improvement-flaws/enums/improvement-
 import { Proficiency } from '../proficiencies/entities/proficiency.entity';
 import { ProficiencyProperty } from '../proficiency-properties/entities/proficiency-property.entity';
 import { Knowledge } from '../knowledges/entities/knowledge.entity';
+import { Attribute } from '../attributes/entities/attribute.entity';
 import { AuthProvider } from '../users/enums/auth-provider.enum';
 import { User } from '../users/entities/user.entity';
 import { CreateSheetDto } from './dto/create-sheet.dto';
@@ -54,6 +55,7 @@ import {
 
 const ATTRIBUTE_TYPE_NAME = 'Atributo';
 const FREE_IMPROVEMENT_VALUE = 2;
+const DEFAULT_ARMOR_CLASS_KEY_ATTRIBUTE_NAME = 'Destreza';
 
 interface ProficiencySource {
   type: Extract<SheetProficiencyAdjustmentSourceType, 'race' | 'biography'>;
@@ -99,6 +101,8 @@ export class SheetsService {
     private readonly proficiencyPropertiesRepository: Repository<ProficiencyProperty>,
     @InjectRepository(Knowledge)
     private readonly knowledgesRepository: Repository<Knowledge>,
+    @InjectRepository(Attribute)
+    private readonly attributesRepository: Repository<Attribute>,
   ) {}
 
   private async findCampaignById(id: string): Promise<Campaign> {
@@ -107,6 +111,24 @@ export class SheetsService {
       throw new NotFoundException('Campanha não encontrada.');
     }
     return campaign;
+  }
+
+  private async findAttributeById(id: string): Promise<Attribute> {
+    const attribute = await this.attributesRepository.findOneBy({ id });
+    if (!attribute) {
+      throw new NotFoundException('Atributo chave não encontrado.');
+    }
+    return attribute;
+  }
+
+  private async findDefaultArmorClassKeyAttribute(): Promise<Attribute> {
+    const attribute = await this.attributesRepository.findOneBy({
+      name: DEFAULT_ARMOR_CLASS_KEY_ATTRIBUTE_NAME,
+    });
+    if (!attribute) {
+      throw new NotFoundException('Atributo chave não encontrado.');
+    }
+    return attribute;
   }
 
   private async attachRaceOrderedTags(race: Race): Promise<void> {
@@ -334,6 +356,8 @@ export class SheetsService {
     const campaign = dto.campaignId
       ? await this.findCampaignById(dto.campaignId)
       : null;
+    const armorClassKeyAttribute =
+      await this.findDefaultArmorClassKeyAttribute();
 
     const sheet = this.sheetsRepository.create({
       name: dto.name,
@@ -341,6 +365,7 @@ export class SheetsService {
       level: 1,
       campaign,
       race: null,
+      armorClassKeyAttribute,
       createdBy: currentUser,
     });
 
@@ -409,6 +434,7 @@ export class SheetsService {
           talents: true,
         },
         biography: true,
+        armorClassKeyAttribute: true,
         createdBy: true,
       },
     });
@@ -459,6 +485,11 @@ export class SheetsService {
       sheet.campaign = dto.campaignId
         ? await this.findCampaignById(dto.campaignId)
         : null;
+    }
+    if (dto.armorClassKeyAttributeId !== undefined) {
+      sheet.armorClassKeyAttribute = await this.findAttributeById(
+        dto.armorClassKeyAttributeId,
+      );
     }
 
     return this.sheetsRepository.save(sheet);

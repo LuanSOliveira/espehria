@@ -4,6 +4,7 @@ import { IBiographyListItem } from '../Biography';
 import { IImprovementDefectItem } from '../ImprovementDefectItem';
 import { IProficiencyProperty } from '../ProficiencyProperty';
 import { IProficiencyGradation } from '../ProficiencyGradation';
+import { IAttribute } from '../Attribute';
 import { IUser } from '../User';
 
 export interface ISheetListItem {
@@ -108,6 +109,7 @@ export interface ISheet extends IEntity {
   proficiencias: ISheetProficiencySnapshot;
   proficienciasAjustadas: ISheetProficiencyAdjustmentEntry[];
   saberes: ISheetKnowledgeSnapshot;
+  armorClassKeyAttribute: IAttribute;
   createdBy: IUser;
   createdAt: string;
   updatedAt: string;

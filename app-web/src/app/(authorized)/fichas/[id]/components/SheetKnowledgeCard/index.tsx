@@ -6,6 +6,7 @@ import { FiHelpCircle } from 'react-icons/fi';
 import { DefaultTextInput } from '@/shared/components/Inputs';
 import { DefaultText, Label } from '@/shared/components/Texts';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
+import { SheetModifierCircle } from '../SheetModifierCircle';
 
 export interface SheetKnowledgeCardProps {
   title: string;
@@ -30,8 +31,6 @@ export const SheetKnowledgeCard = ({
   onSaveNote,
   isSavingNote,
 }: SheetKnowledgeCardProps) => {
-  const totalLabel = total > 0 ? `+${total}` : `${total}`;
-
   const [noteValue, setNoteValue] = useState(note ?? '');
   const lastSavedNoteRef = useRef(note ?? '');
 
@@ -78,29 +77,7 @@ export const SheetKnowledgeCard = ({
               </IconButton>
             </Tooltip>
 
-            <Box
-              sx={{
-                width: 44,
-                height: 44,
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: APP_COLORS.wood,
-                border: `1px solid ${APP_COLORS.gold}`,
-              }}
-            >
-              <DefaultText
-                sx={{
-                  fontSize: '1.1rem',
-                  fontWeight: 700,
-                  lineHeight: 1,
-                  color: APP_COLORS.goldSoft,
-                }}
-              >
-                {totalLabel}
-              </DefaultText>
-            </Box>
+            <SheetModifierCircle value={total} />
           </div>
 
           {editable && (

@@ -137,11 +137,12 @@ export class SheetsController {
   })
   @ApiOkResponse({ type: SheetResponseDto })
   @ApiNotFoundResponse({
-    description: 'Ficha não encontrada ou não pertence ao usuário',
+    description:
+      'Ficha não encontrada ou não pertence ao usuário, ou atributo chave não encontrado',
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem inválida, nível fora do intervalo válido, IDs em formato inválido, ou parâmetros de validação inválidos',
+      'URL de imagem inválida, nível fora do intervalo válido, IDs em formato inválido (incluindo armorClassKeyAttributeId), ou parâmetros de validação inválidos',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
