@@ -24,7 +24,7 @@ import {
   eraFormResolver,
 } from '@/shared/formSchemas';
 import { IEra, ITag } from '@/shared/interfaces';
-import { showToast } from '@/shared/util';
+import { formatTagLabel, showToast } from '@/shared/util';
 import { useSelectedEraStore } from '@/store';
 
 export interface EraCreateFormProps {
@@ -202,7 +202,7 @@ export const EraCreateForm = ({ onSaved }: EraCreateFormProps) => {
           control={control}
           label="Tags"
           options={tagOptions}
-          getOptionLabel={(tag) => tag.name}
+          getOptionLabel={formatTagLabel}
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"

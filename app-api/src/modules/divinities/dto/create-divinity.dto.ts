@@ -222,7 +222,8 @@ export class CreateDivinityDto {
   @ApiPropertyOptional({
     type: [String],
     format: 'uuid',
-    description: 'IDs das tags associadas à divindade, na ordem de inserção preservada (array de UUIDs válidos)',
+    description:
+      'IDs das tags associadas à divindade, na ordem de inserção preservada (array de UUIDs válidos)',
     example: ['550e8400-e29b-41d4-a716-446655440000'],
   })
   @IsOptional()

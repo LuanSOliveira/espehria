@@ -24,7 +24,7 @@ import {
   equipmentFormResolver,
 } from '@/shared/formSchemas';
 import { ICurrency, IEquipment, ITag } from '@/shared/interfaces';
-import { showToast } from '@/shared/util';
+import { formatTagLabel, showToast } from '@/shared/util';
 import { useSelectedEquipmentStore } from '@/store';
 
 export interface EquipmentCreateFormProps {
@@ -226,7 +226,7 @@ export const EquipmentCreateForm = ({ onSaved }: EquipmentCreateFormProps) => {
           control={control}
           label="Tags"
           options={tagOptions}
-          getOptionLabel={(tag) => tag.name}
+          getOptionLabel={formatTagLabel}
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"

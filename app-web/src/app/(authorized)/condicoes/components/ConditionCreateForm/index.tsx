@@ -22,7 +22,7 @@ import {
   conditionFormResolver,
 } from '@/shared/formSchemas';
 import { ICondition, ITag } from '@/shared/interfaces';
-import { showToast } from '@/shared/util';
+import { formatTagLabel, showToast } from '@/shared/util';
 import { useSelectedConditionStore } from '@/store';
 import { ConditionSectionsField } from '../ConditionSectionsField';
 
@@ -187,7 +187,7 @@ export const ConditionCreateForm = ({ onSaved }: ConditionCreateFormProps) => {
           control={control}
           label="Tags"
           options={tagOptions}
-          getOptionLabel={(tag) => tag.name}
+          getOptionLabel={formatTagLabel}
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"

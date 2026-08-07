@@ -33,7 +33,7 @@ import {
   ITag,
   ITraining,
 } from '@/shared/interfaces';
-import { showToast } from '@/shared/util';
+import { formatTagLabel, showToast } from '@/shared/util';
 import { useSelectedTrainingStore } from '@/store';
 
 export interface TrainingCreateFormProps {
@@ -302,7 +302,7 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
           control={control}
           label="Tags"
           options={tagOptions}
-          getOptionLabel={(tag) => tag.name}
+          getOptionLabel={formatTagLabel}
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"

@@ -31,9 +31,7 @@ const TAG_JUNCTION_TABLES: Array<{ table: string; owner: string }> = [
   { table: 'utility_tags', owner: 'utility_id' },
 ];
 
-export class AddOrderToTagJunctionTables1784306280000
-  implements MigrationInterface
-{
+export class AddOrderToTagJunctionTables1784306280000 implements MigrationInterface {
   name = 'AddOrderToTagJunctionTables1784306280000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

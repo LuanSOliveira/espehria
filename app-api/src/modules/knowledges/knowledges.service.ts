@@ -113,13 +113,14 @@ export class KnowledgesService {
 
     await this.knowledgesRepository.delete({
       [ownerColumn]: { id: ownerId },
-    } as FindOptionsWhere<Knowledge>);
+    });
 
     if (items.length === 0) {
       return;
     }
 
-    const resolved = resolvedItems ?? (await this.validateAndResolveItems(items));
+    const resolved =
+      resolvedItems ?? (await this.validateAndResolveItems(items));
 
     const rows = items.map((item, index) => {
       const normalizedTitle = item.title.trim().toLowerCase();

@@ -8,9 +8,7 @@ import { EquipmentController } from './equipment.controller';
 import { EquipmentService } from './equipment.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Equipment, EquipmentTag, Tag, Currency]),
-  ],
+  imports: [TypeOrmModule.forFeature([Equipment, EquipmentTag, Tag, Currency])],
   controllers: [EquipmentController],
   providers: [EquipmentService],
   exports: [EquipmentService],

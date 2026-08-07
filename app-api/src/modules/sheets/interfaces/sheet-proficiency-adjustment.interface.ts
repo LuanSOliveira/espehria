@@ -1,9 +1,5 @@
 export type SheetProficiencyAdjustmentSourceType =
-  | 'race'
-  | 'biography'
-  | 'training'
-  | 'talent'
-  | 'characteristic';
+  'race' | 'biography' | 'training' | 'talent' | 'characteristic';
 
 export interface SheetProficiencyAdjustment {
   id: string;

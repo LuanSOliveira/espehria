@@ -23,7 +23,7 @@ import {
   techniqueFormResolver,
 } from '@/shared/formSchemas';
 import { IEntityReference, ITag, ITechnique } from '@/shared/interfaces';
-import { showToast } from '@/shared/util';
+import { formatTagLabel, showToast } from '@/shared/util';
 import { useSelectedTechniqueStore } from '@/store';
 
 export interface TechniqueCreateFormProps {
@@ -219,7 +219,7 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
           control={control}
           label="Tags"
           options={tagOptions}
-          getOptionLabel={(tag) => tag.name}
+          getOptionLabel={formatTagLabel}
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"

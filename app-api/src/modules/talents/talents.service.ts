@@ -492,9 +492,7 @@ export class TalentsService {
     }
 
     const resolvedKnowledges =
-      await this.knowledgesService.validateAndResolveItems(
-        effectiveKnowledges,
-      );
+      await this.knowledgesService.validateAndResolveItems(effectiveKnowledges);
     this.knowledgesService.validateList(effectiveKnowledges);
 
     const savedTalent = await this.talentsRepository.save(talent);

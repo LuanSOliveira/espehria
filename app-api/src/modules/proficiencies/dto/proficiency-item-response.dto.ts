@@ -27,9 +27,7 @@ export class ProficiencyItemResponseDto {
     const dto = new ProficiencyItemResponseDto();
     dto.id = item.id;
     dto.property = ProficiencyPropertyResponseDto.fromEntity(item.property);
-    dto.gradation = ProficiencyGradationResponseDto.fromEntity(
-      item.gradation,
-    );
+    dto.gradation = ProficiencyGradationResponseDto.fromEntity(item.gradation);
     return dto;
   }
 }

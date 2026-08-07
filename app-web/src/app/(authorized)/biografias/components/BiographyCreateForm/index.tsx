@@ -33,7 +33,7 @@ import {
   IProficiencyItem,
   ITag,
 } from '@/shared/interfaces';
-import { showToast } from '@/shared/util';
+import { formatTagLabel, showToast } from '@/shared/util';
 import { useSelectedBiographyStore } from '@/store';
 
 export interface BiographyCreateFormProps {
@@ -269,7 +269,7 @@ export const BiographyCreateForm = ({ onSaved }: BiographyCreateFormProps) => {
           control={control}
           label="Tags"
           options={tagOptions}
-          getOptionLabel={(tag) => tag.name}
+          getOptionLabel={formatTagLabel}
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"

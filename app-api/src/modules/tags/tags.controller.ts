@@ -45,7 +45,9 @@ export class TagsController {
   @Post()
   @ApiOperation({ summary: 'Cria uma tag' })
   @ApiCreatedResponse({ type: TagResponseDto })
-  @ApiConflictResponse({ description: 'Este nome já está em uso.' })
+  @ApiConflictResponse({
+    description: 'Já existe uma tag com este nome e tipo.',
+  })
   @ApiBadRequestResponse({
     description: 'Nome ou cor ausentes ou formato de cor inválido',
   })
@@ -96,7 +98,9 @@ export class TagsController {
   @ApiOperation({ summary: 'Atualiza uma tag' })
   @ApiOkResponse({ type: TagResponseDto })
   @ApiNotFoundResponse({ description: 'Tag não encontrada.' })
-  @ApiConflictResponse({ description: 'Este nome já está em uso.' })
+  @ApiConflictResponse({
+    description: 'Já existe uma tag com este nome e tipo.',
+  })
   @ApiBadRequestResponse({
     description: 'ID de tag em formato inválido ou dados inválidos',
   })

@@ -22,7 +22,7 @@ import {
   campaignFormResolver,
 } from '@/shared/formSchemas';
 import { ICampaign, ITag, IUser } from '@/shared/interfaces';
-import { showToast } from '@/shared/util';
+import { formatTagLabel, showToast } from '@/shared/util';
 import { useSelectedCampaignStore } from '@/store';
 import { CampaignSectionsField } from '../CampaignSectionsField';
 import { CampaignAllowedUsersField } from '../CampaignAllowedUsersField';
@@ -211,7 +211,7 @@ export const CampaignCreateForm = ({ onSaved }: CampaignCreateFormProps) => {
           control={control}
           label="Tags"
           options={tagOptions}
-          getOptionLabel={(tag) => tag.name}
+          getOptionLabel={formatTagLabel}
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"

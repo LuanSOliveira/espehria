@@ -22,7 +22,7 @@ import {
   organizationFormResolver,
 } from '@/shared/formSchemas';
 import { IOrganization, ITag } from '@/shared/interfaces';
-import { showToast } from '@/shared/util';
+import { formatTagLabel, showToast } from '@/shared/util';
 import { useSelectedOrganizationStore } from '@/store';
 import {
   OrganizationMemberDraft,
@@ -222,7 +222,7 @@ export const OrganizationCreateForm = ({
           control={control}
           label="Tags"
           options={tagOptions}
-          getOptionLabel={(tag) => tag.name}
+          getOptionLabel={formatTagLabel}
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"

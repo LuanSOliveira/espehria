@@ -5,3 +5,4 @@ export * from './GetAccessibleFontSize';
 export * from './IsRichTextEmpty';
 export * from './GetContrastTextColor';
 export * from './FormatPriceWithCurrency';
+export * from './FormatTagLabel';

@@ -51,11 +51,7 @@ export class ErasService {
     if (!era) {
       return null;
     }
-    era.tags = await loadOrderedTagsForOwner(
-      this.eraTagsRepository,
-      id,
-      'era',
-    );
+    era.tags = await loadOrderedTagsForOwner(this.eraTagsRepository, id, 'era');
     return era;
   }
 

@@ -10,7 +10,7 @@ import {
 export class CreateTagDto {
   @ApiProperty({
     example: 'Urgente',
-    description: 'Nome da tag (deve ser único)',
+    description: 'Nome da tag (único em conjunto com o tipo)',
   })
   @IsString()
   @IsNotEmpty()
@@ -30,9 +30,10 @@ export class CreateTagDto {
   @ApiPropertyOptional({
     description: 'Tipo da tag (campo livre, opcional)',
     example: 'Monstro',
+    nullable: true,
   })
   @IsOptional()
   @IsString()
   @MaxLength(100)
-  type?: string;
+  type?: string | null;
 }

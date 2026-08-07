@@ -96,8 +96,7 @@ export class RacesService {
       'characteristic',
     );
     for (const characteristic of race.characteristics) {
-      characteristic.tags =
-        characteristicTagsById.get(characteristic.id) ?? [];
+      characteristic.tags = characteristicTagsById.get(characteristic.id) ?? [];
     }
 
     const talentTagsById = await loadOrderedTagsMap(
@@ -497,9 +496,7 @@ export class RacesService {
     }
 
     const resolvedKnowledges =
-      await this.knowledgesService.validateAndResolveItems(
-        effectiveKnowledges,
-      );
+      await this.knowledgesService.validateAndResolveItems(effectiveKnowledges);
     this.knowledgesService.validateList(effectiveKnowledges);
 
     const savedRace = await this.racesRepository.save(race);

@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddEditableToKnowledgesAndNotesToSheets1784306400000
-  implements MigrationInterface
-{
+export class AddEditableToKnowledgesAndNotesToSheets1784306400000 implements MigrationInterface {
   name = 'AddEditableToKnowledgesAndNotesToSheets1784306400000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

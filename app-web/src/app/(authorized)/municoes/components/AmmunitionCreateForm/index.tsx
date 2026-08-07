@@ -24,7 +24,7 @@ import {
   ammunitionFormResolver,
 } from '@/shared/formSchemas';
 import { ICurrency, IAmmunition, ITag } from '@/shared/interfaces';
-import { showToast } from '@/shared/util';
+import { formatTagLabel, showToast } from '@/shared/util';
 import { useSelectedAmmunitionStore } from '@/store';
 
 export interface AmmunitionCreateFormProps {
@@ -234,7 +234,7 @@ export const AmmunitionCreateForm = ({
           control={control}
           label="Tags"
           options={tagOptions}
-          getOptionLabel={(tag) => tag.name}
+          getOptionLabel={formatTagLabel}
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"

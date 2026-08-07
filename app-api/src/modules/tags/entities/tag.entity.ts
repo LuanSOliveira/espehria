@@ -1,11 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, Index } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 
 @Entity('tags')
 export class Tag extends BaseEntity {
+  // Unicidade de (name, type) é garantida por um índice único de expressão
+  // (name, COALESCE(type, '')) criado via SQL puro na migration
+  // ChangeTagsUniqueIndexToNameAndType — não representável via @Index do TypeORM,
+  // que não suporta índices sobre expressões arbitrárias. Não recriar esse índice
+  // via decorator aqui.
   @ApiProperty()
-  @Index({ unique: true })
   @Column()
   name!: string;
 

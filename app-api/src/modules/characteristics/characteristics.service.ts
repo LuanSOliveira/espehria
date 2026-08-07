@@ -316,8 +316,7 @@ export class CharacteristicsService {
       'characteristic',
     );
     for (const characteristic of characteristics) {
-      characteristic.tags =
-        tagsByCharacteristicId.get(characteristic.id) ?? [];
+      characteristic.tags = tagsByCharacteristicId.get(characteristic.id) ?? [];
     }
 
     const characteristicsById = new Map(
@@ -513,9 +512,7 @@ export class CharacteristicsService {
     }
 
     const resolvedKnowledges =
-      await this.knowledgesService.validateAndResolveItems(
-        effectiveKnowledges,
-      );
+      await this.knowledgesService.validateAndResolveItems(effectiveKnowledges);
     this.knowledgesService.validateList(effectiveKnowledges);
 
     const savedCharacteristic =

@@ -118,7 +118,7 @@ export class ProficienciesService {
 
     await this.proficienciesRepository.delete({
       [ownerColumn]: { id: ownerId },
-    } as FindOptionsWhere<Proficiency>);
+    });
 
     if (items.length === 0) {
       return;

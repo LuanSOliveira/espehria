@@ -410,9 +410,7 @@ export class BiographiesService {
     }
 
     const resolvedKnowledges =
-      await this.knowledgesService.validateAndResolveItems(
-        effectiveKnowledges,
-      );
+      await this.knowledgesService.validateAndResolveItems(effectiveKnowledges);
     this.knowledgesService.validateList(effectiveKnowledges);
 
     const savedBiography = await this.biographiesRepository.save(biography);

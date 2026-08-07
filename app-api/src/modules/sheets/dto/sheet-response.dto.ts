@@ -122,8 +122,7 @@ export class SheetResponseDto {
       sheet.proficiencias,
     );
     dto.proficienciasAjustadas = sheet.proficienciasAjustadas.map(
-      (adjustment) =>
-        SheetProficiencyAdjustmentResponseDto.fromRaw(adjustment),
+      (adjustment) => SheetProficiencyAdjustmentResponseDto.fromRaw(adjustment),
     );
     dto.saberes = SheetKnowledgeSnapshotResponseDto.fromEntity(
       sheet.saberes,

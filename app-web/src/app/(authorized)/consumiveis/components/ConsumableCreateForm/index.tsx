@@ -24,7 +24,7 @@ import {
   consumableFormResolver,
 } from '@/shared/formSchemas';
 import { ICurrency, IConsumable, ITag } from '@/shared/interfaces';
-import { showToast } from '@/shared/util';
+import { formatTagLabel, showToast } from '@/shared/util';
 import { useSelectedConsumableStore } from '@/store';
 
 export interface ConsumableCreateFormProps {
@@ -234,7 +234,7 @@ export const ConsumableCreateForm = ({
           control={control}
           label="Tags"
           options={tagOptions}
-          getOptionLabel={(tag) => tag.name}
+          getOptionLabel={formatTagLabel}
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"

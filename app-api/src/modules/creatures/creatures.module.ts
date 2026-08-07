@@ -9,12 +9,7 @@ import { CreaturesService } from './creatures.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Creature,
-      CreatureTag,
-      CreatureCategory,
-      Tag,
-    ]),
+    TypeOrmModule.forFeature([Creature, CreatureTag, CreatureCategory, Tag]),
   ],
   controllers: [CreaturesController],
   providers: [CreaturesService],

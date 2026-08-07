@@ -122,8 +122,7 @@ export class SheetsService {
       'characteristic',
     );
     for (const characteristic of race.characteristics) {
-      characteristic.tags =
-        characteristicTagsById.get(characteristic.id) ?? [];
+      characteristic.tags = characteristicTagsById.get(characteristic.id) ?? [];
     }
 
     const talentTagsById = await loadOrderedTagsMap(

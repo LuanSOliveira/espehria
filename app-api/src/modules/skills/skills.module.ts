@@ -10,13 +10,7 @@ import { SkillsService } from './skills.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Skill,
-      SkillSection,
-      SkillTag,
-      Attribute,
-      Tag,
-    ]),
+    TypeOrmModule.forFeature([Skill, SkillSection, SkillTag, Attribute, Tag]),
   ],
   controllers: [SkillsController],
   providers: [SkillsService],

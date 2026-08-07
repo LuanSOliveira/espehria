@@ -491,9 +491,7 @@ export class TrainingsService {
     }
 
     const resolvedKnowledges =
-      await this.knowledgesService.validateAndResolveItems(
-        effectiveKnowledges,
-      );
+      await this.knowledgesService.validateAndResolveItems(effectiveKnowledges);
     this.knowledgesService.validateList(effectiveKnowledges);
 
     const savedTraining = await this.trainingsRepository.save(training);

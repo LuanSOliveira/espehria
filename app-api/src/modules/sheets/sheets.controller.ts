@@ -247,8 +247,7 @@ export class SheetsController {
       'Ficha não encontrada ou não pertence ao usuário, ajuste de proficiência não encontrado, ou propriedade selecionada não encontrada',
   })
   @ApiConflictResponse({
-    description:
-      'A propriedade selecionada já está aplicada na ficha',
+    description: 'A propriedade selecionada já está aplicada na ficha',
   })
   @ApiBadRequestResponse({
     description: 'ID de ficha, ajuste ou propriedade em formato inválido',

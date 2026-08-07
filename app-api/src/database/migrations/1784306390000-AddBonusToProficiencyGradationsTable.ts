@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddBonusToProficiencyGradationsTable1784306390000
-  implements MigrationInterface
-{
+export class AddBonusToProficiencyGradationsTable1784306390000 implements MigrationInterface {
   name = 'AddBonusToProficiencyGradationsTable1784306390000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

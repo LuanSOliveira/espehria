@@ -37,7 +37,7 @@ import {
   ITag,
   FamilyRelationshipType,
 } from '@/shared/interfaces';
-import { showToast } from '@/shared/util';
+import { formatTagLabel, showToast } from '@/shared/util';
 import { useSelectedFamilyStore } from '@/store';
 import { FAMILY_CLASSIFICATION_OPTIONS } from '../../data';
 
@@ -407,7 +407,7 @@ export const FamilyCreateForm = ({ onSaved }: FamilyCreateFormProps) => {
           control={control}
           label="Tags"
           options={tagOptions}
-          getOptionLabel={(tag) => tag.name}
+          getOptionLabel={formatTagLabel}
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"

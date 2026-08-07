@@ -24,7 +24,7 @@ import {
   skillFormResolver,
 } from '@/shared/formSchemas';
 import { IAttribute, ISkill, ITag } from '@/shared/interfaces';
-import { showToast } from '@/shared/util';
+import { formatTagLabel, showToast } from '@/shared/util';
 import { useSelectedSkillStore } from '@/store';
 import { SkillSectionsField } from '../SkillSectionsField';
 
@@ -190,7 +190,7 @@ export const SkillCreateForm = ({ onSaved }: SkillCreateFormProps) => {
           control={control}
           label="Tags"
           options={tagOptions}
-          getOptionLabel={(tag) => tag.name}
+          getOptionLabel={formatTagLabel}
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"
