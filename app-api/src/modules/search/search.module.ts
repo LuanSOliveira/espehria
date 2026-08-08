@@ -11,7 +11,10 @@ import { Divinity } from '../divinities/entities/divinity.entity';
 import { Character } from '../characters/entities/character.entity';
 import { Organization } from '../organizations/entities/organization.entity';
 import { Family } from '../families/entities/family.entity';
-import { Equipment } from '../equipment/entities/equipment.entity';
+import { Weapon } from '../weapons/entities/weapon.entity';
+import { Armor } from '../armors/entities/armor.entity';
+import { Accessory } from '../accessories/entities/accessory.entity';
+import { Shield } from '../shields/entities/shield.entity';
 import { Material } from '../materials/entities/material.entity';
 import { Consumable } from '../consumables/entities/consumable.entity';
 import { Ammunition } from '../ammunition/entities/ammunition.entity';
@@ -44,7 +47,10 @@ import { SearchService } from './search.service';
       Character,
       Organization,
       Family,
-      Equipment,
+      Weapon,
+      Armor,
+      Accessory,
+      Shield,
       Material,
       Consumable,
       Ammunition,

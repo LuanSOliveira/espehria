@@ -21,7 +21,10 @@ import { DivinitiesModule } from './modules/divinities/divinities.module';
 import { CharactersModule } from './modules/characters/characters.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { FamiliesModule } from './modules/families/families.module';
-import { EquipmentModule } from './modules/equipment/equipment.module';
+import { WeaponsModule } from './modules/weapons/weapons.module';
+import { ArmorsModule } from './modules/armors/armors.module';
+import { AccessoriesModule } from './modules/accessories/accessories.module';
+import { ShieldsModule } from './modules/shields/shields.module';
 import { MaterialsModule } from './modules/materials/materials.module';
 import { ConsumablesModule } from './modules/consumables/consumables.module';
 import { AmmunitionModule } from './modules/ammunition/ammunition.module';
@@ -86,7 +89,10 @@ import { ProficiencyGradationsModule } from './modules/proficiency-gradations/pr
     CharactersModule,
     OrganizationsModule,
     FamiliesModule,
-    EquipmentModule,
+    WeaponsModule,
+    ArmorsModule,
+    AccessoriesModule,
+    ShieldsModule,
     MaterialsModule,
     ConsumablesModule,
     AmmunitionModule,

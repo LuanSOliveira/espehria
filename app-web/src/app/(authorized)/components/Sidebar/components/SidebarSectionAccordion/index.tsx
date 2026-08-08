@@ -4,6 +4,7 @@ import { FiChevronDown } from 'react-icons/fi';
 import { DefaultText, Label } from '@/shared/components/Texts';
 import { APP_COLORS } from '@/shared/constants';
 import { NavItem } from '../../data';
+import { SidebarNavItemAccordion } from '../SidebarNavItemAccordion';
 
 export interface SidebarSectionAccordionProps {
   title: string;
@@ -52,13 +53,26 @@ export const SidebarSectionAccordion = ({
       <Collapse in={isExpanded}>
         <div className="flex flex-col gap-1">
           {items.map((item) => {
+            if (item.children) {
+              return (
+                <SidebarNavItemAccordion
+                  key={item.label}
+                  label={item.label}
+                  icon={item.icon}
+                  items={item.children}
+                  pathname={pathname}
+                  iconFontSize={iconFontSize}
+                />
+              );
+            }
+
             const isActive = pathname === item.href;
             const Icon = item.icon;
 
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={item.href ?? '#'}
                 style={{ textDecoration: 'none' }}
               >
                 <div

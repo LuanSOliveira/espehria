@@ -1,5 +1,6 @@
 import {
   FiActivity,
+  FiAward,
   FiBookOpen,
   FiBriefcase,
   FiCalendar,
@@ -16,25 +17,31 @@ import {
   FiMapPin,
   FiPackage,
   FiSettings,
+  FiShield,
+  FiSlash,
   FiStar,
   FiSun,
   FiTag,
   FiTarget,
   FiTool,
   FiTrendingUp,
+  FiUmbrella,
   FiUser,
   FiUsers,
   FiZap,
   FiCompass,
 } from 'react-icons/fi';
+import { GiCheckedShield, GiChestArmor, GiDiamondRing } from 'react-icons/gi';
+import { PiSword } from 'react-icons/pi';
 import { MdOutlineFace } from 'react-icons/md';
 import { IconType } from 'react-icons';
 import { APP_ROUTES } from '@/shared/routes';
 
 export interface NavItem {
   label: string;
-  href: string;
+  href?: string;
   icon: IconType;
+  children?: NavItem[];
 }
 
 export interface NavSection {
@@ -126,9 +133,26 @@ export const NAV_SECTIONS: NavSection[] = [
     title: 'Itens',
     items: [
       {
-        label: 'Equipamentos',
-        href: APP_ROUTES.private.equipment,
+        label: 'EQUIPAMENTOS',
         icon: FiTool,
+        children: [
+          { label: 'Armas', href: APP_ROUTES.private.weapons, icon: PiSword },
+          {
+            label: 'Armaduras',
+            href: APP_ROUTES.private.armors,
+            icon: GiChestArmor,
+          },
+          {
+            label: 'Acessórios',
+            href: APP_ROUTES.private.accessories,
+            icon: GiDiamondRing,
+          },
+          {
+            label: 'Escudos',
+            href: APP_ROUTES.private.shields,
+            icon: GiCheckedShield,
+          },
+        ],
       },
       {
         label: 'Materiais',

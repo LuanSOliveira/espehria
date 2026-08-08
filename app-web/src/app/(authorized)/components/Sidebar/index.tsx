@@ -9,7 +9,7 @@ import { useAccessibleFontSize } from '@/hooks/FontAccessibility';
 import { useIsGoogleUser } from '@/hooks/Auth';
 import { APP_BUTTON_BASE_FONT_SIZE, APP_COLORS } from '@/shared/constants';
 import { APP_ROUTES } from '@/shared/routes';
-import { NAV_SECTIONS } from './data';
+import { NAV_SECTIONS, NavItem } from './data';
 import { SidebarSectionAccordion } from './components/SidebarSectionAccordion';
 
 interface SidebarProps {
@@ -24,11 +24,15 @@ const GOOGLE_BLOCKED_ROUTES = [
 const isRouteActive = (pathname: string, href: string): boolean =>
   pathname === href || pathname.startsWith(`${href}/`);
 
+const isItemActive = (pathname: string, item: NavItem): boolean =>
+  (!!item.href && isRouteActive(pathname, item.href)) ||
+  !!item.children?.some((child) => isItemActive(pathname, child));
+
 const getSectionForPathname = (pathname: string): string | null => {
   const activeSection = NAV_SECTIONS.find(
     (section) =>
       section.title &&
-      section.items.some((item) => isRouteActive(pathname, item.href)),
+      section.items.some((item) => isItemActive(pathname, item)),
   );
 
   return activeSection?.title ?? null;
@@ -58,7 +62,7 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
     ? NAV_SECTIONS.map((section) => ({
         ...section,
         items: section.items.filter(
-          (item) => !GOOGLE_BLOCKED_ROUTES.includes(item.href),
+          (item) => !item.href || !GOOGLE_BLOCKED_ROUTES.includes(item.href),
         ),
       }))
     : NAV_SECTIONS;
@@ -102,13 +106,14 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
                 />
               ) : (
                 section.items.map((item) => {
-                  const isActive = isRouteActive(pathname, item.href);
+                  const href = item.href ?? '#';
+                  const isActive = isRouteActive(pathname, href);
                   const Icon = item.icon;
 
                   return (
                     <Link
-                      key={item.href}
-                      href={item.href}
+                      key={href}
+                      href={href}
                       style={{ textDecoration: 'none' }}
                     >
                       <div

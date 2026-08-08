@@ -15,7 +15,10 @@ import { Divinity } from '../divinities/entities/divinity.entity';
 import { Character } from '../characters/entities/character.entity';
 import { Organization } from '../organizations/entities/organization.entity';
 import { Family } from '../families/entities/family.entity';
-import { Equipment } from '../equipment/entities/equipment.entity';
+import { Weapon } from '../weapons/entities/weapon.entity';
+import { Armor } from '../armors/entities/armor.entity';
+import { Accessory } from '../accessories/entities/accessory.entity';
+import { Shield } from '../shields/entities/shield.entity';
 import { Material } from '../materials/entities/material.entity';
 import { Consumable } from '../consumables/entities/consumable.entity';
 import { Ammunition } from '../ammunition/entities/ammunition.entity';
@@ -59,8 +62,14 @@ export class SearchService {
     private readonly organizationsRepository: Repository<Organization>,
     @InjectRepository(Family)
     private readonly familiesRepository: Repository<Family>,
-    @InjectRepository(Equipment)
-    private readonly equipmentRepository: Repository<Equipment>,
+    @InjectRepository(Weapon)
+    private readonly weaponsRepository: Repository<Weapon>,
+    @InjectRepository(Armor)
+    private readonly armorsRepository: Repository<Armor>,
+    @InjectRepository(Accessory)
+    private readonly accessoriesRepository: Repository<Accessory>,
+    @InjectRepository(Shield)
+    private readonly shieldsRepository: Repository<Shield>,
     @InjectRepository(Material)
     private readonly materialsRepository: Repository<Material>,
     @InjectRepository(Consumable)
@@ -131,8 +140,20 @@ export class SearchService {
         repository: this.familiesRepository,
       },
       {
-        entityType: LinkableEntityType.EQUIPMENT,
-        repository: this.equipmentRepository,
+        entityType: LinkableEntityType.WEAPON,
+        repository: this.weaponsRepository,
+      },
+      {
+        entityType: LinkableEntityType.ARMOR,
+        repository: this.armorsRepository,
+      },
+      {
+        entityType: LinkableEntityType.ACCESSORY,
+        repository: this.accessoriesRepository,
+      },
+      {
+        entityType: LinkableEntityType.SHIELD,
+        repository: this.shieldsRepository,
       },
       {
         entityType: LinkableEntityType.MATERIAL,
