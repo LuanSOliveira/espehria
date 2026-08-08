@@ -77,6 +77,7 @@ import {
   SHEET_EMPTY_IMPROVEMENT_DEFECT_SNAPSHOT,
   SHEET_EMPTY_KNOWLEDGE_SNAPSHOT,
   SHEET_EMPTY_PROFICIENCY_SNAPSHOT,
+  SHEET_HIT_POINTS_KEY_ATTRIBUTE_NAME,
   SHEET_IMPROVEMENT_DEFECT_CATEGORIES,
   flattenKnowledgeSnapshot,
   flattenProficiencySnapshot,
@@ -86,7 +87,6 @@ import {
 const ATTRIBUTE_TYPE_NAME = 'Atributo';
 const ATTRIBUTE_BASE_VALUE = 10;
 const ARMOR_CLASS_BASE_VALUE = 10;
-const HIT_POINTS_BASE_VALUE = 0;
 
 const SHEET_TABS_SX = {
   borderBottom: `1px solid ${APP_COLORS.gold}`,
@@ -319,11 +319,28 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     { label: armorClassKeyAttribute?.name ?? '', value: armorClassAttributeModifier },
   ];
 
+  const hitPointsMatchedAttribute = useMemo(
+    () =>
+      attributes.find(
+        (attribute) =>
+          attribute.label.trim().toLowerCase() ===
+          SHEET_HIT_POINTS_KEY_ATTRIBUTE_NAME.trim().toLowerCase(),
+      ),
+    [attributes],
+  );
+  const hitPointsAttributeModifier = hitPointsMatchedAttribute?.modifier ?? 0;
+
   const raceHitPointsBonus = race?.hitPoints ?? 0;
-  const maxHitPoints = HIT_POINTS_BASE_VALUE + raceHitPointsBonus;
-  const maxHitPointsBreakdown = race
-    ? [{ label: race.name, value: race.hitPoints }]
-    : [];
+  const maxHitPoints = (raceHitPointsBonus + hitPointsAttributeModifier) * level;
+  const maxHitPointsBreakdown = [
+    ...(race
+      ? [{ label: `${race.name} x ${level} level`, value: race.hitPoints }]
+      : []),
+    {
+      label: `${SHEET_HIT_POINTS_KEY_ATTRIBUTE_NAME} x ${level} level`,
+      value: hitPointsAttributeModifier,
+    },
+  ];
 
   const attributesDetailGroups = useMemo(
     () =>
@@ -822,6 +839,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
                 temporaryValue={temporaryHitPoints}
                 onTemporaryChange={setTemporaryHitPoints}
                 maxValue={maxHitPoints}
+                keyAttributeName={SHEET_HIT_POINTS_KEY_ATTRIBUTE_NAME}
                 onOpenDetail={() => setIsHitPointsDetailOpen(true)}
               />
 

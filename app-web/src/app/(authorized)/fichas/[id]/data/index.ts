@@ -46,6 +46,12 @@ export const SHEET_SAVING_THROW_DEFINITIONS = [
   { id: 'vontade', name: 'Vontade', keyAttributeName: 'Sabedoria' },
 ] as const;
 
+/**
+ * Atributo-chave fixo (não editável pelo usuário) do PV máximo — seu
+ * modificador entra na fórmula `(PV da raça + modificador) * nível`.
+ */
+export const SHEET_HIT_POINTS_KEY_ATTRIBUTE_NAME = 'Constituição';
+
 export type SheetImprovementDefectCategoryKey =
   keyof ISheetImprovementDefectSnapshot;
 

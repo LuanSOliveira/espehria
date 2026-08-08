@@ -12,6 +12,7 @@ export interface SheetHitPointsPanelProps {
   temporaryValue: number | null;
   onTemporaryChange: (value: number | null) => void;
   maxValue: number;
+  keyAttributeName: string;
   onOpenDetail: () => void;
 }
 
@@ -40,6 +41,7 @@ export const SheetHitPointsPanel = ({
   temporaryValue,
   onTemporaryChange,
   maxValue,
+  keyAttributeName,
   onOpenDetail,
 }: SheetHitPointsPanelProps) => {
   const [currentRawValue, setCurrentRawValue] = useState(
@@ -86,8 +88,14 @@ export const SheetHitPointsPanel = ({
         </Label>
       </div>
 
-      <div className="flex flex-col items-center gap-6 p-4 sm:flex-row sm:justify-center">
-        <div className="flex items-end gap-2">
+      <DefaultText
+        sx={{ fontStyle: 'italic', textAlign: 'center', paddingTop: '12px' }}
+      >
+        {`Atributo-chave: ${keyAttributeName}`}
+      </DefaultText>
+
+      <div className="flex flex-col items-center gap-6 p-4 sm:flex-row sm:items-start sm:justify-center">
+        <div className="flex items-start gap-2">
           <div className="flex flex-col items-center">
             <Label htmlFor="sheet-hit-points-current">PV atual</Label>
             <TextField
@@ -108,7 +116,7 @@ export const SheetHitPointsPanel = ({
                     textAlign: 'center',
                     fontSize: '2rem',
                     fontWeight: 700,
-                    color: APP_COLORS.goldSoft,
+                    color: APP_COLORS.textBrownDark,
                     width: '72px',
                   },
                 },
@@ -117,16 +125,19 @@ export const SheetHitPointsPanel = ({
             />
           </div>
 
-          <DefaultText
-            sx={{
-              fontSize: '2rem',
-              fontWeight: 700,
-              color: APP_COLORS.textBrownDark,
-              marginBottom: '4px',
-            }}
-          >
-            /
-          </DefaultText>
+          <div className="flex flex-col items-center">
+            <Label sx={{ visibility: 'hidden' }}>PV atual</Label>
+            <DefaultText
+              sx={{
+                fontSize: '2rem',
+                fontWeight: 700,
+                color: APP_COLORS.textBrownDark,
+                lineHeight: '41px',
+              }}
+            >
+              /
+            </DefaultText>
+          </div>
 
           <div className="flex flex-col items-center">
             <Label>PV máximo</Label>
@@ -136,26 +147,29 @@ export const SheetHitPointsPanel = ({
                 fontSize: '2rem',
                 fontWeight: 700,
                 color: APP_COLORS.textBrownDark,
+                lineHeight: '41px',
               }}
             >
               {maxValue}
             </DefaultText>
           </div>
 
-          <Tooltip title="Ver detalhamento do bônus">
-            <IconButton
-              aria-label="Ver detalhamento do bônus"
-              onClick={onOpenDetail}
-              size="small"
-              sx={{
-                color: APP_COLORS.textBrownDark,
-                border: `1px solid ${APP_COLORS.gold}`,
-                marginBottom: '4px',
-              }}
-            >
-              <FiHelpCircle style={{ fontSize: 16 }} />
-            </IconButton>
-          </Tooltip>
+          <div className="flex flex-col items-center">
+            <Label sx={{ visibility: 'hidden' }}>PV máximo</Label>
+            <Tooltip title="Ver detalhamento do bônus">
+              <IconButton
+                aria-label="Ver detalhamento do bônus"
+                onClick={onOpenDetail}
+                size="small"
+                sx={{
+                  color: APP_COLORS.textBrownDark,
+                  border: `1px solid ${APP_COLORS.gold}`,
+                }}
+              >
+                <FiHelpCircle style={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
+          </div>
         </div>
 
         <div className="flex flex-col items-center">
