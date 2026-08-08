@@ -32,6 +32,10 @@ export class Race extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   description!: string | null;
 
+  @ApiProperty()
+  @Column({ type: 'int', name: 'hit_points' })
+  hitPoints!: number;
+
   @Column({ type: 'text', nullable: true, name: 'private_information' })
   privateInformation!: string | null;
 

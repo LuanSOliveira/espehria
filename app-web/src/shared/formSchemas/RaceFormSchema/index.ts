@@ -11,6 +11,14 @@ export const raceFormSchema = z.object({
       'Informe uma URL de imagem válida',
     ),
   description: z.string(),
+  hitPoints: z
+    .string()
+    .min(1, 'Informe os pontos de vida')
+    .refine((value) => /^\d+$/.test(value), 'Informe um número inteiro')
+    .refine(
+      (value) => Number(value) >= 1,
+      'Os pontos de vida devem ser no mínimo 1',
+    ),
   privateInformation: z.string(),
   tagIds: z.array(z.string()).optional(),
   characteristicIds: z.array(z.string()).optional(),
@@ -26,6 +34,7 @@ export const raceFormDefaultValues: RaceFormData = {
   categoryId: '',
   referenceImageUrl: '',
   description: '',
+  hitPoints: '',
   privateInformation: '',
   tagIds: [],
   characteristicIds: [],

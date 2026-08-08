@@ -64,9 +64,10 @@ interface KnowledgeInputPayload {
 interface RacePayload
   extends Omit<
     RaceFormData,
-    'referenceImageUrl' | 'characteristicIds' | 'talentIds'
+    'referenceImageUrl' | 'characteristicIds' | 'talentIds' | 'hitPoints'
   > {
   referenceImageUrl?: string;
+  hitPoints: number;
   characteristicIds: string[];
   talentIds: string[];
   improvements: ImprovementDefectInputPayload[];
@@ -141,6 +142,7 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
       categoryId: raceDetail.category.id,
       referenceImageUrl: raceDetail.referenceImageUrl ?? '',
       description: raceDetail.description ?? '',
+      hitPoints: String(raceDetail.hitPoints),
       privateInformation: raceDetail.privateInformation ?? '',
       tagIds: raceDetail.tags?.map((tag) => tag.id) ?? [],
     });
@@ -178,6 +180,7 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
   ): RacePayload => ({
     ...data,
     referenceImageUrl: data.referenceImageUrl || undefined,
+    hitPoints: Number(data.hitPoints),
     tagIds: data.tagIds ?? [],
     characteristicIds: characteristics.map((item) => item.id),
     talentIds: talents.map((item) => item.id),
@@ -330,6 +333,16 @@ export const RaceCreateForm = ({ onSaved }: RaceCreateFormProps) => {
           placeholder="Descreva a raça"
         />
       </div>
+
+      <FormTextInput
+        id="race-form-hit-points"
+        name="hitPoints"
+        control={control}
+        label="Pontos de Vida"
+        placeholder="Digite os pontos de vida"
+        type="number"
+        slotProps={{ htmlInput: { min: 1, step: 1, inputMode: 'numeric' } }}
+      />
 
       <EntityReferenceListField
         label="Características"

@@ -34,6 +34,7 @@ import {
   ISheetKnowledgeSnapshot,
   ISheetProficiencySnapshot,
   ISheetProficiencyAdjustmentEntry,
+  ISheetRace,
   ISkillListFilters,
   ISkillListItem,
 } from '@/shared/interfaces';
@@ -60,6 +61,7 @@ import { SheetKnowledgesPanel } from './components/SheetKnowledgesPanel';
 import { SheetSkillsPanel } from './components/SheetSkillsPanel';
 import { SheetArmorClassPanel } from './components/SheetArmorClassPanel';
 import { SheetSavingThrowsPanel } from './components/SheetSavingThrowsPanel';
+import { SheetHitPointsPanel } from './components/SheetHitPointsPanel';
 import {
   SheetBonusDetail,
   SheetBonusDetailModal,
@@ -84,6 +86,7 @@ import {
 const ATTRIBUTE_TYPE_NAME = 'Atributo';
 const ATTRIBUTE_BASE_VALUE = 10;
 const ARMOR_CLASS_BASE_VALUE = 10;
+const HIT_POINTS_BASE_VALUE = 0;
 
 const SHEET_TABS_SX = {
   borderBottom: `1px solid ${APP_COLORS.gold}`,
@@ -141,8 +144,14 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
   const [name, setName] = useState('');
   const [level, setLevel] = useState(1);
   const [campaign, setCampaign] = useState<ISheetCampaignOption | null>(null);
-  const [race, setRace] = useState<IRaceListItem | null>(null);
+  const [race, setRace] = useState<ISheetRace | null>(null);
   const [biography, setBiography] = useState<IBiographyListItem | null>(null);
+  const [currentHitPoints, setCurrentHitPoints] = useState<number | null>(
+    null,
+  );
+  const [temporaryHitPoints, setTemporaryHitPoints] = useState<number | null>(
+    null,
+  );
   const [melhorias, setMelhorias] = useState<ISheetImprovementDefectSnapshot>(
     SHEET_EMPTY_IMPROVEMENT_DEFECT_SNAPSHOT,
   );
@@ -173,6 +182,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
   const [isArmorClassDetailOpen, setIsArmorClassDetailOpen] = useState(false);
   const [savingThrowPendingBonusDetail, setSavingThrowPendingBonusDetail] =
     useState<SheetSkillModifierResult | null>(null);
+  const [isHitPointsDetailOpen, setIsHitPointsDetailOpen] = useState(false);
 
   useEffect(() => {
     if (!sheet || hasHydrated) {
@@ -191,6 +201,8 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     setSaberes(sheet.saberes);
     setArmorClassKeyAttribute(sheet.armorClassKeyAttribute ?? null);
     setReferenceImage(sheet.referenceImage ?? null);
+    setCurrentHitPoints(sheet.currentHitPoints ?? null);
+    setTemporaryHitPoints(sheet.temporaryHitPoints ?? null);
     setHasHydrated(true);
   }, [sheet, hasHydrated]);
 
@@ -307,6 +319,12 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     { label: armorClassKeyAttribute?.name ?? '', value: armorClassAttributeModifier },
   ];
 
+  const raceHitPointsBonus = race?.hitPoints ?? 0;
+  const maxHitPoints = HIT_POINTS_BASE_VALUE + raceHitPointsBonus;
+  const maxHitPointsBreakdown = race
+    ? [{ label: race.name, value: race.hitPoints }]
+    : [];
+
   const attributesDetailGroups = useMemo(
     () =>
       SHEET_IMPROVEMENT_DEFECT_CATEGORIES.map((category) => ({
@@ -400,6 +418,38 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
         message:
           mutationError.response?.data?.message ??
           'Não foi possível salvar o atributo-chave da Classe de Armadura.',
+        type: 'error',
+      });
+    },
+  });
+
+  const updateCurrentHitPointsMutation = usePutEntity<
+    ISheet,
+    { currentHitPoints: number | null }
+  >({
+    url: `/sheets/${sheetId}`,
+    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
+    onError: (mutationError) => {
+      showToast({
+        message:
+          mutationError.response?.data?.message ??
+          'Não foi possível salvar o PV atual da ficha.',
+        type: 'error',
+      });
+    },
+  });
+
+  const updateTemporaryHitPointsMutation = usePutEntity<
+    ISheet,
+    { temporaryHitPoints: number | null }
+  >({
+    url: `/sheets/${sheetId}`,
+    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
+    onError: (mutationError) => {
+      showToast({
+        message:
+          mutationError.response?.data?.message ??
+          'Não foi possível salvar o PV temporário da ficha.',
         type: 'error',
       });
     },
@@ -622,6 +672,24 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     },
   });
 
+  useFieldAutosave({
+    value: currentHitPoints,
+    enabled: hasHydrated,
+    onSave: (newCurrentHitPoints) =>
+      updateCurrentHitPointsMutation.mutate({
+        currentHitPoints: newCurrentHitPoints,
+      }),
+  });
+
+  useFieldAutosave({
+    value: temporaryHitPoints,
+    enabled: hasHydrated,
+    onSave: (newTemporaryHitPoints) =>
+      updateTemporaryHitPointsMutation.mutate({
+        temporaryHitPoints: newTemporaryHitPoints,
+      }),
+  });
+
   const handleImageSave = (url: string) => {
     updateImageMutation.mutate({ referenceImage: url || null });
   };
@@ -748,6 +816,15 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
         <div className="mt-4">
           {activeTab === 'estatisticas' && (
             <div className="flex flex-col gap-6">
+              <SheetHitPointsPanel
+                currentValue={currentHitPoints}
+                onCurrentChange={setCurrentHitPoints}
+                temporaryValue={temporaryHitPoints}
+                onTemporaryChange={setTemporaryHitPoints}
+                maxValue={maxHitPoints}
+                onOpenDetail={() => setIsHitPointsDetailOpen(true)}
+              />
+
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <SheetAttributesPanel
                   attributes={attributes}
@@ -874,6 +951,16 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
         open={!!savingThrowPendingBonusDetail}
         onClose={() => setSavingThrowPendingBonusDetail(null)}
         detail={savingThrowPendingBonusDetail}
+      />
+
+      <SheetBonusDetailModal
+        open={isHitPointsDetailOpen}
+        onClose={() => setIsHitPointsDetailOpen(false)}
+        detail={{
+          name: 'Pontos de Vida Máximo',
+          total: maxHitPoints,
+          breakdown: maxHitPointsBreakdown,
+        }}
       />
 
       <SheetImageEditModal

@@ -57,7 +57,7 @@ export class RacesController {
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida, dados obrigatórios ausentes, formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas), formato inválido de property/gradation em Proficiências (devem ser UUIDs válidas), ou formato inválido de title/gradation em Saberes (title deve ser string não vazia, gradation deve ser UUID válido)',
+      'URL de imagem de referência inválida, dados obrigatórios ausentes, Pontos de Vida da raça inválido (deve ser inteiro ≥ 1), formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas), formato inválido de property/gradation em Proficiências (devem ser UUIDs válidas), ou formato inválido de title/gradation em Saberes (title deve ser string não vazia, gradation deve ser UUID válido)',
   })
   async create(@Body() dto: CreateRaceDto): Promise<RaceResponseDto> {
     const { race, improvements, flaws, proficiencies, knowledges } =
@@ -134,7 +134,7 @@ export class RacesController {
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida, ID em formato inválido, formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas), formato inválido de property/gradation em Proficiências (devem ser UUIDs válidas), ou formato inválido de title/gradation em Saberes (title deve ser string não vazia, gradation deve ser UUID válido)',
+      'URL de imagem de referência inválida, ID em formato inválido, Pontos de Vida da raça inválido (deve ser inteiro ≥ 1), formato inválido de value/type/property em Melhorias/Defeitos (value deve ser inteiro ≥ 1, type/property devem ser UUIDs válidas), formato inválido de property/gradation em Proficiências (devem ser UUIDs válidas), ou formato inválido de title/gradation em Saberes (title deve ser string não vazia, gradation deve ser UUID válido)',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,

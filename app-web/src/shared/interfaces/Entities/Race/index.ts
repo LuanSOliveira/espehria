@@ -23,6 +23,7 @@ export interface IRace extends IEntity {
   category: IRaceCategory;
   referenceImageUrl?: string | null;
   description?: string | null;
+  hitPoints: number;
   privateInformation?: string | null;
   tags: ITag[];
   characteristics: IEntityReference[];

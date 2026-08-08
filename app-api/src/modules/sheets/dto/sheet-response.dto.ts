@@ -36,6 +36,18 @@ export class SheetResponseDto {
   level: number;
 
   @ApiPropertyOptional({
+    description: 'PV atual da ficha (pode ser nulo se não informado)',
+    example: 12,
+  })
+  currentHitPoints: number | null;
+
+  @ApiPropertyOptional({
+    description: 'PV temporário da ficha (pode ser nulo se não informado)',
+    example: 5,
+  })
+  temporaryHitPoints: number | null;
+
+  @ApiPropertyOptional({
     type: () => CampaignOptionResponseDto,
     description: 'Campanha vinculada à ficha (pode ser nula se não informada)',
   })
@@ -113,6 +125,8 @@ export class SheetResponseDto {
     dto.name = sheet.name;
     dto.referenceImage = sheet.referenceImage;
     dto.level = sheet.level;
+    dto.currentHitPoints = sheet.currentHitPoints;
+    dto.temporaryHitPoints = sheet.temporaryHitPoints;
     dto.campaign = sheet.campaign
       ? CampaignOptionResponseDto.fromEntity(sheet.campaign)
       : null;

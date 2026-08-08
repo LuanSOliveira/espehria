@@ -97,13 +97,19 @@ export interface ISheetProficiencyAdjustmentEntry {
   adjustedProperty: IProficiencyProperty | null;
 }
 
+export interface ISheetRace extends IRaceListItem {
+  hitPoints: number;
+}
+
 export interface ISheet extends IEntity {
   name: string;
   referenceImage?: string | null;
   level: number;
   campaign?: { id: string; name: string } | null;
-  race?: IRaceListItem | null;
+  race?: ISheetRace | null;
   biography?: IBiographyListItem | null;
+  currentHitPoints: number | null;
+  temporaryHitPoints: number | null;
   melhorias: ISheetImprovementDefectSnapshot;
   defeitos: ISheetImprovementDefectSnapshot;
   proficiencias: ISheetProficiencySnapshot;

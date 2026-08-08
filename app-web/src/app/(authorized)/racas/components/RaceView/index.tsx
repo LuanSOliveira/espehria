@@ -8,6 +8,7 @@ import {
   FiArrowUpCircle,
   FiBookOpen,
   FiFileText,
+  FiHeart,
   FiImage,
   FiLock,
   FiTag,
@@ -217,6 +218,12 @@ export const RaceView = ({ raceId, onNotFound }: RaceViewProps) => {
           label="Descrição"
           icon={FiFileText}
           value={race.description}
+        />
+
+        <RaceSectionBox
+          label="Pontos de Vida"
+          icon={FiHeart}
+          value={String(race.hitPoints)}
         />
       </div>
 

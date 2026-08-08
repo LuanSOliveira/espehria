@@ -247,6 +247,7 @@ export class RacesService {
       category,
       referenceImageUrl: dto.referenceImageUrl ?? null,
       description: dto.description ?? null,
+      hitPoints: dto.hitPoints,
       privateInformation: dto.privateInformation ?? null,
       characteristics,
       talents,
@@ -392,6 +393,9 @@ export class RacesService {
     }
     if (dto.description !== undefined) {
       race.description = dto.description;
+    }
+    if (dto.hitPoints !== undefined) {
+      race.hitPoints = dto.hitPoints;
     }
     if (dto.privateInformation !== undefined) {
       race.privateInformation = dto.privateInformation;

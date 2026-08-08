@@ -142,7 +142,7 @@ export class SheetsController {
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem inválida, nível fora do intervalo válido, IDs em formato inválido (incluindo armorClassKeyAttributeId), ou parâmetros de validação inválidos',
+      'URL de imagem inválida, nível fora do intervalo válido, IDs em formato inválido (incluindo armorClassKeyAttributeId), PV atual ou temporário em formato inválido (devem ser inteiros), ou outros parâmetros de validação inválidos',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,

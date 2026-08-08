@@ -35,6 +35,20 @@ export class Sheet extends BaseEntity {
   @Column({ type: 'int', default: 1 })
   level!: number;
 
+  @ApiPropertyOptional({
+    description: 'PV atual da ficha (número inteiro, aceita negativos)',
+    example: 12,
+  })
+  @Column({ type: 'int', nullable: true, name: 'current_hit_points' })
+  currentHitPoints!: number | null;
+
+  @ApiPropertyOptional({
+    description: 'PV temporário da ficha (número inteiro, aceita negativos)',
+    example: 5,
+  })
+  @Column({ type: 'int', nullable: true, name: 'temporary_hit_points' })
+  temporaryHitPoints!: number | null;
+
   @ApiPropertyOptional({ type: () => Campaign })
   @ManyToOne(() => Campaign, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'campaign_id' })

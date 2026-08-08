@@ -481,6 +481,12 @@ export class SheetsService {
     if (dto.level !== undefined) {
       sheet.level = dto.level;
     }
+    if (dto.currentHitPoints !== undefined) {
+      sheet.currentHitPoints = dto.currentHitPoints;
+    }
+    if (dto.temporaryHitPoints !== undefined) {
+      sheet.temporaryHitPoints = dto.temporaryHitPoints;
+    }
     if (dto.campaignId !== undefined) {
       sheet.campaign = dto.campaignId
         ? await this.findCampaignById(dto.campaignId)

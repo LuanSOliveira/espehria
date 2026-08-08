@@ -64,4 +64,28 @@ export class UpdateSheetDto {
   @IsOptional()
   @IsUUID()
   armorClassKeyAttributeId?: string;
+
+  @ApiPropertyOptional({
+    nullable: true,
+    example: 12,
+    description:
+      'PV atual da ficha (inteiro, aceita negativos). Omitir o campo mantém o valor atual inalterado; enviar "null" explicitamente limpa o campo',
+  })
+  @IsOptional()
+  @ValidateIf((_object, value) => value !== null)
+  @Type(() => Number)
+  @IsInt({ message: 'O PV atual deve ser um número inteiro.' })
+  currentHitPoints?: number | null;
+
+  @ApiPropertyOptional({
+    nullable: true,
+    example: 5,
+    description:
+      'PV temporário da ficha (inteiro, aceita negativos). Omitir o campo mantém o valor atual inalterado; enviar "null" explicitamente limpa o campo',
+  })
+  @IsOptional()
+  @ValidateIf((_object, value) => value !== null)
+  @Type(() => Number)
+  @IsInt({ message: 'O PV temporário deve ser um número inteiro.' })
+  temporaryHitPoints?: number | null;
 }

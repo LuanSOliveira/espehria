@@ -2,11 +2,13 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUrl,
   IsUUID,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { ImprovementFlawItemInputDto } from '../../improvement-flaws/dto/improvement-flaw-item-input.dto';
@@ -45,6 +47,15 @@ export class CreateRaceDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiProperty({
+    example: 5,
+    description: 'Pontos de Vida da raça (inteiro, mínimo 1, obrigatório)',
+  })
+  @Type(() => Number)
+  @IsInt({ message: 'Os Pontos de Vida devem ser um número inteiro.' })
+  @Min(1, { message: 'Os Pontos de Vida devem ser maior ou igual a 1.' })
+  hitPoints: number;
 
   @ApiPropertyOptional({
     example: '<p>Anotações internas não destinadas ao público</p>',

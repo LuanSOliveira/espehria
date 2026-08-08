@@ -41,6 +41,12 @@ export class RaceResponseDto {
   })
   description: string | null;
 
+  @ApiProperty({
+    description: 'Pontos de Vida da raça',
+    example: 5,
+  })
+  hitPoints: number;
+
   @ApiPropertyOptional({
     description: 'Informações privadas da raça em HTML',
   })
@@ -120,6 +126,7 @@ export class RaceResponseDto {
     dto.category = RaceCategoryResponseDto.fromEntity(race.category);
     dto.referenceImageUrl = race.referenceImageUrl;
     dto.description = race.description;
+    dto.hitPoints = race.hitPoints;
     dto.privateInformation = race.privateInformation;
     dto.tags = (race.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
     dto.characteristics = (race.characteristics ?? []).map((characteristic) =>
