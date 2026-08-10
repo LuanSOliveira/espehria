@@ -35,7 +35,7 @@ export class EntityReferenceResponseDto {
   @ApiProperty({
     nullable: true,
     description:
-      'Nível da entidade referenciada (característica, talento, técnica ou magia); null quando a entidade referenciada for um treinamento (que não possui nível)',
+      'Nível da entidade referenciada (característica, talento, técnica, magia ou treinamento); null quando a entidade referenciada for uma biografia (que não possui nível)',
     example: 3,
   })
   level!: number | null;

@@ -62,8 +62,10 @@ interface KnowledgeInputPayload {
   editable?: boolean;
 }
 
-interface TrainingPayload extends Omit<TrainingFormData, 'description'> {
+interface TrainingPayload
+  extends Omit<TrainingFormData, 'description' | 'level'> {
   description?: string;
+  level: number;
   improvedFrom: EntityReferenceInputPayload[];
   requirements: EntityReferenceInputPayload[];
   additionalAbilities: EntityReferenceInputPayload[];
@@ -136,6 +138,7 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
       name: trainingDetail.name,
       description: trainingDetail.description ?? '',
       tagIds: trainingDetail.tags?.map((tag) => tag.id) ?? [],
+      level: String(trainingDetail.level),
     });
     setImprovedFrom(trainingDetail.improvedFrom ?? []);
     setRequirements(trainingDetail.requirements ?? []);
@@ -172,6 +175,7 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
     ...data,
     description: data.description || undefined,
     tagIds: data.tagIds ?? [],
+    level: Number(data.level),
     improvedFrom: improvedFrom.map((reference) => ({
       entityType: reference.entityType,
       id: reference.id,
@@ -306,6 +310,16 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"
+        />
+
+        <FormTextInput
+          id="training-form-level"
+          name="level"
+          control={control}
+          label="Level"
+          placeholder="Digite o level"
+          type="number"
+          slotProps={{ htmlInput: { min: 1, step: 1, inputMode: 'numeric' } }}
         />
       </div>
 

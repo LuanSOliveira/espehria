@@ -90,6 +90,8 @@ export const TrainingView = ({
           {training.name}
         </Title>
 
+        <DefaultText>{`(level ${training.level})`}</DefaultText>
+
         {training.tags.length > 0 && (
           <div className="flex flex-wrap justify-center gap-2">
             {training.tags.map((tag) => (

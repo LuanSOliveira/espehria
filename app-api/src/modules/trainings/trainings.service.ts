@@ -182,6 +182,7 @@ export class TrainingsService {
 
     const training = this.trainingsRepository.create({
       name: dto.name,
+      level: dto.level,
       description: dto.description ?? null,
     });
 
@@ -341,6 +342,10 @@ export class TrainingsService {
         throw new ConflictException('Já existe um treinamento com este nome.');
       }
       training.name = dto.name;
+    }
+
+    if (dto.level !== undefined) {
+      training.level = dto.level;
     }
 
     if (dto.description !== undefined) {

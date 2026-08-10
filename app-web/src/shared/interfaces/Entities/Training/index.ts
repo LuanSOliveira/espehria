@@ -9,6 +9,7 @@ export interface ITraining extends IEntity {
   name: string;
   description?: string | null;
   tags: ITag[];
+  level: number;
   improvedFrom: IEntityReference[];
   requirements: IEntityReference[];
   additionalAbilities: IEntityReference[];
@@ -24,6 +25,7 @@ export interface ITrainingListItem {
   id: string;
   name: string;
   tags: ITag[];
+  level: number;
 }
 
 export interface ITrainingListFilters {

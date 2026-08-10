@@ -10,6 +10,10 @@ export class Training extends BaseEntity {
   @Column()
   name!: string;
 
+  @ApiProperty({ description: 'Nível do treinamento (obrigatório)', example: 3 })
+  @Column({ type: 'int' })
+  level!: number;
+
   @Column({ type: 'text', nullable: true })
   description!: string | null;
 

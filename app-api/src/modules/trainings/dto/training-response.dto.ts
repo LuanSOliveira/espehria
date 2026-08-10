@@ -19,6 +19,9 @@ export class TrainingResponseDto {
   })
   name: string;
 
+  @ApiProperty({ description: 'Nível do treinamento', example: 3 })
+  level: number;
+
   @ApiPropertyOptional({
     description: 'Descrição do treinamento em HTML',
     example: '<p>Treinamento focado em técnicas de combate corpo a corpo</p>',
@@ -98,6 +101,7 @@ export class TrainingResponseDto {
     const dto = new TrainingResponseDto();
     dto.id = training.id;
     dto.name = training.name;
+    dto.level = training.level;
     dto.description = training.description;
     dto.tags = (training.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),
