@@ -30,6 +30,8 @@ export interface ITalentListItem {
 
 export interface ITalentListFilters {
   name?: string;
+  level?: number;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

@@ -81,7 +81,9 @@ export class TrainingsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Lista treinamentos com paginação e filtro' })
+  @ApiOperation({
+    summary: 'Lista treinamentos com paginação e filtro por nome, level e tags',
+  })
   @ApiOkResponse({ type: PaginatedTrainingsResponseDto })
   @ApiBadRequestResponse({
     description: 'Parâmetros de paginação ou filtro inválidos',

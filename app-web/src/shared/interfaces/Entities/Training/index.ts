@@ -30,6 +30,8 @@ export interface ITrainingListItem {
 
 export interface ITrainingListFilters {
   name?: string;
+  level?: number;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

@@ -7,8 +7,16 @@ import { ConfirmationModal, FormModal, ViewModal } from '@/shared/components/Mod
 import { Title } from '@/shared/components/Texts';
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { useIsGoogleUser } from '@/hooks/Auth';
-import { useDeleteEntity, useGetEntityList } from '@/hooks/Queries';
-import { ITalentListFilters, ITalentListItem } from '@/shared/interfaces';
+import {
+  useDeleteEntity,
+  useGetEntityList,
+  useTagOptionsQuery,
+} from '@/hooks/Queries';
+import {
+  ITag,
+  ITalentListFilters,
+  ITalentListItem,
+} from '@/shared/interfaces';
 import { APP_DEFAULT_PAGE_SIZE } from '@/shared/constants';
 import { showToast } from '@/shared/util';
 import { useSelectedTalentStore } from '@/store';
@@ -20,6 +28,8 @@ import { TalentView } from './components/TalentView';
 export default function TalentsPage() {
   const isGoogleUser = useIsGoogleUser();
   const [nameInput, setNameInput] = useState('');
+  const [levelInput, setLevelInput] = useState('');
+  const [selectedTags, setSelectedTags] = useState<ITag[]>([]);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [talentPendingDelete, setTalentPendingDelete] =
     useState<ITalentListItem | null>(null);
@@ -32,6 +42,8 @@ export default function TalentsPage() {
 
   const { selectedTalent, resetSelectedTalent, setSelectedTalent } =
     useSelectedTalentStore();
+
+  const { tagOptions } = useTagOptionsQuery();
 
   const { data, isLoading } = useGetEntityList<
     ITalentListItem,
@@ -63,11 +75,26 @@ export default function TalentsPage() {
 
   const handleSearch = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const parsedLevel = Number(levelInput.trim());
     setFilters((current) => ({
       ...current,
       name: nameInput.trim() || undefined,
+      level:
+        levelInput.trim() && !Number.isNaN(parsedLevel)
+          ? parsedLevel
+          : undefined,
+      tagIds: selectedTags.length
+        ? selectedTags.map((tag) => tag.id)
+        : undefined,
       page: 1,
     }));
+  };
+
+  const handleClear = () => {
+    setNameInput('');
+    setLevelInput('');
+    setSelectedTags([]);
+    setFilters({ page: 1, perPage: APP_DEFAULT_PAGE_SIZE });
   };
 
   const handlePageChange = (newPage: number) => {
@@ -113,7 +140,13 @@ export default function TalentsPage() {
       <TalentsFilterSection
         nameValue={nameInput}
         onNameChange={setNameInput}
+        levelValue={levelInput}
+        onLevelChange={setLevelInput}
+        tagsValue={selectedTags}
+        onTagsChange={setSelectedTags}
+        tagOptions={tagOptions}
         onSubmit={handleSearch}
+        onClear={handleClear}
       />
 
       <TalentsList

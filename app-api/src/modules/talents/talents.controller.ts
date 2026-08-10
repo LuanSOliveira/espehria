@@ -81,7 +81,9 @@ export class TalentsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Lista talentos com paginação e filtro' })
+  @ApiOperation({
+    summary: 'Lista talentos com paginação e filtro por nome, level e tags',
+  })
   @ApiOkResponse({ type: PaginatedTalentsResponseDto })
   @ApiBadRequestResponse({
     description: 'Parâmetros de paginação ou filtro inválidos',

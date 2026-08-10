@@ -85,7 +85,10 @@ export class CharacteristicsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Lista características com paginação e filtro' })
+  @ApiOperation({
+    summary:
+      'Lista características com paginação e filtro por nome, level e tags',
+  })
   @ApiOkResponse({ type: PaginatedCharacteristicsResponseDto })
   @ApiBadRequestResponse({
     description: 'Parâmetros de paginação ou filtro inválidos',

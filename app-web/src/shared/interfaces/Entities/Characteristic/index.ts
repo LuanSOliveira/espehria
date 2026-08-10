@@ -30,6 +30,8 @@ export interface ICharacteristicListItem {
 
 export interface ICharacteristicListFilters {
   name?: string;
+  level?: number;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

@@ -1,6 +1,13 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsArray,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Min,
+} from 'class-validator';
 
 export class FindTrainingsQueryDto {
   @ApiPropertyOptional({
@@ -11,6 +18,29 @@ export class FindTrainingsQueryDto {
   @IsOptional()
   @IsString()
   name?: string;
+
+  @ApiPropertyOptional({
+    description: 'Filtro por nível do treinamento (valor exato)',
+    example: 3,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'O nível deve ser um número inteiro.' })
+  @Min(1, { message: 'O nível deve ser maior ou igual a 1.' })
+  level?: number;
+
+  @ApiPropertyOptional({
+    type: [String],
+    format: 'uuid',
+    isArray: true,
+    description:
+      'Filtro por tags (array de UUIDs). Retorna apenas treinamentos que possuem TODAS as tags informadas (AND). Na querystring, use a notação com colchetes: `tagIds[]=uuid1&tagIds[]=uuid2&...`',
+    example: ['550e8400-e29b-41d4-a716-446655440000'],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  tagIds?: string[];
 
   @ApiPropertyOptional({
     minimum: 1,
