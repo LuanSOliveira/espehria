@@ -28,4 +28,6 @@ export const APP_COLORS = {
   buttonText: '#f0d488',
 
   white: '#ffffff',
+
+  alertRed: '#c62828',
 } as const;

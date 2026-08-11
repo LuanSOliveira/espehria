@@ -161,7 +161,6 @@ export const SheetTrainingsPanel = ({
         onClose={() => setSlotIndexPendingFill(null)}
         title="Preencher slot de treinamento"
         entityType="training"
-        url="/trainings"
         sheetId={sheetId}
         isSelecting={isFillingSlot}
         onSelect={(item) => {
@@ -177,7 +176,6 @@ export const SheetTrainingsPanel = ({
         onClose={() => setIsExtraSelectionModalOpen(false)}
         title="Adicionar treinamento extra"
         entityType="training"
-        url="/trainings"
         sheetId={sheetId}
         isSelecting={isAddingExtra}
         onSelect={(item) => {

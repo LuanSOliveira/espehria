@@ -54,7 +54,7 @@ export const SheetAbilityCard = ({
 
   return (
     <>
-      <div style={{ position: 'relative' }}>
+      <div className="h-full" style={{ position: 'relative' }}>
         <span
           style={{
             position: 'absolute',
@@ -69,7 +69,7 @@ export const SheetAbilityCard = ({
         </span>
 
         <div
-          className="flex items-center gap-3 px-3 py-2"
+          className="flex h-full items-center gap-3 px-3 py-2"
           style={APP_CONTAINER_STYLES.detailInfoField}
         >
           <div className="flex flex-1 flex-col gap-1">
@@ -80,7 +80,7 @@ export const SheetAbilityCard = ({
                 <Tooltip title="Requisitos pendentes">
                   <span className="flex items-center">
                     <FiAlertTriangle
-                      style={{ fontSize: 16, color: APP_COLORS.goldSoft }}
+                      style={{ fontSize: 16, color: APP_COLORS.alertRed }}
                     />
                   </span>
                 </Tooltip>

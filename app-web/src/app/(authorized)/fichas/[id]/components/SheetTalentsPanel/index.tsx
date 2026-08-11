@@ -120,7 +120,6 @@ export const SheetTalentsPanel = ({
         onClose={() => setIsSelectionModalOpen(false)}
         title="Adicionar talento extra"
         entityType="talent"
-        url="/talents"
         sheetId={sheetId}
         isSelecting={isAdding}
         onSelect={(item) => {

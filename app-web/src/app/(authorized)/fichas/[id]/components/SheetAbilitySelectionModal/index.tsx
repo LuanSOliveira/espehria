@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   IconButton,
   Table,
@@ -15,16 +15,13 @@ import {
 import { FiAlertTriangle, FiEye, FiLock, FiPlus, FiSearch } from 'react-icons/fi';
 import { FormModal } from '@/shared/components/Modals';
 import {
+  DefaultCheckboxInput,
   DefaultMultiAutocompleteInput,
   DefaultTextInput,
 } from '@/shared/components/Inputs';
 import { DefaultText, Label } from '@/shared/components/Texts';
 import { TagBadge } from '@/shared/components/TagBadge';
-import {
-  useCheckSheetAbilityRequirementsQuery,
-  useGetEntityList,
-  useTagOptionsQuery,
-} from '@/hooks/Queries';
+import { useGetEntityList, useTagOptionsQuery } from '@/hooks/Queries';
 import { useEntityMentionViewStore } from '@/store';
 import { ISheetAbilityBucketType, ITag } from '@/shared/interfaces';
 import { formatTagLabel } from '@/shared/util';
@@ -35,12 +32,16 @@ interface SheetAbilityCandidate {
   name: string;
   level: number;
   tags: ITag[];
+  alreadyPresent: boolean;
+  requirementsMet: boolean;
 }
 
 interface SheetAbilityCandidateListFilters {
+  entityType: ISheetAbilityBucketType;
   name?: string;
   level?: number;
   tagIds?: string[];
+  onlyEligible?: boolean;
   page?: number;
   perPage?: number;
 }
@@ -50,8 +51,6 @@ export interface SheetAbilitySelectionModalProps {
   onClose: () => void;
   title: string;
   entityType: ISheetAbilityBucketType;
-  /** `/characteristics` | `/trainings` | `/talents`. */
-  url: string;
   sheetId: string;
   onSelect: (item: { id: string; name: string }) => void;
   isSelecting?: boolean;
@@ -63,20 +62,21 @@ export interface SheetAbilitySelectionModalProps {
  * que é genérico para 5 tipos de entidade fora do contexto de ficha e só
  * suporta filtro por nome. Este modal recebe um único `entityType` por
  * abertura e reaproveita os filtros nome/level/tags já usados nas páginas de
- * listagem de Características/Treinamentos/Talentos.
+ * listagem de Características/Treinamentos/Talentos, além do filtro
+ * "somente elegíveis".
  *
- * Desvio confirmado contra o backend real: a listagem paginada
- * (`/characteristics` | `/trainings` | `/talents`) não retorna
- * `requirementsMet` por item — esse status vem de um endpoint dedicado,
- * `POST /sheets/:id/abilities/requirement-checks`, chamado aqui em lote para
- * os itens da página atual (`alreadyPresent`/`requirementsMet`).
+ * A listagem vem de uma única chamada a `GET /sheets/:sheetId/abilities/
+ * candidates` (escopada à ficha), que já retorna `alreadyPresent`/
+ * `requirementsMet` embutidos por item e pagina somente após aplicar todos os
+ * filtros (incluindo elegibilidade) — substitui a antiga combinação de
+ * listagem genérica (`/characteristics` | `/trainings` | `/talents`) + `POST
+ * /sheets/:id/abilities/requirement-checks` em lote.
  */
 export const SheetAbilitySelectionModal = ({
   open,
   onClose,
   title,
   entityType,
-  url,
   sheetId,
   onSelect,
   isSelecting = false,
@@ -84,6 +84,7 @@ export const SheetAbilitySelectionModal = ({
   const [nameFilter, setNameFilter] = useState('');
   const [levelFilter, setLevelFilter] = useState('');
   const [tagsFilter, setTagsFilter] = useState<ITag[]>([]);
+  const [onlyEligible, setOnlyEligible] = useState(false);
   const [page, setPage] = useState(1);
 
   const openEntityView = useEntityMentionViewStore(
@@ -99,22 +100,25 @@ export const SheetAbilitySelectionModal = ({
     setNameFilter('');
     setLevelFilter('');
     setTagsFilter([]);
+    setOnlyEligible(false);
     setPage(1);
   }, [open]);
 
   useEffect(() => {
     setPage(1);
-  }, [nameFilter, levelFilter, tagsFilter]);
+  }, [nameFilter, levelFilter, tagsFilter, onlyEligible]);
 
   const { data, isLoading } = useGetEntityList<
     SheetAbilityCandidate,
     SheetAbilityCandidateListFilters
   >({
-    url,
+    url: `/sheets/${sheetId}/abilities/candidates`,
     filters: {
+      entityType,
       name: nameFilter || undefined,
       level: levelFilter ? Number(levelFilter) : undefined,
       tagIds: tagsFilter.length > 0 ? tagsFilter.map((tag) => tag.id) : undefined,
+      onlyEligible: onlyEligible || undefined,
       page,
       perPage: APP_DEFAULT_PAGE_SIZE,
     },
@@ -122,19 +126,6 @@ export const SheetAbilitySelectionModal = ({
   });
 
   const items = data?.data ?? [];
-  const itemIds = useMemo(() => items.map((item) => item.id), [items]);
-
-  const { data: requirementChecks } = useCheckSheetAbilityRequirementsQuery({
-    sheetId,
-    entityType,
-    ids: itemIds,
-    enabled: open && itemIds.length > 0,
-  });
-
-  const checksById = useMemo(
-    () => new Map((requirementChecks ?? []).map((check) => [check.id, check])),
-    [requirementChecks],
-  );
 
   return (
     <FormModal open={open} onClose={onClose} title={title} size="wide">
@@ -174,6 +165,12 @@ export const SheetAbilitySelectionModal = ({
               placeholder="Selecione as tags"
             />
           </div>
+          <DefaultCheckboxInput
+            id="sheet-ability-selection-only-eligible-filter"
+            label="Somente habilidades que cumprem os requisitos"
+            checked={onlyEligible}
+            onChange={setOnlyEligible}
+          />
         </div>
 
         <TableContainer>
@@ -212,9 +209,7 @@ export const SheetAbilitySelectionModal = ({
               )}
 
               {items.map((item) => {
-                const check = checksById.get(item.id);
-                const alreadyPresent = check?.alreadyPresent ?? false;
-                const requirementsMet = check?.requirementsMet ?? true;
+                const { alreadyPresent, requirementsMet } = item;
                 const isAddDisabled = alreadyPresent || !requirementsMet;
                 const addTooltip = alreadyPresent
                   ? 'Já está na ficha'
@@ -231,7 +226,7 @@ export const SheetAbilitySelectionModal = ({
                           <Tooltip title="Requisitos não atendidos">
                             <span className="flex items-center">
                               <FiAlertTriangle
-                                style={{ fontSize: 16, color: APP_COLORS.goldSoft }}
+                                style={{ fontSize: 16, color: APP_COLORS.alertRed }}
                               />
                             </span>
                           </Tooltip>

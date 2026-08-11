@@ -27,24 +27,26 @@ export const SheetTrainingSlotCell = ({
   isEmptying = false,
 }: SheetTrainingSlotCellProps) => {
   return (
-    <div className="flex flex-col gap-1">
-      {training ? (
-        <SheetAbilityCard
-          name={training.name}
-          level={training.level}
-          tags={training.tags}
-          entityType="training"
-          entityId={training.id}
-          requirementsMet={training.requirementsMet}
-          onRemove={onEmpty}
-          isRemoving={isEmptying}
-        />
-      ) : (
-        <SheetDashedFieldButton
-          label="Preencher slot de treinamento"
-          onClick={onFill}
-        />
-      )}
+    <div className="flex h-full flex-col gap-1">
+      <div className="flex-1">
+        {training ? (
+          <SheetAbilityCard
+            name={training.name}
+            level={training.level}
+            tags={training.tags}
+            entityType="training"
+            entityId={training.id}
+            requirementsMet={training.requirementsMet}
+            onRemove={onEmpty}
+            isRemoving={isEmptying}
+          />
+        ) : (
+          <SheetDashedFieldButton
+            label="Preencher slot de treinamento"
+            onClick={onFill}
+          />
+        )}
+      </div>
 
       <Label component="span" sx={{ margin: 0, textAlign: 'center' }}>
         {`Liberado no level ${unlockedAtLevel}`}

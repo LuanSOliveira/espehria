@@ -221,19 +221,6 @@ export interface ISheetAbilitiesMutationResult {
   abilities: ISheetAbilitiesSummary;
 }
 
-/**
- * Retorno de `POST /sheets/:id/abilities/requirement-checks`
- * (`AbilityRequirementCheckResponseDto`), usado pelo modal de seleção para
- * saber, por item do catálogo, se ele já está na ficha e se os requisitos
- * são atendidos.
- */
-export interface ISheetAbilityRequirementCheck {
-  entityType: ISheetAbilityBucketType;
-  id: string;
-  alreadyPresent: boolean;
-  requirementsMet: boolean;
-}
-
 export interface ISheetListFilters {
   name?: string;
   campaignId?: string;

@@ -120,7 +120,6 @@ export const SheetCharacteristicsPanel = ({
         onClose={() => setIsSelectionModalOpen(false)}
         title="Adicionar característica extra"
         entityType="characteristic"
-        url="/characteristics"
         sheetId={sheetId}
         isSelecting={isAdding}
         onSelect={(item) => {

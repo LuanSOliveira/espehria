@@ -13,7 +13,6 @@ export * from './useProficiencyGradationsQuery';
 export * from './useResolveProficiencyAdjustmentMutation';
 export * from './useTagOptionsQuery';
 export * from './useUpdateSheetKnowledgeNoteMutation';
-export * from './useCheckSheetAbilityRequirementsQuery';
 export * from './useRemoveSheetCharacteristicExtraMutation';
 export * from './useRemoveSheetTalentExtraMutation';
 export * from './useRemoveSheetTrainingExtraMutation';

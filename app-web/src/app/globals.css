@@ -33,6 +33,8 @@
   --button-text: #f0d488;
 
   --white: #ffffff;
+
+  --alert-red: #c62828;
 }
 
 @theme inline {
@@ -70,6 +72,8 @@
   --color-button-text: var(--button-text);
 
   --color-white: var(--white);
+
+  --color-alert-red: var(--alert-red);
 }
 
 @media (prefers-color-scheme: dark) {

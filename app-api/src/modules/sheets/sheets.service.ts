@@ -53,7 +53,7 @@ import { AddCharacteristicExtraDto } from './dto/add-characteristic-extra.dto';
 import { AddTrainingExtraDto } from './dto/add-training-extra.dto';
 import { AddTalentExtraDto } from './dto/add-talent-extra.dto';
 import { FillTrainingSlotDto } from './dto/fill-training-slot.dto';
-import { CheckAbilityRequirementsDto } from './dto/check-ability-requirements.dto';
+import { FindSheetAbilityCandidatesQueryDto } from './dto/find-sheet-ability-candidates-query.dto';
 import type { SheetAbilityOriginEntityType } from './dto/sheet-ability-origin-response.dto';
 import { Sheet } from './entities/sheet.entity';
 import { SheetTrainingSlot } from './entities/sheet-training-slot.entity';
@@ -77,6 +77,7 @@ const ATTRIBUTE_TYPE_NAME = 'Atributo';
 const FREE_IMPROVEMENT_VALUE = 2;
 const DEFAULT_ARMOR_CLASS_KEY_ATTRIBUTE_NAME = 'Destreza';
 const INITIAL_TRAINING_SLOT_COUNT = 3;
+const RACE_TALENT_REQUIREMENT_TAG_NAME = 'Raça';
 
 interface ProficiencySource {
   type: SheetProficiencyAdjustmentSourceType;
@@ -172,11 +173,20 @@ export interface SheetAbilityMutationResult {
   abilities: SheetAbilitiesData;
 }
 
-export interface AbilityRequirementCheckResult {
-  entityType: ReferenceableEntityType;
+export interface SheetAbilityCandidateResult {
   id: string;
+  name: string;
+  level: number;
+  tags: TagResponseDto[];
   alreadyPresent: boolean;
   requirementsMet: boolean;
+}
+
+export interface PaginatedSheetAbilityCandidates {
+  data: SheetAbilityCandidateResult[];
+  total: number;
+  page: number;
+  perPage: number;
 }
 
 export interface PaginatedSheets {
@@ -607,15 +617,56 @@ export class SheetsService {
   }
 
   /**
-   * Avalia se `sheet` atende aos requisitos de `item` (nível + `requirements`,
-   * semântica E): Característica/Treinamento/Talento são considerados
-   * atendidos se presentes na ficha por qualquer via (herdado, slot ou
-   * extra — `presentIdsByBucket`); Biografia é considerada atendida se for a
-   * biografia atualmente vinculada; Técnica/Magia são sempre não atendidos
-   * (a ficha não possui mecanismo para "tê-las" nesta demanda).
+   * Regra de requisito adicional, específica de Talento: um Talento com uma
+   * tag cujo nome (normalizado) seja "Raça" só é considerado com requisito
+   * atendido se pertencer aos talentos da Raça atualmente vinculada à ficha.
+   * Não se aplica a Característica/Treinamento (sempre `true`). Ficha sem
+   * Raça vinculada produz conjunto vazio, portanto sempre `false` para
+   * Talentos com essa tag.
+   */
+  private evaluateRaceTalentTagRule(
+    item: {
+      id: string;
+      entityType: ReferenceableEntityType;
+      tags: { name: string }[];
+    },
+    sheet: Sheet,
+  ): boolean {
+    if (item.entityType !== ReferenceableEntityType.TALENT) {
+      return true;
+    }
+    const normalizedTagName = (name: string) => name.trim().toLowerCase();
+    const hasRaceTag = item.tags.some(
+      (tag) =>
+        normalizedTagName(tag.name) ===
+        normalizedTagName(RACE_TALENT_REQUIREMENT_TAG_NAME),
+    );
+    if (!hasRaceTag) {
+      return true;
+    }
+    const raceTalentIds = new Set(
+      (sheet.race?.talents ?? []).map((talent) => talent.id),
+    );
+    return raceTalentIds.has(item.id);
+  }
+
+  /**
+   * Avalia se `sheet` atende aos requisitos de `item` (nível + `requirements`
+   * + regra de tag "Raça" para Talentos, semântica E): Característica/
+   * Treinamento/Talento são considerados atendidos se presentes na ficha por
+   * qualquer via (herdado, slot ou extra — `presentIdsByBucket`); Biografia é
+   * considerada atendida se for a biografia atualmente vinculada; Técnica/
+   * Magia são sempre não atendidos (a ficha não possui mecanismo para
+   * "tê-las" nesta demanda).
    */
   private evaluateAbilityRequirements(
-    item: { level: number; requirements: EntityReferenceResponseDto[] },
+    item: {
+      id: string;
+      entityType: ReferenceableEntityType;
+      level: number;
+      tags: { name: string }[];
+      requirements: EntityReferenceResponseDto[];
+    },
     sheet: Sheet,
     presentIdsByBucket: {
       trainings: Set<string>;
@@ -640,7 +691,8 @@ export class SheetsService {
           return false;
       }
     });
-    return levelMet && requirementsMet;
+    const raceTagRuleMet = this.evaluateRaceTalentTagRule(item, sheet);
+    return levelMet && requirementsMet && raceTagRuleMet;
   }
 
   /**
@@ -970,7 +1022,10 @@ export class SheetsService {
       tags: entry.item.tags,
       requirementsMet: this.evaluateAbilityRequirements(
         {
+          id: entry.item.id,
+          entityType,
           level: entry.item.level,
+          tags: entry.item.tags,
           requirements: requirementsFor(entityType, entry.item.id),
         },
         sheet,
@@ -988,7 +1043,13 @@ export class SheetsService {
       level: item.level,
       tags: item.tags,
       requirementsMet: this.evaluateAbilityRequirements(
-        { level: item.level, requirements: requirementsFor(entityType, item.id) },
+        {
+          id: item.id,
+          entityType,
+          level: item.level,
+          tags: item.tags,
+          requirements: requirementsFor(entityType, item.id),
+        },
         sheet,
         presentIdsByBucket,
       ),
@@ -1771,11 +1832,34 @@ export class SheetsService {
     };
   }
 
-  async checkAbilityRequirements(
+  private bucketForEntityType(
+    entityType: ReferenceableEntityType,
+  ): SheetAbilityBucketKey {
+    if (entityType === ReferenceableEntityType.TRAINING) {
+      return 'trainings';
+    }
+    if (entityType === ReferenceableEntityType.TALENT) {
+      return 'talents';
+    }
+    return 'characteristics';
+  }
+
+  /**
+   * Lista, paginada, candidatos do catálogo (Característica/Treinamento/
+   * Talento, conforme `query.entityType`) a serem vinculados a `sheet`, já
+   * com `alreadyPresent`/`requirementsMet` (incluindo a regra de tag "Raça")
+   * avaliados por candidato. Filtro de nome/level/tags reaproveita o mesmo
+   * padrão de `TalentsService.findAllPaginated`/`TrainingsService.findAllPaginated`/
+   * `CharacteristicsService.findAllPaginated`, mas a paginação (`skip`/`take`)
+   * é aplicada em memória, depois de avaliar elegibilidade para todo o
+   * conjunto filtrado por nome/level/tags — necessário porque `onlyEligible`
+   * (quando ativo) precisa refletir no `total` retornado.
+   */
+  async findAbilityCandidates(
     id: string,
-    dto: CheckAbilityRequirementsDto,
+    query: FindSheetAbilityCandidatesQueryDto,
     currentUser: User,
-  ): Promise<AbilityRequirementCheckResult[]> {
+  ): Promise<PaginatedSheetAbilityCandidates> {
     const sheet = await this.findAccessibleById(id, currentUser);
     if (!sheet) {
       throw new NotFoundException(
@@ -1788,131 +1872,214 @@ export class SheetsService {
       ReferenceableEntityType.TALENT,
       ReferenceableEntityType.CHARACTERISTIC,
     ]);
-    for (const item of dto.items) {
-      if (!allowedTypes.has(item.entityType)) {
-        throw new BadRequestException(
-          'Apenas itens do tipo treinamento, talento ou característica podem ser avaliados neste endpoint.',
-        );
-      }
+    if (!allowedTypes.has(query.entityType)) {
+      throw new BadRequestException(
+        'Apenas itens do tipo treinamento, talento ou característica podem ser avaliados neste endpoint.',
+      );
     }
 
-    if (dto.items.length === 0) {
-      return [];
+    const page = query.page ?? DEFAULT_PAGE;
+    const perPage = query.perPage ?? DEFAULT_PER_PAGE;
+    const hasTagFilter = !!query.tagIds && query.tagIds.length > 0;
+    const uniqueTagIds = hasTagFilter ? [...new Set(query.tagIds)] : [];
+
+    let candidateIds: string[];
+    let candidateEntities: { id: string; name: string; level: number }[];
+    let tagsById: Map<string, Tag[]>;
+
+    if (query.entityType === ReferenceableEntityType.CHARACTERISTIC) {
+      const queryBuilder =
+        this.characteristicsRepository.createQueryBuilder('characteristic');
+      if (query.name) {
+        queryBuilder.andWhere('characteristic.name ILIKE :name', {
+          name: `%${query.name}%`,
+        });
+      }
+      if (query.level !== undefined) {
+        queryBuilder.andWhere('characteristic.level = :level', {
+          level: query.level,
+        });
+      }
+      if (hasTagFilter) {
+        queryBuilder
+          .innerJoin(
+            'characteristic_tags',
+            'characteristic_tag_filter',
+            'characteristic_tag_filter.characteristic_id = characteristic.id AND characteristic_tag_filter.tag_id IN (:...tagIds)',
+            { tagIds: uniqueTagIds },
+          )
+          .groupBy('characteristic.id')
+          .having(
+            'COUNT(DISTINCT characteristic_tag_filter.tag_id) = :tagCount',
+            { tagCount: uniqueTagIds.length },
+          );
+      }
+      const rows = await queryBuilder
+        .select(['characteristic.id', 'characteristic.name'])
+        .orderBy('characteristic.name', 'ASC')
+        .getMany();
+      candidateIds = rows.map((row) => row.id);
+      candidateEntities = await this.characteristicsRepository.find({
+        where: { id: In(candidateIds) },
+        order: { name: 'ASC' },
+      });
+      tagsById = await loadOrderedTagsMap(
+        this.characteristicTagsRepository,
+        candidateIds,
+        'characteristic',
+      );
+    } else if (query.entityType === ReferenceableEntityType.TRAINING) {
+      const queryBuilder =
+        this.trainingsRepository.createQueryBuilder('training');
+      if (query.name) {
+        queryBuilder.andWhere('training.name ILIKE :name', {
+          name: `%${query.name}%`,
+        });
+      }
+      if (query.level !== undefined) {
+        queryBuilder.andWhere('training.level = :level', {
+          level: query.level,
+        });
+      }
+      if (hasTagFilter) {
+        queryBuilder
+          .innerJoin(
+            'training_tags',
+            'training_tag_filter',
+            'training_tag_filter.training_id = training.id AND training_tag_filter.tag_id IN (:...tagIds)',
+            { tagIds: uniqueTagIds },
+          )
+          .groupBy('training.id')
+          .having('COUNT(DISTINCT training_tag_filter.tag_id) = :tagCount', {
+            tagCount: uniqueTagIds.length,
+          });
+      }
+      const rows = await queryBuilder
+        .select(['training.id', 'training.name'])
+        .orderBy('training.name', 'ASC')
+        .getMany();
+      candidateIds = rows.map((row) => row.id);
+      candidateEntities = await this.trainingsRepository.find({
+        where: { id: In(candidateIds) },
+        order: { name: 'ASC' },
+      });
+      tagsById = await loadOrderedTagsMap(
+        this.trainingTagsRepository,
+        candidateIds,
+        'training',
+      );
+    } else {
+      const queryBuilder = this.talentsRepository.createQueryBuilder('talent');
+      if (query.name) {
+        queryBuilder.andWhere('talent.name ILIKE :name', {
+          name: `%${query.name}%`,
+        });
+      }
+      if (query.level !== undefined) {
+        queryBuilder.andWhere('talent.level = :level', {
+          level: query.level,
+        });
+      }
+      if (hasTagFilter) {
+        queryBuilder
+          .innerJoin(
+            'talent_tags',
+            'talent_tag_filter',
+            'talent_tag_filter.talent_id = talent.id AND talent_tag_filter.tag_id IN (:...tagIds)',
+            { tagIds: uniqueTagIds },
+          )
+          .groupBy('talent.id')
+          .having('COUNT(DISTINCT talent_tag_filter.tag_id) = :tagCount', {
+            tagCount: uniqueTagIds.length,
+          });
+      }
+      const rows = await queryBuilder
+        .select(['talent.id', 'talent.name'])
+        .orderBy('talent.name', 'ASC')
+        .getMany();
+      candidateIds = rows.map((row) => row.id);
+      candidateEntities = await this.talentsRepository.find({
+        where: { id: In(candidateIds) },
+        order: { name: 'ASC' },
+      });
+      tagsById = await loadOrderedTagsMap(
+        this.talentTagsRepository,
+        candidateIds,
+        'talent',
+      );
+    }
+
+    if (candidateIds.length === 0) {
+      return { data: [], total: 0, page, perPage };
     }
 
     const slots = await this.loadSlotsWithTags(sheet.id);
     const extras = await this.loadExtrasWithTags(sheet.id);
     const computed = await this.computeSheetAbilities(sheet, slots, extras);
 
-    const trainingIds = [
-      ...new Set(
-        dto.items
-          .filter((item) => item.entityType === ReferenceableEntityType.TRAINING)
-          .map((item) => item.id),
-      ),
-    ];
-    const talentIds = [
-      ...new Set(
-        dto.items
-          .filter((item) => item.entityType === ReferenceableEntityType.TALENT)
-          .map((item) => item.id),
-      ),
-    ];
-    const characteristicIds = [
-      ...new Set(
-        dto.items
-          .filter(
-            (item) => item.entityType === ReferenceableEntityType.CHARACTERISTIC,
-          )
-          .map((item) => item.id),
-      ),
-    ];
-
-    const levelByKey = new Map<string, number>();
-
-    if (trainingIds.length > 0) {
-      const trainings = await this.trainingsRepository.findBy({
-        id: In(trainingIds),
-      });
-      if (trainings.length !== trainingIds.length) {
-        throw new NotFoundException(
-          'Um ou mais treinamentos informados não foram encontrados.',
-        );
-      }
-      for (const training of trainings) {
-        levelByKey.set(
-          `${ReferenceableEntityType.TRAINING}:${training.id}`,
-          training.level,
-        );
-      }
-    }
-    if (talentIds.length > 0) {
-      const talents = await this.talentsRepository.findBy({ id: In(talentIds) });
-      if (talents.length !== talentIds.length) {
-        throw new NotFoundException(
-          'Um ou mais talentos informados não foram encontrados.',
-        );
-      }
-      for (const talent of talents) {
-        levelByKey.set(`${ReferenceableEntityType.TALENT}:${talent.id}`, talent.level);
-      }
-    }
-    if (characteristicIds.length > 0) {
-      const characteristics = await this.characteristicsRepository.findBy({
-        id: In(characteristicIds),
-      });
-      if (characteristics.length !== characteristicIds.length) {
-        throw new NotFoundException(
-          'Uma ou mais características informadas não foram encontradas.',
-        );
-      }
-      for (const characteristic of characteristics) {
-        levelByKey.set(
-          `${ReferenceableEntityType.CHARACTERISTIC}:${characteristic.id}`,
-          characteristic.level,
-        );
-      }
-    }
-
     const requirementsByOwnerKey =
       await this.entityLinksService.loadLinksForOwnersBatched(
-        dto.items.map((item) => ({ entityType: item.entityType, id: item.id })),
+        candidateIds.map((candidateId) => ({
+          entityType: query.entityType,
+          id: candidateId,
+        })),
         [EntityLinkType.REQUIREMENT],
       );
 
-    const bucketFor = (
-      entityType: ReferenceableEntityType,
-    ): SheetAbilityBucketKey => {
-      if (entityType === ReferenceableEntityType.TRAINING) {
-        return 'trainings';
-      }
-      if (entityType === ReferenceableEntityType.TALENT) {
-        return 'talents';
-      }
-      return 'characteristics';
-    };
+    const entitiesById = new Map(
+      candidateEntities.map((entity) => [entity.id, entity]),
+    );
+    const bucketKey = this.bucketForEntityType(query.entityType);
 
-    return dto.items.map((item) => {
-      const level = levelByKey.get(`${item.entityType}:${item.id}`)!;
-      const requirements =
-        requirementsByOwnerKey.get(
-          `${EntityLinkType.REQUIREMENT}:${item.entityType}:${item.id}`,
-        ) ?? [];
-      const alreadyPresent = computed.presentIdsByBucket[
-        bucketFor(item.entityType)
-      ].has(item.id);
-      const requirementsMet = this.evaluateAbilityRequirements(
-        { level, requirements },
-        sheet,
-        computed.presentIdsByBucket,
-      );
-      return {
-        entityType: item.entityType,
-        id: item.id,
-        alreadyPresent,
-        requirementsMet,
-      };
-    });
+    const evaluated: SheetAbilityCandidateResult[] = candidateIds
+      .map((candidateId) => entitiesById.get(candidateId))
+      .filter(
+        (entity): entity is { id: string; name: string; level: number } =>
+          entity !== undefined,
+      )
+      .map((entity) => {
+        const tags = (tagsById.get(entity.id) ?? []).map((tag) =>
+          TagResponseDto.fromEntity(tag),
+        );
+        const requirements =
+          requirementsByOwnerKey.get(
+            `${EntityLinkType.REQUIREMENT}:${query.entityType}:${entity.id}`,
+          ) ?? [];
+        const alreadyPresent = computed.presentIdsByBucket[bucketKey].has(
+          entity.id,
+        );
+        const requirementsMet = this.evaluateAbilityRequirements(
+          {
+            id: entity.id,
+            entityType: query.entityType,
+            level: entity.level,
+            tags,
+            requirements,
+          },
+          sheet,
+          computed.presentIdsByBucket,
+        );
+        return {
+          id: entity.id,
+          name: entity.name,
+          level: entity.level,
+          tags,
+          alreadyPresent,
+          requirementsMet,
+        };
+      });
+
+    const filtered = query.onlyEligible
+      ? evaluated.filter((candidate) => candidate.requirementsMet)
+      : evaluated;
+
+    const total = filtered.length;
+    const data = filtered.slice(
+      (page - 1) * perPage,
+      (page - 1) * perPage + perPage,
+    );
+
+    return { data, total, page, perPage };
   }
 
   async addCharacteristicExtra(
@@ -1948,7 +2115,10 @@ export class SheetsService {
       );
     const requirementsMet = this.evaluateAbilityRequirements(
       {
+        id: characteristic.id,
+        entityType: ReferenceableEntityType.CHARACTERISTIC,
         level: characteristic.level,
+        tags: characteristic.tags,
         requirements:
           requirementsByOwnerKey.get(
             `${EntityLinkType.REQUIREMENT}:${ReferenceableEntityType.CHARACTERISTIC}:${characteristic.id}`,
@@ -2036,7 +2206,10 @@ export class SheetsService {
       );
     const requirementsMet = this.evaluateAbilityRequirements(
       {
+        id: training.id,
+        entityType: ReferenceableEntityType.TRAINING,
         level: training.level,
+        tags: training.tags,
         requirements:
           requirementsByOwnerKey.get(
             `${EntityLinkType.REQUIREMENT}:${ReferenceableEntityType.TRAINING}:${training.id}`,
@@ -2121,7 +2294,10 @@ export class SheetsService {
       );
     const requirementsMet = this.evaluateAbilityRequirements(
       {
+        id: talent.id,
+        entityType: ReferenceableEntityType.TALENT,
         level: talent.level,
+        tags: talent.tags,
         requirements:
           requirementsByOwnerKey.get(
             `${EntityLinkType.REQUIREMENT}:${ReferenceableEntityType.TALENT}:${talent.id}`,
@@ -2218,7 +2394,10 @@ export class SheetsService {
       );
     const requirementsMet = this.evaluateAbilityRequirements(
       {
+        id: training.id,
+        entityType: ReferenceableEntityType.TRAINING,
         level: training.level,
+        tags: training.tags,
         requirements:
           requirementsByOwnerKey.get(
             `${EntityLinkType.REQUIREMENT}:${ReferenceableEntityType.TRAINING}:${training.id}`,

@@ -44,7 +44,9 @@ import { AddCharacteristicExtraDto } from './dto/add-characteristic-extra.dto';
 import { AddTrainingExtraDto } from './dto/add-training-extra.dto';
 import { AddTalentExtraDto } from './dto/add-talent-extra.dto';
 import { FillTrainingSlotDto } from './dto/fill-training-slot.dto';
-import { CheckAbilityRequirementsDto } from './dto/check-ability-requirements.dto';
+import { FindSheetAbilityCandidatesQueryDto } from './dto/find-sheet-ability-candidates-query.dto';
+import { PaginatedSheetAbilityCandidatesResponseDto } from './dto/paginated-sheet-ability-candidates-response.dto';
+import { SheetAbilityCandidateResponseDto } from './dto/sheet-ability-candidate-response.dto';
 import { SheetAbilitiesResponseDto } from './dto/sheet-abilities-response.dto';
 import { SheetAbilitiesMutationResponseDto } from './dto/sheet-abilities-mutation-response.dto';
 import { SheetCharacteristicsAbilitiesResponseDto } from './dto/sheet-characteristics-abilities-response.dto';
@@ -53,7 +55,6 @@ import { SheetTalentsAbilitiesResponseDto } from './dto/sheet-talents-abilities-
 import { SheetTrainingSlotResponseDto } from './dto/sheet-training-slot-response.dto';
 import { SheetAbilityCardResponseDto } from './dto/sheet-ability-card-response.dto';
 import { SheetAbilityOriginResponseDto } from './dto/sheet-ability-origin-response.dto';
-import { AbilityRequirementCheckResponseDto } from './dto/ability-requirement-check-response.dto';
 import {
   SheetAbilitiesData,
   SheetAbilityCard,
@@ -389,34 +390,36 @@ export class SheetsController {
     return this.toAbilitiesResponseDto(data);
   }
 
-  @Post(':id/abilities/requirement-checks')
-  @HttpCode(HttpStatus.OK)
+  @Get(':id/abilities/candidates')
   @ApiOperation({
     summary:
-      'Avalia, em lote, presença e requisitos de itens do catálogo (Treinamento/Talento/Característica) frente ao estado atual da ficha',
+      'Lista paginada de candidatos do catálogo (Treinamento/Talento/Característica) para vínculo à ficha, com alreadyPresent/requirementsMet já avaliados no servidor',
   })
-  @ApiOkResponse({ type: [AbilityRequirementCheckResponseDto] })
+  @ApiOkResponse({ type: PaginatedSheetAbilityCandidatesResponseDto })
   @ApiNotFoundResponse({
-    description:
-      'Ficha não encontrada ou não pertence ao usuário, ou algum item informado não encontrado',
+    description: 'Ficha não encontrada ou não pertence ao usuário',
   })
   @ApiBadRequestResponse({
     description:
-      'ID de ficha em formato inválido, ou item com entityType diferente de training/talent/characteristic',
+      'ID de ficha em formato inválido, entityType diferente de training/talent/characteristic, ou parâmetros de paginação/filtro inválidos',
   })
-  async checkAbilityRequirements(
+  async findAbilityCandidates(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: CheckAbilityRequirementsDto,
+    @Query() query: FindSheetAbilityCandidatesQueryDto,
     @CurrentUser() currentUser: User,
-  ): Promise<AbilityRequirementCheckResponseDto[]> {
-    const results = await this.sheetsService.checkAbilityRequirements(
-      id,
-      dto,
-      currentUser,
-    );
-    return results.map((result) =>
-      AbilityRequirementCheckResponseDto.fromRaw(result),
-    );
+  ): Promise<PaginatedSheetAbilityCandidatesResponseDto> {
+    const { data, total, page, perPage } =
+      await this.sheetsService.findAbilityCandidates(id, query, currentUser);
+
+    return {
+      data: data.map((candidate) =>
+        SheetAbilityCandidateResponseDto.fromRaw(candidate),
+      ),
+      total,
+      page,
+      perPage,
+      totalPages: Math.ceil(total / perPage),
+    };
   }
 
   @Post(':id/characteristics/extras')
