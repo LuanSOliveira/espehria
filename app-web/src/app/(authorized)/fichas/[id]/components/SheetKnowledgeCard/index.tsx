@@ -52,7 +52,7 @@ export const SheetKnowledgeCard = ({
     <Box sx={{ position: 'relative', ...APP_CONTAINER_STYLES.detailSectionBox }}>
       <div className="flex items-start justify-between gap-3 p-3">
         <div className="flex flex-1 flex-col gap-1">
-          <Label component="span" sx={{ margin: 0 }}>
+          <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
             {title}
           </Label>
           <DefaultText>{`Graduação: ${gradationName}`}</DefaultText>

@@ -74,7 +74,7 @@ export const SheetAbilityCard = ({
         >
           <div className="flex flex-1 flex-col gap-1">
             <div className="flex items-center gap-2">
-              <DefaultText>{name}</DefaultText>
+              <DefaultText sx={{ fontWeight: 700 }}>{name}</DefaultText>
 
               {!requirementsMet && (
                 <Tooltip title="Requisitos pendentes">
