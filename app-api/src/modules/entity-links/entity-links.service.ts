@@ -4,7 +4,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, FindOptionsWhere, In, Repository } from 'typeorm';
+import {
+  DeepPartial,
+  FindOptionsRelations,
+  FindOptionsWhere,
+  In,
+  Repository,
+} from 'typeorm';
 import { loadOrderedTagsMap } from '../../common/utils/ordered-tags.util';
 import { Training } from '../trainings/entities/training.entity';
 import { TrainingTag } from '../trainings/entities/training-tag.entity';
@@ -154,7 +160,7 @@ export class EntityLinksService {
       const entities = await repository.findBy({ id: In(uniqueIds) });
       if (entities.length !== uniqueIds.length) {
         throw new NotFoundException(
-          'Um ou mais itens referenciados em Aprimorado de/Requisitos/Habilidades Adicionais não foram encontrados.',
+          'Um ou mais itens referenciados em Requisitos/Habilidades Adicionais não foram encontrados.',
         );
       }
       for (const entity of entities) {
@@ -170,7 +176,7 @@ export class EntityLinksService {
       const resolved = resolvedByKey.get(`${ref.entityType}:${ref.id}`);
       if (!resolved) {
         throw new NotFoundException(
-          'Um ou mais itens referenciados em Aprimorado de/Requisitos/Habilidades Adicionais não foram encontrados.',
+          'Um ou mais itens referenciados em Requisitos/Habilidades Adicionais não foram encontrados.',
         );
       }
       return resolved;
@@ -180,37 +186,21 @@ export class EntityLinksService {
   validateLists(params: {
     ownerEntityType: ReferenceableEntityType;
     ownerId?: string;
-    improvedFrom: EntityReferenceInputDto[];
     requirements: EntityReferenceInputDto[];
     additionalAbilities?: EntityReferenceInputDto[];
   }): void {
-    const { ownerEntityType, ownerId, improvedFrom, requirements } = params;
+    const { ownerEntityType, ownerId, requirements } = params;
     const additionalAbilities = params.additionalAbilities ?? [];
     const key = (ref: EntityReferenceInputDto) => `${ref.entityType}:${ref.id}`;
 
     if (ownerId) {
-      for (const ref of [
-        ...improvedFrom,
-        ...requirements,
-        ...additionalAbilities,
-      ]) {
+      for (const ref of [...requirements, ...additionalAbilities]) {
         if (ref.entityType === ownerEntityType && ref.id === ownerId) {
           throw new ConflictException(
-            'Um item não pode ser Aprimorado de/Requisito/Habilidade Adicional de si mesmo.',
+            'Um item não pode ser Requisito ou Habilidade Adicional de si mesmo.',
           );
         }
       }
-    }
-
-    const improvedFromKeys = new Set<string>();
-    for (const ref of improvedFrom) {
-      const refKey = key(ref);
-      if (improvedFromKeys.has(refKey)) {
-        throw new ConflictException(
-          'Um item não pode ser adicionado duas vezes à mesma lista.',
-        );
-      }
-      improvedFromKeys.add(refKey);
     }
 
     const requirementsKeys = new Set<string>();
@@ -236,16 +226,7 @@ export class EntityLinksService {
     }
 
     const mutualExclusivityMessage =
-      'Um item não pode estar em mais de uma das listas Aprimorado de, Requisitos e Habilidades Adicionais ao mesmo tempo.';
-
-    for (const refKey of improvedFromKeys) {
-      if (requirementsKeys.has(refKey)) {
-        throw new ConflictException(mutualExclusivityMessage);
-      }
-      if (additionalAbilitiesKeys.has(refKey)) {
-        throw new ConflictException(mutualExclusivityMessage);
-      }
-    }
+      'Um item não pode estar em Requisitos e Habilidades Adicionais ao mesmo tempo.';
 
     for (const refKey of requirementsKeys) {
       if (additionalAbilitiesKeys.has(refKey)) {
@@ -291,7 +272,6 @@ export class EntityLinksService {
     ownerEntityType: ReferenceableEntityType,
     ownerId: string,
   ): Promise<{
-    improvedFrom: EntityReferenceResponseDto[];
     requirements: EntityReferenceResponseDto[];
     additionalAbilities: EntityReferenceResponseDto[];
   }> {
@@ -423,11 +403,6 @@ export class EntityLinksService {
       b: EntityReferenceResponseDto,
     ) => a.name.localeCompare(b.name, 'pt-BR');
 
-    const improvedFrom = links
-      .filter((link) => link.linkType === EntityLinkType.IMPROVED_FROM)
-      .map(toResponse)
-      .sort(sortByName);
-
     const requirements = links
       .filter((link) => link.linkType === EntityLinkType.REQUIREMENT)
       .map(toResponse)
@@ -438,6 +413,187 @@ export class EntityLinksService {
       .map(toResponse)
       .sort(sortByName);
 
-    return { improvedFrom, requirements, additionalAbilities };
+    return { requirements, additionalAbilities };
+  }
+
+  /**
+   * Carrega, em lote, os links de um ou mais `linkTypes` para múltiplos donos
+   * (possivelmente de tipos distintos), agrupando por `ownerColumn` para
+   * executar no máximo uma query `IN (...)` por combinação (linkType, coluna
+   * de dono) — evita N+1 ao computar herança/requisitos para vários itens
+   * vinculados a uma ficha de uma vez. Chave do mapa retornado:
+   * `${linkType}:${entityType}:${id}`.
+   */
+  async loadLinksForOwnersBatched(
+    owners: { entityType: ReferenceableEntityType; id: string }[],
+    linkTypes: EntityLinkType[],
+  ): Promise<Map<string, EntityReferenceResponseDto[]>> {
+    const result = new Map<string, EntityReferenceResponseDto[]>();
+    if (owners.length === 0 || linkTypes.length === 0) {
+      return result;
+    }
+
+    const idsByEntityType = new Map<ReferenceableEntityType, Set<string>>();
+    for (const owner of owners) {
+      const ids = idsByEntityType.get(owner.entityType) ?? new Set<string>();
+      ids.add(owner.id);
+      idsByEntityType.set(owner.entityType, ids);
+    }
+
+    const toResponse = (link: EntityLink): EntityReferenceResponseDto => {
+      if (link.targetTraining) {
+        return EntityReferenceResponseDto.fromResolved(
+          link.targetTraining,
+          ReferenceableEntityType.TRAINING,
+        );
+      }
+      if (link.targetTalent) {
+        return EntityReferenceResponseDto.fromResolved(
+          link.targetTalent,
+          ReferenceableEntityType.TALENT,
+        );
+      }
+      if (link.targetTechnique) {
+        return EntityReferenceResponseDto.fromResolved(
+          link.targetTechnique,
+          ReferenceableEntityType.TECHNIQUE,
+        );
+      }
+      if (link.targetSpell) {
+        return EntityReferenceResponseDto.fromResolved(
+          link.targetSpell,
+          ReferenceableEntityType.SPELL,
+        );
+      }
+      if (link.targetBiography) {
+        return EntityReferenceResponseDto.fromResolved(
+          link.targetBiography,
+          ReferenceableEntityType.BIOGRAPHY,
+        );
+      }
+      return EntityReferenceResponseDto.fromResolved(
+        link.targetCharacteristic as Characteristic,
+        ReferenceableEntityType.CHARACTERISTIC,
+      );
+    };
+
+    const sortByName = (
+      a: EntityReferenceResponseDto,
+      b: EntityReferenceResponseDto,
+    ) => a.name.localeCompare(b.name, 'pt-BR');
+
+    for (const [entityType, idsSet] of idsByEntityType) {
+      const ownerColumn = this.ownerColumnFor(entityType);
+      const ids = [...idsSet];
+
+      for (const linkType of linkTypes) {
+        const whereCriteria: Record<string, unknown> = {
+          linkType,
+          [ownerColumn]: { id: In(ids) },
+        };
+
+        const links = await this.entityLinksRepository.find({
+          where: whereCriteria as FindOptionsWhere<EntityLink>,
+          relations: {
+            [ownerColumn]: true,
+            targetTraining: true,
+            targetTalent: true,
+            targetTechnique: true,
+            targetSpell: true,
+            targetCharacteristic: true,
+            targetBiography: true,
+          } as FindOptionsRelations<EntityLink>,
+        });
+
+        const trainingTagsById = await loadOrderedTagsMap(
+          this.trainingTagsRepository,
+          links
+            .map((link) => link.targetTraining?.id)
+            .filter((linkId): linkId is string => linkId !== undefined),
+          'training',
+        );
+        const talentTagsById = await loadOrderedTagsMap(
+          this.talentTagsRepository,
+          links
+            .map((link) => link.targetTalent?.id)
+            .filter((linkId): linkId is string => linkId !== undefined),
+          'talent',
+        );
+        const techniqueTagsById = await loadOrderedTagsMap(
+          this.techniqueTagsRepository,
+          links
+            .map((link) => link.targetTechnique?.id)
+            .filter((linkId): linkId is string => linkId !== undefined),
+          'technique',
+        );
+        const spellTagsById = await loadOrderedTagsMap(
+          this.spellTagsRepository,
+          links
+            .map((link) => link.targetSpell?.id)
+            .filter((linkId): linkId is string => linkId !== undefined),
+          'spell',
+        );
+        const characteristicTagsById = await loadOrderedTagsMap(
+          this.characteristicTagsRepository,
+          links
+            .map((link) => link.targetCharacteristic?.id)
+            .filter((linkId): linkId is string => linkId !== undefined),
+          'characteristic',
+        );
+        const biographyTagsById = await loadOrderedTagsMap(
+          this.biographyTagsRepository,
+          links
+            .map((link) => link.targetBiography?.id)
+            .filter((linkId): linkId is string => linkId !== undefined),
+          'biography',
+        );
+
+        for (const link of links) {
+          if (link.targetTraining) {
+            link.targetTraining.tags =
+              trainingTagsById.get(link.targetTraining.id) ?? [];
+          }
+          if (link.targetTalent) {
+            link.targetTalent.tags =
+              talentTagsById.get(link.targetTalent.id) ?? [];
+          }
+          if (link.targetTechnique) {
+            link.targetTechnique.tags =
+              techniqueTagsById.get(link.targetTechnique.id) ?? [];
+          }
+          if (link.targetSpell) {
+            link.targetSpell.tags =
+              spellTagsById.get(link.targetSpell.id) ?? [];
+          }
+          if (link.targetCharacteristic) {
+            link.targetCharacteristic.tags =
+              characteristicTagsById.get(link.targetCharacteristic.id) ?? [];
+          }
+          if (link.targetBiography) {
+            link.targetBiography.tags =
+              biographyTagsById.get(link.targetBiography.id) ?? [];
+          }
+        }
+
+        const linksByOwnerId = new Map<string, EntityLink[]>();
+        for (const link of links) {
+          const owner = link[ownerColumn] as { id: string } | null;
+          if (!owner) {
+            continue;
+          }
+          const ownerLinks = linksByOwnerId.get(owner.id) ?? [];
+          ownerLinks.push(link);
+          linksByOwnerId.set(owner.id, ownerLinks);
+        }
+
+        for (const id of ids) {
+          const key = `${linkType}:${entityType}:${id}`;
+          const ownerLinks = linksByOwnerId.get(id) ?? [];
+          result.set(key, ownerLinks.map(toResponse).sort(sortByName));
+        }
+      }
+    }
+
+    return result;
   }
 }

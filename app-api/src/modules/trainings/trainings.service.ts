@@ -49,7 +49,6 @@ export interface PaginatedTrainings {
 
 export interface TrainingWithReferences {
   training: Training;
-  improvedFrom: EntityReferenceResponseDto[];
   requirements: EntityReferenceResponseDto[];
   additionalAbilities: EntityReferenceResponseDto[];
   improvements: ImprovementFlawItemResponseDto[];
@@ -88,7 +87,7 @@ export class TrainingsService {
       'training',
     );
 
-    const { improvedFrom, requirements, additionalAbilities } =
+    const { requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
         ReferenceableEntityType.TRAINING,
         id,
@@ -109,7 +108,6 @@ export class TrainingsService {
 
     return {
       training,
-      improvedFrom,
       requirements,
       additionalAbilities,
       improvements,
@@ -140,7 +138,6 @@ export class TrainingsService {
         ? await this.findTagsByIds(dto.tagIds)
         : [];
 
-    const improvedFromInput = dto.improvedFrom ?? [];
     const requirementsInput = dto.requirements ?? [];
     const additionalAbilitiesInput = dto.additionalAbilities ?? [];
     const improvementsInput = dto.improvements ?? [];
@@ -150,12 +147,10 @@ export class TrainingsService {
 
     this.entityLinksService.validateLists({
       ownerEntityType: ReferenceableEntityType.TRAINING,
-      improvedFrom: improvedFromInput,
       requirements: requirementsInput,
       additionalAbilities: additionalAbilitiesInput,
     });
 
-    await this.entityLinksService.resolveReferences(improvedFromInput);
     await this.entityLinksService.resolveReferences(requirementsInput);
     await this.entityLinksService.resolveReferences(additionalAbilitiesInput);
 
@@ -198,12 +193,6 @@ export class TrainingsService {
     await this.entityLinksService.replaceLinks(
       ReferenceableEntityType.TRAINING,
       savedTraining.id,
-      EntityLinkType.IMPROVED_FROM,
-      improvedFromInput,
-    );
-    await this.entityLinksService.replaceLinks(
-      ReferenceableEntityType.TRAINING,
-      savedTraining.id,
       EntityLinkType.REQUIREMENT,
       requirementsInput,
     );
@@ -241,7 +230,7 @@ export class TrainingsService {
       resolvedKnowledges,
     );
 
-    const { improvedFrom, requirements, additionalAbilities } =
+    const { requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
         ReferenceableEntityType.TRAINING,
         savedTraining.id,
@@ -262,7 +251,6 @@ export class TrainingsService {
 
     return {
       training: savedTraining,
-      improvedFrom,
       requirements,
       additionalAbilities,
       improvements,
@@ -395,12 +383,10 @@ export class TrainingsService {
       );
     }
 
-    let effectiveImprovedFrom = dto.improvedFrom;
     let effectiveRequirements = dto.requirements;
     let effectiveAdditionalAbilities = dto.additionalAbilities;
 
     if (
-      effectiveImprovedFrom === undefined ||
       effectiveRequirements === undefined ||
       effectiveAdditionalAbilities === undefined
     ) {
@@ -408,14 +394,6 @@ export class TrainingsService {
         ReferenceableEntityType.TRAINING,
         id,
       );
-      if (effectiveImprovedFrom === undefined) {
-        effectiveImprovedFrom = current.improvedFrom.map(
-          (ref): EntityReferenceInputDto => ({
-            entityType: ref.entityType,
-            id: ref.id,
-          }),
-        );
-      }
       if (effectiveRequirements === undefined) {
         effectiveRequirements = current.requirements.map(
           (ref): EntityReferenceInputDto => ({
@@ -437,14 +415,10 @@ export class TrainingsService {
     this.entityLinksService.validateLists({
       ownerEntityType: ReferenceableEntityType.TRAINING,
       ownerId: id,
-      improvedFrom: effectiveImprovedFrom,
       requirements: effectiveRequirements,
       additionalAbilities: effectiveAdditionalAbilities,
     });
 
-    if (dto.improvedFrom !== undefined) {
-      await this.entityLinksService.resolveReferences(dto.improvedFrom);
-    }
     if (dto.requirements !== undefined) {
       await this.entityLinksService.resolveReferences(dto.requirements);
     }
@@ -535,14 +509,6 @@ export class TrainingsService {
     const savedTraining = await this.trainingsRepository.save(training);
     savedTraining.tags = tags;
 
-    if (dto.improvedFrom !== undefined) {
-      await this.entityLinksService.replaceLinks(
-        ReferenceableEntityType.TRAINING,
-        id,
-        EntityLinkType.IMPROVED_FROM,
-        dto.improvedFrom,
-      );
-    }
     if (dto.requirements !== undefined) {
       await this.entityLinksService.replaceLinks(
         ReferenceableEntityType.TRAINING,
@@ -594,7 +560,7 @@ export class TrainingsService {
       );
     }
 
-    const { improvedFrom, requirements, additionalAbilities } =
+    const { requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
         ReferenceableEntityType.TRAINING,
         id,
@@ -615,7 +581,6 @@ export class TrainingsService {
 
     return {
       training: savedTraining,
-      improvedFrom,
       requirements,
       additionalAbilities,
       improvements,

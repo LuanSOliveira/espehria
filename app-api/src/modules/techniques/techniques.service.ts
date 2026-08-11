@@ -36,7 +36,6 @@ export interface PaginatedTechniques {
 
 export interface TechniqueWithReferences {
   technique: Technique;
-  improvedFrom: EntityReferenceResponseDto[];
   requirements: EntityReferenceResponseDto[];
 }
 
@@ -67,13 +66,12 @@ export class TechniquesService {
       'technique',
     );
 
-    const { improvedFrom, requirements } =
-      await this.entityLinksService.loadReferencesFor(
-        ReferenceableEntityType.TECHNIQUE,
-        id,
-      );
+    const { requirements } = await this.entityLinksService.loadReferencesFor(
+      ReferenceableEntityType.TECHNIQUE,
+      id,
+    );
 
-    return { technique, improvedFrom, requirements };
+    return { technique, requirements };
   }
 
   private async findTagsByIds(tagIds: string[]): Promise<Tag[]> {
@@ -97,16 +95,13 @@ export class TechniquesService {
         ? await this.findTagsByIds(dto.tagIds)
         : [];
 
-    const improvedFromInput = dto.improvedFrom ?? [];
     const requirementsInput = dto.requirements ?? [];
 
     this.entityLinksService.validateLists({
       ownerEntityType: ReferenceableEntityType.TECHNIQUE,
-      improvedFrom: improvedFromInput,
       requirements: requirementsInput,
     });
 
-    await this.entityLinksService.resolveReferences(improvedFromInput);
     await this.entityLinksService.resolveReferences(requirementsInput);
 
     const technique = this.techniquesRepository.create({
@@ -128,23 +123,16 @@ export class TechniquesService {
     await this.entityLinksService.replaceLinks(
       ReferenceableEntityType.TECHNIQUE,
       savedTechnique.id,
-      EntityLinkType.IMPROVED_FROM,
-      improvedFromInput,
-    );
-    await this.entityLinksService.replaceLinks(
-      ReferenceableEntityType.TECHNIQUE,
-      savedTechnique.id,
       EntityLinkType.REQUIREMENT,
       requirementsInput,
     );
 
-    const { improvedFrom, requirements } =
-      await this.entityLinksService.loadReferencesFor(
-        ReferenceableEntityType.TECHNIQUE,
-        savedTechnique.id,
-      );
+    const { requirements } = await this.entityLinksService.loadReferencesFor(
+      ReferenceableEntityType.TECHNIQUE,
+      savedTechnique.id,
+    );
 
-    return { technique: savedTechnique, improvedFrom, requirements };
+    return { technique: savedTechnique, requirements };
   }
 
   async findAllPaginated(
@@ -239,45 +227,27 @@ export class TechniquesService {
       );
     }
 
-    let effectiveImprovedFrom = dto.improvedFrom;
     let effectiveRequirements = dto.requirements;
 
-    if (
-      effectiveImprovedFrom === undefined ||
-      effectiveRequirements === undefined
-    ) {
+    if (effectiveRequirements === undefined) {
       const current = await this.entityLinksService.loadReferencesFor(
         ReferenceableEntityType.TECHNIQUE,
         id,
       );
-      if (effectiveImprovedFrom === undefined) {
-        effectiveImprovedFrom = current.improvedFrom.map(
-          (ref): EntityReferenceInputDto => ({
-            entityType: ref.entityType,
-            id: ref.id,
-          }),
-        );
-      }
-      if (effectiveRequirements === undefined) {
-        effectiveRequirements = current.requirements.map(
-          (ref): EntityReferenceInputDto => ({
-            entityType: ref.entityType,
-            id: ref.id,
-          }),
-        );
-      }
+      effectiveRequirements = current.requirements.map(
+        (ref): EntityReferenceInputDto => ({
+          entityType: ref.entityType,
+          id: ref.id,
+        }),
+      );
     }
 
     this.entityLinksService.validateLists({
       ownerEntityType: ReferenceableEntityType.TECHNIQUE,
       ownerId: id,
-      improvedFrom: effectiveImprovedFrom,
       requirements: effectiveRequirements,
     });
 
-    if (dto.improvedFrom !== undefined) {
-      await this.entityLinksService.resolveReferences(dto.improvedFrom);
-    }
     if (dto.requirements !== undefined) {
       await this.entityLinksService.resolveReferences(dto.requirements);
     }
@@ -285,14 +255,6 @@ export class TechniquesService {
     const savedTechnique = await this.techniquesRepository.save(technique);
     savedTechnique.tags = tags;
 
-    if (dto.improvedFrom !== undefined) {
-      await this.entityLinksService.replaceLinks(
-        ReferenceableEntityType.TECHNIQUE,
-        id,
-        EntityLinkType.IMPROVED_FROM,
-        dto.improvedFrom,
-      );
-    }
     if (dto.requirements !== undefined) {
       await this.entityLinksService.replaceLinks(
         ReferenceableEntityType.TECHNIQUE,
@@ -302,13 +264,12 @@ export class TechniquesService {
       );
     }
 
-    const { improvedFrom, requirements } =
-      await this.entityLinksService.loadReferencesFor(
-        ReferenceableEntityType.TECHNIQUE,
-        id,
-      );
+    const { requirements } = await this.entityLinksService.loadReferencesFor(
+      ReferenceableEntityType.TECHNIQUE,
+      id,
+    );
 
-    return { technique: savedTechnique, improvedFrom, requirements };
+    return { technique: savedTechnique, requirements };
   }
 
   async remove(id: string): Promise<void> {

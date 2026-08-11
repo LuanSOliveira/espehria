@@ -39,12 +39,6 @@ export class TechniqueResponseDto {
 
   @ApiProperty({
     type: () => [EntityReferenceResponseDto],
-    description: 'Itens dos quais esta técnica é aprimorada',
-  })
-  improvedFrom: EntityReferenceResponseDto[];
-
-  @ApiProperty({
-    type: () => [EntityReferenceResponseDto],
     description: 'Itens exigidos como requisito para esta técnica',
   })
   requirements: EntityReferenceResponseDto[];
@@ -57,7 +51,6 @@ export class TechniqueResponseDto {
 
   static fromEntity(
     technique: Technique,
-    improvedFrom: EntityReferenceResponseDto[],
     requirements: EntityReferenceResponseDto[],
   ): TechniqueResponseDto {
     const dto = new TechniqueResponseDto();
@@ -69,7 +62,6 @@ export class TechniqueResponseDto {
     dto.tags = (technique.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),
     );
-    dto.improvedFrom = improvedFrom;
     dto.requirements = requirements;
     dto.createdAt = technique.createdAt;
     dto.updatedAt = technique.updatedAt;

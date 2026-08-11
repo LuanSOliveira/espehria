@@ -16,7 +16,6 @@ export interface ISpell extends IEntity {
   description?: string | null;
   tags: ITag[];
   level: number;
-  improvedFrom: IEntityReference[];
   requirements: IEntityReference[];
   createdAt: string;
   updatedAt: string;

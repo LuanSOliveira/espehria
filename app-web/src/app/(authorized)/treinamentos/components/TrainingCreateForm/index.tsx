@@ -66,7 +66,6 @@ interface TrainingPayload
   extends Omit<TrainingFormData, 'description' | 'level'> {
   description?: string;
   level: number;
-  improvedFrom: EntityReferenceInputPayload[];
   requirements: EntityReferenceInputPayload[];
   additionalAbilities: EntityReferenceInputPayload[];
   improvements: ImprovementDefectInputPayload[];
@@ -81,7 +80,6 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
   );
   const isEditMode = !!selectedTraining;
 
-  const [improvedFrom, setImprovedFrom] = useState<IEntityReference[]>([]);
   const [requirements, setRequirements] = useState<IEntityReference[]>([]);
   const [additionalAbilities, setAdditionalAbilities] = useState<
     IEntityReference[]
@@ -114,8 +112,6 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
     if (!isEditMode) {
       reset(trainingFormDefaultValues);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
-      setImprovedFrom([]);
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setRequirements([]);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setAdditionalAbilities([]);
@@ -140,7 +136,6 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
       tagIds: trainingDetail.tags?.map((tag) => tag.id) ?? [],
       level: String(trainingDetail.level),
     });
-    setImprovedFrom(trainingDetail.improvedFrom ?? []);
     setRequirements(trainingDetail.requirements ?? []);
     setAdditionalAbilities(trainingDetail.additionalAbilities ?? []);
     setImprovements(trainingDetail.improvements ?? []);
@@ -164,7 +159,6 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
 
   const buildPayload = (
     data: TrainingFormData,
-    improvedFrom: IEntityReference[],
     requirements: IEntityReference[],
     additionalAbilities: IEntityReference[],
     improvements: IImprovementDefectItem[],
@@ -176,10 +170,6 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
     description: data.description || undefined,
     tagIds: data.tagIds ?? [],
     level: Number(data.level),
-    improvedFrom: improvedFrom.map((reference) => ({
-      entityType: reference.entityType,
-      id: reference.id,
-    })),
     requirements: requirements.map((reference) => ({
       entityType: reference.entityType,
       id: reference.id,
@@ -218,7 +208,6 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
         type: 'success',
       });
       reset(trainingFormDefaultValues);
-      setImprovedFrom([]);
       setRequirements([]);
       setAdditionalAbilities([]);
       setImprovements([]);
@@ -260,7 +249,6 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
   const onSubmit = (data: TrainingFormData) => {
     const payload = buildPayload(
       data,
-      improvedFrom,
       requirements,
       additionalAbilities,
       improvements,
@@ -370,32 +358,20 @@ export const TrainingCreateForm = ({ onSaved }: TrainingCreateFormProps) => {
         addButtonLabel="Adicionar Habilidades"
         value={additionalAbilities}
         onChange={setAdditionalAbilities}
-        otherListValues={[improvedFrom, requirements]}
+        otherListValues={[requirements]}
         currentEntityType="training"
         currentEntityId={selectedTraining?.id}
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <EntityReferenceListField
-          label="Aprimorado de"
-          addButtonLabel="Adicionar Aprimorado de"
-          value={improvedFrom}
-          onChange={setImprovedFrom}
-          otherListValues={[requirements, additionalAbilities]}
-          currentEntityType="training"
-          currentEntityId={selectedTraining?.id}
-        />
-
-        <EntityReferenceListField
-          label="Requisitos"
-          addButtonLabel="Adicionar Requisitos"
-          value={requirements}
-          onChange={setRequirements}
-          otherListValues={[improvedFrom, additionalAbilities]}
-          currentEntityType="training"
-          currentEntityId={selectedTraining?.id}
-        />
-      </div>
+      <EntityReferenceListField
+        label="Requisitos"
+        addButtonLabel="Adicionar Requisitos"
+        value={requirements}
+        onChange={setRequirements}
+        otherListValues={[additionalAbilities]}
+        currentEntityType="training"
+        currentEntityId={selectedTraining?.id}
+      />
 
       <PrimaryButton
         type="submit"

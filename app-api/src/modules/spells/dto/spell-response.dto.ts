@@ -39,12 +39,6 @@ export class SpellResponseDto {
 
   @ApiProperty({
     type: () => [EntityReferenceResponseDto],
-    description: 'Itens dos quais esta magia é aprimorada',
-  })
-  improvedFrom: EntityReferenceResponseDto[];
-
-  @ApiProperty({
-    type: () => [EntityReferenceResponseDto],
     description: 'Itens exigidos como requisito para esta magia',
   })
   requirements: EntityReferenceResponseDto[];
@@ -57,7 +51,6 @@ export class SpellResponseDto {
 
   static fromEntity(
     spell: Spell,
-    improvedFrom: EntityReferenceResponseDto[],
     requirements: EntityReferenceResponseDto[],
   ): SpellResponseDto {
     const dto = new SpellResponseDto();
@@ -67,7 +60,6 @@ export class SpellResponseDto {
     dto.referenceImage = spell.referenceImage;
     dto.description = spell.description;
     dto.tags = (spell.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
-    dto.improvedFrom = improvedFrom;
     dto.requirements = requirements;
     dto.createdAt = spell.createdAt;
     dto.updatedAt = spell.updatedAt;

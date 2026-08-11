@@ -1,4 +1,7 @@
 import {
+  ISheetAbilitiesSummary,
+  ISheetAbilityOrigin,
+  ISheetAbilityOriginEntityType,
   ISheetImprovementDefectSnapshot,
   ISheetKnowledgeSnapshot,
   ISheetProficiencySnapshot,
@@ -131,3 +134,40 @@ export const flattenKnowledgeSnapshot = (
   ...snapshot.talents,
   ...snapshot.characteristics,
 ];
+
+/**
+ * Valor inicial da aba Habilidades, antes da primeira resposta de
+ * `GET /sheets/:id/abilities` chegar — mesmo espírito de
+ * `SHEET_EMPTY_IMPROVEMENT_DEFECT_SNAPSHOT`/`SHEET_EMPTY_PROFICIENCY_SNAPSHOT`/
+ * `SHEET_EMPTY_KNOWLEDGE_SNAPSHOT`.
+ */
+export const SHEET_EMPTY_ABILITIES_SUMMARY: ISheetAbilitiesSummary = {
+  characteristics: { inherited: [], extras: [] },
+  trainings: { slots: [], inherited: [], extras: [] },
+  talents: { inherited: [], extras: [] },
+};
+
+/**
+ * Label pt-BR de cada tipo de entidade de origem possível de um item
+ * herdado, usado para compor o indicativo textual "via {origem} {nome}"
+ * exibido nos cards herdados das 3 sub-abas de Habilidades.
+ */
+export const SHEET_ABILITY_ORIGIN_LABELS: Record<
+  ISheetAbilityOriginEntityType,
+  string
+> = {
+  race: 'Raça',
+  biography: 'Biografia',
+  training: 'Treinamento',
+  talent: 'Talento',
+  characteristic: 'Característica',
+  technique: 'Técnica',
+  spell: 'Magia',
+};
+
+/**
+ * Formata o indicativo textual de origem de um card herdado (ex.: "via Raça
+ * Anão"), reaproveitado pelas 3 sub-abas de Habilidades.
+ */
+export const formatSheetAbilityOriginLabel = (origin: ISheetAbilityOrigin) =>
+  `via ${SHEET_ABILITY_ORIGIN_LABELS[origin.entityType]} ${origin.name}`;

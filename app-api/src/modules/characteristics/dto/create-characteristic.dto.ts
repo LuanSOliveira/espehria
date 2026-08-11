@@ -55,24 +55,7 @@ export class CreateCharacteristicDto {
   @ApiPropertyOptional({
     type: () => [EntityReferenceInputDto],
     description:
-      'Itens dos quais esta característica é aprimorada. Não pode referenciar a si mesmo, conter duplicatas ou estar simultâneamente em Requisitos.',
-    example: [
-      {
-        entityType: 'talent',
-        id: '550e8400-e29b-41d4-a716-446655440000',
-      },
-    ],
-  })
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => EntityReferenceInputDto)
-  improvedFrom?: EntityReferenceInputDto[];
-
-  @ApiPropertyOptional({
-    type: () => [EntityReferenceInputDto],
-    description:
-      'Itens exigidos como requisito para esta característica. Não pode referenciar a si mesmo, conter duplicatas ou estar simultâneamente em Aprimorado de.',
+      'Itens exigidos como requisito para esta característica. Não pode referenciar a si mesmo, conter duplicatas ou estar simultaneamente em Habilidades Adicionais.',
     example: [
       {
         entityType: 'technique',
@@ -89,7 +72,7 @@ export class CreateCharacteristicDto {
   @ApiPropertyOptional({
     type: () => [EntityReferenceInputDto],
     description:
-      'Habilidades adicionais associadas a esta característica. Não pode referenciar a si mesmo, conter duplicatas ou estar simultâneamente em Aprimorado de ou em Requisitos.',
+      'Habilidades adicionais associadas a esta característica. Não pode referenciar a si mesmo, conter duplicatas ou estar simultaneamente em Requisitos.',
     example: [
       {
         entityType: 'technique',

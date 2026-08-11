@@ -65,7 +65,6 @@ interface KnowledgeInputPayload {
 interface TalentPayload extends Omit<TalentFormData, 'description' | 'level'> {
   description?: string;
   level: number;
-  improvedFrom: EntityReferenceInputPayload[];
   requirements: EntityReferenceInputPayload[];
   additionalAbilities: EntityReferenceInputPayload[];
   improvements: ImprovementDefectInputPayload[];
@@ -78,7 +77,6 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
   const selectedTalent = useSelectedTalentStore((state) => state.selectedTalent);
   const isEditMode = !!selectedTalent;
 
-  const [improvedFrom, setImprovedFrom] = useState<IEntityReference[]>([]);
   const [requirements, setRequirements] = useState<IEntityReference[]>([]);
   const [additionalAbilities, setAdditionalAbilities] = useState<
     IEntityReference[]
@@ -111,8 +109,6 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
     if (!isEditMode) {
       reset(talentFormDefaultValues);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
-      setImprovedFrom([]);
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setRequirements([]);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setAdditionalAbilities([]);
@@ -137,7 +133,6 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
       tagIds: talentDetail.tags?.map((tag) => tag.id) ?? [],
       level: String(talentDetail.level),
     });
-    setImprovedFrom(talentDetail.improvedFrom ?? []);
     setRequirements(talentDetail.requirements ?? []);
     setAdditionalAbilities(talentDetail.additionalAbilities ?? []);
     setImprovements(talentDetail.improvements ?? []);
@@ -161,7 +156,6 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
 
   const buildPayload = (
     data: TalentFormData,
-    improvedFrom: IEntityReference[],
     requirements: IEntityReference[],
     additionalAbilities: IEntityReference[],
     improvements: IImprovementDefectItem[],
@@ -173,10 +167,6 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
     description: data.description || undefined,
     tagIds: data.tagIds ?? [],
     level: Number(data.level),
-    improvedFrom: improvedFrom.map((reference) => ({
-      entityType: reference.entityType,
-      id: reference.id,
-    })),
     requirements: requirements.map((reference) => ({
       entityType: reference.entityType,
       id: reference.id,
@@ -215,7 +205,6 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
         type: 'success',
       });
       reset(talentFormDefaultValues);
-      setImprovedFrom([]);
       setRequirements([]);
       setAdditionalAbilities([]);
       setImprovements([]);
@@ -257,7 +246,6 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
   const onSubmit = (data: TalentFormData) => {
     const payload = buildPayload(
       data,
-      improvedFrom,
       requirements,
       additionalAbilities,
       improvements,
@@ -367,32 +355,20 @@ export const TalentCreateForm = ({ onSaved }: TalentCreateFormProps) => {
         addButtonLabel="Adicionar Habilidades"
         value={additionalAbilities}
         onChange={setAdditionalAbilities}
-        otherListValues={[improvedFrom, requirements]}
+        otherListValues={[requirements]}
         currentEntityType="talent"
         currentEntityId={selectedTalent?.id}
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <EntityReferenceListField
-          label="Aprimorado de"
-          addButtonLabel="Adicionar Aprimorado de"
-          value={improvedFrom}
-          onChange={setImprovedFrom}
-          otherListValues={[requirements, additionalAbilities]}
-          currentEntityType="talent"
-          currentEntityId={selectedTalent?.id}
-        />
-
-        <EntityReferenceListField
-          label="Requisitos"
-          addButtonLabel="Adicionar Requisitos"
-          value={requirements}
-          onChange={setRequirements}
-          otherListValues={[improvedFrom, additionalAbilities]}
-          currentEntityType="talent"
-          currentEntityId={selectedTalent?.id}
-        />
-      </div>
+      <EntityReferenceListField
+        label="Requisitos"
+        addButtonLabel="Adicionar Requisitos"
+        value={requirements}
+        onChange={setRequirements}
+        otherListValues={[additionalAbilities]}
+        currentEntityType="talent"
+        currentEntityId={selectedTalent?.id}
+      />
 
       <PrimaryButton
         type="submit"

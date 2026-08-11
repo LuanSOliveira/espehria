@@ -48,24 +48,20 @@ export class TechniquesController {
   @ApiCreatedResponse({ type: TechniqueResponseDto })
   @ApiConflictResponse({
     description:
-      'Já existe uma técnica com este nome, ou violação de regra em Aprimorado de/Requisitos (autorreferência, duplicata ou item em ambas as listas)',
+      'Já existe uma técnica com este nome, ou violação de regra em Requisitos (duplicata ou autorreferência)',
   })
   @ApiNotFoundResponse({
     description:
-      'Uma ou mais tags ou entidades referenciadas em Aprimorado de/Requisitos não foram encontradas',
+      'Uma ou mais tags ou entidades referenciadas em Requisitos não foram encontradas',
   })
   @ApiBadRequestResponse({
     description:
       'URL de imagem de referência inválida, dados obrigatórios ausentes ou formato inválido de entityType/id',
   })
   async create(@Body() dto: CreateTechniqueDto): Promise<TechniqueResponseDto> {
-    const { technique, improvedFrom, requirements } =
+    const { technique, requirements } =
       await this.techniquesService.create(dto);
-    return TechniqueResponseDto.fromEntity(
-      technique,
-      improvedFrom,
-      requirements,
-    );
+    return TechniqueResponseDto.fromEntity(technique, requirements);
   }
 
   @Get()
@@ -105,7 +101,6 @@ export class TechniquesController {
     }
     return TechniqueResponseDto.fromEntity(
       result.technique,
-      result.improvedFrom,
       result.requirements,
     );
   }
@@ -119,23 +114,19 @@ export class TechniquesController {
   })
   @ApiConflictResponse({
     description:
-      'Já existe uma técnica com este nome, ou violação de regra em Aprimorado de/Requisitos (autorreferência, duplicata ou item em ambas as listas)',
+      'Já existe uma técnica com este nome, ou violação de regra em Requisitos (duplicata ou autorreferência)',
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida, ID em formato inválido ou formato inválido de entityType/id em Aprimorado de/Requisitos',
+      'URL de imagem de referência inválida, ID em formato inválido ou formato inválido de entityType/id em Requisitos',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateTechniqueDto,
   ): Promise<TechniqueResponseDto> {
-    const { technique, improvedFrom, requirements } =
+    const { technique, requirements } =
       await this.techniquesService.update(id, dto);
-    return TechniqueResponseDto.fromEntity(
-      technique,
-      improvedFrom,
-      requirements,
-    );
+    return TechniqueResponseDto.fromEntity(technique, requirements);
   }
 
   @Delete(':id')

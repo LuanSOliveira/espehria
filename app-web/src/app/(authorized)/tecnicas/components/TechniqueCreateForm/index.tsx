@@ -40,7 +40,6 @@ interface TechniquePayload
   referenceImage?: string;
   description?: string;
   level: number;
-  improvedFrom: EntityReferenceInputPayload[];
   requirements: EntityReferenceInputPayload[];
 }
 
@@ -50,7 +49,6 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
   );
   const isEditMode = !!selectedTechnique;
 
-  const [improvedFrom, setImprovedFrom] = useState<IEntityReference[]>([]);
   const [requirements, setRequirements] = useState<IEntityReference[]>([]);
 
   const { tagOptions } = useTagOptionsQuery();
@@ -74,8 +72,6 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
     if (!isEditMode) {
       reset(techniqueFormDefaultValues);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
-      setImprovedFrom([]);
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setRequirements([]);
       return;
     }
@@ -91,7 +87,6 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
       tagIds: techniqueDetail.tags?.map((tag) => tag.id) ?? [],
       level: String(techniqueDetail.level),
     });
-    setImprovedFrom(techniqueDetail.improvedFrom ?? []);
     setRequirements(techniqueDetail.requirements ?? []);
   }, [isEditMode, techniqueDetail, reset]);
 
@@ -110,7 +105,6 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
 
   const buildPayload = (
     data: TechniqueFormData,
-    improvedFrom: IEntityReference[],
     requirements: IEntityReference[],
   ): TechniquePayload => ({
     ...data,
@@ -118,10 +112,6 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
     description: data.description || undefined,
     tagIds: data.tagIds ?? [],
     level: Number(data.level),
-    improvedFrom: improvedFrom.map((reference) => ({
-      entityType: reference.entityType,
-      id: reference.id,
-    })),
     requirements: requirements.map((reference) => ({
       entityType: reference.entityType,
       id: reference.id,
@@ -137,7 +127,6 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
         type: 'success',
       });
       reset(techniqueFormDefaultValues);
-      setImprovedFrom([]);
       setRequirements([]);
       onSaved();
     },
@@ -172,7 +161,7 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
   });
 
   const onSubmit = (data: TechniqueFormData) => {
-    const payload = buildPayload(data, improvedFrom, requirements);
+    const payload = buildPayload(data, requirements);
 
     if (isEditMode) {
       updateTechniqueMutation.mutate(payload);
@@ -244,27 +233,14 @@ export const TechniqueCreateForm = ({ onSaved }: TechniqueCreateFormProps) => {
         placeholder="Descreva a técnica"
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <EntityReferenceListField
-          label="Aprimorado de"
-          addButtonLabel="Adicionar Aprimorado de"
-          value={improvedFrom}
-          onChange={setImprovedFrom}
-          otherListValues={[requirements]}
-          currentEntityType="technique"
-          currentEntityId={selectedTechnique?.id}
-        />
-
-        <EntityReferenceListField
-          label="Requisitos"
-          addButtonLabel="Adicionar Requisitos"
-          value={requirements}
-          onChange={setRequirements}
-          otherListValues={[improvedFrom]}
-          currentEntityType="technique"
-          currentEntityId={selectedTechnique?.id}
-        />
-      </div>
+      <EntityReferenceListField
+        label="Requisitos"
+        addButtonLabel="Adicionar Requisitos"
+        value={requirements}
+        onChange={setRequirements}
+        currentEntityType="technique"
+        currentEntityId={selectedTechnique?.id}
+      />
 
       <PrimaryButton
         type="submit"

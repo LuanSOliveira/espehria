@@ -36,7 +36,6 @@ export interface PaginatedSpells {
 
 export interface SpellWithReferences {
   spell: Spell;
-  improvedFrom: EntityReferenceResponseDto[];
   requirements: EntityReferenceResponseDto[];
 }
 
@@ -67,13 +66,12 @@ export class SpellsService {
       'spell',
     );
 
-    const { improvedFrom, requirements } =
-      await this.entityLinksService.loadReferencesFor(
-        ReferenceableEntityType.SPELL,
-        id,
-      );
+    const { requirements } = await this.entityLinksService.loadReferencesFor(
+      ReferenceableEntityType.SPELL,
+      id,
+    );
 
-    return { spell, improvedFrom, requirements };
+    return { spell, requirements };
   }
 
   private async findTagsByIds(tagIds: string[]): Promise<Tag[]> {
@@ -97,16 +95,13 @@ export class SpellsService {
         ? await this.findTagsByIds(dto.tagIds)
         : [];
 
-    const improvedFromInput = dto.improvedFrom ?? [];
     const requirementsInput = dto.requirements ?? [];
 
     this.entityLinksService.validateLists({
       ownerEntityType: ReferenceableEntityType.SPELL,
-      improvedFrom: improvedFromInput,
       requirements: requirementsInput,
     });
 
-    await this.entityLinksService.resolveReferences(improvedFromInput);
     await this.entityLinksService.resolveReferences(requirementsInput);
 
     const spell = this.spellsRepository.create({
@@ -128,23 +123,16 @@ export class SpellsService {
     await this.entityLinksService.replaceLinks(
       ReferenceableEntityType.SPELL,
       savedSpell.id,
-      EntityLinkType.IMPROVED_FROM,
-      improvedFromInput,
-    );
-    await this.entityLinksService.replaceLinks(
-      ReferenceableEntityType.SPELL,
-      savedSpell.id,
       EntityLinkType.REQUIREMENT,
       requirementsInput,
     );
 
-    const { improvedFrom, requirements } =
-      await this.entityLinksService.loadReferencesFor(
-        ReferenceableEntityType.SPELL,
-        savedSpell.id,
-      );
+    const { requirements } = await this.entityLinksService.loadReferencesFor(
+      ReferenceableEntityType.SPELL,
+      savedSpell.id,
+    );
 
-    return { spell: savedSpell, improvedFrom, requirements };
+    return { spell: savedSpell, requirements };
   }
 
   async findAllPaginated(query: FindSpellsQueryDto): Promise<PaginatedSpells> {
@@ -231,45 +219,27 @@ export class SpellsService {
       );
     }
 
-    let effectiveImprovedFrom = dto.improvedFrom;
     let effectiveRequirements = dto.requirements;
 
-    if (
-      effectiveImprovedFrom === undefined ||
-      effectiveRequirements === undefined
-    ) {
+    if (effectiveRequirements === undefined) {
       const current = await this.entityLinksService.loadReferencesFor(
         ReferenceableEntityType.SPELL,
         id,
       );
-      if (effectiveImprovedFrom === undefined) {
-        effectiveImprovedFrom = current.improvedFrom.map(
-          (ref): EntityReferenceInputDto => ({
-            entityType: ref.entityType,
-            id: ref.id,
-          }),
-        );
-      }
-      if (effectiveRequirements === undefined) {
-        effectiveRequirements = current.requirements.map(
-          (ref): EntityReferenceInputDto => ({
-            entityType: ref.entityType,
-            id: ref.id,
-          }),
-        );
-      }
+      effectiveRequirements = current.requirements.map(
+        (ref): EntityReferenceInputDto => ({
+          entityType: ref.entityType,
+          id: ref.id,
+        }),
+      );
     }
 
     this.entityLinksService.validateLists({
       ownerEntityType: ReferenceableEntityType.SPELL,
       ownerId: id,
-      improvedFrom: effectiveImprovedFrom,
       requirements: effectiveRequirements,
     });
 
-    if (dto.improvedFrom !== undefined) {
-      await this.entityLinksService.resolveReferences(dto.improvedFrom);
-    }
     if (dto.requirements !== undefined) {
       await this.entityLinksService.resolveReferences(dto.requirements);
     }
@@ -277,14 +247,6 @@ export class SpellsService {
     const savedSpell = await this.spellsRepository.save(spell);
     savedSpell.tags = tags;
 
-    if (dto.improvedFrom !== undefined) {
-      await this.entityLinksService.replaceLinks(
-        ReferenceableEntityType.SPELL,
-        id,
-        EntityLinkType.IMPROVED_FROM,
-        dto.improvedFrom,
-      );
-    }
     if (dto.requirements !== undefined) {
       await this.entityLinksService.replaceLinks(
         ReferenceableEntityType.SPELL,
@@ -294,13 +256,12 @@ export class SpellsService {
       );
     }
 
-    const { improvedFrom, requirements } =
-      await this.entityLinksService.loadReferencesFor(
-        ReferenceableEntityType.SPELL,
-        id,
-      );
+    const { requirements } = await this.entityLinksService.loadReferencesFor(
+      ReferenceableEntityType.SPELL,
+      id,
+    );
 
-    return { spell: savedSpell, improvedFrom, requirements };
+    return { spell: savedSpell, requirements };
   }
 
   async remove(id: string): Promise<void> {

@@ -7,6 +7,7 @@ import {
   HttpStatus,
   NotFoundException,
   Param,
+  ParseIntPipe,
   ParseUUIDPipe,
   Post,
   Put,
@@ -39,7 +40,26 @@ import { SheetListItemResponseDto } from './dto/sheet-list-item-response.dto';
 import { SheetResponseDto } from './dto/sheet-response.dto';
 import { UpdateSheetDto } from './dto/update-sheet.dto';
 import { UpdateSheetKnowledgeNoteDto } from './dto/update-sheet-knowledge-note.dto';
-import { SheetsService } from './sheets.service';
+import { AddCharacteristicExtraDto } from './dto/add-characteristic-extra.dto';
+import { AddTrainingExtraDto } from './dto/add-training-extra.dto';
+import { AddTalentExtraDto } from './dto/add-talent-extra.dto';
+import { FillTrainingSlotDto } from './dto/fill-training-slot.dto';
+import { CheckAbilityRequirementsDto } from './dto/check-ability-requirements.dto';
+import { SheetAbilitiesResponseDto } from './dto/sheet-abilities-response.dto';
+import { SheetAbilitiesMutationResponseDto } from './dto/sheet-abilities-mutation-response.dto';
+import { SheetCharacteristicsAbilitiesResponseDto } from './dto/sheet-characteristics-abilities-response.dto';
+import { SheetTrainingsAbilitiesResponseDto } from './dto/sheet-trainings-abilities-response.dto';
+import { SheetTalentsAbilitiesResponseDto } from './dto/sheet-talents-abilities-response.dto';
+import { SheetTrainingSlotResponseDto } from './dto/sheet-training-slot-response.dto';
+import { SheetAbilityCardResponseDto } from './dto/sheet-ability-card-response.dto';
+import { SheetAbilityOriginResponseDto } from './dto/sheet-ability-origin-response.dto';
+import { AbilityRequirementCheckResponseDto } from './dto/ability-requirement-check-response.dto';
+import {
+  SheetAbilitiesData,
+  SheetAbilityCard,
+  SheetAbilityMutationResult,
+  SheetsService,
+} from './sheets.service';
 
 @ApiTags('sheets')
 @ApiBearerAuth()
@@ -50,6 +70,56 @@ export class SheetsController {
     private readonly sheetsService: SheetsService,
     private readonly campaignsService: CampaignsService,
   ) {}
+
+  private toCardDto(card: SheetAbilityCard): SheetAbilityCardResponseDto {
+    return SheetAbilityCardResponseDto.fromRaw({
+      id: card.id,
+      name: card.name,
+      level: card.level,
+      tags: card.tags,
+      requirementsMet: card.requirementsMet,
+      origin: card.origin
+        ? SheetAbilityOriginResponseDto.fromRaw(card.origin)
+        : null,
+    });
+  }
+
+  private toAbilitiesResponseDto(
+    data: SheetAbilitiesData,
+  ): SheetAbilitiesResponseDto {
+    return SheetAbilitiesResponseDto.fromRaw({
+      characteristics: SheetCharacteristicsAbilitiesResponseDto.fromRaw({
+        inherited: data.characteristics.inherited.map((card) =>
+          this.toCardDto(card),
+        ),
+        extras: data.characteristics.extras.map((card) => this.toCardDto(card)),
+      }),
+      trainings: SheetTrainingsAbilitiesResponseDto.fromRaw({
+        slots: data.trainings.slots.map((slot) =>
+          SheetTrainingSlotResponseDto.fromRaw({
+            slotIndex: slot.slotIndex,
+            unlockedAtLevel: slot.unlockedAtLevel,
+            training: slot.training ? this.toCardDto(slot.training) : null,
+          }),
+        ),
+        inherited: data.trainings.inherited.map((card) => this.toCardDto(card)),
+        extras: data.trainings.extras.map((card) => this.toCardDto(card)),
+      }),
+      talents: SheetTalentsAbilitiesResponseDto.fromRaw({
+        inherited: data.talents.inherited.map((card) => this.toCardDto(card)),
+        extras: data.talents.extras.map((card) => this.toCardDto(card)),
+      }),
+    });
+  }
+
+  private toMutationResponseDto(
+    result: SheetAbilityMutationResult,
+  ): SheetAbilitiesMutationResponseDto {
+    return SheetAbilitiesMutationResponseDto.fromRaw({
+      sheet: SheetResponseDto.fromEntity(result.sheet),
+      abilities: this.toAbilitiesResponseDto(result.abilities),
+    });
+  }
 
   @Post()
   @ApiOperation({ summary: 'Cria uma nova ficha para o usuário autenticado' })
@@ -299,6 +369,239 @@ export class SheetsController {
       currentUser,
     );
     return SheetResponseDto.fromEntity(sheet);
+  }
+
+  @Get(':id/abilities')
+  @ApiOperation({
+    summary:
+      'Lista consolidada das habilidades da ficha (Características/Treinamentos/Talentos herdados, slots de Treinamento e extras), com status de requisitos',
+  })
+  @ApiOkResponse({ type: SheetAbilitiesResponseDto })
+  @ApiNotFoundResponse({
+    description: 'Ficha não encontrada ou não pertence ao usuário',
+  })
+  @ApiBadRequestResponse({ description: 'ID de ficha em formato inválido' })
+  async getAbilities(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetAbilitiesResponseDto> {
+    const data = await this.sheetsService.getAbilities(id, currentUser);
+    return this.toAbilitiesResponseDto(data);
+  }
+
+  @Post(':id/abilities/requirement-checks')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Avalia, em lote, presença e requisitos de itens do catálogo (Treinamento/Talento/Característica) frente ao estado atual da ficha',
+  })
+  @ApiOkResponse({ type: [AbilityRequirementCheckResponseDto] })
+  @ApiNotFoundResponse({
+    description:
+      'Ficha não encontrada ou não pertence ao usuário, ou algum item informado não encontrado',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'ID de ficha em formato inválido, ou item com entityType diferente de training/talent/characteristic',
+  })
+  async checkAbilityRequirements(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CheckAbilityRequirementsDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<AbilityRequirementCheckResponseDto[]> {
+    const results = await this.sheetsService.checkAbilityRequirements(
+      id,
+      dto,
+      currentUser,
+    );
+    return results.map((result) =>
+      AbilityRequirementCheckResponseDto.fromRaw(result),
+    );
+  }
+
+  @Post(':id/characteristics/extras')
+  @ApiOperation({ summary: 'Adiciona uma característica extra à ficha' })
+  @ApiCreatedResponse({ type: SheetAbilitiesMutationResponseDto })
+  @ApiNotFoundResponse({
+    description: 'Ficha não encontrada ou não pertence ao usuário, ou característica não encontrada',
+  })
+  @ApiConflictResponse({
+    description:
+      'Item já vinculado à ficha (herdado, slot ou extra), ou requisitos não atendidos',
+  })
+  @ApiBadRequestResponse({ description: 'ID de ficha ou característica em formato inválido' })
+  async addCharacteristicExtra(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AddCharacteristicExtraDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetAbilitiesMutationResponseDto> {
+    const result = await this.sheetsService.addCharacteristicExtra(
+      id,
+      dto,
+      currentUser,
+    );
+    return this.toMutationResponseDto(result);
+  }
+
+  @Delete(':id/characteristics/extras/:characteristicId')
+  @ApiOperation({ summary: 'Remove uma característica extra da ficha' })
+  @ApiOkResponse({ type: SheetAbilitiesMutationResponseDto })
+  @ApiNotFoundResponse({
+    description:
+      'Ficha não encontrada ou não pertence ao usuário, ou característica não encontrada como extra desta ficha',
+  })
+  @ApiBadRequestResponse({ description: 'ID de ficha ou característica em formato inválido' })
+  async removeCharacteristicExtra(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('characteristicId', ParseUUIDPipe) characteristicId: string,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetAbilitiesMutationResponseDto> {
+    const result = await this.sheetsService.removeCharacteristicExtra(
+      id,
+      characteristicId,
+      currentUser,
+    );
+    return this.toMutationResponseDto(result);
+  }
+
+  @Post(':id/trainings/extras')
+  @ApiOperation({ summary: 'Adiciona um treinamento extra à ficha' })
+  @ApiCreatedResponse({ type: SheetAbilitiesMutationResponseDto })
+  @ApiNotFoundResponse({
+    description: 'Ficha não encontrada ou não pertence ao usuário, ou treinamento não encontrado',
+  })
+  @ApiConflictResponse({
+    description:
+      'Item já vinculado à ficha (herdado, slot ou extra), ou requisitos não atendidos',
+  })
+  @ApiBadRequestResponse({ description: 'ID de ficha ou treinamento em formato inválido' })
+  async addTrainingExtra(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AddTrainingExtraDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetAbilitiesMutationResponseDto> {
+    const result = await this.sheetsService.addTrainingExtra(
+      id,
+      dto,
+      currentUser,
+    );
+    return this.toMutationResponseDto(result);
+  }
+
+  @Delete(':id/trainings/extras/:trainingId')
+  @ApiOperation({ summary: 'Remove um treinamento extra da ficha' })
+  @ApiOkResponse({ type: SheetAbilitiesMutationResponseDto })
+  @ApiNotFoundResponse({
+    description:
+      'Ficha não encontrada ou não pertence ao usuário, ou treinamento não encontrado como extra desta ficha',
+  })
+  @ApiBadRequestResponse({ description: 'ID de ficha ou treinamento em formato inválido' })
+  async removeTrainingExtra(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('trainingId', ParseUUIDPipe) trainingId: string,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetAbilitiesMutationResponseDto> {
+    const result = await this.sheetsService.removeTrainingExtra(
+      id,
+      trainingId,
+      currentUser,
+    );
+    return this.toMutationResponseDto(result);
+  }
+
+  @Post(':id/talents/extras')
+  @ApiOperation({ summary: 'Adiciona um talento extra à ficha' })
+  @ApiCreatedResponse({ type: SheetAbilitiesMutationResponseDto })
+  @ApiNotFoundResponse({
+    description: 'Ficha não encontrada ou não pertence ao usuário, ou talento não encontrado',
+  })
+  @ApiConflictResponse({
+    description:
+      'Item já vinculado à ficha (herdado, slot ou extra), ou requisitos não atendidos',
+  })
+  @ApiBadRequestResponse({ description: 'ID de ficha ou talento em formato inválido' })
+  async addTalentExtra(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AddTalentExtraDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetAbilitiesMutationResponseDto> {
+    const result = await this.sheetsService.addTalentExtra(
+      id,
+      dto,
+      currentUser,
+    );
+    return this.toMutationResponseDto(result);
+  }
+
+  @Delete(':id/talents/extras/:talentId')
+  @ApiOperation({ summary: 'Remove um talento extra da ficha' })
+  @ApiOkResponse({ type: SheetAbilitiesMutationResponseDto })
+  @ApiNotFoundResponse({
+    description:
+      'Ficha não encontrada ou não pertence ao usuário, ou talento não encontrado como extra desta ficha',
+  })
+  @ApiBadRequestResponse({ description: 'ID de ficha ou talento em formato inválido' })
+  async removeTalentExtra(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('talentId', ParseUUIDPipe) talentId: string,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetAbilitiesMutationResponseDto> {
+    const result = await this.sheetsService.removeTalentExtra(
+      id,
+      talentId,
+      currentUser,
+    );
+    return this.toMutationResponseDto(result);
+  }
+
+  @Put(':id/trainings/slots/:slotIndex/training')
+  @ApiOperation({ summary: 'Preenche um slot de treinamento vazio da ficha' })
+  @ApiOkResponse({ type: SheetAbilitiesMutationResponseDto })
+  @ApiNotFoundResponse({
+    description:
+      'Ficha não encontrada ou não pertence ao usuário, slot não encontrado nesta ficha, ou treinamento não encontrado',
+  })
+  @ApiConflictResponse({
+    description:
+      'Slot já preenchido, item já vinculado à ficha (herdado, slot ou extra), ou requisitos não atendidos',
+  })
+  @ApiBadRequestResponse({
+    description: 'ID de ficha, índice de slot ou de treinamento em formato inválido',
+  })
+  async fillTrainingSlot(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('slotIndex', ParseIntPipe) slotIndex: number,
+    @Body() dto: FillTrainingSlotDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetAbilitiesMutationResponseDto> {
+    const result = await this.sheetsService.fillTrainingSlot(
+      id,
+      slotIndex,
+      dto,
+      currentUser,
+    );
+    return this.toMutationResponseDto(result);
+  }
+
+  @Delete(':id/trainings/slots/:slotIndex/training')
+  @ApiOperation({ summary: 'Esvazia um slot de treinamento preenchido da ficha' })
+  @ApiOkResponse({ type: SheetAbilitiesMutationResponseDto })
+  @ApiNotFoundResponse({
+    description:
+      'Ficha não encontrada ou não pertence ao usuário, ou slot vazio/não encontrado nesta ficha',
+  })
+  @ApiBadRequestResponse({ description: 'ID de ficha ou índice de slot em formato inválido' })
+  async emptyTrainingSlot(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('slotIndex', ParseIntPipe) slotIndex: number,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetAbilitiesMutationResponseDto> {
+    const result = await this.sheetsService.emptyTrainingSlot(
+      id,
+      slotIndex,
+      currentUser,
+    );
+    return this.toMutationResponseDto(result);
   }
 
   @Delete(':id')

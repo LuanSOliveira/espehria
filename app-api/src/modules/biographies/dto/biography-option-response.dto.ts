@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Biography } from '../entities/biography.entity';
 import { TagResponseDto } from '../../tags/dto/tag-response.dto';
+import { EntityReferenceResponseDto } from '../../entity-links/dto/entity-reference-response.dto';
 
 export class BiographyOptionResponseDto {
   @ApiProperty({
@@ -33,6 +34,12 @@ export class BiographyOptionResponseDto {
   })
   tags: TagResponseDto[];
 
+  @ApiProperty({
+    type: () => [EntityReferenceResponseDto],
+    description: 'Habilidades adicionais associadas a esta biografia',
+  })
+  additionalAbilities: EntityReferenceResponseDto[];
+
   static fromEntity(biography: Biography): BiographyOptionResponseDto {
     const dto = new BiographyOptionResponseDto();
     dto.id = biography.id;
@@ -42,6 +49,7 @@ export class BiographyOptionResponseDto {
     dto.tags = (biography.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),
     );
+    dto.additionalAbilities = biography.additionalAbilities ?? [];
     return dto;
   }
 }

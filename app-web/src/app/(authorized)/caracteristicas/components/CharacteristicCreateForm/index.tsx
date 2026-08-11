@@ -66,7 +66,6 @@ interface CharacteristicPayload
   extends Omit<CharacteristicFormData, 'description' | 'level'> {
   description?: string;
   level: number;
-  improvedFrom: EntityReferenceInputPayload[];
   requirements: EntityReferenceInputPayload[];
   additionalAbilities: EntityReferenceInputPayload[];
   improvements: ImprovementDefectInputPayload[];
@@ -83,7 +82,6 @@ export const CharacteristicCreateForm = ({
   );
   const isEditMode = !!selectedCharacteristic;
 
-  const [improvedFrom, setImprovedFrom] = useState<IEntityReference[]>([]);
   const [requirements, setRequirements] = useState<IEntityReference[]>([]);
   const [additionalAbilities, setAdditionalAbilities] = useState<
     IEntityReference[]
@@ -116,8 +114,6 @@ export const CharacteristicCreateForm = ({
     if (!isEditMode) {
       reset(characteristicFormDefaultValues);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
-      setImprovedFrom([]);
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setRequirements([]);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setAdditionalAbilities([]);
@@ -142,7 +138,6 @@ export const CharacteristicCreateForm = ({
       tagIds: characteristicDetail.tags?.map((tag) => tag.id) ?? [],
       level: String(characteristicDetail.level),
     });
-    setImprovedFrom(characteristicDetail.improvedFrom ?? []);
     setRequirements(characteristicDetail.requirements ?? []);
     setAdditionalAbilities(characteristicDetail.additionalAbilities ?? []);
     setImprovements(characteristicDetail.improvements ?? []);
@@ -166,7 +161,6 @@ export const CharacteristicCreateForm = ({
 
   const buildPayload = (
     data: CharacteristicFormData,
-    improvedFrom: IEntityReference[],
     requirements: IEntityReference[],
     additionalAbilities: IEntityReference[],
     improvements: IImprovementDefectItem[],
@@ -178,10 +172,6 @@ export const CharacteristicCreateForm = ({
     description: data.description || undefined,
     tagIds: data.tagIds ?? [],
     level: Number(data.level),
-    improvedFrom: improvedFrom.map((reference) => ({
-      entityType: reference.entityType,
-      id: reference.id,
-    })),
     requirements: requirements.map((reference) => ({
       entityType: reference.entityType,
       id: reference.id,
@@ -223,7 +213,6 @@ export const CharacteristicCreateForm = ({
         type: 'success',
       });
       reset(characteristicFormDefaultValues);
-      setImprovedFrom([]);
       setRequirements([]);
       setAdditionalAbilities([]);
       setImprovements([]);
@@ -268,7 +257,6 @@ export const CharacteristicCreateForm = ({
   const onSubmit = (data: CharacteristicFormData) => {
     const payload = buildPayload(
       data,
-      improvedFrom,
       requirements,
       additionalAbilities,
       improvements,
@@ -379,32 +367,20 @@ export const CharacteristicCreateForm = ({
         addButtonLabel="Adicionar Habilidades"
         value={additionalAbilities}
         onChange={setAdditionalAbilities}
-        otherListValues={[improvedFrom, requirements]}
+        otherListValues={[requirements]}
         currentEntityType="characteristic"
         currentEntityId={selectedCharacteristic?.id}
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <EntityReferenceListField
-          label="Aprimorado de"
-          addButtonLabel="Adicionar Aprimorado de"
-          value={improvedFrom}
-          onChange={setImprovedFrom}
-          otherListValues={[requirements, additionalAbilities]}
-          currentEntityType="characteristic"
-          currentEntityId={selectedCharacteristic?.id}
-        />
-
-        <EntityReferenceListField
-          label="Requisitos"
-          addButtonLabel="Adicionar Requisitos"
-          value={requirements}
-          onChange={setRequirements}
-          otherListValues={[improvedFrom, additionalAbilities]}
-          currentEntityType="characteristic"
-          currentEntityId={selectedCharacteristic?.id}
-        />
-      </div>
+      <EntityReferenceListField
+        label="Requisitos"
+        addButtonLabel="Adicionar Requisitos"
+        value={requirements}
+        onChange={setRequirements}
+        otherListValues={[additionalAbilities]}
+        currentEntityType="characteristic"
+        currentEntityId={selectedCharacteristic?.id}
+      />
 
       <PrimaryButton
         type="submit"

@@ -24,11 +24,11 @@ import {
 } from '@/hooks/Queries';
 import {
   IAttribute,
-  IBiographyListItem,
   IProficiencyProperty,
   IRaceListFilters,
   IRaceListItem,
   ISheet,
+  ISheetBiography,
   ISheetCampaignOption,
   ISheetImprovementDefectSnapshot,
   ISheetKnowledgeSnapshot,
@@ -66,6 +66,9 @@ import {
   SheetBonusDetail,
   SheetBonusDetailModal,
 } from './components/SheetBonusDetailModal';
+import { SheetCharacteristicsPanel } from './components/SheetCharacteristicsPanel';
+import { SheetTrainingsPanel } from './components/SheetTrainingsPanel';
+import { SheetTalentsPanel } from './components/SheetTalentsPanel';
 import { useFieldAutosave } from './hooks/useFieldAutosave';
 import {
   SheetSkillModifierResult,
@@ -73,6 +76,7 @@ import {
 } from './hooks/useSheetSkillModifiers';
 import { useSheetKnowledgeModifiers } from './hooks/useSheetKnowledgeModifiers';
 import { useSheetSavingThrowModifiers } from './hooks/useSheetSavingThrowModifiers';
+import { useSheetAbilities } from './hooks/useSheetAbilities';
 import {
   SHEET_EMPTY_IMPROVEMENT_DEFECT_SNAPSHOT,
   SHEET_EMPTY_KNOWLEDGE_SNAPSHOT,
@@ -95,8 +99,9 @@ const SHEET_TABS_SX = {
   '& .MuiTabs-indicator': { backgroundColor: APP_COLORS.goldDark },
 };
 
-type SheetDetailTab = 'estatisticas' | 'bonus';
+type SheetDetailTab = 'estatisticas' | 'bonus' | 'habilidades';
 type SheetBonusSubTab = 'melhorias' | 'defeitos' | 'proficiencias';
+type SheetAbilitiesSubTab = 'caracteristicas' | 'treinamentos' | 'talentos';
 
 interface SheetDetailsPageProps {
   params: Promise<{ id: string }>;
@@ -145,7 +150,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
   const [level, setLevel] = useState(1);
   const [campaign, setCampaign] = useState<ISheetCampaignOption | null>(null);
   const [race, setRace] = useState<ISheetRace | null>(null);
-  const [biography, setBiography] = useState<IBiographyListItem | null>(null);
+  const [biography, setBiography] = useState<ISheetBiography | null>(null);
   const [currentHitPoints, setCurrentHitPoints] = useState<number | null>(
     null,
   );
@@ -174,6 +179,8 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
   const [activeTab, setActiveTab] = useState<SheetDetailTab>('estatisticas');
   const [activeBonusSubTab, setActiveBonusSubTab] =
     useState<SheetBonusSubTab>('melhorias');
+  const [activeAbilitiesSubTab, setActiveAbilitiesSubTab] =
+    useState<SheetAbilitiesSubTab>('caracteristicas');
   const [isAttributesDetailOpen, setIsAttributesDetailOpen] = useState(false);
   const [skillPendingBonusDetail, setSkillPendingBonusDetail] =
     useState<SheetSkillModifierResult | null>(null);
@@ -205,6 +212,38 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     setTemporaryHitPoints(sheet.temporaryHitPoints ?? null);
     setHasHydrated(true);
   }, [sheet, hasHydrated]);
+
+  /**
+   * Aplica os 5 snapshots derivados comuns a toda mutação que recalcula a
+   * ficha (`melhorias`, `defeitos`, `proficiencias`, `proficienciasAjustadas`,
+   * `saberes`) a partir de um `ISheet` recalculado — reaproveitado pelas
+   * mutações de Raça/Biografia já existentes, pelas 8 mutações de Habilidades
+   * (via `useSheetAbilities`) e por `updateLevelMutation`. `abilities` não faz
+   * parte de `ISheet` (ver `useSheetAbilities`), por isso não está aqui.
+   */
+  const applySheetSnapshots = (data: ISheet) => {
+    setMelhorias(data.melhorias);
+    setDefeitos(data.defeitos);
+    setProficiencias(data.proficiencias);
+    setProficienciasAjustadas(data.proficienciasAjustadas);
+    setSaberes(data.saberes);
+  };
+
+  const abilitiesQueryKey = [`/sheets/${sheetId}/abilities`];
+
+  const {
+    abilities,
+    isLoadingAbilities,
+    addCharacteristicExtraMutation,
+    removeCharacteristicExtraMutation,
+    addTalentExtraMutation,
+    removeTalentExtraMutation,
+    addTrainingExtraMutation,
+    removeTrainingExtraMutation,
+    fillTrainingSlotMutation,
+    emptyTrainingSlotMutation,
+    refetchAbilitiesAfterLevelChange,
+  } = useSheetAbilities({ sheetId, applySheetSnapshots });
 
   const { data: campaignOptionsData } = useSheetCampaignOptionsQuery();
   const campaignOptions = campaignOptionsData ?? [];
@@ -398,6 +437,19 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
   const updateLevelMutation = usePutEntity<ISheet, { level: number }>({
     url: `/sheets/${sheetId}`,
     invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
+    onSuccess: (data) => {
+      /**
+       * Reduzir o level da ficha pode remover slots de Treinamento (e
+       * desvincular o Treinamento que estivesse neles), recalculando
+       * melhorias/defeitos/proficiências/saberes — o `level` local não é
+       * sobrescrito (já é a fonte de verdade via input controlado), só os
+       * snapshots derivados. `GET /sheets/:id` não devolve `abilities`
+       * (contrato real, ver `useSheetAbilities`), então a listagem de slots é
+       * atualizada com um refetch dedicado do endpoint de habilidades.
+       */
+      applySheetSnapshots(data);
+      refetchAbilitiesAfterLevelChange();
+    },
     onError: (mutationError) => {
       showToast({
         message:
@@ -498,14 +550,10 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
 
   const linkRaceMutation = usePutEntity<ISheet, { raceId: string }>({
     url: `/sheets/${sheetId}/race`,
-    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
+    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`], abilitiesQueryKey],
     onSuccess: (data) => {
       setRace(data.race ?? null);
-      setMelhorias(data.melhorias);
-      setDefeitos(data.defeitos);
-      setProficiencias(data.proficiencias);
-      setProficienciasAjustadas(data.proficienciasAjustadas);
-      setSaberes(data.saberes);
+      applySheetSnapshots(data);
       showToast({ message: 'Raça vinculada com sucesso.', type: 'success' });
     },
     onError: (mutationError) => {
@@ -520,14 +568,10 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
 
   const unlinkRaceMutation = useDeleteEntity<ISheet>({
     url: `/sheets/${sheetId}/race`,
-    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
+    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`], abilitiesQueryKey],
     onSuccess: (data) => {
       setRace(null);
-      setMelhorias(data.melhorias);
-      setDefeitos(data.defeitos);
-      setProficiencias(data.proficiencias);
-      setProficienciasAjustadas(data.proficienciasAjustadas);
-      setSaberes(data.saberes);
+      applySheetSnapshots(data);
       showToast({ message: 'Raça removida com sucesso.', type: 'success' });
     },
     onError: (mutationError) => {
@@ -545,14 +589,10 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     SheetBiographyAssignPayload
   >({
     url: `/sheets/${sheetId}/biography`,
-    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
+    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`], abilitiesQueryKey],
     onSuccess: (data) => {
       setBiography(data.biography ?? null);
-      setMelhorias(data.melhorias);
-      setDefeitos(data.defeitos);
-      setProficiencias(data.proficiencias);
-      setProficienciasAjustadas(data.proficienciasAjustadas);
-      setSaberes(data.saberes);
+      applySheetSnapshots(data);
       showToast({
         message: 'Biografia vinculada com sucesso.',
         type: 'success',
@@ -570,14 +610,10 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
 
   const unlinkBiographyMutation = useDeleteEntity<ISheet>({
     url: `/sheets/${sheetId}/biography`,
-    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
+    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`], abilitiesQueryKey],
     onSuccess: (data) => {
       setBiography(null);
-      setMelhorias(data.melhorias);
-      setDefeitos(data.defeitos);
-      setProficiencias(data.proficiencias);
-      setProficienciasAjustadas(data.proficienciasAjustadas);
-      setSaberes(data.saberes);
+      applySheetSnapshots(data);
       showToast({
         message: 'Biografia removida com sucesso.',
         type: 'success',
@@ -814,6 +850,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
         >
           <Tab value="estatisticas" label="Estatísticas" />
           <Tab value="bonus" label="Bônus" />
+          <Tab value="habilidades" label="Habilidades" />
         </Tabs>
 
         {activeTab === 'bonus' && (
@@ -827,6 +864,20 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
             <Tab value="melhorias" label="Melhorias" />
             <Tab value="defeitos" label="Defeitos" />
             <Tab value="proficiencias" label="Proficiências" />
+          </Tabs>
+        )}
+
+        {activeTab === 'habilidades' && (
+          <Tabs
+            value={activeAbilitiesSubTab}
+            onChange={(_event, newValue: SheetAbilitiesSubTab) =>
+              setActiveAbilitiesSubTab(newValue)
+            }
+            sx={SHEET_TABS_SX}
+          >
+            <Tab value="caracteristicas" label="Características" />
+            <Tab value="treinamentos" label="Treinamentos" />
+            <Tab value="talentos" label="Talentos" />
           </Tabs>
         )}
 
@@ -934,6 +985,82 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
               />
             </div>
           )}
+
+          {activeTab === 'habilidades' &&
+            activeAbilitiesSubTab === 'caracteristicas' && (
+              <SheetCharacteristicsPanel
+                sheetId={sheetId}
+                inherited={abilities.characteristics.inherited}
+                extras={abilities.characteristics.extras}
+                onAddExtra={(characteristicId) =>
+                  addCharacteristicExtraMutation.mutate({ characteristicId })
+                }
+                onRemoveExtra={(characteristicId) =>
+                  removeCharacteristicExtraMutation.mutate(characteristicId)
+                }
+                isAdding={addCharacteristicExtraMutation.isPending}
+                isRemoving={(characteristicId) =>
+                  removeCharacteristicExtraMutation.isPending &&
+                  removeCharacteristicExtraMutation.variables ===
+                    characteristicId
+                }
+                isLoading={isLoadingAbilities}
+              />
+            )}
+
+          {activeTab === 'habilidades' &&
+            activeAbilitiesSubTab === 'treinamentos' && (
+              <SheetTrainingsPanel
+                sheetId={sheetId}
+                slots={abilities.trainings.slots}
+                inherited={abilities.trainings.inherited}
+                extras={abilities.trainings.extras}
+                onFillSlot={(slotIndex, trainingId) =>
+                  fillTrainingSlotMutation.mutate({ slotIndex, trainingId })
+                }
+                onEmptySlot={(slotIndex) =>
+                  emptyTrainingSlotMutation.mutate(slotIndex)
+                }
+                onAddExtra={(trainingId) =>
+                  addTrainingExtraMutation.mutate({ trainingId })
+                }
+                onRemoveExtra={(trainingId) =>
+                  removeTrainingExtraMutation.mutate(trainingId)
+                }
+                isFillingSlot={fillTrainingSlotMutation.isPending}
+                isEmptyingSlot={(slotIndex) =>
+                  emptyTrainingSlotMutation.isPending &&
+                  emptyTrainingSlotMutation.variables === slotIndex
+                }
+                isAddingExtra={addTrainingExtraMutation.isPending}
+                isRemovingExtra={(trainingId) =>
+                  removeTrainingExtraMutation.isPending &&
+                  removeTrainingExtraMutation.variables === trainingId
+                }
+                isLoading={isLoadingAbilities}
+              />
+            )}
+
+          {activeTab === 'habilidades' &&
+            activeAbilitiesSubTab === 'talentos' && (
+              <SheetTalentsPanel
+                sheetId={sheetId}
+                inherited={abilities.talents.inherited}
+                extras={abilities.talents.extras}
+                onAddExtra={(talentId) =>
+                  addTalentExtraMutation.mutate({ talentId })
+                }
+                onRemoveExtra={(talentId) =>
+                  removeTalentExtraMutation.mutate(talentId)
+                }
+                isAdding={addTalentExtraMutation.isPending}
+                isRemoving={(talentId) =>
+                  removeTalentExtraMutation.isPending &&
+                  removeTalentExtraMutation.variables === talentId
+                }
+                isLoading={isLoadingAbilities}
+              />
+            )}
         </div>
       </div>
 

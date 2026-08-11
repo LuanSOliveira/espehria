@@ -140,7 +140,6 @@ export class BiographiesService {
 
     this.entityLinksService.validateLists({
       ownerEntityType: ReferenceableEntityType.BIOGRAPHY,
-      improvedFrom: [],
       requirements: [],
       additionalAbilities: additionalAbilitiesInput,
     });
@@ -341,7 +340,6 @@ export class BiographiesService {
     this.entityLinksService.validateLists({
       ownerEntityType: ReferenceableEntityType.BIOGRAPHY,
       ownerId: id,
-      improvedFrom: [],
       requirements: [],
       additionalAbilities: effectiveAdditionalAbilities,
     });

@@ -48,20 +48,19 @@ export class SpellsController {
   @ApiCreatedResponse({ type: SpellResponseDto })
   @ApiConflictResponse({
     description:
-      'Já existe uma magia com este nome, ou violação de regra em Aprimorado de/Requisitos (autorreferência, duplicata ou item em ambas as listas)',
+      'Já existe uma magia com este nome, ou violação de regra em Requisitos (duplicata ou autorreferência)',
   })
   @ApiNotFoundResponse({
     description:
-      'Uma ou mais tags ou entidades referenciadas em Aprimorado de/Requisitos não foram encontradas',
+      'Uma ou mais tags ou entidades referenciadas em Requisitos não foram encontradas',
   })
   @ApiBadRequestResponse({
     description:
       'URL de imagem de referência inválida, dados obrigatórios ausentes ou formato inválido de entityType/id',
   })
   async create(@Body() dto: CreateSpellDto): Promise<SpellResponseDto> {
-    const { spell, improvedFrom, requirements } =
-      await this.spellsService.create(dto);
-    return SpellResponseDto.fromEntity(spell, improvedFrom, requirements);
+    const { spell, requirements } = await this.spellsService.create(dto);
+    return SpellResponseDto.fromEntity(spell, requirements);
   }
 
   @Get()
@@ -97,11 +96,7 @@ export class SpellsController {
     if (!result) {
       throw new NotFoundException('Magia não encontrada.');
     }
-    return SpellResponseDto.fromEntity(
-      result.spell,
-      result.improvedFrom,
-      result.requirements,
-    );
+    return SpellResponseDto.fromEntity(result.spell, result.requirements);
   }
 
   @Put(':id')
@@ -113,19 +108,18 @@ export class SpellsController {
   })
   @ApiConflictResponse({
     description:
-      'Já existe uma magia com este nome, ou violação de regra em Aprimorado de/Requisitos (autorreferência, duplicata ou item em ambas as listas)',
+      'Já existe uma magia com este nome, ou violação de regra em Requisitos (duplicata ou autorreferência)',
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida, ID em formato inválido ou formato inválido de entityType/id em Aprimorado de/Requisitos',
+      'URL de imagem de referência inválida, ID em formato inválido ou formato inválido de entityType/id em Requisitos',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateSpellDto,
   ): Promise<SpellResponseDto> {
-    const { spell, improvedFrom, requirements } =
-      await this.spellsService.update(id, dto);
-    return SpellResponseDto.fromEntity(spell, improvedFrom, requirements);
+    const { spell, requirements } = await this.spellsService.update(id, dto);
+    return SpellResponseDto.fromEntity(spell, requirements);
   }
 
   @Delete(':id')

@@ -10,7 +10,6 @@ export interface ITraining extends IEntity {
   description?: string | null;
   tags: ITag[];
   level: number;
-  improvedFrom: IEntityReference[];
   requirements: IEntityReference[];
   additionalAbilities: IEntityReference[];
   improvements: IImprovementDefectItem[];

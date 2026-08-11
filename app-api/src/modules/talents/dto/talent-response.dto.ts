@@ -36,12 +36,6 @@ export class TalentResponseDto {
 
   @ApiProperty({
     type: () => [EntityReferenceResponseDto],
-    description: 'Itens dos quais este talento é aprimorado',
-  })
-  improvedFrom: EntityReferenceResponseDto[];
-
-  @ApiProperty({
-    type: () => [EntityReferenceResponseDto],
     description: 'Itens exigidos como requisito para este talento',
   })
   requirements: EntityReferenceResponseDto[];
@@ -89,7 +83,6 @@ export class TalentResponseDto {
   static fromEntity(
     talent: Talent,
     references: {
-      improvedFrom: EntityReferenceResponseDto[];
       requirements: EntityReferenceResponseDto[];
       additionalAbilities: EntityReferenceResponseDto[];
       improvements: ImprovementFlawItemResponseDto[];
@@ -104,7 +97,6 @@ export class TalentResponseDto {
     dto.level = talent.level;
     dto.description = talent.description;
     dto.tags = (talent.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
-    dto.improvedFrom = references.improvedFrom;
     dto.requirements = references.requirements;
     dto.additionalAbilities = references.additionalAbilities;
     dto.improvements = references.improvements;

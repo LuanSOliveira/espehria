@@ -36,12 +36,6 @@ export class CharacteristicResponseDto {
 
   @ApiProperty({
     type: () => [EntityReferenceResponseDto],
-    description: 'Itens dos quais esta característica é aprimorada',
-  })
-  improvedFrom: EntityReferenceResponseDto[];
-
-  @ApiProperty({
-    type: () => [EntityReferenceResponseDto],
     description: 'Itens exigidos como requisito para esta característica',
   })
   requirements: EntityReferenceResponseDto[];
@@ -89,7 +83,6 @@ export class CharacteristicResponseDto {
   static fromEntity(
     characteristic: Characteristic,
     references: {
-      improvedFrom: EntityReferenceResponseDto[];
       requirements: EntityReferenceResponseDto[];
       additionalAbilities: EntityReferenceResponseDto[];
       improvements: ImprovementFlawItemResponseDto[];
@@ -106,7 +99,6 @@ export class CharacteristicResponseDto {
     dto.tags = (characteristic.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),
     );
-    dto.improvedFrom = references.improvedFrom;
     dto.requirements = references.requirements;
     dto.additionalAbilities = references.additionalAbilities;
     dto.improvements = references.improvements;

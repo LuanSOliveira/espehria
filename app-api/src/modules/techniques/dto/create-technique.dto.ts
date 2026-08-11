@@ -61,24 +61,7 @@ export class CreateTechniqueDto {
   @ApiPropertyOptional({
     type: () => [EntityReferenceInputDto],
     description:
-      'Itens dos quais esta técnica é aprimorada. Não pode referenciar a si mesma, conter duplicatas ou estar simultaneamente em Requisitos.',
-    example: [
-      {
-        entityType: 'technique',
-        id: '550e8400-e29b-41d4-a716-446655440000',
-      },
-    ],
-  })
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => EntityReferenceInputDto)
-  improvedFrom?: EntityReferenceInputDto[];
-
-  @ApiPropertyOptional({
-    type: () => [EntityReferenceInputDto],
-    description:
-      'Itens exigidos como requisito para esta técnica. Não pode referenciar a si mesma, conter duplicatas ou estar simultaneamente em Aprimorado de.',
+      'Itens exigidos como requisito para esta técnica. Não pode referenciar a si mesma nem conter duplicatas.',
     example: [
       {
         entityType: 'spell',

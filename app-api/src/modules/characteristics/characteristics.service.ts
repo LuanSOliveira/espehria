@@ -49,7 +49,6 @@ export interface PaginatedCharacteristics {
 
 export interface CharacteristicWithReferences {
   characteristic: Characteristic;
-  improvedFrom: EntityReferenceResponseDto[];
   requirements: EntityReferenceResponseDto[];
   additionalAbilities: EntityReferenceResponseDto[];
   improvements: ImprovementFlawItemResponseDto[];
@@ -90,7 +89,7 @@ export class CharacteristicsService {
       'characteristic',
     );
 
-    const { improvedFrom, requirements, additionalAbilities } =
+    const { requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
         ReferenceableEntityType.CHARACTERISTIC,
         id,
@@ -111,7 +110,6 @@ export class CharacteristicsService {
 
     return {
       characteristic,
-      improvedFrom,
       requirements,
       additionalAbilities,
       improvements,
@@ -146,7 +144,6 @@ export class CharacteristicsService {
         ? await this.findTagsByIds(dto.tagIds)
         : [];
 
-    const improvedFromInput = dto.improvedFrom ?? [];
     const requirementsInput = dto.requirements ?? [];
     const additionalAbilitiesInput = dto.additionalAbilities ?? [];
     const improvementsInput = dto.improvements ?? [];
@@ -156,12 +153,10 @@ export class CharacteristicsService {
 
     this.entityLinksService.validateLists({
       ownerEntityType: ReferenceableEntityType.CHARACTERISTIC,
-      improvedFrom: improvedFromInput,
       requirements: requirementsInput,
       additionalAbilities: additionalAbilitiesInput,
     });
 
-    await this.entityLinksService.resolveReferences(improvedFromInput);
     await this.entityLinksService.resolveReferences(requirementsInput);
     await this.entityLinksService.resolveReferences(additionalAbilitiesInput);
 
@@ -205,12 +200,6 @@ export class CharacteristicsService {
     await this.entityLinksService.replaceLinks(
       ReferenceableEntityType.CHARACTERISTIC,
       savedCharacteristic.id,
-      EntityLinkType.IMPROVED_FROM,
-      improvedFromInput,
-    );
-    await this.entityLinksService.replaceLinks(
-      ReferenceableEntityType.CHARACTERISTIC,
-      savedCharacteristic.id,
       EntityLinkType.REQUIREMENT,
       requirementsInput,
     );
@@ -248,7 +237,7 @@ export class CharacteristicsService {
       resolvedKnowledges,
     );
 
-    const { improvedFrom, requirements, additionalAbilities } =
+    const { requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
         ReferenceableEntityType.CHARACTERISTIC,
         savedCharacteristic.id,
@@ -269,7 +258,6 @@ export class CharacteristicsService {
 
     return {
       characteristic: savedCharacteristic,
-      improvedFrom,
       requirements,
       additionalAbilities,
       improvements,
@@ -414,12 +402,10 @@ export class CharacteristicsService {
       );
     }
 
-    let effectiveImprovedFrom = dto.improvedFrom;
     let effectiveRequirements = dto.requirements;
     let effectiveAdditionalAbilities = dto.additionalAbilities;
 
     if (
-      effectiveImprovedFrom === undefined ||
       effectiveRequirements === undefined ||
       effectiveAdditionalAbilities === undefined
     ) {
@@ -427,14 +413,6 @@ export class CharacteristicsService {
         ReferenceableEntityType.CHARACTERISTIC,
         id,
       );
-      if (effectiveImprovedFrom === undefined) {
-        effectiveImprovedFrom = current.improvedFrom.map(
-          (ref): EntityReferenceInputDto => ({
-            entityType: ref.entityType,
-            id: ref.id,
-          }),
-        );
-      }
       if (effectiveRequirements === undefined) {
         effectiveRequirements = current.requirements.map(
           (ref): EntityReferenceInputDto => ({
@@ -456,14 +434,10 @@ export class CharacteristicsService {
     this.entityLinksService.validateLists({
       ownerEntityType: ReferenceableEntityType.CHARACTERISTIC,
       ownerId: id,
-      improvedFrom: effectiveImprovedFrom,
       requirements: effectiveRequirements,
       additionalAbilities: effectiveAdditionalAbilities,
     });
 
-    if (dto.improvedFrom !== undefined) {
-      await this.entityLinksService.resolveReferences(dto.improvedFrom);
-    }
     if (dto.requirements !== undefined) {
       await this.entityLinksService.resolveReferences(dto.requirements);
     }
@@ -555,14 +529,6 @@ export class CharacteristicsService {
       await this.characteristicsRepository.save(characteristic);
     savedCharacteristic.tags = tags;
 
-    if (dto.improvedFrom !== undefined) {
-      await this.entityLinksService.replaceLinks(
-        ReferenceableEntityType.CHARACTERISTIC,
-        id,
-        EntityLinkType.IMPROVED_FROM,
-        dto.improvedFrom,
-      );
-    }
     if (dto.requirements !== undefined) {
       await this.entityLinksService.replaceLinks(
         ReferenceableEntityType.CHARACTERISTIC,
@@ -614,7 +580,7 @@ export class CharacteristicsService {
       );
     }
 
-    const { improvedFrom, requirements, additionalAbilities } =
+    const { requirements, additionalAbilities } =
       await this.entityLinksService.loadReferencesFor(
         ReferenceableEntityType.CHARACTERISTIC,
         id,
@@ -635,7 +601,6 @@ export class CharacteristicsService {
 
     return {
       characteristic: savedCharacteristic,
-      improvedFrom,
       requirements,
       additionalAbilities,
       improvements,

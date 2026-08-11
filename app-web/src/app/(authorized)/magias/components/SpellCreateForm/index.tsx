@@ -40,7 +40,6 @@ interface SpellPayload
   referenceImage?: string;
   description?: string;
   level: number;
-  improvedFrom: EntityReferenceInputPayload[];
   requirements: EntityReferenceInputPayload[];
 }
 
@@ -48,7 +47,6 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
   const selectedSpell = useSelectedSpellStore((state) => state.selectedSpell);
   const isEditMode = !!selectedSpell;
 
-  const [improvedFrom, setImprovedFrom] = useState<IEntityReference[]>([]);
   const [requirements, setRequirements] = useState<IEntityReference[]>([]);
 
   const { tagOptions } = useTagOptionsQuery();
@@ -72,8 +70,6 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
     if (!isEditMode) {
       reset(spellFormDefaultValues);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
-      setImprovedFrom([]);
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza rascunho local ao sair do modo edição
       setRequirements([]);
       return;
     }
@@ -89,7 +85,6 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
       tagIds: spellDetail.tags?.map((tag) => tag.id) ?? [],
       level: String(spellDetail.level),
     });
-    setImprovedFrom(spellDetail.improvedFrom ?? []);
     setRequirements(spellDetail.requirements ?? []);
   }, [isEditMode, spellDetail, reset]);
 
@@ -108,7 +103,6 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
 
   const buildPayload = (
     data: SpellFormData,
-    improvedFrom: IEntityReference[],
     requirements: IEntityReference[],
   ): SpellPayload => ({
     ...data,
@@ -116,10 +110,6 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
     description: data.description || undefined,
     tagIds: data.tagIds ?? [],
     level: Number(data.level),
-    improvedFrom: improvedFrom.map((reference) => ({
-      entityType: reference.entityType,
-      id: reference.id,
-    })),
     requirements: requirements.map((reference) => ({
       entityType: reference.entityType,
       id: reference.id,
@@ -135,7 +125,6 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
         type: 'success',
       });
       reset(spellFormDefaultValues);
-      setImprovedFrom([]);
       setRequirements([]);
       onSaved();
     },
@@ -170,7 +159,7 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
   });
 
   const onSubmit = (data: SpellFormData) => {
-    const payload = buildPayload(data, improvedFrom, requirements);
+    const payload = buildPayload(data, requirements);
 
     if (isEditMode) {
       updateSpellMutation.mutate(payload);
@@ -242,27 +231,14 @@ export const SpellCreateForm = ({ onSaved }: SpellCreateFormProps) => {
         placeholder="Descreva a magia"
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <EntityReferenceListField
-          label="Aprimorado de"
-          addButtonLabel="Adicionar Aprimorado de"
-          value={improvedFrom}
-          onChange={setImprovedFrom}
-          otherListValues={[requirements]}
-          currentEntityType="spell"
-          currentEntityId={selectedSpell?.id}
-        />
-
-        <EntityReferenceListField
-          label="Requisitos"
-          addButtonLabel="Adicionar Requisitos"
-          value={requirements}
-          onChange={setRequirements}
-          otherListValues={[improvedFrom]}
-          currentEntityType="spell"
-          currentEntityId={selectedSpell?.id}
-        />
-      </div>
+      <EntityReferenceListField
+        label="Requisitos"
+        addButtonLabel="Adicionar Requisitos"
+        value={requirements}
+        onChange={setRequirements}
+        currentEntityType="spell"
+        currentEntityId={selectedSpell?.id}
+      />
 
       <PrimaryButton
         type="submit"

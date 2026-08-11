@@ -36,12 +36,6 @@ export class TrainingResponseDto {
 
   @ApiProperty({
     type: () => [EntityReferenceResponseDto],
-    description: 'Itens dos quais este treinamento é aprimorado',
-  })
-  improvedFrom: EntityReferenceResponseDto[];
-
-  @ApiProperty({
-    type: () => [EntityReferenceResponseDto],
     description: 'Itens exigidos como requisito para este treinamento',
   })
   requirements: EntityReferenceResponseDto[];
@@ -89,7 +83,6 @@ export class TrainingResponseDto {
   static fromEntity(
     training: Training,
     references: {
-      improvedFrom: EntityReferenceResponseDto[];
       requirements: EntityReferenceResponseDto[];
       additionalAbilities: EntityReferenceResponseDto[];
       improvements: ImprovementFlawItemResponseDto[];
@@ -106,7 +99,6 @@ export class TrainingResponseDto {
     dto.tags = (training.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),
     );
-    dto.improvedFrom = references.improvedFrom;
     dto.requirements = references.requirements;
     dto.additionalAbilities = references.additionalAbilities;
     dto.improvements = references.improvements;

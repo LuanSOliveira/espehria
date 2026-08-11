@@ -55,24 +55,7 @@ export class CreateTrainingDto {
   @ApiPropertyOptional({
     type: () => [EntityReferenceInputDto],
     description:
-      'Itens dos quais este treinamento é aprimorado. Não pode referenciar a si mesmo, conter duplicatas ou estar simultâneamente em Requisitos.',
-    example: [
-      {
-        entityType: 'training',
-        id: '550e8400-e29b-41d4-a716-446655440000',
-      },
-    ],
-  })
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => EntityReferenceInputDto)
-  improvedFrom?: EntityReferenceInputDto[];
-
-  @ApiPropertyOptional({
-    type: () => [EntityReferenceInputDto],
-    description:
-      'Itens exigidos como requisito para este treinamento. Não pode referenciar a si mesmo, conter duplicatas ou estar simultâneamente em Aprimorado de.',
+      'Itens exigidos como requisito para este treinamento. Não pode referenciar a si mesmo, conter duplicatas ou estar simultaneamente em Habilidades Adicionais.',
     example: [
       {
         entityType: 'talent',
@@ -89,7 +72,7 @@ export class CreateTrainingDto {
   @ApiPropertyOptional({
     type: () => [EntityReferenceInputDto],
     description:
-      'Habilidades adicionais associadas a este treinamento. Não pode referenciar a si mesmo, conter duplicatas ou estar simultâneamente em Aprimorado de ou em Requisitos.',
+      'Habilidades adicionais associadas a este treinamento. Não pode referenciar a si mesmo, conter duplicatas ou estar simultaneamente em Requisitos.',
     example: [
       {
         entityType: 'technique',
