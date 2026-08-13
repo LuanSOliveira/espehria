@@ -35,12 +35,14 @@ interface EntityReferenceCandidateListFilters {
   name?: string;
   page?: number;
   perPage?: number;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface EntityReferenceTabConfig {
   label: string;
   entityType: string;
   url: string;
+  extraFilters?: Record<string, string | number | boolean | undefined>;
 }
 
 const ENTITY_REFERENCE_SELECTION_TABS: EntityReferenceTabConfig[] = [
@@ -105,6 +107,7 @@ export const EntityReferenceSelectionModal = ({
       name: nameFilter || undefined,
       page,
       perPage: APP_DEFAULT_PAGE_SIZE,
+      ...activeTab.extraFilters,
     },
     enabled: open,
   });

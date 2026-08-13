@@ -31,7 +31,12 @@ import {
   FiZap,
   FiCompass,
 } from 'react-icons/fi';
-import { GiCheckedShield, GiChestArmor, GiDiamondRing } from 'react-icons/gi';
+import {
+  GiCheckedShield,
+  GiChestArmor,
+  GiDiamondRing,
+  GiScrollUnfurled,
+} from 'react-icons/gi';
 import { PiSword } from 'react-icons/pi';
 import { MdOutlineFace } from 'react-icons/md';
 import { IconType } from 'react-icons';
@@ -151,6 +156,11 @@ export const NAV_SECTIONS: NavSection[] = [
             label: 'Escudos',
             href: APP_ROUTES.private.shields,
             icon: GiCheckedShield,
+          },
+          {
+            label: 'Traços',
+            href: APP_ROUTES.private.traits,
+            icon: GiScrollUnfurled,
           },
         ],
       },

@@ -47,6 +47,10 @@ import { ImprovementFlawPropertiesModule } from './modules/improvement-flaw-prop
 import { BiographiesModule } from './modules/biographies/biographies.module';
 import { ProficiencyPropertiesModule } from './modules/proficiency-properties/proficiency-properties.module';
 import { ProficiencyGradationsModule } from './modules/proficiency-gradations/proficiency-gradations.module';
+import { TraitTypesModule } from './modules/trait-types/trait-types.module';
+import { SizeGradesModule } from './modules/size-grades/size-grades.module';
+import { DamageTypesModule } from './modules/damage-types/damage-types.module';
+import { TraitsModule } from './modules/traits/traits.module';
 
 @Module({
   imports: [
@@ -115,6 +119,10 @@ import { ProficiencyGradationsModule } from './modules/proficiency-gradations/pr
     BiographiesModule,
     ProficiencyPropertiesModule,
     ProficiencyGradationsModule,
+    TraitTypesModule,
+    SizeGradesModule,
+    DamageTypesModule,
+    TraitsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

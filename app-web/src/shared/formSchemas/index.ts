@@ -11,6 +11,7 @@ export * from './CharacterFormSchema';
 export * from './OrganizationFormSchema';
 export * from './FamilyFormSchema';
 export * from './WeaponFormSchema';
+export * from './TraitFormSchema';
 export * from './ArmorFormSchema';
 export * from './AccessoryFormSchema';
 export * from './ShieldFormSchema';

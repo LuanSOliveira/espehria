@@ -1,21 +1,24 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import {
   FormAutocompleteInput,
+  FormCheckboxInput,
   FormMultiAutocompleteInput,
   FormRichTextInput,
   FormTextInput,
 } from '@/shared/components/Inputs';
 import { PrimaryButton } from '@/shared/components/Buttons';
-import { DefaultText } from '@/shared/components/Texts';
+import { DefaultText, Label } from '@/shared/components/Texts';
 import {
   useCurrenciesQuery,
+  useDamageTypesQuery,
   useGetEntityById,
   usePostEntity,
   usePutEntity,
+  useSizeGradesQuery,
   useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
@@ -23,9 +26,22 @@ import {
   weaponFormDefaultValues,
   weaponFormResolver,
 } from '@/shared/formSchemas';
-import { ICurrency, IWeapon, ITag } from '@/shared/interfaces';
+import {
+  ICurrency,
+  IDamageType,
+  IEntityReference,
+  ISizeGrade,
+  IWeapon,
+  ITag,
+} from '@/shared/interfaces';
 import { formatTagLabel, showToast } from '@/shared/util';
 import { useSelectedWeaponStore } from '@/store';
+import {
+  WEAPON_DAMAGE_DIE_OPTIONS,
+  WEAPON_HANDS_OPTIONS,
+  WEAPON_STYLE_OPTIONS,
+} from '../../data';
+import { WeaponTraitsField } from '../WeaponTraitsField';
 
 export interface WeaponCreateFormProps {
   onSaved: () => void;
@@ -34,23 +50,56 @@ export interface WeaponCreateFormProps {
 interface WeaponPayload
   extends Omit<
     WeaponFormData,
-    'referenceImage' | 'description' | 'price' | 'currencyId' | 'privateInformation'
+    | 'referenceImage'
+    | 'description'
+    | 'price'
+    | 'currencyId'
+    | 'privateInformation'
+    | 'nickname'
+    | 'volume'
+    | 'sizeGradeId'
+    | 'hands'
+    | 'weaponStyle'
+    | 'damageValue'
+    | 'damageDie'
+    | 'damageTypeId'
+    | 'distanceMeters'
+    | 'reloadActions'
   > {
   referenceImage?: string;
   description?: string;
   price?: number | null;
   currencyId?: string;
   privateInformation?: string;
+  nickname?: string;
+  volume?: number | null;
+  sizeGradeId?: string;
+  hands?: string;
+  weaponStyle?: string;
+  traitIds: string[];
+  damageValue?: number | null;
+  damageDie?: string;
+  damageTypeId?: string;
+  distanceMeters?: number | null;
+  reloadActions?: number | null;
 }
 
 export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
   const selectedWeapon = useSelectedWeaponStore((state) => state.selectedWeapon);
   const isEditMode = !!selectedWeapon;
 
+  const [traits, setTraits] = useState<IEntityReference[]>([]);
+
   const { tagOptions } = useTagOptionsQuery();
 
   const { data: currenciesData } = useCurrenciesQuery();
   const currencyOptions = currenciesData ?? [];
+
+  const { data: sizeGradesData } = useSizeGradesQuery();
+  const sizeGradeOptions = sizeGradesData ?? [];
+
+  const { data: damageTypesData } = useDamageTypesQuery();
+  const damageTypeOptions = damageTypesData ?? [];
 
   const {
     data: weaponDetail,
@@ -70,6 +119,7 @@ export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
   useEffect(() => {
     if (!isEditMode) {
       reset(weaponFormDefaultValues);
+      setTraits([]);
       return;
     }
 
@@ -79,13 +129,41 @@ export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
 
     reset({
       name: weaponDetail.name,
+      nickname: weaponDetail.nickname ?? '',
       referenceImage: weaponDetail.referenceImage ?? '',
       description: weaponDetail.description ?? '',
       price: weaponDetail.price != null ? String(weaponDetail.price) : '',
       currencyId: weaponDetail.currency?.id ?? '',
+      volume: weaponDetail.volume != null ? String(weaponDetail.volume) : '',
+      sizeGradeId: weaponDetail.sizeGrade?.id ?? '',
+      hands: weaponDetail.hands ?? '',
+      weaponStyle: weaponDetail.weaponStyle ?? '',
+      damageValue:
+        weaponDetail.damageValue != null ? String(weaponDetail.damageValue) : '',
+      damageDie: weaponDetail.damageDie ?? '',
+      damageTypeId: weaponDetail.damageType?.id ?? '',
+      magicalDamage: weaponDetail.magicalDamage,
+      distanceMeters:
+        weaponDetail.distanceMeters != null
+          ? String(weaponDetail.distanceMeters)
+          : '',
+      usesAmmunition: weaponDetail.usesAmmunition,
+      reloadActions:
+        weaponDetail.reloadActions != null
+          ? String(weaponDetail.reloadActions)
+          : '',
       privateInformation: weaponDetail.privateInformation ?? '',
       tagIds: weaponDetail.tags?.map((tag) => tag.id) ?? [],
     });
+
+    setTraits(
+      weaponDetail.traits?.map((trait) => ({
+        id: trait.id,
+        name: trait.name,
+        entityType: 'trait',
+        tags: trait.tags,
+      })) ?? [],
+    );
   }, [isEditMode, weaponDetail, reset]);
 
   useEffect(() => {
@@ -109,6 +187,19 @@ export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
     currencyId: data.currencyId || undefined,
     privateInformation: data.privateInformation || undefined,
     tagIds: data.tagIds ?? [],
+    nickname: data.nickname || undefined,
+    volume: data.volume ? Number(data.volume) : null,
+    sizeGradeId: data.sizeGradeId || undefined,
+    hands: data.hands || undefined,
+    weaponStyle: data.weaponStyle || undefined,
+    traitIds: traits.map((t) => t.id),
+    damageValue: data.damageValue ? Number(data.damageValue) : null,
+    damageDie: data.damageDie || undefined,
+    damageTypeId: data.damageTypeId || undefined,
+    magicalDamage: data.magicalDamage,
+    distanceMeters: data.distanceMeters ? Number(data.distanceMeters) : null,
+    usesAmmunition: data.usesAmmunition,
+    reloadActions: data.reloadActions ? Number(data.reloadActions) : null,
   });
 
   const createWeaponMutation = usePostEntity<IWeapon, WeaponPayload>({
@@ -120,6 +211,7 @@ export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
         type: 'success',
       });
       reset(weaponFormDefaultValues);
+      setTraits([]);
       onSaved();
     },
     onError: (error) => {
@@ -185,6 +277,14 @@ export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
         />
 
         <FormTextInput
+          id="weapon-form-nickname"
+          name="nickname"
+          control={control}
+          label="Apelido"
+          placeholder="Digite o apelido"
+        />
+
+        <FormTextInput
           id="weapon-form-reference-image"
           name="referenceImage"
           control={control}
@@ -192,6 +292,20 @@ export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
           placeholder="https://exemplo.com/imagem.jpg"
         />
 
+        <FormMultiAutocompleteInput<WeaponFormData, ITag>
+          id="weapon-form-tags"
+          name="tagIds"
+          control={control}
+          label="Tags"
+          options={tagOptions}
+          getOptionLabel={formatTagLabel}
+          getOptionValue={(tag) => tag.id}
+          getOptionColor={(tag) => tag.color}
+          placeholder="Selecione as tags"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <FormTextInput
           id="weapon-form-price"
           name="price"
@@ -215,16 +329,136 @@ export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
           placeholder="Selecione a moeda"
         />
 
-        <FormMultiAutocompleteInput<WeaponFormData, ITag>
-          id="weapon-form-tags"
-          name="tagIds"
+        <FormTextInput
+          id="weapon-form-volume"
+          name="volume"
           control={control}
-          label="Tags"
-          options={tagOptions}
-          getOptionLabel={formatTagLabel}
-          getOptionValue={(tag) => tag.id}
-          getOptionColor={(tag) => tag.color}
-          placeholder="Selecione as tags"
+          label="Volume"
+          placeholder="Digite o volume"
+          type="number"
+          slotProps={{
+            htmlInput: { min: 0, step: 0.1, inputMode: 'decimal' },
+          }}
+        />
+
+        <FormAutocompleteInput<WeaponFormData, ISizeGrade>
+          id="weapon-form-size-grade"
+          name="sizeGradeId"
+          control={control}
+          label="Grau de Tamanho"
+          options={sizeGradeOptions}
+          getOptionLabel={(sizeGrade) => sizeGrade.name}
+          getOptionValue={(sizeGrade) => sizeGrade.id}
+          placeholder="Selecione o grau de tamanho"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <FormAutocompleteInput<WeaponFormData, (typeof WEAPON_HANDS_OPTIONS)[number]>
+          id="weapon-form-hands"
+          name="hands"
+          control={control}
+          label="Mãos"
+          options={WEAPON_HANDS_OPTIONS}
+          getOptionLabel={(option) => option.label}
+          getOptionValue={(option) => option.value}
+          placeholder="Selecione a quantidade de mãos"
+        />
+
+        <FormAutocompleteInput<
+          WeaponFormData,
+          (typeof WEAPON_STYLE_OPTIONS)[number]
+        >
+          id="weapon-form-weapon-style"
+          name="weaponStyle"
+          control={control}
+          label="Estilo de Arma"
+          options={WEAPON_STYLE_OPTIONS}
+          getOptionLabel={(option) => option.label}
+          getOptionValue={(option) => option.value}
+          placeholder="Selecione o estilo de arma"
+        />
+      </div>
+
+      <WeaponTraitsField value={traits} onChange={setTraits} />
+
+      <div className="flex flex-col gap-4">
+        <Label component="span" sx={{ margin: 0 }}>
+          Dano
+        </Label>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <FormTextInput
+            id="weapon-form-damage-value"
+            name="damageValue"
+            control={control}
+            label="Valor"
+            placeholder="Digite o valor de dano"
+            type="number"
+            slotProps={{ htmlInput: { min: 0, step: 1, inputMode: 'numeric' } }}
+          />
+
+          <FormAutocompleteInput<
+            WeaponFormData,
+            (typeof WEAPON_DAMAGE_DIE_OPTIONS)[number]
+          >
+            id="weapon-form-damage-die"
+            name="damageDie"
+            control={control}
+            label="Dado"
+            options={WEAPON_DAMAGE_DIE_OPTIONS}
+            getOptionLabel={(option) => option.label}
+            getOptionValue={(option) => option.value}
+            placeholder="Selecione o dado"
+          />
+
+          <FormAutocompleteInput<WeaponFormData, IDamageType>
+            id="weapon-form-damage-type"
+            name="damageTypeId"
+            control={control}
+            label="Tipo de dano"
+            options={damageTypeOptions}
+            getOptionLabel={(damageType) => damageType.name}
+            getOptionValue={(damageType) => damageType.id}
+            placeholder="Selecione o tipo de dano"
+          />
+
+          <FormCheckboxInput
+            id="weapon-form-magical-damage"
+            name="magicalDamage"
+            control={control}
+            label="Dano mágico"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <FormTextInput
+          id="weapon-form-distance-meters"
+          name="distanceMeters"
+          control={control}
+          label="Distância (Metros)"
+          placeholder="Digite a distância"
+          type="number"
+          slotProps={{
+            htmlInput: { min: 0, step: 0.1, inputMode: 'decimal' },
+          }}
+        />
+
+        <FormCheckboxInput
+          id="weapon-form-uses-ammunition"
+          name="usesAmmunition"
+          control={control}
+          label="Usa Munição?"
+        />
+
+        <FormTextInput
+          id="weapon-form-reload-actions"
+          name="reloadActions"
+          control={control}
+          label="Ações de Recarga"
+          placeholder="Digite as ações de recarga"
+          type="number"
+          slotProps={{ htmlInput: { min: 0, step: 1, inputMode: 'numeric' } }}
         />
       </div>
 

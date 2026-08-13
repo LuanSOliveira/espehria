@@ -15,6 +15,7 @@ export * from './PageStore/CharactersStore';
 export * from './PageStore/OrganizationsStore';
 export * from './PageStore/FamiliesStore';
 export * from './PageStore/WeaponsStore';
+export * from './PageStore/TraitsStore';
 export * from './PageStore/ArmorsStore';
 export * from './PageStore/AccessoriesStore';
 export * from './PageStore/ShieldsStore';

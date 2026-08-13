@@ -32,6 +32,7 @@ import { Technique } from '../techniques/entities/technique.entity';
 import { Spell } from '../spells/entities/spell.entity';
 import { Characteristic } from '../characteristics/entities/characteristic.entity';
 import { Biography } from '../biographies/entities/biography.entity';
+import { Trait } from '../traits/entities/trait.entity';
 import { LinkableEntityType } from './enums/linkable-entity-type.enum';
 import { SearchResultItemResponseDto } from './dto/search-result-item-response.dto';
 
@@ -100,6 +101,8 @@ export class SearchService {
     private readonly plannedSessionsRepository: Repository<PlannedSession>,
     @InjectRepository(Biography)
     private readonly biographiesRepository: Repository<Biography>,
+    @InjectRepository(Trait)
+    private readonly traitsRepository: Repository<Trait>,
   ) {}
 
   async search(
@@ -214,6 +217,10 @@ export class SearchService {
       {
         entityType: LinkableEntityType.BIOGRAPHY,
         repository: this.biographiesRepository,
+      },
+      {
+        entityType: LinkableEntityType.TRAIT,
+        repository: this.traitsRepository,
       },
     ];
 

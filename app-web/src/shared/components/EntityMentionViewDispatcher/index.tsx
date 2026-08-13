@@ -13,6 +13,7 @@ import { CharacterView } from '@/app/(authorized)/personagens/components/Charact
 import { OrganizationView } from '@/app/(authorized)/organizacoes/components/OrganizationView';
 import { FamilyView } from '@/app/(authorized)/familias/components/FamilyView';
 import { WeaponView } from '@/app/(authorized)/armas/components/WeaponView';
+import { TraitView } from '@/app/(authorized)/tracos/components/TraitView';
 import { ArmorView } from '@/app/(authorized)/armaduras/components/ArmorView';
 import { AccessoryView } from '@/app/(authorized)/acessorios/components/AccessoryView';
 import { ShieldView } from '@/app/(authorized)/escudos/components/ShieldView';
@@ -74,6 +75,9 @@ const ENTITY_MENTION_VIEW_REGISTRY: Record<
   ),
   weapon: ({ entityId, onNotFound }) => (
     <WeaponView weaponId={entityId} onNotFound={onNotFound} />
+  ),
+  trait: ({ entityId, onNotFound }) => (
+    <TraitView traitId={entityId} onNotFound={onNotFound} />
   ),
   armor: ({ entityId, onNotFound }) => (
     <ArmorView armorId={entityId} onNotFound={onNotFound} />

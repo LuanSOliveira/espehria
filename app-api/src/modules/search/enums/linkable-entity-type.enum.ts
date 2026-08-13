@@ -29,4 +29,5 @@ export enum LinkableEntityType {
   CAMPAIGN = 'campaign',
   PLANNED_SESSION = 'planned_session',
   BIOGRAPHY = 'biography',
+  TRAIT = 'trait',
 }

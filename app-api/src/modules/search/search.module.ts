@@ -30,6 +30,7 @@ import { Characteristic } from '../characteristics/entities/characteristic.entit
 import { Campaign } from '../campaigns/entities/campaign.entity';
 import { PlannedSession } from '../planned-sessions/entities/planned-session.entity';
 import { Biography } from '../biographies/entities/biography.entity';
+import { Trait } from '../traits/entities/trait.entity';
 import { SearchController } from './search.controller';
 import { SearchService } from './search.service';
 
@@ -66,6 +67,7 @@ import { SearchService } from './search.service';
       Campaign,
       PlannedSession,
       Biography,
+      Trait,
     ]),
   ],
   controllers: [SearchController],

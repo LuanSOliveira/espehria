@@ -2,11 +2,27 @@
 
 import { useEffect, useState } from 'react';
 import { Box, Chip, CircularProgress } from '@mui/material';
-import { FiDollarSign, FiFileText, FiImage, FiLock } from 'react-icons/fi';
+import {
+  FiAward,
+  FiDollarSign,
+  FiFileText,
+  FiGrid,
+  FiImage,
+  FiLock,
+  FiMaximize2,
+  FiNavigation,
+  FiPackage,
+  FiRefreshCw,
+  FiRotateCw,
+  FiTag,
+  FiTarget,
+  FiZap,
+} from 'react-icons/fi';
 import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
+import { EntityReferenceCard } from '@/shared/components/EntityReferenceCard';
 import { useGetEntityById } from '@/hooks/Queries';
 import { IWeapon } from '@/shared/interfaces';
 import {
@@ -15,6 +31,11 @@ import {
   showToast,
 } from '@/shared/util';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
+import {
+  WEAPON_DAMAGE_DIE_OPTIONS,
+  WEAPON_HANDS_OPTIONS,
+  WEAPON_STYLE_OPTIONS,
+} from '../../data';
 
 export interface WeaponViewProps {
   weaponId: string;
@@ -73,6 +94,16 @@ export const WeaponView = ({ weaponId, onNotFound }: WeaponViewProps) => {
   if (!weapon) {
     return null;
   }
+
+  const handsLabel = WEAPON_HANDS_OPTIONS.find(
+    (option) => option.value === weapon.hands,
+  )?.label;
+  const weaponStyleLabel = WEAPON_STYLE_OPTIONS.find(
+    (option) => option.value === weapon.weaponStyle,
+  )?.label;
+  const damageDieLabel = WEAPON_DAMAGE_DIE_OPTIONS.find(
+    (option) => option.value === weapon.damageDie,
+  )?.label;
 
   return (
     <div className="flex flex-col gap-6">
@@ -158,21 +189,217 @@ export const WeaponView = ({ weaponId, onNotFound }: WeaponViewProps) => {
             </div>
           )}
 
-          <div
-            className="flex items-start gap-2 px-3 py-2"
-            style={APP_CONTAINER_STYLES.detailInfoField}
-          >
-            <FiDollarSign
-              style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
-            />
-            <div>
-              <Label component="span" sx={{ margin: 0 }}>
-                Preço
-              </Label>
-              <DefaultText>
-                {formatPriceWithCurrency(weapon.price, weapon.currency)}
-              </DefaultText>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiDollarSign
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Preço
+                </Label>
+                <DefaultText>
+                  {formatPriceWithCurrency(weapon.price, weapon.currency)}
+                </DefaultText>
+              </div>
             </div>
+
+            {weapon.nickname && (
+              <div
+                className="flex items-start gap-2 px-3 py-2"
+                style={APP_CONTAINER_STYLES.detailInfoField}
+              >
+                <FiTag
+                  style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+                />
+                <div>
+                  <Label component="span" sx={{ margin: 0 }}>
+                    Apelido
+                  </Label>
+                  <DefaultText>{weapon.nickname}</DefaultText>
+                </div>
+              </div>
+            )}
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiMaximize2
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Grau de Tamanho
+                </Label>
+                <DefaultText>{weapon.sizeGrade?.name ?? NOT_INFORMED}</DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiGrid
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Mãos
+                </Label>
+                <DefaultText>{handsLabel ?? NOT_INFORMED}</DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiTarget
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Estilo de Arma
+                </Label>
+                <DefaultText>{weaponStyleLabel ?? NOT_INFORMED}</DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiPackage
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Volume
+                </Label>
+                <DefaultText>{weapon.volume ?? NOT_INFORMED}</DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiNavigation
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Distância (Metros)
+                </Label>
+                <DefaultText>{weapon.distanceMeters ?? NOT_INFORMED}</DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiRefreshCw
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Usa Munição
+                </Label>
+                <DefaultText>{weapon.usesAmmunition ? 'Sim' : 'Não'}</DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiRotateCw
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Ações de Recarga
+                </Label>
+                <DefaultText>{weapon.reloadActions ?? NOT_INFORMED}</DefaultText>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className="flex-1 min-w-0 flex flex-col"
+        style={APP_CONTAINER_STYLES.detailSectionBox}
+      >
+        <div
+          className="flex items-center gap-2 px-3 py-2"
+          style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
+        >
+          <FiAward style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
+          <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
+            Traços
+          </Label>
+        </div>
+        <div className="flex flex-col gap-2 px-3 py-3">
+          {weapon.traits.length === 0 && (
+            <DefaultText>Nenhum item adicionado.</DefaultText>
+          )}
+          {weapon.traits.map((trait) => (
+            <EntityReferenceCard
+              key={trait.id}
+              reference={{
+                id: trait.id,
+                name: trait.name,
+                entityType: 'trait',
+                tags: trait.tags,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div
+        className="flex-1 min-w-0 flex flex-col"
+        style={APP_CONTAINER_STYLES.detailSectionBox}
+      >
+        <div
+          className="flex items-center gap-2 px-3 py-2"
+          style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
+        >
+          <FiZap style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
+          <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
+            Dano
+          </Label>
+        </div>
+        <div className="grid grid-cols-1 gap-2 px-3 py-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <Label component="span" sx={{ margin: 0 }}>
+              Valor
+            </Label>
+            <DefaultText>{weapon.damageValue ?? NOT_INFORMED}</DefaultText>
+          </div>
+          <div>
+            <Label component="span" sx={{ margin: 0 }}>
+              Dado
+            </Label>
+            <DefaultText>{damageDieLabel ?? NOT_INFORMED}</DefaultText>
+          </div>
+          <div>
+            <Label component="span" sx={{ margin: 0 }}>
+              Tipo de dano
+            </Label>
+            <DefaultText>{weapon.damageType?.name ?? NOT_INFORMED}</DefaultText>
+          </div>
+          <div>
+            <Label component="span" sx={{ margin: 0 }}>
+              Dano Mágico
+            </Label>
+            <DefaultText>{weapon.magicalDamage ? 'Sim' : 'Não'}</DefaultText>
           </div>
         </div>
       </div>
