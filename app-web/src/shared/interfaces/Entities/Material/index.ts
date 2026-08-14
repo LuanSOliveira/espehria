@@ -25,6 +25,7 @@ export interface IMaterial extends IEntity {
 
 export interface IMaterialListFilters {
   name?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

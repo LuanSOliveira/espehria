@@ -11,8 +11,16 @@ import {
 import { Title } from '@/shared/components/Texts';
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { useIsGoogleUser } from '@/hooks/Auth';
-import { useDeleteEntity, useGetEntityList } from '@/hooks/Queries';
-import { ITechniqueListFilters, ITechniqueListItem } from '@/shared/interfaces';
+import {
+  useDeleteEntity,
+  useGetEntityList,
+  useTagOptionsQuery,
+} from '@/hooks/Queries';
+import {
+  ITag,
+  ITechniqueListFilters,
+  ITechniqueListItem,
+} from '@/shared/interfaces';
 import { APP_DEFAULT_PAGE_SIZE } from '@/shared/constants';
 import { showToast } from '@/shared/util';
 import { useSelectedTechniqueStore } from '@/store';
@@ -24,6 +32,7 @@ import { TechniqueView } from './components/TechniqueView';
 export default function TechniquesPage() {
   const isGoogleUser = useIsGoogleUser();
   const [nameInput, setNameInput] = useState('');
+  const [selectedTags, setSelectedTags] = useState<ITag[]>([]);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [techniquePendingDelete, setTechniquePendingDelete] =
     useState<ITechniqueListItem | null>(null);
@@ -36,6 +45,8 @@ export default function TechniquesPage() {
 
   const { selectedTechnique, resetSelectedTechnique, setSelectedTechnique } =
     useSelectedTechniqueStore();
+
+  const { tagOptions } = useTagOptionsQuery();
 
   const { data, isLoading } = useGetEntityList<
     ITechniqueListItem,
@@ -70,8 +81,17 @@ export default function TechniquesPage() {
     setFilters((current) => ({
       ...current,
       name: nameInput.trim() || undefined,
+      tagIds: selectedTags.length
+        ? selectedTags.map((tag) => tag.id)
+        : undefined,
       page: 1,
     }));
+  };
+
+  const handleClear = () => {
+    setNameInput('');
+    setSelectedTags([]);
+    setFilters({ page: 1, perPage: APP_DEFAULT_PAGE_SIZE });
   };
 
   const handlePageChange = (newPage: number) => {
@@ -117,7 +137,11 @@ export default function TechniquesPage() {
       <TechniquesFilterSection
         nameValue={nameInput}
         onNameChange={setNameInput}
+        tagsValue={selectedTags}
+        onTagsChange={setSelectedTags}
+        tagOptions={tagOptions}
         onSubmit={handleSearch}
+        onClear={handleClear}
       />
 
       <TechniquesList

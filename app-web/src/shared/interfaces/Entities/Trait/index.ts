@@ -20,6 +20,7 @@ export interface ITrait extends IEntity {
 
 export interface ITraitListFilters {
   name?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

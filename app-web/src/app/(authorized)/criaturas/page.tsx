@@ -11,11 +11,13 @@ import {
   useCreatureCategoriesQuery,
   useDeleteEntity,
   useGetEntityList,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   ICreatureCategory,
   ICreatureListFilters,
   ICreatureListItem,
+  ITag,
 } from '@/shared/interfaces';
 import { APP_DEFAULT_PAGE_SIZE } from '@/shared/constants';
 import { showToast } from '@/shared/util';
@@ -30,6 +32,7 @@ export default function CreaturesPage() {
   const [nameInput, setNameInput] = useState('');
   const [categoryFilter, setCategoryFilter] =
     useState<ICreatureCategory | null>(null);
+  const [selectedTags, setSelectedTags] = useState<ITag[]>([]);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [creaturePendingDelete, setCreaturePendingDelete] =
     useState<ICreatureListItem | null>(null);
@@ -44,6 +47,8 @@ export default function CreaturesPage() {
     useSelectedCreatureStore();
 
   const { data: categories } = useCreatureCategoriesQuery();
+
+  const { tagOptions } = useTagOptionsQuery();
 
   const { data, isLoading } = useGetEntityList<
     ICreatureListItem,
@@ -79,8 +84,18 @@ export default function CreaturesPage() {
       ...current,
       name: nameInput.trim() || undefined,
       categoryId: categoryFilter?.id,
+      tagIds: selectedTags.length
+        ? selectedTags.map((tag) => tag.id)
+        : undefined,
       page: 1,
     }));
+  };
+
+  const handleClear = () => {
+    setNameInput('');
+    setCategoryFilter(null);
+    setSelectedTags([]);
+    setFilters({ page: 1, perPage: APP_DEFAULT_PAGE_SIZE });
   };
 
   const handlePageChange = (newPage: number) => {
@@ -129,7 +144,11 @@ export default function CreaturesPage() {
         categoryValue={categoryFilter}
         onCategoryChange={setCategoryFilter}
         categories={categories ?? []}
+        tagsValue={selectedTags}
+        onTagsChange={setSelectedTags}
+        tagOptions={tagOptions}
         onSubmit={handleSearch}
+        onClear={handleClear}
       />
 
       <CreaturesList

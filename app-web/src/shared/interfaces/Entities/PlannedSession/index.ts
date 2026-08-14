@@ -26,6 +26,7 @@ export interface IPlannedSession extends IEntity {
 
 export interface IPlannedSessionListFilters {
   name?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

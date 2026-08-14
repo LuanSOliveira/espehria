@@ -3,10 +3,12 @@ import { FiSearch } from 'react-icons/fi';
 
 import {
   DefaultAutocompleteInput,
+  DefaultMultiAutocompleteInput,
   DefaultTextInput,
 } from '@/shared/components/Inputs';
-import { PrimaryButton } from '@/shared/components/Buttons';
-import { IEraOption } from '@/shared/interfaces';
+import { PrimaryButton, SecondaryButton } from '@/shared/components/Buttons';
+import { IEraOption, ITag } from '@/shared/interfaces';
+import { formatTagLabel } from '@/shared/util';
 
 export interface EventsFilterSectionProps {
   nameValue: string;
@@ -18,7 +20,11 @@ export interface EventsFilterSectionProps {
   eraValue: IEraOption | null;
   onEraChange: (value: IEraOption | null) => void;
   eras: IEraOption[];
+  tagsValue: ITag[];
+  onTagsChange: (value: ITag[]) => void;
+  tagOptions: ITag[];
   onSubmit: (event: SubmitEvent<HTMLFormElement>) => void;
+  onClear: () => void;
 }
 
 export const EventsFilterSection = ({
@@ -31,7 +37,11 @@ export const EventsFilterSection = ({
   eraValue,
   onEraChange,
   eras,
+  tagsValue,
+  onTagsChange,
+  tagOptions,
   onSubmit,
+  onClear,
 }: EventsFilterSectionProps) => {
   return (
     <form onSubmit={onSubmit} className="mt-6 flex flex-wrap items-end gap-3">
@@ -78,9 +88,29 @@ export const EventsFilterSection = ({
           placeholder="Todas as eras"
         />
       </div>
+      <div className="min-w-60 flex-1">
+        <DefaultMultiAutocompleteInput<ITag>
+          id="events-tags-filter"
+          label="Tags"
+          options={tagOptions}
+          getOptionLabel={formatTagLabel}
+          getOptionValue={(tag) => tag.id}
+          getOptionColor={(tag) => tag.color}
+          value={tagsValue}
+          onChange={onTagsChange}
+          placeholder="Selecione as tags"
+        />
+      </div>
       <PrimaryButton type="submit" sx={{ width: 'auto', padding: '12px 24px' }}>
         Filtrar
       </PrimaryButton>
+      <SecondaryButton
+        type="button"
+        onClick={onClear}
+        sx={{ width: 'auto', padding: '12px 24px' }}
+      >
+        Limpar filtros
+      </SecondaryButton>
     </form>
   );
 };

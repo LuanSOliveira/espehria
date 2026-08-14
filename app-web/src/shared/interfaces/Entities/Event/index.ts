@@ -30,6 +30,7 @@ export interface IEventListFilters {
   eraId?: string;
   startYear?: number;
   endYear?: number;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

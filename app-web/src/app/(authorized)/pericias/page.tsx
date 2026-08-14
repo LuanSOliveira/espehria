@@ -11,11 +11,13 @@ import {
   useAttributesQuery,
   useDeleteEntity,
   useGetEntityList,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   IAttribute,
   ISkillListFilters,
   ISkillListItem,
+  ITag,
 } from '@/shared/interfaces';
 import { APP_DEFAULT_PAGE_SIZE } from '@/shared/constants';
 import { showToast } from '@/shared/util';
@@ -31,6 +33,7 @@ export default function SkillsPage() {
   const [attributeFilter, setAttributeFilter] = useState<IAttribute | null>(
     null,
   );
+  const [selectedTags, setSelectedTags] = useState<ITag[]>([]);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [skillPendingDelete, setSkillPendingDelete] =
     useState<ISkillListItem | null>(null);
@@ -45,6 +48,8 @@ export default function SkillsPage() {
     useSelectedSkillStore();
 
   const { data: attributes } = useAttributesQuery();
+
+  const { tagOptions } = useTagOptionsQuery();
 
   const { data, isLoading } = useGetEntityList<ISkillListItem, ISkillListFilters>({
     url: '/skills',
@@ -77,8 +82,18 @@ export default function SkillsPage() {
       ...current,
       name: nameInput.trim() || undefined,
       keyAttributeId: attributeFilter?.id,
+      tagIds: selectedTags.length
+        ? selectedTags.map((tag) => tag.id)
+        : undefined,
       page: 1,
     }));
+  };
+
+  const handleClear = () => {
+    setNameInput('');
+    setAttributeFilter(null);
+    setSelectedTags([]);
+    setFilters({ page: 1, perPage: APP_DEFAULT_PAGE_SIZE });
   };
 
   const handlePageChange = (newPage: number) => {
@@ -127,7 +142,11 @@ export default function SkillsPage() {
         attributeValue={attributeFilter}
         onAttributeChange={setAttributeFilter}
         attributes={attributes ?? []}
+        tagsValue={selectedTags}
+        onTagsChange={setSelectedTags}
+        tagOptions={tagOptions}
         onSubmit={handleSearch}
+        onClear={handleClear}
       />
 
       <SkillsList

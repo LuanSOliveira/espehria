@@ -45,6 +45,7 @@ export interface ICharacter extends IEntity {
 
 export interface ICharacterListFilters {
   name?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

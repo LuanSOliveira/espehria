@@ -190,12 +190,40 @@ export class CampaignsService {
       });
     }
 
-    const [ids, total] = await queryBuilder
+    const hasTagFilter = !!query.tagIds && query.tagIds.length > 0;
+    if (hasTagFilter) {
+      const uniqueTagIds = [...new Set(query.tagIds)];
+      queryBuilder
+        .innerJoin(
+          'campaign_tags',
+          'campaign_tag_filter',
+          'campaign_tag_filter.campaign_id = campaign.id AND campaign_tag_filter.tag_id IN (:...tagIds)',
+          { tagIds: uniqueTagIds },
+        )
+        .groupBy('campaign.id')
+        .having('COUNT(DISTINCT campaign_tag_filter.tag_id) = :tagCount', {
+          tagCount: uniqueTagIds.length,
+        });
+    }
+
+    // `getManyAndCount()` não computa corretamente o total quando a query tem
+    // `groupBy`/`having` (o count interno do TypeORM ignora o agrupamento).
+    // Por isso, apenas quando há filtro de tags (e, portanto, `groupBy`/
+    // `having` aplicados), o total é calculado separadamente a partir de uma
+    // cópia da query já filtrada/agrupada (que mantém o `andWhere` de
+    // `createdBy`), contando as linhas resultantes (uma por campanha). Sem
+    // filtro de tags, `getCount()` é suficiente e evita trazer todos os ids
+    // para a aplicação só para contá-los.
+    const total = hasTagFilter
+      ? (await queryBuilder.clone().select('campaign.id').getRawMany()).length
+      : await queryBuilder.clone().getCount();
+
+    const ids = await queryBuilder
       .select(['campaign.id', 'campaign.name'])
       .orderBy('campaign.name', 'ASC')
       .skip((page - 1) * perPage)
       .take(perPage)
-      .getManyAndCount();
+      .getMany();
 
     if (ids.length === 0) {
       return { data: [], total, page, perPage };

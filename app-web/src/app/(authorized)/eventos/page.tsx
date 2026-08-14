@@ -15,11 +15,13 @@ import {
   useDeleteEntity,
   useErasAllQuery,
   useGetEntityList,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   IEraOption,
   IEventListFilters,
   IEventListItem,
+  ITag,
 } from '@/shared/interfaces';
 import { APP_DEFAULT_PAGE_SIZE } from '@/shared/constants';
 import { showToast } from '@/shared/util';
@@ -35,6 +37,7 @@ export default function EventsPage() {
   const [startYearInput, setStartYearInput] = useState('');
   const [endYearInput, setEndYearInput] = useState('');
   const [eraFilter, setEraFilter] = useState<IEraOption | null>(null);
+  const [selectedTags, setSelectedTags] = useState<ITag[]>([]);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [eventPendingDelete, setEventPendingDelete] =
     useState<IEventListItem | null>(null);
@@ -49,6 +52,8 @@ export default function EventsPage() {
     useSelectedEventStore();
 
   const { data: eras } = useErasAllQuery();
+
+  const { tagOptions } = useTagOptionsQuery();
 
   const { data, isLoading } = useGetEntityList<
     IEventListItem,
@@ -86,8 +91,20 @@ export default function EventsPage() {
       startYear: startYearInput.trim() ? Number(startYearInput.trim()) : undefined,
       endYear: endYearInput.trim() ? Number(endYearInput.trim()) : undefined,
       eraId: eraFilter?.id,
+      tagIds: selectedTags.length
+        ? selectedTags.map((tag) => tag.id)
+        : undefined,
       page: 1,
     }));
+  };
+
+  const handleClear = () => {
+    setNameInput('');
+    setStartYearInput('');
+    setEndYearInput('');
+    setEraFilter(null);
+    setSelectedTags([]);
+    setFilters({ page: 1, perPage: APP_DEFAULT_PAGE_SIZE });
   };
 
   const handlePageChange = (newPage: number) => {
@@ -140,7 +157,11 @@ export default function EventsPage() {
         eraValue={eraFilter}
         onEraChange={setEraFilter}
         eras={eras ?? []}
+        tagsValue={selectedTags}
+        onTagsChange={setSelectedTags}
+        tagOptions={tagOptions}
         onSubmit={handleSearch}
+        onClear={handleClear}
       />
 
       <EventsList

@@ -39,6 +39,7 @@ export interface ILocation extends IEntity {
 export interface ILocationListFilters {
   name?: string;
   type?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

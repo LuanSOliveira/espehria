@@ -33,6 +33,7 @@ export interface IEra extends IEntity {
 
 export interface IEraListFilters {
   name?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

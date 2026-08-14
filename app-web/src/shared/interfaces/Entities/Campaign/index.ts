@@ -30,6 +30,7 @@ export interface ICampaign extends IEntity {
 
 export interface ICampaignListFilters {
   name?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

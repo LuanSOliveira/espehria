@@ -27,6 +27,7 @@ export interface IBiographyListItem {
 
 export interface IBiographyListFilters {
   name?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

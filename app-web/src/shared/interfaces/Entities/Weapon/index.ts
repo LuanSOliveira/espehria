@@ -54,6 +54,7 @@ export interface IWeapon extends IEntity {
 
 export interface IWeaponListFilters {
   name?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

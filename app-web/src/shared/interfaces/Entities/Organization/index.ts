@@ -34,6 +34,7 @@ export interface IOrganization extends IEntity {
 
 export interface IOrganizationListFilters {
   name?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

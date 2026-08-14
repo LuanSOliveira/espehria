@@ -24,6 +24,7 @@ export interface IConditionListItem {
 
 export interface IConditionListFilters {
   name?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

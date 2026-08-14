@@ -55,6 +55,7 @@ export interface ICreature extends IEntity {
 export interface ICreatureListFilters {
   name?: string;
   categoryId?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

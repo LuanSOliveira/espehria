@@ -131,12 +131,41 @@ export class ErasService {
       });
     }
 
-    const [ids, total] = await queryBuilder
+    const hasTagFilter = !!query.tagIds && query.tagIds.length > 0;
+    if (hasTagFilter) {
+      const uniqueTagIds = [...new Set(query.tagIds)];
+      queryBuilder
+        .innerJoin(
+          'era_tags',
+          'era_tag_filter',
+          'era_tag_filter.era_id = era.id AND era_tag_filter.tag_id IN (:...tagIds)',
+          { tagIds: uniqueTagIds },
+        )
+        .groupBy('era.id')
+        .having('COUNT(DISTINCT era_tag_filter.tag_id) = :tagCount', {
+          tagCount: uniqueTagIds.length,
+        });
+    }
+
+    // `getManyAndCount()` não computa corretamente o total quando a query tem
+    // `groupBy`/`having` (o count interno do TypeORM ignora o agrupamento).
+    // Por isso, apenas quando há filtro de tags (e, portanto, `groupBy`/
+    // `having` aplicados), o total é calculado separadamente a partir de uma
+    // cópia da query já filtrada/agrupada, contando as linhas resultantes
+    // (uma por era). Sem filtro de tags, `getCount()` é suficiente e evita
+    // trazer todos os ids para a aplicação só para contá-los. O `groupBy`
+    // por `era.id` (chave primária) cobre a dependência funcional com
+    // `era.order` (coluna `ordering` no banco) usada no `orderBy` abaixo.
+    const total = hasTagFilter
+      ? (await queryBuilder.clone().select('era.id').getRawMany()).length
+      : await queryBuilder.clone().getCount();
+
+    const ids = await queryBuilder
       .select(['era.id'])
       .orderBy('era.order', 'ASC')
       .skip((page - 1) * perPage)
       .take(perPage)
-      .getManyAndCount();
+      .getMany();
 
     if (ids.length === 0) {
       return { data: [], total, page, perPage };

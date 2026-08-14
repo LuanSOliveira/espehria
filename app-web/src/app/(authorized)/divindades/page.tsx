@@ -15,11 +15,13 @@ import {
   useDeleteEntity,
   useDivinityCategoriesQuery,
   useGetEntityList,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   IDivinityCategory,
   IDivinityListFilters,
   IDivinityListItem,
+  ITag,
 } from '@/shared/interfaces';
 import { APP_DEFAULT_PAGE_SIZE } from '@/shared/constants';
 import { showToast } from '@/shared/util';
@@ -34,6 +36,7 @@ export default function DivinitiesPage() {
   const [nameInput, setNameInput] = useState('');
   const [categoryFilter, setCategoryFilter] =
     useState<IDivinityCategory | null>(null);
+  const [selectedTags, setSelectedTags] = useState<ITag[]>([]);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [divinityPendingDelete, setDivinityPendingDelete] =
     useState<IDivinityListItem | null>(null);
@@ -48,6 +51,8 @@ export default function DivinitiesPage() {
     useSelectedDivinityStore();
 
   const { data: categories } = useDivinityCategoriesQuery();
+
+  const { tagOptions } = useTagOptionsQuery();
 
   const { data, isLoading } = useGetEntityList<
     IDivinityListItem,
@@ -83,8 +88,18 @@ export default function DivinitiesPage() {
       ...current,
       name: nameInput.trim() || undefined,
       categoryId: categoryFilter?.id,
+      tagIds: selectedTags.length
+        ? selectedTags.map((tag) => tag.id)
+        : undefined,
       page: 1,
     }));
+  };
+
+  const handleClear = () => {
+    setNameInput('');
+    setCategoryFilter(null);
+    setSelectedTags([]);
+    setFilters({ page: 1, perPage: APP_DEFAULT_PAGE_SIZE });
   };
 
   const handlePageChange = (newPage: number) => {
@@ -133,7 +148,11 @@ export default function DivinitiesPage() {
         categoryValue={categoryFilter}
         onCategoryChange={setCategoryFilter}
         categories={categories ?? []}
+        tagsValue={selectedTags}
+        onTagsChange={setSelectedTags}
+        tagOptions={tagOptions}
         onSubmit={handleSearch}
+        onClear={handleClear}
       />
 
       <DivinitiesList

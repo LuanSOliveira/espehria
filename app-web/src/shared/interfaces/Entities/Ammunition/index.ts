@@ -25,6 +25,7 @@ export interface IAmmunition extends IEntity {
 
 export interface IAmmunitionListFilters {
   name?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

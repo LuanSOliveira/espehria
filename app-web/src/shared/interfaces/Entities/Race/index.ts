@@ -39,6 +39,7 @@ export interface IRace extends IEntity {
 export interface IRaceListFilters {
   name?: string;
   categoryId?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

@@ -25,6 +25,7 @@ export interface IAccessory extends IEntity {
 
 export interface IAccessoryListFilters {
   name?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

@@ -25,6 +25,7 @@ export interface IConsumable extends IEntity {
 
 export interface IConsumableListFilters {
   name?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

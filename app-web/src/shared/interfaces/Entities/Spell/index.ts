@@ -23,6 +23,7 @@ export interface ISpell extends IEntity {
 
 export interface ISpellListFilters {
   name?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

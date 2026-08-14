@@ -37,6 +37,7 @@ export interface IArmor extends IEntity {
 
 export interface IArmorListFilters {
   name?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

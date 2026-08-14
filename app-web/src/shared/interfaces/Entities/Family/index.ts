@@ -65,6 +65,7 @@ export interface IFamily extends IEntity {
 
 export interface IFamilyListFilters {
   name?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

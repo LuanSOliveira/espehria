@@ -11,8 +11,16 @@ import {
 import { Title } from '@/shared/components/Texts';
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { useIsGoogleUser } from '@/hooks/Auth';
-import { useDeleteEntity, useGetEntityList } from '@/hooks/Queries';
-import { IBiographyListFilters, IBiographyListItem } from '@/shared/interfaces';
+import {
+  useDeleteEntity,
+  useGetEntityList,
+  useTagOptionsQuery,
+} from '@/hooks/Queries';
+import {
+  IBiographyListFilters,
+  IBiographyListItem,
+  ITag,
+} from '@/shared/interfaces';
 import { APP_DEFAULT_PAGE_SIZE } from '@/shared/constants';
 import { showToast } from '@/shared/util';
 import { useSelectedBiographyStore } from '@/store';
@@ -24,6 +32,7 @@ import { BiographyView } from './components/BiographyView';
 export default function BiographiesPage() {
   const isGoogleUser = useIsGoogleUser();
   const [nameInput, setNameInput] = useState('');
+  const [selectedTags, setSelectedTags] = useState<ITag[]>([]);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [biographyPendingDelete, setBiographyPendingDelete] =
     useState<IBiographyListItem | null>(null);
@@ -36,6 +45,8 @@ export default function BiographiesPage() {
 
   const { selectedBiography, resetSelectedBiography, setSelectedBiography } =
     useSelectedBiographyStore();
+
+  const { tagOptions } = useTagOptionsQuery();
 
   const { data, isLoading } = useGetEntityList<
     IBiographyListItem,
@@ -70,8 +81,17 @@ export default function BiographiesPage() {
     setFilters((current) => ({
       ...current,
       name: nameInput.trim() || undefined,
+      tagIds: selectedTags.length
+        ? selectedTags.map((tag) => tag.id)
+        : undefined,
       page: 1,
     }));
+  };
+
+  const handleClear = () => {
+    setNameInput('');
+    setSelectedTags([]);
+    setFilters({ page: 1, perPage: APP_DEFAULT_PAGE_SIZE });
   };
 
   const handlePageChange = (newPage: number) => {
@@ -117,7 +137,11 @@ export default function BiographiesPage() {
       <BiographiesFilterSection
         nameValue={nameInput}
         onNameChange={setNameInput}
+        tagsValue={selectedTags}
+        onTagsChange={setSelectedTags}
+        tagOptions={tagOptions}
         onSubmit={handleSearch}
+        onClear={handleClear}
       />
 
       <BiographiesList

@@ -231,12 +231,42 @@ export class CharactersService {
       });
     }
 
-    const [ids, total] = await queryBuilder
+    const hasTagFilter = !!query.tagIds && query.tagIds.length > 0;
+    if (hasTagFilter) {
+      const uniqueTagIds = [...new Set(query.tagIds)];
+      queryBuilder
+        .innerJoin(
+          'character_tags',
+          'character_tag_filter',
+          'character_tag_filter.character_id = character.id AND character_tag_filter.tag_id IN (:...tagIds)',
+          { tagIds: uniqueTagIds },
+        )
+        .groupBy('character.id')
+        .having('COUNT(DISTINCT character_tag_filter.tag_id) = :tagCount', {
+          tagCount: uniqueTagIds.length,
+        });
+    }
+
+    // `getManyAndCount()` não computa corretamente o total quando a query tem
+    // `groupBy`/`having` (o count interno do TypeORM ignora o agrupamento).
+    // Por isso, apenas quando há filtro de tags (e, portanto, `groupBy`/
+    // `having` aplicados), o total é calculado separadamente a partir de uma
+    // cópia da query já filtrada/agrupada, contando as linhas resultantes
+    // (uma por personagem). Sem filtro de tags, `getCount()` é suficiente e
+    // evita trazer todos os ids para a aplicação só para contá-los. Esse
+    // filtro fica restrito a esta query de paginação (seleção de ids) — a
+    // query subsequente que carrega `race`/`category` não é afetada.
+    const total = hasTagFilter
+      ? (await queryBuilder.clone().select('character.id').getRawMany())
+          .length
+      : await queryBuilder.clone().getCount();
+
+    const ids = await queryBuilder
       .select(['character.id', 'character.name'])
       .orderBy('character.name', 'ASC')
       .skip((page - 1) * perPage)
       .take(perPage)
-      .getManyAndCount();
+      .getMany();
 
     if (ids.length === 0) {
       return { data: [], total, page, perPage };

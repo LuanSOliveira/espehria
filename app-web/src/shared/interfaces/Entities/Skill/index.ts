@@ -28,6 +28,7 @@ export interface ISkillListItem {
 export interface ISkillListFilters {
   name?: string;
   keyAttributeId?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

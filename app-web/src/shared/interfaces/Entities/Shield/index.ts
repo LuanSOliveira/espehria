@@ -25,6 +25,7 @@ export interface IShield extends IEntity {
 
 export interface IShieldListFilters {
   name?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

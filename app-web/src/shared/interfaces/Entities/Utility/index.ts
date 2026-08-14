@@ -25,6 +25,7 @@ export interface IUtility extends IEntity {
 
 export interface IUtilityListFilters {
   name?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

@@ -135,12 +135,41 @@ export class AmmunitionService {
       });
     }
 
-    const [ids, total] = await queryBuilder
+    const hasTagFilter = !!query.tagIds && query.tagIds.length > 0;
+    if (hasTagFilter) {
+      const uniqueTagIds = [...new Set(query.tagIds)];
+      queryBuilder
+        .innerJoin(
+          'ammunition_tags',
+          'ammunition_tag_filter',
+          'ammunition_tag_filter.ammunition_id = ammunition.id AND ammunition_tag_filter.tag_id IN (:...tagIds)',
+          { tagIds: uniqueTagIds },
+        )
+        .groupBy('ammunition.id')
+        .having('COUNT(DISTINCT ammunition_tag_filter.tag_id) = :tagCount', {
+          tagCount: uniqueTagIds.length,
+        });
+    }
+
+    // `getManyAndCount()` não computa corretamente o total quando a query tem
+    // `groupBy`/`having` (o count interno do TypeORM ignora o agrupamento).
+    // Por isso, apenas quando há filtro de tags (e, portanto, `groupBy`/
+    // `having` aplicados), o total é calculado separadamente a partir de uma
+    // cópia da query já filtrada/agrupada, contando as linhas resultantes
+    // (uma por item de munição). Sem filtro de tags, `getCount()` é
+    // suficiente e evita trazer todos os ids para a aplicação só para
+    // contá-los.
+    const total = hasTagFilter
+      ? (await queryBuilder.clone().select('ammunition.id').getRawMany())
+          .length
+      : await queryBuilder.clone().getCount();
+
+    const ids = await queryBuilder
       .select(['ammunition.id', 'ammunition.name'])
       .orderBy('ammunition.name', 'ASC')
       .skip((page - 1) * perPage)
       .take(perPage)
-      .getManyAndCount();
+      .getMany();
 
     if (ids.length === 0) {
       return { data: [], total, page, perPage };

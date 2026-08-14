@@ -49,6 +49,7 @@ export interface IDivinity extends IEntity {
 export interface IDivinityListFilters {
   name?: string;
   categoryId?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }

@@ -23,6 +23,7 @@ export interface ITechnique extends IEntity {
 
 export interface ITechniqueListFilters {
   name?: string;
+  tagIds?: string[];
   page?: number;
   perPage?: number;
 }
