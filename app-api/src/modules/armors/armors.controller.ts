@@ -49,11 +49,11 @@ export class ArmorsController {
   @ApiConflictResponse({ description: 'Já existe uma armadura com este nome' })
   @ApiNotFoundResponse({
     description:
-      'Uma ou mais tags não foram encontradas, ou a moeda informada não existe',
+      'Uma ou mais tags não foram encontradas, a moeda informada não existe, a categoria de armadura informada não existe, ou um ou mais traços não foram encontrados',
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida ou dados obrigatórios ausentes',
+      'URL de imagem de referência inválida, dados obrigatórios ausentes, volume/penalidade de velocidade com mais de 1 casa decimal ou negativos, ou demais campos numéricos negativos ou fora do mínimo exigido',
   })
   async create(@Body() dto: CreateArmorDto): Promise<ArmorResponseDto> {
     const armor = await this.armorsService.create(dto);
@@ -101,12 +101,12 @@ export class ArmorsController {
   @ApiOkResponse({ type: ArmorResponseDto })
   @ApiNotFoundResponse({
     description:
-      'Armadura, uma ou mais tags, ou a moeda informados não foram encontrados',
+      'Armadura, uma ou mais tags, a moeda, a categoria de armadura, ou um ou mais traços informados não foram encontrados',
   })
   @ApiConflictResponse({ description: 'Já existe uma armadura com este nome' })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida ou ID em formato inválido',
+      'URL de imagem de referência inválida, ID em formato inválido, volume/penalidade de velocidade com mais de 1 casa decimal ou negativos, ou demais campos numéricos negativos ou fora do mínimo exigido',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,

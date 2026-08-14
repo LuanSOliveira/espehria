@@ -16,6 +16,8 @@ export * from './useTraitTypesQuery';
 export * from './useSizeGradesQuery';
 export * from './useDamageTypesQuery';
 export * from './useArmaTraitTypeId';
+export * from './useArmorCategoriesQuery';
+export * from './useArmaduraTraitTypeId';
 export * from './useUpdateSheetKnowledgeNoteMutation';
 export * from './useRemoveSheetCharacteristicExtraMutation';
 export * from './useRemoveSheetTalentExtraMutation';

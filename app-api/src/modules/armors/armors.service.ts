@@ -20,8 +20,11 @@ import { UpdateArmorDto } from './dto/update-armor.dto';
 import { FindArmorsQueryDto } from './dto/find-armors-query.dto';
 import { Armor } from './entities/armor.entity';
 import { ArmorTag } from './entities/armor-tag.entity';
+import { ArmorTrait } from './entities/armor-trait.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { Currency } from '../currencies/entities/currency.entity';
+import { ArmorCategory } from '../armor-categories/entities/armor-category.entity';
+import { Trait } from '../traits/entities/trait.entity';
 
 export interface PaginatedArmors {
   data: Armor[];
@@ -37,10 +40,16 @@ export class ArmorsService {
     private readonly armorsRepository: Repository<Armor>,
     @InjectRepository(ArmorTag)
     private readonly armorTagsRepository: Repository<ArmorTag>,
+    @InjectRepository(ArmorTrait)
+    private readonly armorTraitsRepository: Repository<ArmorTrait>,
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
     @InjectRepository(Currency)
     private readonly currencyRepository: Repository<Currency>,
+    @InjectRepository(ArmorCategory)
+    private readonly armorCategoriesRepository: Repository<ArmorCategory>,
+    @InjectRepository(Trait)
+    private readonly traitsRepository: Repository<Trait>,
   ) {}
 
   findByName(name: string): Promise<Armor | null> {
@@ -50,7 +59,7 @@ export class ArmorsService {
   async findById(id: string): Promise<Armor | null> {
     const armor = await this.armorsRepository.findOne({
       where: { id },
-      relations: { currency: true },
+      relations: { currency: true, armorCategory: true },
     });
     if (!armor) {
       return null;
@@ -60,6 +69,7 @@ export class ArmorsService {
       id,
       'armor',
     );
+    armor.traits = await this.loadOrderedTraitsForArmor(id);
     return armor;
   }
 
@@ -73,6 +83,16 @@ export class ArmorsService {
     return uniqueIds.map((id) => tagsById.get(id)!);
   }
 
+  private async findTraitsByIds(traitIds: string[]): Promise<Trait[]> {
+    const uniqueIds = [...new Set(traitIds)];
+    const traits = await this.traitsRepository.findBy({ id: In(uniqueIds) });
+    if (traits.length !== uniqueIds.length) {
+      throw new NotFoundException('Um ou mais traços não foram encontrados.');
+    }
+    const traitsById = new Map(traits.map((trait) => [trait.id, trait]));
+    return uniqueIds.map((id) => traitsById.get(id)!);
+  }
+
   private async findCurrencyById(currencyId: string): Promise<Currency> {
     const currency = await this.currencyRepository.findOneBy({
       id: currencyId,
@@ -81,6 +101,67 @@ export class ArmorsService {
       throw new NotFoundException('Moeda não encontrada.');
     }
     return currency;
+  }
+
+  private async findArmorCategoryById(
+    armorCategoryId: string,
+  ): Promise<ArmorCategory> {
+    const armorCategory = await this.armorCategoriesRepository.findOneBy({
+      id: armorCategoryId,
+    });
+    if (!armorCategory) {
+      throw new NotFoundException('Categoria de armadura não encontrada.');
+    }
+    return armorCategory;
+  }
+
+  private async loadOrderedTraitsForArmor(armorId: string): Promise<Trait[]> {
+    const traitsByArmorId = await this.loadOrderedTraitsMap([armorId]);
+    return traitsByArmorId.get(armorId) ?? [];
+  }
+
+  private async loadOrderedTraitsMap(
+    armorIds: string[],
+  ): Promise<Map<string, Trait[]>> {
+    const traitsByArmorId = new Map<string, Trait[]>();
+    if (armorIds.length === 0) {
+      return traitsByArmorId;
+    }
+
+    const rows = await this.armorTraitsRepository.find({
+      where: { armor: { id: In(armorIds) } },
+      relations: { armor: true, trait: true },
+      order: { order: 'ASC', id: 'ASC' },
+    });
+
+    for (const row of rows) {
+      const traits = traitsByArmorId.get(row.armor.id) ?? [];
+      traits.push(row.trait);
+      traitsByArmorId.set(row.armor.id, traits);
+    }
+
+    return traitsByArmorId;
+  }
+
+  private async createOrderedTraitJunctions(
+    armor: Armor,
+    traits: Trait[],
+  ): Promise<void> {
+    if (traits.length === 0) {
+      return;
+    }
+    const junctions = traits.map((trait, index) =>
+      this.armorTraitsRepository.create({ armor, trait, order: index }),
+    );
+    await this.armorTraitsRepository.save(junctions);
+  }
+
+  private async replaceOrderedTraitJunctions(
+    armor: Armor,
+    traits: Trait[],
+  ): Promise<void> {
+    await this.armorTraitsRepository.delete({ armor: { id: armor.id } });
+    await this.createOrderedTraitJunctions(armor, traits);
   }
 
   async create(dto: CreateArmorDto): Promise<Armor> {
@@ -94,8 +175,17 @@ export class ArmorsService {
         ? await this.findTagsByIds(dto.tagIds)
         : [];
 
+    const traits =
+      dto.traitIds && dto.traitIds.length > 0
+        ? await this.findTraitsByIds(dto.traitIds)
+        : [];
+
     const currency = dto.currencyId
       ? await this.findCurrencyById(dto.currencyId)
+      : null;
+
+    const armorCategory = dto.armorCategoryId
+      ? await this.findArmorCategoryById(dto.armorCategoryId)
       : null;
 
     const armor = this.armorsRepository.create({
@@ -105,6 +195,14 @@ export class ArmorsService {
       price: dto.price ?? null,
       currency,
       privateInformation: dto.privateInformation ?? null,
+      nickname: dto.nickname ?? null,
+      volume: dto.volume ?? null,
+      armorCategory,
+      armorClassBonus: dto.armorClassBonus ?? null,
+      dexterityModifierLimit: dto.dexterityModifierLimit ?? null,
+      strength: dto.strength ?? null,
+      checkPenalty: dto.checkPenalty ?? null,
+      speedPenaltyMeters: dto.speedPenaltyMeters ?? null,
     });
 
     const savedArmor = await this.armorsRepository.save(armor);
@@ -114,7 +212,9 @@ export class ArmorsService {
       savedArmor,
       tags,
     );
+    await this.createOrderedTraitJunctions(savedArmor, traits);
     savedArmor.tags = tags;
+    savedArmor.traits = traits;
     return savedArmor;
   }
 
@@ -143,7 +243,7 @@ export class ArmorsService {
 
     const armors = await this.armorsRepository.find({
       where: { id: In(ids.map((armor) => armor.id)) },
-      relations: { currency: true },
+      relations: { currency: true, armorCategory: true },
       order: { name: 'ASC' },
     });
 
@@ -152,8 +252,12 @@ export class ArmorsService {
       armors.map((armor) => armor.id),
       'armor',
     );
+    const traitsByArmorId = await this.loadOrderedTraitsMap(
+      armors.map((armor) => armor.id),
+    );
     for (const armor of armors) {
       armor.tags = tagsByArmorId.get(armor.id) ?? [];
+      armor.traits = traitsByArmorId.get(armor.id) ?? [];
     }
 
     const armorsById = new Map(armors.map((armor) => [armor.id, armor]));
@@ -195,6 +299,33 @@ export class ArmorsService {
     if (dto.privateInformation !== undefined) {
       armor.privateInformation = dto.privateInformation;
     }
+    if (dto.nickname !== undefined) {
+      armor.nickname = dto.nickname;
+    }
+    if (dto.volume !== undefined) {
+      armor.volume = dto.volume;
+    }
+    if (dto.armorCategoryId !== undefined) {
+      armor.armorCategory = dto.armorCategoryId
+        ? await this.findArmorCategoryById(dto.armorCategoryId)
+        : null;
+    }
+    if (dto.armorClassBonus !== undefined) {
+      armor.armorClassBonus = dto.armorClassBonus;
+    }
+    if (dto.dexterityModifierLimit !== undefined) {
+      armor.dexterityModifierLimit = dto.dexterityModifierLimit;
+    }
+    if (dto.strength !== undefined) {
+      armor.strength = dto.strength;
+    }
+    if (dto.checkPenalty !== undefined) {
+      armor.checkPenalty = dto.checkPenalty;
+    }
+    if (dto.speedPenaltyMeters !== undefined) {
+      armor.speedPenaltyMeters = dto.speedPenaltyMeters;
+    }
+
     let tags = armor.tags;
     if (dto.tagIds !== undefined) {
       tags = dto.tagIds.length > 0 ? await this.findTagsByIds(dto.tagIds) : [];
@@ -206,8 +337,16 @@ export class ArmorsService {
       );
     }
 
+    let traits = armor.traits;
+    if (dto.traitIds !== undefined) {
+      traits =
+        dto.traitIds.length > 0 ? await this.findTraitsByIds(dto.traitIds) : [];
+      await this.replaceOrderedTraitJunctions(armor, traits);
+    }
+
     const savedArmor = await this.armorsRepository.save(armor);
     savedArmor.tags = tags;
+    savedArmor.traits = traits;
     return savedArmor;
   }
 

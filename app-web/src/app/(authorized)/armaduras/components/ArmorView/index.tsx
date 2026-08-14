@@ -2,11 +2,26 @@
 
 import { useEffect, useState } from 'react';
 import { Box, Chip, CircularProgress } from '@mui/material';
-import { FiDollarSign, FiFileText, FiImage, FiLock } from 'react-icons/fi';
+import {
+  FiActivity,
+  FiAward,
+  FiDollarSign,
+  FiFileText,
+  FiImage,
+  FiLock,
+  FiMinusCircle,
+  FiPackage,
+  FiPlusCircle,
+  FiShield,
+  FiTag,
+  FiTrendingUp,
+  FiWind,
+} from 'react-icons/fi';
 import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
+import { EntityReferenceCard } from '@/shared/components/EntityReferenceCard';
 import { useGetEntityById } from '@/hooks/Queries';
 import { IArmor } from '@/shared/interfaces';
 import {
@@ -158,22 +173,179 @@ export const ArmorView = ({ armorId, onNotFound }: ArmorViewProps) => {
             </div>
           )}
 
-          <div
-            className="flex items-start gap-2 px-3 py-2"
-            style={APP_CONTAINER_STYLES.detailInfoField}
-          >
-            <FiDollarSign
-              style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
-            />
-            <div>
-              <Label component="span" sx={{ margin: 0 }}>
-                Preço
-              </Label>
-              <DefaultText>
-                {formatPriceWithCurrency(armor.price, armor.currency)}
-              </DefaultText>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiDollarSign
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Preço
+                </Label>
+                <DefaultText>
+                  {formatPriceWithCurrency(armor.price, armor.currency)}
+                </DefaultText>
+              </div>
+            </div>
+
+            {armor.nickname && (
+              <div
+                className="flex items-start gap-2 px-3 py-2"
+                style={APP_CONTAINER_STYLES.detailInfoField}
+              >
+                <FiTag
+                  style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+                />
+                <div>
+                  <Label component="span" sx={{ margin: 0 }}>
+                    Apelido
+                  </Label>
+                  <DefaultText>{armor.nickname}</DefaultText>
+                </div>
+              </div>
+            )}
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiPackage
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Volume
+                </Label>
+                <DefaultText>{armor.volume ?? NOT_INFORMED}</DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiShield
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Categoria
+                </Label>
+                <DefaultText>{armor.armorCategory?.name ?? NOT_INFORMED}</DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiPlusCircle
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Bônus de CA
+                </Label>
+                <DefaultText>{armor.armorClassBonus ?? NOT_INFORMED}</DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiTrendingUp
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Limite de modificador de Destreza
+                </Label>
+                <DefaultText>
+                  {armor.dexterityModifierLimit ?? NOT_INFORMED}
+                </DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiActivity
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Força
+                </Label>
+                <DefaultText>{armor.strength ?? NOT_INFORMED}</DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiMinusCircle
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Penalidade em teste
+                </Label>
+                <DefaultText>{armor.checkPenalty ?? NOT_INFORMED}</DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiWind
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Penalidade de Velocidade (Metros)
+                </Label>
+                <DefaultText>{armor.speedPenaltyMeters ?? NOT_INFORMED}</DefaultText>
+              </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div
+        className="flex-1 min-w-0 flex flex-col"
+        style={APP_CONTAINER_STYLES.detailSectionBox}
+      >
+        <div
+          className="flex items-center gap-2 px-3 py-2"
+          style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
+        >
+          <FiAward style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
+          <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
+            Traços
+          </Label>
+        </div>
+        <div className="flex flex-col gap-2 px-3 py-3">
+          {armor.traits.length === 0 && (
+            <DefaultText>Nenhum item adicionado.</DefaultText>
+          )}
+          {armor.traits.map((trait) => (
+            <EntityReferenceCard
+              key={trait.id}
+              reference={{
+                id: trait.id,
+                name: trait.name,
+                entityType: 'trait',
+                tags: trait.tags,
+              }}
+            />
+          ))}
         </div>
       </div>
 

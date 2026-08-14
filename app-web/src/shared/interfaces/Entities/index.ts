@@ -19,6 +19,7 @@ export * from './SizeGrade';
 export * from './DamageType';
 export * from './Trait';
 export * from './Weapon';
+export * from './ArmorCategory';
 export * from './Armor';
 export * from './Accessory';
 export * from './Shield';

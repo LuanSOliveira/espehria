@@ -51,6 +51,7 @@ import { TraitTypesModule } from './modules/trait-types/trait-types.module';
 import { SizeGradesModule } from './modules/size-grades/size-grades.module';
 import { DamageTypesModule } from './modules/damage-types/damage-types.module';
 import { TraitsModule } from './modules/traits/traits.module';
+import { ArmorCategoriesModule } from './modules/armor-categories/armor-categories.module';
 
 @Module({
   imports: [
@@ -123,6 +124,7 @@ import { TraitsModule } from './modules/traits/traits.module';
     SizeGradesModule,
     DamageTypesModule,
     TraitsModule,
+    ArmorCategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
