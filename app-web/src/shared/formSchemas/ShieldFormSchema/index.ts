@@ -4,6 +4,7 @@ import { z } from 'zod';
 export const shieldFormSchema = z
   .object({
     name: z.string().min(1, 'Informe o nome'),
+    nickname: z.string(),
     referenceImage: z
       .string()
       .refine(
@@ -17,6 +18,36 @@ export const shieldFormSchema = z
         'Informe um preço inteiro válido',
       ),
     currencyId: z.string(),
+    volume: z
+      .string()
+      .refine(
+        (v) => v === '' || /^\d+(\.\d)?$/.test(v),
+        'Informe um volume válido (no máximo 1 casa decimal)',
+      ),
+    armorClassBonus: z
+      .string()
+      .refine(
+        (v) => v === '' || /^\d+$/.test(v),
+        'Informe um bônus de CA inteiro válido',
+      ),
+    speedPenaltyMeters: z
+      .string()
+      .refine(
+        (v) => v === '' || /^\d+(\.\d)?$/.test(v),
+        'Informe uma penalidade de velocidade válida (no máximo 1 casa decimal)',
+      ),
+    hardness: z
+      .string()
+      .refine(
+        (v) => v === '' || /^\d+$/.test(v),
+        'Informe um valor de dureza inteiro válido',
+      ),
+    hitPoints: z
+      .string()
+      .refine(
+        (v) => v === '' || /^\d+$/.test(v),
+        'Informe um valor de pontos de vida inteiro válido',
+      ),
     tagIds: z.array(z.string()).optional(),
     description: z.string(),
     privateInformation: z.string(),
@@ -37,9 +68,15 @@ export const shieldFormResolver = zodResolver(shieldFormSchema);
 
 export const shieldFormDefaultValues: ShieldFormData = {
   name: '',
+  nickname: '',
   referenceImage: '',
   price: '',
   currencyId: '',
+  volume: '',
+  armorClassBonus: '',
+  speedPenaltyMeters: '',
+  hardness: '',
+  hitPoints: '',
   tagIds: [],
   description: '',
   privateInformation: '',

@@ -3,6 +3,7 @@ import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Tag } from '../../tags/entities/tag.entity';
 import { Currency } from '../../currencies/entities/currency.entity';
+import { DecimalTransformer } from '../../../common/transformers/decimal.transformer';
 
 @Entity('shields')
 export class Shield extends BaseEntity {
@@ -32,4 +33,38 @@ export class Shield extends BaseEntity {
     description: 'Tags associadas ao escudo',
   })
   tags!: Tag[];
+
+  @Column({ type: 'varchar', nullable: true })
+  nickname!: string | null;
+
+  @Column({
+    type: 'numeric',
+    precision: 4,
+    scale: 1,
+    nullable: true,
+    transformer: DecimalTransformer,
+  })
+  volume!: number | null;
+
+  @Column({ type: 'int', name: 'armor_class_bonus', nullable: true })
+  armorClassBonus!: number | null;
+
+  @Column({
+    type: 'numeric',
+    precision: 4,
+    scale: 1,
+    name: 'speed_penalty_meters',
+    nullable: true,
+    transformer: DecimalTransformer,
+  })
+  speedPenaltyMeters!: number | null;
+
+  @Column({ type: 'int', nullable: true })
+  hardness!: number | null;
+
+  @Column({ type: 'int', name: 'hit_points', nullable: true })
+  hitPoints!: number | null;
+
+  @Column({ type: 'int', name: 'break_threshold', default: 0 })
+  breakThreshold!: number;
 }

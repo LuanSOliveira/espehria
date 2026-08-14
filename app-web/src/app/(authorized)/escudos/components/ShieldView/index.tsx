@@ -2,7 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import { Box, Chip, CircularProgress } from '@mui/material';
-import { FiDollarSign, FiFileText, FiImage, FiLock } from 'react-icons/fi';
+import {
+  FiAlertTriangle,
+  FiDollarSign,
+  FiFileText,
+  FiHeart,
+  FiHexagon,
+  FiImage,
+  FiLock,
+  FiPackage,
+  FiPlusCircle,
+  FiTag,
+  FiWind,
+} from 'react-icons/fi';
 import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
@@ -158,20 +170,131 @@ export const ShieldView = ({ shieldId, onNotFound }: ShieldViewProps) => {
             </div>
           )}
 
-          <div
-            className="flex items-start gap-2 px-3 py-2"
-            style={APP_CONTAINER_STYLES.detailInfoField}
-          >
-            <FiDollarSign
-              style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
-            />
-            <div>
-              <Label component="span" sx={{ margin: 0 }}>
-                Preço
-              </Label>
-              <DefaultText>
-                {formatPriceWithCurrency(shield.price, shield.currency)}
-              </DefaultText>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiDollarSign
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Preço
+                </Label>
+                <DefaultText>
+                  {formatPriceWithCurrency(shield.price, shield.currency)}
+                </DefaultText>
+              </div>
+            </div>
+
+            {shield.nickname && (
+              <div
+                className="flex items-start gap-2 px-3 py-2"
+                style={APP_CONTAINER_STYLES.detailInfoField}
+              >
+                <FiTag
+                  style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+                />
+                <div>
+                  <Label component="span" sx={{ margin: 0 }}>
+                    Apelido
+                  </Label>
+                  <DefaultText>{shield.nickname}</DefaultText>
+                </div>
+              </div>
+            )}
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiPackage
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Volume
+                </Label>
+                <DefaultText>{shield.volume ?? NOT_INFORMED}</DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiPlusCircle
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Bônus de CA
+                </Label>
+                <DefaultText>{shield.armorClassBonus ?? NOT_INFORMED}</DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiWind
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Penalidade de Velocidade (Metros)
+                </Label>
+                <DefaultText>
+                  {shield.speedPenaltyMeters ?? NOT_INFORMED}
+                </DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiHexagon
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Dureza
+                </Label>
+                <DefaultText>{shield.hardness ?? NOT_INFORMED}</DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiHeart
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Pontos de Vida
+                </Label>
+                <DefaultText>{shield.hitPoints ?? NOT_INFORMED}</DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiAlertTriangle
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Limiar de Quebra
+                </Label>
+                <DefaultText>{shield.breakThreshold ?? 0}</DefaultText>
+              </div>
             </div>
           </div>
         </div>

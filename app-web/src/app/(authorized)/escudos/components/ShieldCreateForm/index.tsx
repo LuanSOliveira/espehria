@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import {
+  DefaultTextInput,
   FormAutocompleteInput,
   FormMultiAutocompleteInput,
   FormRichTextInput,
@@ -34,13 +35,29 @@ export interface ShieldCreateFormProps {
 interface ShieldPayload
   extends Omit<
     ShieldFormData,
-    'referenceImage' | 'description' | 'price' | 'currencyId' | 'privateInformation'
+    | 'referenceImage'
+    | 'description'
+    | 'price'
+    | 'currencyId'
+    | 'privateInformation'
+    | 'nickname'
+    | 'volume'
+    | 'armorClassBonus'
+    | 'speedPenaltyMeters'
+    | 'hardness'
+    | 'hitPoints'
   > {
   referenceImage?: string;
   description?: string;
   price?: number | null;
   currencyId?: string;
   privateInformation?: string;
+  nickname?: string;
+  volume?: number | null;
+  armorClassBonus?: number | null;
+  speedPenaltyMeters?: number | null;
+  hardness?: number | null;
+  hitPoints?: number | null;
 }
 
 export const ShieldCreateForm = ({ onSaved }: ShieldCreateFormProps) => {
@@ -62,10 +79,15 @@ export const ShieldCreateForm = ({ onSaved }: ShieldCreateFormProps) => {
     enabled: isEditMode,
   });
 
-  const { control, handleSubmit, reset } = useForm<ShieldFormData>({
+  const { control, handleSubmit, reset, watch } = useForm<ShieldFormData>({
     resolver: shieldFormResolver,
     defaultValues: shieldFormDefaultValues,
   });
+
+  const hitPointsValue = watch('hitPoints');
+  const breakThresholdValue = hitPointsValue
+    ? Math.floor(Number(hitPointsValue) / 2)
+    : 0;
 
   useEffect(() => {
     if (!isEditMode) {
@@ -79,10 +101,24 @@ export const ShieldCreateForm = ({ onSaved }: ShieldCreateFormProps) => {
 
     reset({
       name: shieldDetail.name,
+      nickname: shieldDetail.nickname ?? '',
       referenceImage: shieldDetail.referenceImage ?? '',
       description: shieldDetail.description ?? '',
       price: shieldDetail.price != null ? String(shieldDetail.price) : '',
       currencyId: shieldDetail.currency?.id ?? '',
+      volume: shieldDetail.volume != null ? String(shieldDetail.volume) : '',
+      armorClassBonus:
+        shieldDetail.armorClassBonus != null
+          ? String(shieldDetail.armorClassBonus)
+          : '',
+      speedPenaltyMeters:
+        shieldDetail.speedPenaltyMeters != null
+          ? String(shieldDetail.speedPenaltyMeters)
+          : '',
+      hardness:
+        shieldDetail.hardness != null ? String(shieldDetail.hardness) : '',
+      hitPoints:
+        shieldDetail.hitPoints != null ? String(shieldDetail.hitPoints) : '',
       privateInformation: shieldDetail.privateInformation ?? '',
       tagIds: shieldDetail.tags?.map((tag) => tag.id) ?? [],
     });
@@ -109,6 +145,14 @@ export const ShieldCreateForm = ({ onSaved }: ShieldCreateFormProps) => {
     currencyId: data.currencyId || undefined,
     privateInformation: data.privateInformation || undefined,
     tagIds: data.tagIds ?? [],
+    nickname: data.nickname || undefined,
+    volume: data.volume ? Number(data.volume) : null,
+    armorClassBonus: data.armorClassBonus ? Number(data.armorClassBonus) : null,
+    speedPenaltyMeters: data.speedPenaltyMeters
+      ? Number(data.speedPenaltyMeters)
+      : null,
+    hardness: data.hardness ? Number(data.hardness) : null,
+    hitPoints: data.hitPoints ? Number(data.hitPoints) : null,
   });
 
   const createShieldMutation = usePostEntity<IShield, ShieldPayload>({
@@ -187,6 +231,14 @@ export const ShieldCreateForm = ({ onSaved }: ShieldCreateFormProps) => {
         />
 
         <FormTextInput
+          id="shield-form-nickname"
+          name="nickname"
+          control={control}
+          label="Apelido"
+          placeholder="Digite o apelido"
+        />
+
+        <FormTextInput
           id="shield-form-reference-image"
           name="referenceImage"
           control={control}
@@ -194,6 +246,20 @@ export const ShieldCreateForm = ({ onSaved }: ShieldCreateFormProps) => {
           placeholder="https://exemplo.com/imagem.jpg"
         />
 
+        <FormMultiAutocompleteInput<ShieldFormData, ITag>
+          id="shield-form-tags"
+          name="tagIds"
+          control={control}
+          label="Tags"
+          options={tagOptions}
+          getOptionLabel={formatTagLabel}
+          getOptionValue={(tag) => tag.id}
+          getOptionColor={(tag) => tag.color}
+          placeholder="Selecione as tags"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <FormTextInput
           id="shield-form-price"
           name="price"
@@ -217,16 +283,70 @@ export const ShieldCreateForm = ({ onSaved }: ShieldCreateFormProps) => {
           placeholder="Selecione a moeda"
         />
 
-        <FormMultiAutocompleteInput<ShieldFormData, ITag>
-          id="shield-form-tags"
-          name="tagIds"
+        <FormTextInput
+          id="shield-form-volume"
+          name="volume"
           control={control}
-          label="Tags"
-          options={tagOptions}
-          getOptionLabel={formatTagLabel}
-          getOptionValue={(tag) => tag.id}
-          getOptionColor={(tag) => tag.color}
-          placeholder="Selecione as tags"
+          label="Volume"
+          placeholder="Digite o volume"
+          type="number"
+          slotProps={{
+            htmlInput: { min: 0, step: 0.1, inputMode: 'decimal' },
+          }}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <FormTextInput
+          id="shield-form-armor-class-bonus"
+          name="armorClassBonus"
+          control={control}
+          label="Bônus de CA"
+          placeholder="Digite o bônus de CA"
+          type="number"
+          slotProps={{ htmlInput: { min: 0, step: 1, inputMode: 'numeric' } }}
+        />
+
+        <FormTextInput
+          id="shield-form-speed-penalty-meters"
+          name="speedPenaltyMeters"
+          control={control}
+          label="Penalidade de Velocidade (Metros)"
+          placeholder="Digite a penalidade de velocidade"
+          type="number"
+          slotProps={{
+            htmlInput: { min: 0, step: 0.1, inputMode: 'decimal' },
+          }}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <FormTextInput
+          id="shield-form-hardness"
+          name="hardness"
+          control={control}
+          label="Dureza"
+          placeholder="Digite a dureza"
+          type="number"
+          slotProps={{ htmlInput: { min: 0, step: 1, inputMode: 'numeric' } }}
+        />
+
+        <FormTextInput
+          id="shield-form-hit-points"
+          name="hitPoints"
+          control={control}
+          label="Pontos de Vida"
+          placeholder="Digite os pontos de vida"
+          type="number"
+          slotProps={{ htmlInput: { min: 0, step: 1, inputMode: 'numeric' } }}
+        />
+
+        <DefaultTextInput
+          id="shield-form-break-threshold"
+          label="Limiar de Quebra"
+          value={breakThresholdValue}
+          disabled
+          type="number"
         />
       </div>
 

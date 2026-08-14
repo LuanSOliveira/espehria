@@ -105,6 +105,16 @@ export class ShieldsService {
       price: dto.price ?? null,
       currency,
       privateInformation: dto.privateInformation ?? null,
+      nickname: dto.nickname ?? null,
+      volume: dto.volume ?? null,
+      armorClassBonus: dto.armorClassBonus ?? null,
+      speedPenaltyMeters: dto.speedPenaltyMeters ?? null,
+      hardness: dto.hardness ?? null,
+      hitPoints: dto.hitPoints ?? null,
+      breakThreshold:
+        dto.hitPoints !== undefined && dto.hitPoints !== null
+          ? Math.floor(dto.hitPoints / 2)
+          : 0,
     });
 
     const savedShield = await this.shieldsRepository.save(shield);
@@ -223,6 +233,26 @@ export class ShieldsService {
     }
     if (dto.privateInformation !== undefined) {
       shield.privateInformation = dto.privateInformation;
+    }
+    if (dto.nickname !== undefined) {
+      shield.nickname = dto.nickname;
+    }
+    if (dto.volume !== undefined) {
+      shield.volume = dto.volume;
+    }
+    if (dto.armorClassBonus !== undefined) {
+      shield.armorClassBonus = dto.armorClassBonus;
+    }
+    if (dto.speedPenaltyMeters !== undefined) {
+      shield.speedPenaltyMeters = dto.speedPenaltyMeters;
+    }
+    if (dto.hardness !== undefined) {
+      shield.hardness = dto.hardness;
+    }
+    if (dto.hitPoints !== undefined) {
+      shield.hitPoints = dto.hitPoints;
+      shield.breakThreshold =
+        dto.hitPoints !== null ? Math.floor(dto.hitPoints / 2) : 0;
     }
     let tags = shield.tags;
     if (dto.tagIds !== undefined) {

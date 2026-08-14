@@ -21,6 +21,13 @@ export interface IShield extends IEntity {
   tags: ITag[];
   createdAt: string;
   updatedAt: string;
+  nickname?: string | null;
+  volume?: number | null;
+  armorClassBonus?: number | null;
+  speedPenaltyMeters?: number | null;
+  hardness?: number | null;
+  hitPoints?: number | null;
+  breakThreshold?: number | null;
 }
 
 export interface IShieldListFilters {

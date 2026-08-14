@@ -53,7 +53,9 @@ export class ShieldsController {
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida ou dados obrigatórios ausentes',
+      'URL de imagem de referência inválida, dados obrigatórios ausentes, ou ' +
+      'volume/penalidade de velocidade com mais de 1 casa decimal ou negativos, ' +
+      'ou bônus de CA/dureza/pontos de vida negativos',
   })
   async create(@Body() dto: CreateShieldDto): Promise<ShieldResponseDto> {
     const shield = await this.shieldsService.create(dto);
@@ -106,7 +108,9 @@ export class ShieldsController {
   @ApiConflictResponse({ description: 'Já existe um escudo com este nome' })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida ou ID em formato inválido',
+      'URL de imagem de referência inválida, ID em formato inválido, ou ' +
+      'volume/penalidade de velocidade com mais de 1 casa decimal ou negativos, ' +
+      'ou bônus de CA/dureza/pontos de vida negativos',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,

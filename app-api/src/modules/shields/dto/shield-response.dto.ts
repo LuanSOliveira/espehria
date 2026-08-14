@@ -51,6 +51,49 @@ export class ShieldResponseDto {
   })
   tags: TagResponseDto[];
 
+  @ApiPropertyOptional({
+    description: 'Apelido do escudo',
+    example: 'Escudo da Guarda',
+  })
+  nickname: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Volume do escudo',
+    example: 15.5,
+  })
+  volume: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Bônus de CA do escudo, mínimo 0',
+    example: 2,
+  })
+  armorClassBonus: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Penalidade de velocidade em metros do escudo',
+    example: 3,
+  })
+  speedPenaltyMeters: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Dureza do escudo, mínimo 0',
+    example: 5,
+  })
+  hardness: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Pontos de vida do escudo, mínimo 0',
+    example: 10,
+  })
+  hitPoints: number | null;
+
+  @ApiProperty({
+    description:
+      'Limiar de quebra do escudo (somente leitura, calculado pela API como floor(Pontos de Vida / 2), ou 0 quando Pontos de Vida está vazio/nulo)',
+    example: 5,
+  })
+  breakThreshold: number;
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -69,6 +112,13 @@ export class ShieldResponseDto {
       : null;
     dto.privateInformation = shield.privateInformation;
     dto.tags = (shield.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
+    dto.nickname = shield.nickname;
+    dto.volume = shield.volume;
+    dto.armorClassBonus = shield.armorClassBonus;
+    dto.speedPenaltyMeters = shield.speedPenaltyMeters;
+    dto.hardness = shield.hardness;
+    dto.hitPoints = shield.hitPoints;
+    dto.breakThreshold = shield.breakThreshold;
     dto.createdAt = shield.createdAt;
     dto.updatedAt = shield.updatedAt;
     return dto;
