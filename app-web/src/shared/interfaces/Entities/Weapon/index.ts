@@ -25,6 +25,9 @@ export interface IWeaponListItem {
   currency?: ICurrency | null;
   tags: ITag[];
   traits: ITrait[];
+  damageValue?: number | null;
+  damageDie?: WeaponDamageDie | null;
+  damageType?: IDamageType | null;
 }
 
 export interface IWeapon extends IEntity {

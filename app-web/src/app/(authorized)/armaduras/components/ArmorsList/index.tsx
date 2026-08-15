@@ -55,6 +55,21 @@ export const ArmorsList = ({
             </TableCell>
             <TableCell sx={{ borderColor: APP_COLORS.gold }}>
               <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
+                Categoria
+              </Label>
+            </TableCell>
+            <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
+                Bônus de CA
+              </Label>
+            </TableCell>
+            <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
+                Limite Des.
+              </Label>
+            </TableCell>
+            <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
                 Preço
               </Label>
             </TableCell>
@@ -68,7 +83,7 @@ export const ArmorsList = ({
         <TableBody>
           {!isLoading && armors.length === 0 && (
             <TableRow>
-              <TableCell colSpan={5} sx={{ borderColor: APP_COLORS.gold }}>
+              <TableCell colSpan={8} sx={{ borderColor: APP_COLORS.gold }}>
                 <DefaultText>Nenhuma armadura encontrada.</DefaultText>
               </TableCell>
             </TableRow>

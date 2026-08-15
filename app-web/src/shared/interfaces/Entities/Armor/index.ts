@@ -12,6 +12,9 @@ export interface IArmorListItem {
   currency?: ICurrency | null;
   tags: ITag[];
   traits: ITrait[];
+  armorCategory?: IArmorCategory | null;
+  armorClassBonus?: number | null;
+  dexterityModifierLimit?: number | null;
 }
 
 export interface IArmor extends IEntity {

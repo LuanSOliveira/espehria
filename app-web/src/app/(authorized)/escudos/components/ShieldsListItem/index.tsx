@@ -16,6 +16,21 @@ export interface ShieldsListItemProps {
   onDelete: (shield: IShieldListItem) => void;
 }
 
+const formatShieldHitPoints = (
+  hitPoints?: number | null,
+  breakThreshold?: number | null,
+): string => {
+  if (hitPoints === null || hitPoints === undefined) {
+    return 'Não informado';
+  }
+
+  if (breakThreshold === null || breakThreshold === undefined) {
+    return `${hitPoints}`;
+  }
+
+  return `${hitPoints}(${breakThreshold})`;
+};
+
 export const ShieldsListItem = ({
   shield,
   onView,
@@ -46,6 +61,17 @@ export const ShieldsListItem = ({
             <TagBadge key={tag.id} name={tag.name} color={tag.color} />
           ))}
         </div>
+      </TableCell>
+      <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+        <DefaultText>{shield.armorClassBonus ?? '—'}</DefaultText>
+      </TableCell>
+      <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+        <DefaultText>{shield.hardness ?? '—'}</DefaultText>
+      </TableCell>
+      <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+        <DefaultText>
+          {formatShieldHitPoints(shield.hitPoints, shield.breakThreshold)}
+        </DefaultText>
       </TableCell>
       <TableCell sx={{ borderColor: APP_COLORS.gold }}>
         <DefaultText>

@@ -55,6 +55,21 @@ export const ShieldsList = ({
             </TableCell>
             <TableCell sx={{ borderColor: APP_COLORS.gold }}>
               <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
+                Bônus de CA
+              </Label>
+            </TableCell>
+            <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
+                Dureza
+              </Label>
+            </TableCell>
+            <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
+                PV(LQ)
+              </Label>
+            </TableCell>
+            <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
                 Preço
               </Label>
             </TableCell>
@@ -68,7 +83,7 @@ export const ShieldsList = ({
         <TableBody>
           {!isLoading && shields.length === 0 && (
             <TableRow>
-              <TableCell colSpan={5} sx={{ borderColor: APP_COLORS.gold }}>
+              <TableCell colSpan={8} sx={{ borderColor: APP_COLORS.gold }}>
                 <DefaultText>Nenhum escudo encontrado.</DefaultText>
               </TableCell>
             </TableRow>

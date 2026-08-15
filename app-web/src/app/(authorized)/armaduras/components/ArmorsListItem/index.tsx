@@ -46,6 +46,17 @@ export const ArmorsListItem = ({
       </TableCell>
       <TableCell sx={{ borderColor: APP_COLORS.gold }}>
         <DefaultText>
+          {armor.armorCategory?.name ?? 'Não informado'}
+        </DefaultText>
+      </TableCell>
+      <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+        <DefaultText>{armor.armorClassBonus ?? '—'}</DefaultText>
+      </TableCell>
+      <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+        <DefaultText>{armor.dexterityModifierLimit ?? '—'}</DefaultText>
+      </TableCell>
+      <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+        <DefaultText>
           {formatPriceWithCurrency(armor.price, armor.currency)}
         </DefaultText>
       </TableCell>

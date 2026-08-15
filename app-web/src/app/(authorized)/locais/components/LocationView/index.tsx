@@ -127,7 +127,10 @@ export const LocationView = ({ locationId, onNotFound }: LocationViewProps) => {
             style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
           >
             <FiFileText style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
-            <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
+            <Label
+              component="span"
+              sx={{ margin: 0, color: APP_COLORS.goldSoft }}
+            >
               Descrição
             </Label>
           </div>
@@ -157,7 +160,7 @@ export const LocationView = ({ locationId, onNotFound }: LocationViewProps) => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label sx={{ margin: 0 }}>Pontos de Interesse de</Label>
+            <Label sx={{ margin: 0 }}>Ponto de Interesse de</Label>
             {location.pointsOfInterestOf.length === 0 ? (
               <DefaultText>
                 Nenhum local relaciona este como ponto de interesse.

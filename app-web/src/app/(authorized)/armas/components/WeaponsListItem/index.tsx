@@ -5,7 +5,11 @@ import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText } from '@/shared/components/Texts';
 import { ImageAvatarPreview } from '@/shared/components/ImageAvatarPreview';
 import { TagBadge } from '@/shared/components/TagBadge';
-import { IWeaponListItem } from '@/shared/interfaces';
+import {
+  IDamageType,
+  IWeaponListItem,
+  WeaponDamageDie,
+} from '@/shared/interfaces';
 import { APP_COLORS } from '@/shared/constants';
 import { formatPriceWithCurrency } from '@/shared/util';
 
@@ -15,6 +19,32 @@ export interface WeaponsListItemProps {
   onEdit: (weapon: IWeaponListItem) => void;
   onDelete: (weapon: IWeaponListItem) => void;
 }
+
+const formatWeaponDamage = (
+  damageValue?: number | null,
+  damageDie?: WeaponDamageDie | null,
+  damageType?: IDamageType | null,
+): string => {
+  const hasDamageValue = damageValue !== null && damageValue !== undefined;
+  const hasDamageDie = damageDie !== null && damageDie !== undefined;
+  const dieValue = `${hasDamageValue ? damageValue : ''}${
+    hasDamageDie ? damageDie : ''
+  }`;
+
+  if (dieValue && damageType) {
+    return `${dieValue} ${damageType.name}`;
+  }
+
+  if (dieValue) {
+    return dieValue;
+  }
+
+  if (damageType) {
+    return damageType.name;
+  }
+
+  return 'Não informado';
+};
 
 export const WeaponsListItem = ({
   weapon,
@@ -46,6 +76,15 @@ export const WeaponsListItem = ({
             <TagBadge key={tag.id} name={tag.name} color={tag.color} />
           ))}
         </div>
+      </TableCell>
+      <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+        <DefaultText>
+          {formatWeaponDamage(
+            weapon.damageValue,
+            weapon.damageDie,
+            weapon.damageType,
+          )}
+        </DefaultText>
       </TableCell>
       <TableCell sx={{ borderColor: APP_COLORS.gold }}>
         <DefaultText>

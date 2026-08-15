@@ -9,6 +9,10 @@ export interface IShieldListItem {
   price?: number | null;
   currency?: ICurrency | null;
   tags: ITag[];
+  armorClassBonus?: number | null;
+  hardness?: number | null;
+  hitPoints?: number | null;
+  breakThreshold?: number | null;
 }
 
 export interface IShield extends IEntity {

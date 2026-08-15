@@ -40,6 +40,31 @@ export class ShieldListItemResponseDto {
   })
   tags: TagResponseDto[];
 
+  @ApiPropertyOptional({
+    description: 'Bônus de CA do escudo, mínimo 0',
+    example: 2,
+  })
+  armorClassBonus: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Dureza do escudo, mínimo 0',
+    example: 5,
+  })
+  hardness: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Pontos de vida do escudo, mínimo 0',
+    example: 10,
+  })
+  hitPoints: number | null;
+
+  @ApiProperty({
+    description:
+      'Limiar de quebra do escudo (somente leitura, calculado pela API como floor(Pontos de Vida / 2), ou 0 quando Pontos de Vida está vazio/nulo)',
+    example: 5,
+  })
+  breakThreshold: number;
+
   static fromEntity(shield: Shield): ShieldListItemResponseDto {
     const dto = new ShieldListItemResponseDto();
     dto.id = shield.id;
@@ -50,6 +75,10 @@ export class ShieldListItemResponseDto {
       ? CurrencyResponseDto.fromEntity(shield.currency)
       : null;
     dto.tags = (shield.tags ?? []).map((tag) => TagResponseDto.fromEntity(tag));
+    dto.armorClassBonus = shield.armorClassBonus;
+    dto.hardness = shield.hardness;
+    dto.hitPoints = shield.hitPoints;
+    dto.breakThreshold = shield.breakThreshold;
     return dto;
   }
 }

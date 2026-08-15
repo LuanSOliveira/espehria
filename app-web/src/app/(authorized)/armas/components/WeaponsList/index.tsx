@@ -55,6 +55,11 @@ export const WeaponsList = ({
             </TableCell>
             <TableCell sx={{ borderColor: APP_COLORS.gold }}>
               <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
+                Dano
+              </Label>
+            </TableCell>
+            <TableCell sx={{ borderColor: APP_COLORS.gold }}>
+              <Label component="span" sx={{ margin: 0, fontWeight: 700 }}>
                 Preço
               </Label>
             </TableCell>
@@ -68,7 +73,7 @@ export const WeaponsList = ({
         <TableBody>
           {!isLoading && weapons.length === 0 && (
             <TableRow>
-              <TableCell colSpan={5} sx={{ borderColor: APP_COLORS.gold }}>
+              <TableCell colSpan={6} sx={{ borderColor: APP_COLORS.gold }}>
                 <DefaultText>Nenhuma arma encontrada.</DefaultText>
               </TableCell>
             </TableRow>
