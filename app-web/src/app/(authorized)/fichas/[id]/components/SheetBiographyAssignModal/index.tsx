@@ -1,11 +1,15 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Checkbox, Chip, IconButton, Tooltip } from '@mui/material';
-import { FiEdit2, FiEye } from 'react-icons/fi';
+import { Checkbox, Chip, IconButton, TablePagination, Tooltip } from '@mui/material';
+import { FiEdit2, FiEye, FiSearch } from 'react-icons/fi';
 import { FormModal, ViewModal } from '@/shared/components/Modals';
 import { DefaultText, Label } from '@/shared/components/Texts';
-import { DefaultAutocompleteInput, DefaultTextInput } from '@/shared/components/Inputs';
+import {
+  DefaultAutocompleteInput,
+  DefaultMultiAutocompleteInput,
+  DefaultTextInput,
+} from '@/shared/components/Inputs';
 import { PrimaryButton, SecondaryButton } from '@/shared/components/Buttons';
 import { ImageAvatarPreview } from '@/shared/components/ImageAvatarPreview';
 import { ImprovementDefectCard } from '@/shared/components/ImprovementDefectCard';
@@ -15,15 +19,23 @@ import {
   useGetEntityList,
   useImprovementDefectPropertiesQuery,
   useImprovementDefectTypesQuery,
+  useTagOptionsQuery,
 } from '@/hooks/Queries';
 import {
   IBiography,
   IBiographyListFilters,
   IBiographyListItem,
   IImprovementDefectItem,
+  ITag,
 } from '@/shared/interfaces';
-import { getContrastTextColor, showToast } from '@/shared/util';
-import { APP_COLORS, APP_CONTAINER_STYLES, APP_INPUT_STYLES } from '@/shared/constants';
+import { formatTagLabel, getContrastTextColor, showToast } from '@/shared/util';
+import {
+  APP_COLORS,
+  APP_CONTAINER_STYLES,
+  APP_DEFAULT_PAGE_SIZE,
+  APP_INPUT_STYLES,
+} from '@/shared/constants';
+import { SheetBiographySelectionCard } from '../SheetBiographySelectionCard';
 
 const ATTRIBUTE_TYPE_NAME = 'Atributo';
 const FREE_IMPROVEMENT_VALUE = 2;
@@ -58,10 +70,13 @@ export const SheetBiographyAssignModal = ({
   onConfirm,
   isSaving = false,
 }: SheetBiographyAssignModalProps) => {
-  const [search, setSearch] = useState('');
+  const [nameFilter, setNameFilter] = useState('');
+  const [tagsFilter, setTagsFilter] = useState<ITag[]>([]);
+  const [page, setPage] = useState(1);
   const [biography, setBiography] = useState<IBiographyListItem | null>(null);
   const [isSelectingBiography, setIsSelectingBiography] = useState(true);
-  const [isBiographyViewOpen, setIsBiographyViewOpen] = useState(false);
+  const [biographyPendingView, setBiographyPendingView] =
+    useState<IBiographyListItem | null>(null);
   const [selectedImprovementKey, setSelectedImprovementKey] = useState<
     string | null
   >(null);
@@ -75,7 +90,9 @@ export const SheetBiographyAssignModal = ({
     setWasOpen(open);
 
     if (open) {
-      setSearch('');
+      setNameFilter('');
+      setTagsFilter([]);
+      setPage(1);
       setSyncedBiographyId(null);
 
       if (initialValue) {
@@ -92,14 +109,19 @@ export const SheetBiographyAssignModal = ({
     }
   }
 
-  const { data: biographyOptionsData } = useGetEntityList<
-    IBiographyListItem,
-    IBiographyListFilters
-  >({
-    url: '/biographies',
-    filters: { name: search || undefined, perPage: 20 },
-    enabled: open && isSelectingBiography,
-  });
+  const { tagOptions } = useTagOptionsQuery();
+
+  const { data: biographyOptionsData, isLoading: isLoadingBiographyOptions } =
+    useGetEntityList<IBiographyListItem, IBiographyListFilters>({
+      url: '/biographies',
+      filters: {
+        name: nameFilter || undefined,
+        tagIds: tagsFilter.length > 0 ? tagsFilter.map((tag) => tag.id) : undefined,
+        page,
+        perPage: APP_DEFAULT_PAGE_SIZE,
+      },
+      enabled: open && isSelectingBiography,
+    });
   const biographyOptions = biographyOptionsData?.data ?? [];
 
   const { data: biographyDetail } = useGetEntityById<IBiography>({
@@ -162,6 +184,16 @@ export const SheetBiographyAssignModal = ({
     }
   };
 
+  const handleNameFilterChange = (value: string) => {
+    setNameFilter(value);
+    setPage(1);
+  };
+
+  const handleTagsFilterChange = (value: ITag[]) => {
+    setTagsFilter(value);
+    setPage(1);
+  };
+
   const handleConfirm = () => {
     if (!biography || !selectedImprovement || !freePropertyId) {
       return;
@@ -193,17 +225,67 @@ export const SheetBiographyAssignModal = ({
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           {isSelectingBiography ? (
-            <DefaultAutocompleteInput<IBiographyListItem>
-              id="sheet-biography-assign-search"
-              label="Biografia"
-              options={biographyOptions}
-              getOptionLabel={(option) => option.name}
-              value={biography}
-              onChange={handleSelectBiography}
-              inputValue={search}
-              onInputChange={setSearch}
-              placeholder="Buscar biografia por nome"
-            />
+            <>
+              <Label component="span" sx={{ margin: 0 }}>
+                Biografia
+              </Label>
+
+              <div className="flex flex-wrap items-end gap-3">
+                <div className="min-w-50 flex-1">
+                  <DefaultTextInput
+                    id="sheet-biography-assign-name-filter"
+                    label="Nome"
+                    placeholder="Buscar por nome"
+                    value={nameFilter}
+                    onChange={(event) =>
+                      handleNameFilterChange(event.target.value)
+                    }
+                    icon={<FiSearch />}
+                  />
+                </div>
+                <div className="min-w-60 flex-1">
+                  <DefaultMultiAutocompleteInput<ITag>
+                    id="sheet-biography-assign-tags-filter"
+                    label="Tags"
+                    options={tagOptions}
+                    getOptionLabel={formatTagLabel}
+                    getOptionValue={(tag) => tag.id}
+                    getOptionColor={(tag) => tag.color}
+                    value={tagsFilter}
+                    onChange={handleTagsFilterChange}
+                    placeholder="Selecione as tags"
+                  />
+                </div>
+              </div>
+
+              {!isLoadingBiographyOptions && biographyOptions.length === 0 && (
+                <DefaultText>Nenhuma biografia encontrada.</DefaultText>
+              )}
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {biographyOptions.map((item) => (
+                  <SheetBiographySelectionCard
+                    key={item.id}
+                    biography={item}
+                    onView={() => setBiographyPendingView(item)}
+                    onSelect={() => handleSelectBiography(item)}
+                  />
+                ))}
+              </div>
+
+              <TablePagination
+                component="div"
+                count={biographyOptionsData?.total ?? 0}
+                page={page - 1}
+                rowsPerPage={APP_DEFAULT_PAGE_SIZE}
+                rowsPerPageOptions={[APP_DEFAULT_PAGE_SIZE]}
+                onPageChange={(_event, newPage) => setPage(newPage + 1)}
+                sx={{
+                  color: APP_COLORS.textBrownDark,
+                  borderTop: `1px solid ${APP_COLORS.gold}`,
+                }}
+              />
+            </>
           ) : (
             biography && (
               <>
@@ -242,16 +324,16 @@ export const SheetBiographyAssignModal = ({
                   <Tooltip title="Visualizar">
                     <IconButton
                       aria-label={`Visualizar ${biography.name}`}
-                      onClick={() => setIsBiographyViewOpen(true)}
+                      onClick={() => setBiographyPendingView(biography)}
                       sx={{ color: APP_COLORS.textBrownDark }}
                     >
                       <FiEye />
                     </IconButton>
                   </Tooltip>
 
-                  <Tooltip title="Editar">
+                  <Tooltip title="Trocar biografia">
                     <IconButton
-                      aria-label={`Editar ${biography.name}`}
+                      aria-label={`Trocar biografia ${biography.name}`}
                       onClick={() => setIsSelectingBiography(true)}
                       sx={{ color: APP_COLORS.textBrownDark }}
                     >
@@ -367,12 +449,14 @@ export const SheetBiographyAssignModal = ({
       </div>
 
       <ViewModal
-        open={isBiographyViewOpen}
-        onClose={() => setIsBiographyViewOpen(false)}
+        open={!!biographyPendingView}
+        onClose={() => setBiographyPendingView(null)}
         title="Detalhes da Biografia"
         size="wide"
       >
-        {biography && <BiographyView biographyId={biography.id} />}
+        {biographyPendingView && (
+          <BiographyView biographyId={biographyPendingView.id} />
+        )}
       </ViewModal>
     </FormModal>
   );

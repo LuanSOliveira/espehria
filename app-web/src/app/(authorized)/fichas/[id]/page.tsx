@@ -25,8 +25,6 @@ import {
 import {
   IAttribute,
   IProficiencyProperty,
-  IRaceListFilters,
-  IRaceListItem,
   ISheet,
   ISheetBiography,
   ISheetCampaignOption,
@@ -247,14 +245,6 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
 
   const { data: campaignOptionsData } = useSheetCampaignOptionsQuery();
   const campaignOptions = campaignOptionsData ?? [];
-
-  const { data: racesData } = useGetEntityList<IRaceListItem, IRaceListFilters>(
-    {
-      url: '/races',
-      filters: { perPage: 100 },
-    },
-  );
-  const raceOptions = racesData?.data ?? [];
 
   const { data: improvementDefectTypes } = useImprovementDefectTypesQuery();
   const attributeType = improvementDefectTypes?.find(
@@ -821,7 +811,6 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SheetRaceField
               value={race}
-              options={raceOptions}
               onAssign={(raceId) => linkRaceMutation.mutate({ raceId })}
               onRemove={() => unlinkRaceMutation.mutate()}
               isSaving={linkRaceMutation.isPending}

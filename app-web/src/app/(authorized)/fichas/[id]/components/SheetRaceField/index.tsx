@@ -1,25 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  Autocomplete,
-  CircularProgress,
-  IconButton,
-  TextField,
-  Tooltip,
-} from '@mui/material';
-import { FiX } from 'react-icons/fi';
 import { Label } from '@/shared/components/Texts';
-import { ViewModal } from '@/shared/components/Modals';
+import { ViewModal, ConfirmationModal } from '@/shared/components/Modals';
 import { RaceView } from '@/app/(authorized)/racas/components/RaceView';
 import { IRaceListItem } from '@/shared/interfaces';
-import { APP_COLORS } from '@/shared/constants';
 import { SheetRaceCard } from '../SheetRaceCard';
 import { SheetDashedFieldButton } from '../SheetDashedFieldButton';
+import { SheetRaceSelectionModal } from '../SheetRaceSelectionModal';
 
 export interface SheetRaceFieldProps {
   value: IRaceListItem | null;
-  options: IRaceListItem[];
   onAssign: (raceId: string) => void;
   onRemove: () => void;
   isSaving?: boolean;
@@ -28,102 +19,70 @@ export interface SheetRaceFieldProps {
 
 export const SheetRaceField = ({
   value,
-  options,
   onAssign,
   onRemove,
   isSaving,
   isRemoving,
 }: SheetRaceFieldProps) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [pendingRace, setPendingRace] = useState<IRaceListItem | null>(null);
+  const [isChangeConfirmOpen, setIsChangeConfirmOpen] = useState(false);
 
-  const handleChange = (newValue: IRaceListItem | null) => {
-    if (!newValue) {
+  const handleSelectRace = (race: IRaceListItem) => {
+    if (!value) {
+      onAssign(race.id);
+      setIsSelectionModalOpen(false);
       return;
     }
 
-    onAssign(newValue.id);
-    setIsEditing(false);
+    setIsSelectionModalOpen(false);
+    setPendingRace(race);
+    setIsChangeConfirmOpen(true);
+  };
+
+  const handleConfirmChange = () => {
+    if (!pendingRace) {
+      return;
+    }
+
+    onAssign(pendingRace.id);
+    setIsChangeConfirmOpen(false);
+    setPendingRace(null);
+  };
+
+  const handleCancelChange = () => {
+    setIsChangeConfirmOpen(false);
+    setPendingRace(null);
   };
 
   return (
     <div>
-      <Label htmlFor={isEditing ? 'sheet-race-field' : undefined}>Raça</Label>
+      <Label component="span">Raça</Label>
 
-      {isEditing && (
-        <div className="flex items-center gap-2">
-          <Autocomplete<IRaceListItem>
-            id="sheet-race-field"
-            options={options}
-            getOptionLabel={(option) => option.name}
-            value={value}
-            onChange={(_event, newValue) => handleChange(newValue)}
-            disabled={isSaving}
-            sx={{ flex: 1 }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                variant="standard"
-                placeholder="Selecione a raça"
-                slotProps={{
-                  ...params.slotProps,
-                  input: {
-                    ...params.slotProps.input,
-                    endAdornment: isSaving ? (
-                      <CircularProgress size={16} sx={{ color: APP_COLORS.gold }} />
-                    ) : (
-                      params.slotProps.input.endAdornment
-                    ),
-                  },
-                }}
-                sx={{
-                  '& .MuiInput-root:before': { borderBottom: 'none' },
-                  '& .MuiInput-root:hover:not(.Mui-disabled):before': {
-                    borderBottom: `1px solid ${APP_COLORS.goldDark}`,
-                  },
-                  '& .MuiInput-root:after': {
-                    borderBottom: `2px solid ${APP_COLORS.gold}`,
-                  },
-                  '& .MuiInputBase-input': {
-                    fontSize: '1.125rem',
-                    color: APP_COLORS.textBrownDark,
-                  },
-                }}
-              />
-            )}
-          />
-
-          {value && (
-            <Tooltip title="Cancelar">
-              <IconButton
-                aria-label="Cancelar edição da raça"
-                onClick={() => setIsEditing(false)}
-                disabled={isSaving}
-                sx={{ color: APP_COLORS.textBrownDark }}
-              >
-                <FiX />
-              </IconButton>
-            </Tooltip>
-          )}
-        </div>
-      )}
-
-      {!isEditing && value && (
+      {value && (
         <SheetRaceCard
           race={value}
           onView={() => setIsViewModalOpen(true)}
-          onEdit={() => setIsEditing(true)}
+          onEdit={() => setIsSelectionModalOpen(true)}
           onRemove={onRemove}
           isRemoving={isRemoving}
         />
       )}
 
-      {!isEditing && !value && (
+      {!value && (
         <SheetDashedFieldButton
           label="Adicionar raça"
-          onClick={() => setIsEditing(true)}
+          onClick={() => setIsSelectionModalOpen(true)}
         />
       )}
+
+      <SheetRaceSelectionModal
+        open={isSelectionModalOpen}
+        onClose={() => setIsSelectionModalOpen(false)}
+        onSelect={handleSelectRace}
+        isSelecting={isSaving}
+      />
 
       <ViewModal
         open={isViewModalOpen}
@@ -133,6 +92,16 @@ export const SheetRaceField = ({
       >
         {value && <RaceView raceId={value.id} />}
       </ViewModal>
+
+      <ConfirmationModal
+        open={isChangeConfirmOpen}
+        title="Trocar raça"
+        message="Trocar a raça impacta características, talentos e pontos de vida da ficha. Deseja continuar?"
+        confirmLabel="Trocar"
+        isLoading={isSaving}
+        onConfirm={handleConfirmChange}
+        onCancel={handleCancelChange}
+      />
     </div>
   );
 };
