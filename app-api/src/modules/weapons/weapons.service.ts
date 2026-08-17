@@ -18,9 +18,12 @@ import {
 import { CreateWeaponDto } from './dto/create-weapon.dto';
 import { UpdateWeaponDto } from './dto/update-weapon.dto';
 import { FindWeaponsQueryDto } from './dto/find-weapons-query.dto';
+import { WeaponDamageInputDto } from './dto/weapon-damage-input.dto';
 import { Weapon } from './entities/weapon.entity';
 import { WeaponTag } from './entities/weapon-tag.entity';
 import { WeaponTrait } from './entities/weapon-trait.entity';
+import { WeaponAlternativeDamage } from './entities/weapon-alternative-damage.entity';
+import { WeaponExtraDamage } from './entities/weapon-extra-damage.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { Currency } from '../currencies/entities/currency.entity';
 import { SizeGrade } from '../size-grades/entities/size-grade.entity';
@@ -53,6 +56,10 @@ export class WeaponsService {
     private readonly damageTypesRepository: Repository<DamageType>,
     @InjectRepository(Trait)
     private readonly traitsRepository: Repository<Trait>,
+    @InjectRepository(WeaponAlternativeDamage)
+    private readonly weaponAlternativeDamagesRepository: Repository<WeaponAlternativeDamage>,
+    @InjectRepository(WeaponExtraDamage)
+    private readonly weaponExtraDamagesRepository: Repository<WeaponExtraDamage>,
   ) {}
 
   findByName(name: string): Promise<Weapon | null> {
@@ -62,7 +69,13 @@ export class WeaponsService {
   async findById(id: string): Promise<Weapon | null> {
     const weapon = await this.weaponsRepository.findOne({
       where: { id },
-      relations: { currency: true, sizeGrade: true, damageType: true },
+      relations: {
+        currency: true,
+        sizeGrade: true,
+        damageType: true,
+        alternativeDamages: { damageType: true },
+        extraDamages: { damageType: true },
+      },
     });
     if (!weapon) {
       return null;
@@ -124,6 +137,77 @@ export class WeaponsService {
       throw new NotFoundException('Tipo de dano não encontrado.');
     }
     return damageType;
+  }
+
+  private async findDamageTypesByIds(
+    damageTypeIds: string[],
+  ): Promise<Map<string, DamageType>> {
+    const uniqueIds = [...new Set(damageTypeIds)];
+    if (uniqueIds.length === 0) {
+      return new Map();
+    }
+    const damageTypes = await this.damageTypesRepository.findBy({
+      id: In(uniqueIds),
+    });
+    return new Map(damageTypes.map((damageType) => [damageType.id, damageType]));
+  }
+
+  private async buildAlternativeDamageEntries(
+    entries: WeaponDamageInputDto[],
+  ): Promise<WeaponAlternativeDamage[]> {
+    const damageTypeIds = entries
+      .map((entry) => entry.damageTypeId)
+      .filter((id): id is string => !!id);
+    const damageTypesById = await this.findDamageTypesByIds(damageTypeIds);
+    if (damageTypesById.size !== new Set(damageTypeIds).size) {
+      throw new NotFoundException(
+        'Um ou mais tipos de dano informados nos danos alternativos não foram encontrados.',
+      );
+    }
+
+    return entries.map((entry, index) =>
+      this.weaponAlternativeDamagesRepository.create({
+        damageValue: entry.damageValue ?? null,
+        damageDie: entry.damageDie ?? null,
+        damageType: entry.damageTypeId
+          ? (damageTypesById.get(entry.damageTypeId) ?? null)
+          : null,
+        magicalDamage: entry.magicalDamage ?? false,
+        distanceMeters: entry.distanceMeters ?? null,
+        usesAmmunition: entry.usesAmmunition ?? false,
+        reloadActions: entry.reloadActions ?? null,
+        order: index,
+      }),
+    );
+  }
+
+  private async buildExtraDamageEntries(
+    entries: WeaponDamageInputDto[],
+  ): Promise<WeaponExtraDamage[]> {
+    const damageTypeIds = entries
+      .map((entry) => entry.damageTypeId)
+      .filter((id): id is string => !!id);
+    const damageTypesById = await this.findDamageTypesByIds(damageTypeIds);
+    if (damageTypesById.size !== new Set(damageTypeIds).size) {
+      throw new NotFoundException(
+        'Um ou mais tipos de dano informados nos danos extras não foram encontrados.',
+      );
+    }
+
+    return entries.map((entry, index) =>
+      this.weaponExtraDamagesRepository.create({
+        damageValue: entry.damageValue ?? null,
+        damageDie: entry.damageDie ?? null,
+        damageType: entry.damageTypeId
+          ? (damageTypesById.get(entry.damageTypeId) ?? null)
+          : null,
+        magicalDamage: entry.magicalDamage ?? false,
+        distanceMeters: entry.distanceMeters ?? null,
+        usesAmmunition: entry.usesAmmunition ?? false,
+        reloadActions: entry.reloadActions ?? null,
+        order: index,
+      }),
+    );
   }
 
   private async loadOrderedTraitsForWeapon(weaponId: string): Promise<Trait[]> {
@@ -203,6 +287,16 @@ export class WeaponsService {
       ? await this.findDamageTypeById(dto.damageTypeId)
       : null;
 
+    const alternativeDamages =
+      dto.alternativeDamages && dto.alternativeDamages.length > 0
+        ? await this.buildAlternativeDamageEntries(dto.alternativeDamages)
+        : [];
+
+    const extraDamages =
+      dto.extraDamages && dto.extraDamages.length > 0
+        ? await this.buildExtraDamageEntries(dto.extraDamages)
+        : [];
+
     const weapon = this.weaponsRepository.create({
       name: dto.name,
       referenceImage: dto.referenceImage ?? null,
@@ -222,6 +316,8 @@ export class WeaponsService {
       distanceMeters: dto.distanceMeters ?? null,
       usesAmmunition: dto.usesAmmunition ?? false,
       reloadActions: dto.reloadActions ?? null,
+      alternativeDamages,
+      extraDamages,
     });
 
     const savedWeapon = await this.weaponsRepository.save(weapon);
@@ -404,6 +500,34 @@ export class WeaponsService {
       traits =
         dto.traitIds.length > 0 ? await this.findTraitsByIds(dto.traitIds) : [];
       await this.replaceOrderedTraitJunctions(weapon, traits);
+    }
+
+    if (dto.alternativeDamages !== undefined) {
+      // Reatribuir `weapon.alternativeDamages` inteiro e deixar o cascade save cuidar
+      // da remoção via `orphanedRowAction` falha com violação de not-null: o TypeORM
+      // tenta primeiro um UPDATE setando "weapon_id" = NULL nas linhas órfãs antes de
+      // excluí-las (mesmo problema e mesma solução usada em LocationsService para
+      // `sections`). Por isso os itens antigos são removidos explicitamente pelo
+      // repositório antes de atribuir os novos.
+      if (weapon.alternativeDamages.length > 0) {
+        await this.weaponAlternativeDamagesRepository.remove(
+          weapon.alternativeDamages,
+        );
+      }
+      weapon.alternativeDamages =
+        dto.alternativeDamages.length > 0
+          ? await this.buildAlternativeDamageEntries(dto.alternativeDamages)
+          : [];
+    }
+
+    if (dto.extraDamages !== undefined) {
+      if (weapon.extraDamages.length > 0) {
+        await this.weaponExtraDamagesRepository.remove(weapon.extraDamages);
+      }
+      weapon.extraDamages =
+        dto.extraDamages.length > 0
+          ? await this.buildExtraDamageEntries(dto.extraDamages)
+          : [];
     }
 
     const savedWeapon = await this.weaponsRepository.save(weapon);

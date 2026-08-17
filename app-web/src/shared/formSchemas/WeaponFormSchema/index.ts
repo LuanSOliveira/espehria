@@ -1,6 +1,43 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
+export const weaponDamageItemSchema = z.object({
+  damageValue: z
+    .string()
+    .refine(
+      (v) => v === '' || /^\d+$/.test(v),
+      'Informe um valor de dano inteiro válido',
+    ),
+  damageDie: z.string(),
+  damageTypeId: z.string(),
+  magicalDamage: z.boolean(),
+  distanceMeters: z
+    .string()
+    .refine(
+      (v) => v === '' || /^\d+(\.\d)?$/.test(v),
+      'Informe uma distância válida (no máximo 1 casa decimal)',
+    ),
+  usesAmmunition: z.boolean(),
+  reloadActions: z
+    .string()
+    .refine(
+      (v) => v === '' || /^\d+$/.test(v),
+      'Informe um valor de ações de recarga inteiro válido',
+    ),
+});
+
+export type WeaponDamageItemFormData = z.infer<typeof weaponDamageItemSchema>;
+
+export const weaponDamageItemDefaultValues: WeaponDamageItemFormData = {
+  damageValue: '',
+  damageDie: '',
+  damageTypeId: '',
+  magicalDamage: false,
+  distanceMeters: '',
+  usesAmmunition: false,
+  reloadActions: '',
+};
+
 export const weaponFormSchema = z
   .object({
     name: z.string().min(1, 'Informe o nome'),
@@ -52,6 +89,8 @@ export const weaponFormSchema = z
     tagIds: z.array(z.string()).optional(),
     description: z.string(),
     privateInformation: z.string(),
+    alternativeDamages: z.array(weaponDamageItemSchema),
+    extraDamages: z.array(weaponDamageItemSchema),
   })
   .superRefine((data, ctx) => {
     if (data.price !== '' && data.currencyId === '') {
@@ -87,4 +126,6 @@ export const weaponFormDefaultValues: WeaponFormData = {
   tagIds: [],
   description: '',
   privateInformation: '',
+  alternativeDamages: [],
+  extraDamages: [],
 };

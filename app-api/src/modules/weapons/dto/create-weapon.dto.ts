@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -12,10 +13,12 @@ import {
   IsUUID,
   Min,
   ValidateIf,
+  ValidateNested,
 } from 'class-validator';
 import { WeaponHands } from '../enums/weapon-hands.enum';
 import { WeaponStyle } from '../enums/weapon-style.enum';
 import { WeaponDamageDie } from '../enums/weapon-damage-die.enum';
+import { WeaponDamageInputDto } from './weapon-damage-input.dto';
 
 export class CreateWeaponDto {
   @ApiProperty({
@@ -200,4 +203,24 @@ export class CreateWeaponDto {
   @IsInt({ message: 'As ações de recarga devem ser um número inteiro.' })
   @Min(0, { message: 'As ações de recarga não podem ser negativas.' })
   reloadActions?: number;
+
+  @ApiPropertyOptional({
+    type: () => [WeaponDamageInputDto],
+    description: 'Danos alternativos da arma (lista independente com os mesmos 7 campos do dano principal), na ordem de inserção preservada. Cada item pode incluir valor, dado, tipo de dano, dano mágico, distância, munição e ações de recarga',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => WeaponDamageInputDto)
+  alternativeDamages?: WeaponDamageInputDto[];
+
+  @ApiPropertyOptional({
+    type: () => [WeaponDamageInputDto],
+    description: 'Danos extras da arma (lista independente com os mesmos 7 campos do dano principal), na ordem de inserção preservada. Cada item pode incluir valor, dado, tipo de dano, dano mágico, distância, munição e ações de recarga',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => WeaponDamageInputDto)
+  extraDamages?: WeaponDamageInputDto[];
 }

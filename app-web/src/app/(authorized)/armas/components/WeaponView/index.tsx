@@ -412,6 +412,166 @@ export const WeaponView = ({ weaponId, onNotFound }: WeaponViewProps) => {
           className="flex items-center gap-2 px-3 py-2"
           style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
         >
+          <FiZap style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
+          <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
+            Dano Alternativo
+          </Label>
+        </div>
+        <div className="flex flex-col gap-3 px-3 py-3">
+          {weapon.alternativeDamages.length === 0 && (
+            <DefaultText>Nenhum item adicionado.</DefaultText>
+          )}
+          {weapon.alternativeDamages.map((damage) => {
+            const alternativeDamageDieLabel = WEAPON_DAMAGE_DIE_OPTIONS.find(
+              (option) => option.value === damage.damageDie,
+            )?.label;
+
+            return (
+              <div
+                key={damage.id}
+                className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4"
+              >
+                <div>
+                  <Label component="span" sx={{ margin: 0 }}>
+                    Valor
+                  </Label>
+                  <DefaultText>{damage.damageValue ?? NOT_INFORMED}</DefaultText>
+                </div>
+                <div>
+                  <Label component="span" sx={{ margin: 0 }}>
+                    Dado
+                  </Label>
+                  <DefaultText>
+                    {alternativeDamageDieLabel ?? NOT_INFORMED}
+                  </DefaultText>
+                </div>
+                <div>
+                  <Label component="span" sx={{ margin: 0 }}>
+                    Tipo de dano
+                  </Label>
+                  <DefaultText>
+                    {damage.damageType?.name ?? NOT_INFORMED}
+                  </DefaultText>
+                </div>
+                <div>
+                  <Label component="span" sx={{ margin: 0 }}>
+                    Dano Mágico
+                  </Label>
+                  <DefaultText>{damage.magicalDamage ? 'Sim' : 'Não'}</DefaultText>
+                </div>
+                <div>
+                  <Label component="span" sx={{ margin: 0 }}>
+                    Distância (Metros)
+                  </Label>
+                  <DefaultText>{damage.distanceMeters ?? NOT_INFORMED}</DefaultText>
+                </div>
+                <div>
+                  <Label component="span" sx={{ margin: 0 }}>
+                    Ações de Recarga
+                  </Label>
+                  <DefaultText>{damage.reloadActions ?? NOT_INFORMED}</DefaultText>
+                </div>
+                <div>
+                  <Label component="span" sx={{ margin: 0 }}>
+                    Usa Munição
+                  </Label>
+                  <DefaultText>
+                    {damage.usesAmmunition ? 'Sim' : 'Não'}
+                  </DefaultText>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div
+        className="flex-1 min-w-0 flex flex-col"
+        style={APP_CONTAINER_STYLES.detailSectionBox}
+      >
+        <div
+          className="flex items-center gap-2 px-3 py-2"
+          style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
+        >
+          <FiZap style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
+          <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
+            Dano Extra
+          </Label>
+        </div>
+        <div className="flex flex-col gap-3 px-3 py-3">
+          {weapon.extraDamages.length === 0 && (
+            <DefaultText>Nenhum item adicionado.</DefaultText>
+          )}
+          {weapon.extraDamages.map((damage) => {
+            const extraDamageDieLabel = WEAPON_DAMAGE_DIE_OPTIONS.find(
+              (option) => option.value === damage.damageDie,
+            )?.label;
+
+            return (
+              <div
+                key={damage.id}
+                className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4"
+              >
+                <div>
+                  <Label component="span" sx={{ margin: 0 }}>
+                    Valor
+                  </Label>
+                  <DefaultText>{damage.damageValue ?? NOT_INFORMED}</DefaultText>
+                </div>
+                <div>
+                  <Label component="span" sx={{ margin: 0 }}>
+                    Dado
+                  </Label>
+                  <DefaultText>{extraDamageDieLabel ?? NOT_INFORMED}</DefaultText>
+                </div>
+                <div>
+                  <Label component="span" sx={{ margin: 0 }}>
+                    Tipo de dano
+                  </Label>
+                  <DefaultText>
+                    {damage.damageType?.name ?? NOT_INFORMED}
+                  </DefaultText>
+                </div>
+                <div>
+                  <Label component="span" sx={{ margin: 0 }}>
+                    Dano Mágico
+                  </Label>
+                  <DefaultText>{damage.magicalDamage ? 'Sim' : 'Não'}</DefaultText>
+                </div>
+                <div>
+                  <Label component="span" sx={{ margin: 0 }}>
+                    Distância (Metros)
+                  </Label>
+                  <DefaultText>{damage.distanceMeters ?? NOT_INFORMED}</DefaultText>
+                </div>
+                <div>
+                  <Label component="span" sx={{ margin: 0 }}>
+                    Ações de Recarga
+                  </Label>
+                  <DefaultText>{damage.reloadActions ?? NOT_INFORMED}</DefaultText>
+                </div>
+                <div>
+                  <Label component="span" sx={{ margin: 0 }}>
+                    Usa Munição
+                  </Label>
+                  <DefaultText>
+                    {damage.usesAmmunition ? 'Sim' : 'Não'}
+                  </DefaultText>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div
+        className="flex-1 min-w-0 flex flex-col"
+        style={APP_CONTAINER_STYLES.detailSectionBox}
+      >
+        <div
+          className="flex items-center gap-2 px-3 py-2"
+          style={APP_CONTAINER_STYLES.detailSectionBoxHeader}
+        >
           <FiFileText style={{ fontSize: 16, color: APP_COLORS.goldSoft }} />
           <Label component="span" sx={{ margin: 0, color: APP_COLORS.goldSoft }}>
             Descrição

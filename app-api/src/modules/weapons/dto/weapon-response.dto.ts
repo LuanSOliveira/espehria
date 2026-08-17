@@ -8,6 +8,7 @@ import { TraitResponseDto } from '../../traits/dto/trait-response.dto';
 import { WeaponHands } from '../enums/weapon-hands.enum';
 import { WeaponStyle } from '../enums/weapon-style.enum';
 import { WeaponDamageDie } from '../enums/weapon-damage-die.enum';
+import { WeaponDamageResponseDto } from './weapon-damage-response.dto';
 
 export class WeaponResponseDto {
   @ApiProperty({
@@ -135,6 +136,19 @@ export class WeaponResponseDto {
   })
   reloadActions: number | null;
 
+  @ApiProperty({
+    type: () => [WeaponDamageResponseDto],
+    description:
+      'Danos alternativos da arma (lista independente com os mesmos 7 campos do dano principal: valor, dado, tipo de dano, dano mágico, distância, munição, ações de recarga). A ordem de resposta reflete a ordem de inserção',
+  })
+  alternativeDamages: WeaponDamageResponseDto[];
+
+  @ApiProperty({
+    type: () => [WeaponDamageResponseDto],
+    description: 'Danos extras da arma (lista independente com os mesmos 7 campos do dano principal: valor, dado, tipo de dano, dano mágico, distância, munição, ações de recarga). A ordem de resposta reflete a ordem de inserção',
+  })
+  extraDamages: WeaponDamageResponseDto[];
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -172,6 +186,14 @@ export class WeaponResponseDto {
     dto.distanceMeters = weapon.distanceMeters;
     dto.usesAmmunition = weapon.usesAmmunition;
     dto.reloadActions = weapon.reloadActions;
+    dto.alternativeDamages = (weapon.alternativeDamages ?? [])
+      .slice()
+      .sort((a, b) => a.order - b.order)
+      .map((damage) => WeaponDamageResponseDto.fromEntity(damage));
+    dto.extraDamages = (weapon.extraDamages ?? [])
+      .slice()
+      .sort((a, b) => a.order - b.order)
+      .map((damage) => WeaponDamageResponseDto.fromEntity(damage));
     dto.createdAt = weapon.createdAt;
     dto.updatedAt = weapon.updatedAt;
     return dto;

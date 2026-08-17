@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Tag } from '../../tags/entities/tag.entity';
 import { Currency } from '../../currencies/entities/currency.entity';
@@ -10,6 +17,8 @@ import { DecimalTransformer } from '../../../common/transformers/decimal.transfo
 import { WeaponHands } from '../enums/weapon-hands.enum';
 import { WeaponStyle } from '../enums/weapon-style.enum';
 import { WeaponDamageDie } from '../enums/weapon-damage-die.enum';
+import { WeaponAlternativeDamage } from './weapon-alternative-damage.entity';
+import { WeaponExtraDamage } from './weapon-extra-damage.entity';
 
 @Entity('weapons')
 export class Weapon extends BaseEntity {
@@ -106,4 +115,24 @@ export class Weapon extends BaseEntity {
 
   @Column({ type: 'int', name: 'reload_actions', nullable: true })
   reloadActions!: number | null;
+
+  @ApiProperty({
+    type: () => [WeaponAlternativeDamage],
+    description: 'Danos alternativos da arma',
+  })
+  @OneToMany(() => WeaponAlternativeDamage, (damage) => damage.weapon, {
+    cascade: true,
+    orphanedRowAction: 'delete',
+  })
+  alternativeDamages!: WeaponAlternativeDamage[];
+
+  @ApiProperty({
+    type: () => [WeaponExtraDamage],
+    description: 'Danos extras da arma',
+  })
+  @OneToMany(() => WeaponExtraDamage, (damage) => damage.weapon, {
+    cascade: true,
+    orphanedRowAction: 'delete',
+  })
+  extraDamages!: WeaponExtraDamage[];
 }

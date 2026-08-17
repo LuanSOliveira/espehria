@@ -49,11 +49,11 @@ export class WeaponsController {
   @ApiConflictResponse({ description: 'Já existe uma arma com este nome' })
   @ApiNotFoundResponse({
     description:
-      'Uma ou mais tags, moeda, grau de tamanho, tipo de dano ou um ou mais traços não foram encontrados',
+      'Uma ou mais tags, moeda, grau de tamanho, tipo de dano, um ou mais traços, ou um ou mais tipos de dano informados dentro dos danos alternativos/extras não foram encontrados',
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida, dados obrigatórios ausentes, valores de hands/weaponStyle/damageDie fora do enum, ou volume/distanceMeters com mais de 1 casa decimal ou negativos',
+      'URL de imagem de referência inválida, dados obrigatórios ausentes, valores de hands/weaponStyle/damageDie (incluindo dentro dos danos alternativos/extras) fora do enum, ou volume/distanceMeters (incluindo dentro dos danos alternativos/extras) com mais de 1 casa decimal ou negativos, ou valores negativos em damageValue/reloadActions (incluindo dentro dos danos alternativos/extras)',
   })
   async create(@Body() dto: CreateWeaponDto): Promise<WeaponResponseDto> {
     const weapon = await this.weaponsService.create(dto);
@@ -101,12 +101,12 @@ export class WeaponsController {
   @ApiOkResponse({ type: WeaponResponseDto })
   @ApiNotFoundResponse({
     description:
-      'Arma, uma ou mais tags, moeda, grau de tamanho, tipo de dano ou um ou mais traços informados não foram encontrados',
+      'Arma, uma ou mais tags, moeda, grau de tamanho, tipo de dano, um ou mais traços, ou um ou mais tipos de dano informados dentro dos danos alternativos/extras não foram encontrados',
   })
   @ApiConflictResponse({ description: 'Já existe uma arma com este nome' })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida, ID em formato inválido, valores de hands/weaponStyle/damageDie fora do enum, ou volume/distanceMeters com mais de 1 casa decimal ou negativos',
+      'URL de imagem de referência inválida, ID em formato inválido, valores de hands/weaponStyle/damageDie (incluindo dentro dos danos alternativos/extras) fora do enum, ou volume/distanceMeters (incluindo dentro dos danos alternativos/extras) com mais de 1 casa decimal ou negativos, ou valores negativos em damageValue/reloadActions (incluindo dentro dos danos alternativos/extras)',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,

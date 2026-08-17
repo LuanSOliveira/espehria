@@ -30,6 +30,17 @@ export interface IWeaponListItem {
   damageType?: IDamageType | null;
 }
 
+export interface IWeaponDamage {
+  id: string;
+  damageValue?: number | null;
+  damageDie?: WeaponDamageDie | null;
+  damageType?: IDamageType | null;
+  magicalDamage: boolean;
+  distanceMeters?: number | null;
+  usesAmmunition: boolean;
+  reloadActions?: number | null;
+}
+
 export interface IWeapon extends IEntity {
   name: string;
   referenceImage?: string | null;
@@ -53,6 +64,8 @@ export interface IWeapon extends IEntity {
   distanceMeters?: number | null;
   usesAmmunition: boolean;
   reloadActions?: number | null;
+  alternativeDamages: IWeaponDamage[];
+  extraDamages: IWeaponDamage[];
 }
 
 export interface IWeaponListFilters {

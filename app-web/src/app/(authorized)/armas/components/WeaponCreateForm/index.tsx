@@ -42,30 +42,42 @@ import {
   WEAPON_STYLE_OPTIONS,
 } from '../../data';
 import { WeaponTraitsField } from '../WeaponTraitsField';
+import { WeaponDamagesField } from '../WeaponDamagesField';
 
 export interface WeaponCreateFormProps {
   onSaved: () => void;
 }
 
-interface WeaponPayload
-  extends Omit<
-    WeaponFormData,
-    | 'referenceImage'
-    | 'description'
-    | 'price'
-    | 'currencyId'
-    | 'privateInformation'
-    | 'nickname'
-    | 'volume'
-    | 'sizeGradeId'
-    | 'hands'
-    | 'weaponStyle'
-    | 'damageValue'
-    | 'damageDie'
-    | 'damageTypeId'
-    | 'distanceMeters'
-    | 'reloadActions'
-  > {
+interface WeaponDamagePayload {
+  damageValue?: number | null;
+  damageDie?: string;
+  damageTypeId?: string;
+  magicalDamage: boolean;
+  distanceMeters?: number | null;
+  usesAmmunition: boolean;
+  reloadActions?: number | null;
+}
+
+interface WeaponPayload extends Omit<
+  WeaponFormData,
+  | 'referenceImage'
+  | 'description'
+  | 'price'
+  | 'currencyId'
+  | 'privateInformation'
+  | 'nickname'
+  | 'volume'
+  | 'sizeGradeId'
+  | 'hands'
+  | 'weaponStyle'
+  | 'damageValue'
+  | 'damageDie'
+  | 'damageTypeId'
+  | 'distanceMeters'
+  | 'reloadActions'
+  | 'alternativeDamages'
+  | 'extraDamages'
+> {
   referenceImage?: string;
   description?: string;
   price?: number | null;
@@ -82,10 +94,14 @@ interface WeaponPayload
   damageTypeId?: string;
   distanceMeters?: number | null;
   reloadActions?: number | null;
+  alternativeDamages: WeaponDamagePayload[];
+  extraDamages: WeaponDamagePayload[];
 }
 
 export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
-  const selectedWeapon = useSelectedWeaponStore((state) => state.selectedWeapon);
+  const selectedWeapon = useSelectedWeaponStore(
+    (state) => state.selectedWeapon,
+  );
   const isEditMode = !!selectedWeapon;
 
   const [traits, setTraits] = useState<IEntityReference[]>([]);
@@ -139,7 +155,9 @@ export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
       hands: weaponDetail.hands ?? '',
       weaponStyle: weaponDetail.weaponStyle ?? '',
       damageValue:
-        weaponDetail.damageValue != null ? String(weaponDetail.damageValue) : '',
+        weaponDetail.damageValue != null
+          ? String(weaponDetail.damageValue)
+          : '',
       damageDie: weaponDetail.damageDie ?? '',
       damageTypeId: weaponDetail.damageType?.id ?? '',
       magicalDamage: weaponDetail.magicalDamage,
@@ -154,6 +172,34 @@ export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
           : '',
       privateInformation: weaponDetail.privateInformation ?? '',
       tagIds: weaponDetail.tags?.map((tag) => tag.id) ?? [],
+      alternativeDamages: (weaponDetail.alternativeDamages ?? []).map(
+        (damage) => ({
+          damageValue:
+            damage.damageValue != null ? String(damage.damageValue) : '',
+          damageDie: damage.damageDie ?? '',
+          damageTypeId: damage.damageType?.id ?? '',
+          magicalDamage: damage.magicalDamage,
+          distanceMeters:
+            damage.distanceMeters != null
+              ? String(damage.distanceMeters)
+              : '',
+          usesAmmunition: damage.usesAmmunition,
+          reloadActions:
+            damage.reloadActions != null ? String(damage.reloadActions) : '',
+        }),
+      ),
+      extraDamages: (weaponDetail.extraDamages ?? []).map((damage) => ({
+        damageValue:
+          damage.damageValue != null ? String(damage.damageValue) : '',
+        damageDie: damage.damageDie ?? '',
+        damageTypeId: damage.damageType?.id ?? '',
+        magicalDamage: damage.magicalDamage,
+        distanceMeters:
+          damage.distanceMeters != null ? String(damage.distanceMeters) : '',
+        usesAmmunition: damage.usesAmmunition,
+        reloadActions:
+          damage.reloadActions != null ? String(damage.reloadActions) : '',
+      })),
     });
 
     setTraits(
@@ -179,6 +225,23 @@ export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
     });
   }, [isWeaponDetailError, weaponDetailError]);
 
+  const buildDamagePayload = (
+    damages: WeaponFormData['alternativeDamages'],
+  ): WeaponDamagePayload[] =>
+    damages.map((damage) => ({
+      damageValue: damage.damageValue ? Number(damage.damageValue) : null,
+      damageDie: damage.damageDie || undefined,
+      damageTypeId: damage.damageTypeId || undefined,
+      magicalDamage: damage.magicalDamage,
+      distanceMeters: damage.distanceMeters
+        ? Number(damage.distanceMeters)
+        : null,
+      usesAmmunition: damage.usesAmmunition,
+      reloadActions: damage.reloadActions
+        ? Number(damage.reloadActions)
+        : null,
+    }));
+
   const buildPayload = (data: WeaponFormData): WeaponPayload => ({
     ...data,
     referenceImage: data.referenceImage || undefined,
@@ -200,6 +263,8 @@ export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
     distanceMeters: data.distanceMeters ? Number(data.distanceMeters) : null,
     usesAmmunition: data.usesAmmunition,
     reloadActions: data.reloadActions ? Number(data.reloadActions) : null,
+    alternativeDamages: buildDamagePayload(data.alternativeDamages),
+    extraDamages: buildDamagePayload(data.extraDamages),
   });
 
   const createWeaponMutation = usePostEntity<IWeapon, WeaponPayload>({
@@ -354,7 +419,10 @@ export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <FormAutocompleteInput<WeaponFormData, (typeof WEAPON_HANDS_OPTIONS)[number]>
+        <FormAutocompleteInput<
+          WeaponFormData,
+          (typeof WEAPON_HANDS_OPTIONS)[number]
+        >
           id="weapon-form-hands"
           name="hands"
           control={control}
@@ -443,14 +511,6 @@ export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
             htmlInput: { min: 0, step: 0.1, inputMode: 'decimal' },
           }}
         />
-
-        <FormCheckboxInput
-          id="weapon-form-uses-ammunition"
-          name="usesAmmunition"
-          control={control}
-          label="Usa Munição?"
-        />
-
         <FormTextInput
           id="weapon-form-reload-actions"
           name="reloadActions"
@@ -460,7 +520,29 @@ export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
           type="number"
           slotProps={{ htmlInput: { min: 0, step: 1, inputMode: 'numeric' } }}
         />
+        <FormCheckboxInput
+          id="weapon-form-uses-ammunition"
+          name="usesAmmunition"
+          control={control}
+          label="Usa Munição?"
+        />
       </div>
+
+      <WeaponDamagesField
+        control={control}
+        name="alternativeDamages"
+        title="Dano Alternativo"
+        addButtonLabel="Adicionar Dano Alternativo"
+        damageTypeOptions={damageTypeOptions}
+      />
+
+      <WeaponDamagesField
+        control={control}
+        name="extraDamages"
+        title="Dano Extra"
+        addButtonLabel="Adicionar Dano Extra"
+        damageTypeOptions={damageTypeOptions}
+      />
 
       <div className="grid grid-cols-1 gap-4">
         <FormRichTextInput
