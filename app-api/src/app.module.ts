@@ -52,6 +52,8 @@ import { SizeGradesModule } from './modules/size-grades/size-grades.module';
 import { DamageTypesModule } from './modules/damage-types/damage-types.module';
 import { TraitsModule } from './modules/traits/traits.module';
 import { ArmorCategoriesModule } from './modules/armor-categories/armor-categories.module';
+import { EnchantmentsModule } from './modules/enchantments/enchantments.module';
+import { EnhancementsModule } from './modules/enhancements/enhancements.module';
 
 @Module({
   imports: [
@@ -125,6 +127,8 @@ import { ArmorCategoriesModule } from './modules/armor-categories/armor-categori
     DamageTypesModule,
     TraitsModule,
     ArmorCategoriesModule,
+    EnchantmentsModule,
+    EnhancementsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

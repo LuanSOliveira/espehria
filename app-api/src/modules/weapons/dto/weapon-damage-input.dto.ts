@@ -22,7 +22,8 @@ export class WeaponDamageInputDto {
 
   @ApiPropertyOptional({
     enum: WeaponDamageDie,
-    description: 'Dado de dano (d2, d4, d6, d8, d10, d12, d20 ou d100, opcional)',
+    description:
+      'Dado de dano (d2, d4, d6, d8, d10, d12, d20 ou d100, opcional)',
   })
   @IsOptional()
   @IsEnum(WeaponDamageDie)

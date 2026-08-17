@@ -30,6 +30,8 @@ import { CharacteristicView } from '@/app/(authorized)/caracteristicas/component
 import { TechniqueView } from '@/app/(authorized)/tecnicas/components/TechniqueView';
 import { SpellView } from '@/app/(authorized)/magias/components/SpellView';
 import { BiographyView } from '@/app/(authorized)/biografias/components/BiographyView';
+import { EnchantmentView } from '@/app/(authorized)/encantamentos/components/EnchantmentView';
+import { EnhancementView } from '@/app/(authorized)/aprimoramentos/components/EnhancementView';
 
 interface EntityMentionViewRendererParams {
   entityId: string;
@@ -126,6 +128,12 @@ const ENTITY_MENTION_VIEW_REGISTRY: Record<
   ),
   biography: ({ entityId, onNotFound }) => (
     <BiographyView biographyId={entityId} onNotFound={onNotFound} />
+  ),
+  enchantment: ({ entityId, onNotFound }) => (
+    <EnchantmentView enchantmentId={entityId} onNotFound={onNotFound} />
+  ),
+  enhancement: ({ entityId, onNotFound }) => (
+    <EnhancementView enhancementId={entityId} onNotFound={onNotFound} />
   ),
 };
 

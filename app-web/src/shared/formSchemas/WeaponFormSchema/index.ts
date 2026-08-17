@@ -38,6 +38,21 @@ export const weaponDamageItemDefaultValues: WeaponDamageItemFormData = {
   reloadActions: '',
 };
 
+export const weaponEmbeddedEffectItemSchema = z.object({
+  name: z.string().min(1, 'Informe o nome'),
+  effect: z.string(),
+});
+
+export type WeaponEmbeddedEffectItemFormData = z.infer<
+  typeof weaponEmbeddedEffectItemSchema
+>;
+
+export const weaponEmbeddedEffectItemDefaultValues: WeaponEmbeddedEffectItemFormData =
+  {
+    name: '',
+    effect: '',
+  };
+
 export const weaponFormSchema = z
   .object({
     name: z.string().min(1, 'Informe o nome'),
@@ -91,6 +106,8 @@ export const weaponFormSchema = z
     privateInformation: z.string(),
     alternativeDamages: z.array(weaponDamageItemSchema),
     extraDamages: z.array(weaponDamageItemSchema),
+    enchantments: z.array(weaponEmbeddedEffectItemSchema),
+    enhancements: z.array(weaponEmbeddedEffectItemSchema),
   })
   .superRefine((data, ctx) => {
     if (data.price !== '' && data.currencyId === '') {
@@ -128,4 +145,6 @@ export const weaponFormDefaultValues: WeaponFormData = {
   privateInformation: '',
   alternativeDamages: [],
   extraDamages: [],
+  enchantments: [],
+  enhancements: [],
 };

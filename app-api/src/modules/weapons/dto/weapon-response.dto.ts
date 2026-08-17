@@ -9,6 +9,7 @@ import { WeaponHands } from '../enums/weapon-hands.enum';
 import { WeaponStyle } from '../enums/weapon-style.enum';
 import { WeaponDamageDie } from '../enums/weapon-damage-die.enum';
 import { WeaponDamageResponseDto } from './weapon-damage-response.dto';
+import { WeaponEmbeddedEffectResponseDto } from './weapon-embedded-effect-response.dto';
 
 export class WeaponResponseDto {
   @ApiProperty({
@@ -145,9 +146,24 @@ export class WeaponResponseDto {
 
   @ApiProperty({
     type: () => [WeaponDamageResponseDto],
-    description: 'Danos extras da arma (lista independente com os mesmos 7 campos do dano principal: valor, dado, tipo de dano, dano mágico, distância, munição, ações de recarga). A ordem de resposta reflete a ordem de inserção',
+    description:
+      'Danos extras da arma (lista independente com os mesmos 7 campos do dano principal: valor, dado, tipo de dano, dano mágico, distância, munição, ações de recarga). A ordem de resposta reflete a ordem de inserção',
   })
   extraDamages: WeaponDamageResponseDto[];
+
+  @ApiProperty({
+    type: () => [WeaponEmbeddedEffectResponseDto],
+    description:
+      'Encantamentos da arma: cópia independente de nome/efeito escolhidos do catálogo de Encantamentos, sem vínculo/FK com a entidade Enchantment. Ordem de inserção preservada',
+  })
+  enchantments: WeaponEmbeddedEffectResponseDto[];
+
+  @ApiProperty({
+    type: () => [WeaponEmbeddedEffectResponseDto],
+    description:
+      'Aprimoramentos da arma: cópia independente de nome/efeito escolhidos do catálogo de Aprimoramentos, sem vínculo/FK com a entidade Enhancement. Ordem de inserção preservada',
+  })
+  enhancements: WeaponEmbeddedEffectResponseDto[];
 
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
@@ -194,6 +210,12 @@ export class WeaponResponseDto {
       .slice()
       .sort((a, b) => a.order - b.order)
       .map((damage) => WeaponDamageResponseDto.fromEntity(damage));
+    dto.enchantments = (weapon.enchantments ?? []).map((item) =>
+      WeaponEmbeddedEffectResponseDto.fromEntity(item),
+    );
+    dto.enhancements = (weapon.enhancements ?? []).map((item) =>
+      WeaponEmbeddedEffectResponseDto.fromEntity(item),
+    );
     dto.createdAt = weapon.createdAt;
     dto.updatedAt = weapon.updatedAt;
     return dto;

@@ -23,7 +23,7 @@ export class SearchController {
   @Get()
   @ApiOperation({
     summary:
-      'Busca entidades linkáveis (campanhas, sessões planejadas, usuários, criaturas, tags, locais, raças, eras, eventos, divindades, personagens, organizações, famílias, equipamentos, materiais, consumíveis, munições, utilitários, regras, perícias, condições, treinamentos, talentos, técnicas, magias, características e biografias) por nome, para uso em menções (@mention). Campanhas e sessões planejadas aparecem apenas se pertencem ao usuário autenticado; usuários Google não veem esses tipos nos resultados',
+      'Busca entidades linkáveis (campanhas, sessões planejadas, usuários, criaturas, tags, locais, raças, eras, eventos, divindades, personagens, organizações, famílias, equipamentos, materiais, consumíveis, munições, utilitários, regras, perícias, condições, treinamentos, talentos, técnicas, magias, características, encantamentos, aprimoramentos e biografias) por nome, para uso em menções (@mention). Campanhas e sessões planejadas aparecem apenas se pertencem ao usuário autenticado; usuários Google não veem esses tipos nos resultados',
   })
   @ApiOkResponse({ type: [SearchResultItemResponseDto] })
   @ApiBadRequestResponse({

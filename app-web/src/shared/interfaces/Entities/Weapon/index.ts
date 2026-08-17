@@ -41,6 +41,11 @@ export interface IWeaponDamage {
   reloadActions?: number | null;
 }
 
+export interface IWeaponEmbeddedEffect {
+  name: string;
+  effect?: string | null;
+}
+
 export interface IWeapon extends IEntity {
   name: string;
   referenceImage?: string | null;
@@ -66,6 +71,8 @@ export interface IWeapon extends IEntity {
   reloadActions?: number | null;
   alternativeDamages: IWeaponDamage[];
   extraDamages: IWeaponDamage[];
+  enchantments: IWeaponEmbeddedEffect[];
+  enhancements: IWeaponEmbeddedEffect[];
 }
 
 export interface IWeaponListFilters {

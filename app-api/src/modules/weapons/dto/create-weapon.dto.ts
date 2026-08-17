@@ -19,6 +19,7 @@ import { WeaponHands } from '../enums/weapon-hands.enum';
 import { WeaponStyle } from '../enums/weapon-style.enum';
 import { WeaponDamageDie } from '../enums/weapon-damage-die.enum';
 import { WeaponDamageInputDto } from './weapon-damage-input.dto';
+import { WeaponEmbeddedEffectDto } from './weapon-embedded-effect.dto';
 
 export class CreateWeaponDto {
   @ApiProperty({
@@ -115,7 +116,8 @@ export class CreateWeaponDto {
 
   @ApiPropertyOptional({
     enum: WeaponHands,
-    description: 'Quantidade de mãos necessárias para usar a arma: 1 ou 2 (opcional)',
+    description:
+      'Quantidade de mãos necessárias para usar a arma: 1 ou 2 (opcional)',
   })
   @IsOptional()
   @IsEnum(WeaponHands)
@@ -152,7 +154,8 @@ export class CreateWeaponDto {
 
   @ApiPropertyOptional({
     enum: WeaponDamageDie,
-    description: 'Dado de dano da arma (d2, d4, d6, d8, d10, d12, d20 ou d100, opcional)',
+    description:
+      'Dado de dano da arma (d2, d4, d6, d8, d10, d12, d20 ou d100, opcional)',
   })
   @IsOptional()
   @IsEnum(WeaponDamageDie)
@@ -177,7 +180,8 @@ export class CreateWeaponDto {
 
   @ApiPropertyOptional({
     example: 9,
-    description: 'Distância em metros da arma (no máximo 1 casa decimal, opcional)',
+    description:
+      'Distância em metros da arma (no máximo 1 casa decimal, opcional)',
   })
   @IsOptional()
   @IsNumber(
@@ -197,7 +201,8 @@ export class CreateWeaponDto {
 
   @ApiPropertyOptional({
     example: 1,
-    description: 'Número de ações de recarga da arma (número inteiro, opcional)',
+    description:
+      'Número de ações de recarga da arma (número inteiro, opcional)',
   })
   @IsOptional()
   @IsInt({ message: 'As ações de recarga devem ser um número inteiro.' })
@@ -206,7 +211,8 @@ export class CreateWeaponDto {
 
   @ApiPropertyOptional({
     type: () => [WeaponDamageInputDto],
-    description: 'Danos alternativos da arma (lista independente com os mesmos 7 campos do dano principal), na ordem de inserção preservada. Cada item pode incluir valor, dado, tipo de dano, dano mágico, distância, munição e ações de recarga',
+    description:
+      'Danos alternativos da arma (lista independente com os mesmos 7 campos do dano principal), na ordem de inserção preservada. Cada item pode incluir valor, dado, tipo de dano, dano mágico, distância, munição e ações de recarga',
   })
   @IsOptional()
   @IsArray()
@@ -216,11 +222,34 @@ export class CreateWeaponDto {
 
   @ApiPropertyOptional({
     type: () => [WeaponDamageInputDto],
-    description: 'Danos extras da arma (lista independente com os mesmos 7 campos do dano principal), na ordem de inserção preservada. Cada item pode incluir valor, dado, tipo de dano, dano mágico, distância, munição e ações de recarga',
+    description:
+      'Danos extras da arma (lista independente com os mesmos 7 campos do dano principal), na ordem de inserção preservada. Cada item pode incluir valor, dado, tipo de dano, dano mágico, distância, munição e ações de recarga',
   })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => WeaponDamageInputDto)
   extraDamages?: WeaponDamageInputDto[];
+
+  @ApiPropertyOptional({
+    type: () => [WeaponEmbeddedEffectDto],
+    description:
+      'Encantamentos da arma: cópia independente de nome/efeito escolhidos do catálogo de Encantamentos, sem vínculo/FK com a entidade Enchantment. Ordem de inserção preservada. Cada item deve conter um nome (obrigatório) e um efeito opcional',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => WeaponEmbeddedEffectDto)
+  enchantments?: WeaponEmbeddedEffectDto[];
+
+  @ApiPropertyOptional({
+    type: () => [WeaponEmbeddedEffectDto],
+    description:
+      'Aprimoramentos da arma: cópia independente de nome/efeito escolhidos do catálogo de Aprimoramentos, sem vínculo/FK com a entidade Enhancement. Ordem de inserção preservada. Cada item deve conter um nome (obrigatório) e um efeito opcional',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => WeaponEmbeddedEffectDto)
+  enhancements?: WeaponEmbeddedEffectDto[];
 }

@@ -24,3 +24,4 @@ export * from './useRemoveSheetTalentExtraMutation';
 export * from './useRemoveSheetTrainingExtraMutation';
 export * from './useFillSheetTrainingSlotMutation';
 export * from './useEmptySheetTrainingSlotMutation';
+export * from './useWeaponEmbeddedEffectDetailMutation';

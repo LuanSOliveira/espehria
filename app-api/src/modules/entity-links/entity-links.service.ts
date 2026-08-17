@@ -502,7 +502,7 @@ export class EntityLinksService {
             targetSpell: true,
             targetCharacteristic: true,
             targetBiography: true,
-          } as FindOptionsRelations<EntityLink>,
+          },
         });
 
         const trainingTagsById = await loadOrderedTagsMap(

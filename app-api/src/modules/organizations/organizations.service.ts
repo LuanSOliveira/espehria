@@ -259,10 +259,9 @@ export class OrganizationsService {
           { tagIds: uniqueTagIds },
         )
         .groupBy('organization.id')
-        .having(
-          'COUNT(DISTINCT organization_tag_filter.tag_id) = :tagCount',
-          { tagCount: uniqueTagIds.length },
-        );
+        .having('COUNT(DISTINCT organization_tag_filter.tag_id) = :tagCount', {
+          tagCount: uniqueTagIds.length,
+        });
     }
 
     // `getManyAndCount()` não computa corretamente o total quando a query tem

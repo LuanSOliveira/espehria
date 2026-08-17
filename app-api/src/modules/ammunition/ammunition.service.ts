@@ -160,8 +160,7 @@ export class AmmunitionService {
     // suficiente e evita trazer todos os ids para a aplicação só para
     // contá-los.
     const total = hasTagFilter
-      ? (await queryBuilder.clone().select('ammunition.id').getRawMany())
-          .length
+      ? (await queryBuilder.clone().select('ammunition.id').getRawMany()).length
       : await queryBuilder.clone().getCount();
 
     const ids = await queryBuilder

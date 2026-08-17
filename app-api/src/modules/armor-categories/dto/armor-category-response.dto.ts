@@ -15,7 +15,8 @@ export class ArmorCategoryResponseDto {
   name: string;
 
   @ApiProperty({
-    description: 'Posição de exibição da categoria de armadura (ordem crescente)',
+    description:
+      'Posição de exibição da categoria de armadura (ordem crescente)',
     example: 3,
   })
   order: number;

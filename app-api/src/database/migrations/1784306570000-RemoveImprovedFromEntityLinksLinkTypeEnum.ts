@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class RemoveImprovedFromEntityLinksLinkTypeEnum1784306570000
-  implements MigrationInterface
-{
+export class RemoveImprovedFromEntityLinksLinkTypeEnum1784306570000 implements MigrationInterface {
   name = 'RemoveImprovedFromEntityLinksLinkTypeEnum1784306570000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

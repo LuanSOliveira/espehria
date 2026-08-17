@@ -273,8 +273,7 @@ export class BiographiesService {
     // (uma por biografia). Sem filtro de tags, `getCount()` é suficiente e
     // evita trazer todos os ids para a aplicação só para contá-los.
     const total = hasTagFilter
-      ? (await queryBuilder.clone().select('biography.id').getRawMany())
-          .length
+      ? (await queryBuilder.clone().select('biography.id').getRawMany()).length
       : await queryBuilder.clone().getCount();
 
     const ids = await queryBuilder

@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateSheetAbilityExtrasTable1784306560000
-  implements MigrationInterface
-{
+export class CreateSheetAbilityExtrasTable1784306560000 implements MigrationInterface {
   name = 'CreateSheetAbilityExtrasTable1784306560000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

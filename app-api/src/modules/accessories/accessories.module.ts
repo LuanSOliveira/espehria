@@ -8,9 +8,7 @@ import { AccessoriesController } from './accessories.controller';
 import { AccessoriesService } from './accessories.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Accessory, AccessoryTag, Tag, Currency]),
-  ],
+  imports: [TypeOrmModule.forFeature([Accessory, AccessoryTag, Tag, Currency])],
   controllers: [AccessoriesController],
   providers: [AccessoriesService],
   exports: [AccessoriesService],

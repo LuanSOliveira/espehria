@@ -19,6 +19,8 @@ import { WeaponStyle } from '../enums/weapon-style.enum';
 import { WeaponDamageDie } from '../enums/weapon-damage-die.enum';
 import { WeaponAlternativeDamage } from './weapon-alternative-damage.entity';
 import { WeaponExtraDamage } from './weapon-extra-damage.entity';
+import { WeaponEmbeddedEffectResponseDto } from '../dto/weapon-embedded-effect-response.dto';
+import type { WeaponEmbeddedEffect } from '../interfaces/weapon-embedded-effect.interface';
 
 @Entity('weapons')
 export class Weapon extends BaseEntity {
@@ -135,4 +137,20 @@ export class Weapon extends BaseEntity {
     orphanedRowAction: 'delete',
   })
   extraDamages!: WeaponExtraDamage[];
+
+  @ApiProperty({
+    type: () => [WeaponEmbeddedEffectResponseDto],
+    description:
+      'Encantamentos da arma (cópia de nome/efeito, sem vínculo/FK com o catálogo de Encantamentos)',
+  })
+  @Column({ type: 'jsonb', default: [] })
+  enchantments!: WeaponEmbeddedEffect[];
+
+  @ApiProperty({
+    type: () => [WeaponEmbeddedEffectResponseDto],
+    description:
+      'Aprimoramentos da arma (cópia de nome/efeito, sem vínculo/FK com o catálogo de Aprimoramentos)',
+  })
+  @Column({ type: 'jsonb', default: [] })
+  enhancements!: WeaponEmbeddedEffect[];
 }

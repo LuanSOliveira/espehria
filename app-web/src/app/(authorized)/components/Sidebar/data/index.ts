@@ -35,7 +35,9 @@ import {
   GiCheckedShield,
   GiChestArmor,
   GiDiamondRing,
+  GiMagicSwirl,
   GiScrollUnfurled,
+  GiUpgrade,
 } from 'react-icons/gi';
 import { PiSword } from 'react-icons/pi';
 import { MdOutlineFace } from 'react-icons/md';
@@ -161,6 +163,16 @@ export const NAV_SECTIONS: NavSection[] = [
             label: 'Traços',
             href: APP_ROUTES.private.traits,
             icon: GiScrollUnfurled,
+          },
+          {
+            label: 'Encantamentos',
+            href: APP_ROUTES.private.enchantments,
+            icon: GiMagicSwirl,
+          },
+          {
+            label: 'Aprimoramentos',
+            href: APP_ROUTES.private.enhancements,
+            icon: GiUpgrade,
           },
         ],
       },

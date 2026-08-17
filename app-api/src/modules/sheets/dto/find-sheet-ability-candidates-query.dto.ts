@@ -24,8 +24,7 @@ export class FindSheetAbilityCandidatesQueryDto {
   entityType: ReferenceableEntityType;
 
   @ApiPropertyOptional({
-    description:
-      'Filtro por nome (busca parcial, case-insensitive com ILIKE)',
+    description: 'Filtro por nome (busca parcial, case-insensitive com ILIKE)',
     example: 'Persuasão',
   })
   @IsOptional()

@@ -124,8 +124,10 @@ export class TechniquesController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateTechniqueDto,
   ): Promise<TechniqueResponseDto> {
-    const { technique, requirements } =
-      await this.techniquesService.update(id, dto);
+    const { technique, requirements } = await this.techniquesService.update(
+      id,
+      dto,
+    );
     return TechniqueResponseDto.fromEntity(technique, requirements);
   }
 

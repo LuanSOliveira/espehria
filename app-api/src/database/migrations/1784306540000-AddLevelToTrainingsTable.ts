@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddLevelToTrainingsTable1784306540000
-  implements MigrationInterface
-{
+export class AddLevelToTrainingsTable1784306540000 implements MigrationInterface {
   name = 'AddLevelToTrainingsTable1784306540000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

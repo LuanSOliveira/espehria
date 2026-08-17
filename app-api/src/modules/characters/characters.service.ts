@@ -257,8 +257,7 @@ export class CharactersService {
     // filtro fica restrito a esta query de paginação (seleção de ids) — a
     // query subsequente que carrega `race`/`category` não é afetada.
     const total = hasTagFilter
-      ? (await queryBuilder.clone().select('character.id').getRawMany())
-          .length
+      ? (await queryBuilder.clone().select('character.id').getRawMany()).length
       : await queryBuilder.clone().getCount();
 
     const ids = await queryBuilder

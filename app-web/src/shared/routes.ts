@@ -32,6 +32,8 @@ const MENU_ROUTES = {
   campaigns: '/campanhas',
   sheets: '/fichas',
   biographies: '/biografias',
+  enchantments: '/encantamentos',
+  enhancements: '/aprimoramentos',
 };
 
 export const APP_ROUTES = {
@@ -70,6 +72,8 @@ export const APP_ROUTES = {
     sheets: MENU_ROUTES.sheets,
     sheetDetails: (id: string) => `${MENU_ROUTES.sheets}/${id}`,
     biographies: MENU_ROUTES.biographies,
+    enchantments: MENU_ROUTES.enchantments,
+    enhancements: MENU_ROUTES.enhancements,
   },
   public: {
     login: MENU_ROUTES.login,

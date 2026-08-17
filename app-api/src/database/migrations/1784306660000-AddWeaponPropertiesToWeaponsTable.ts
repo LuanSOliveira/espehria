@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddWeaponPropertiesToWeaponsTable1784306660000
-  implements MigrationInterface
-{
+export class AddWeaponPropertiesToWeaponsTable1784306660000 implements MigrationInterface {
   name = 'AddWeaponPropertiesToWeaponsTable1784306660000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -16,10 +14,10 @@ export class AddWeaponPropertiesToWeaponsTable1784306660000
       `CREATE TYPE "public"."weapons_damage_die_enum" AS ENUM('d2', 'd4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100')`,
     );
 
-    await queryRunner.query(`ALTER TABLE "weapons" ADD "nickname" character varying`);
     await queryRunner.query(
-      `ALTER TABLE "weapons" ADD "volume" numeric(4,1)`,
+      `ALTER TABLE "weapons" ADD "nickname" character varying`,
     );
+    await queryRunner.query(`ALTER TABLE "weapons" ADD "volume" numeric(4,1)`);
     await queryRunner.query(`ALTER TABLE "weapons" ADD "size_grade_id" uuid`);
     await queryRunner.query(
       `ALTER TABLE "weapons" ADD "hands" "public"."weapons_hands_enum"`,
@@ -27,9 +25,7 @@ export class AddWeaponPropertiesToWeaponsTable1784306660000
     await queryRunner.query(
       `ALTER TABLE "weapons" ADD "weapon_style" "public"."weapons_weapon_style_enum"`,
     );
-    await queryRunner.query(
-      `ALTER TABLE "weapons" ADD "damage_value" integer`,
-    );
+    await queryRunner.query(`ALTER TABLE "weapons" ADD "damage_value" integer`);
     await queryRunner.query(
       `ALTER TABLE "weapons" ADD "damage_die" "public"."weapons_damage_die_enum"`,
     );
@@ -75,12 +71,16 @@ export class AddWeaponPropertiesToWeaponsTable1784306660000
     await queryRunner.query(
       `ALTER TABLE "weapons" DROP COLUMN "magical_damage"`,
     );
-    await queryRunner.query(`ALTER TABLE "weapons" DROP COLUMN "damage_type_id"`);
+    await queryRunner.query(
+      `ALTER TABLE "weapons" DROP COLUMN "damage_type_id"`,
+    );
     await queryRunner.query(`ALTER TABLE "weapons" DROP COLUMN "damage_die"`);
     await queryRunner.query(`ALTER TABLE "weapons" DROP COLUMN "damage_value"`);
     await queryRunner.query(`ALTER TABLE "weapons" DROP COLUMN "weapon_style"`);
     await queryRunner.query(`ALTER TABLE "weapons" DROP COLUMN "hands"`);
-    await queryRunner.query(`ALTER TABLE "weapons" DROP COLUMN "size_grade_id"`);
+    await queryRunner.query(
+      `ALTER TABLE "weapons" DROP COLUMN "size_grade_id"`,
+    );
     await queryRunner.query(`ALTER TABLE "weapons" DROP COLUMN "volume"`);
     await queryRunner.query(`ALTER TABLE "weapons" DROP COLUMN "nickname"`);
 

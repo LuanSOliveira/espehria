@@ -48,8 +48,7 @@ export class TraitsController {
   @ApiCreatedResponse({ type: TraitResponseDto })
   @ApiConflictResponse({ description: 'Já existe um traço com este nome' })
   @ApiNotFoundResponse({
-    description:
-      'Tipo de traço ou uma ou mais tags não foram encontrados',
+    description: 'Tipo de traço ou uma ou mais tags não foram encontrados',
   })
   @ApiBadRequestResponse({
     description: 'Dados obrigatórios ausentes ou em formato inválido',

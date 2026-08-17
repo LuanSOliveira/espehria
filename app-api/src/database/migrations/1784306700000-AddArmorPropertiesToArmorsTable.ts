@@ -1,14 +1,16 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddArmorPropertiesToArmorsTable1784306700000
-  implements MigrationInterface
-{
+export class AddArmorPropertiesToArmorsTable1784306700000 implements MigrationInterface {
   name = 'AddArmorPropertiesToArmorsTable1784306700000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "armors" ADD "nickname" character varying`);
+    await queryRunner.query(
+      `ALTER TABLE "armors" ADD "nickname" character varying`,
+    );
     await queryRunner.query(`ALTER TABLE "armors" ADD "volume" numeric(4,1)`);
-    await queryRunner.query(`ALTER TABLE "armors" ADD "armor_category_id" uuid`);
+    await queryRunner.query(
+      `ALTER TABLE "armors" ADD "armor_category_id" uuid`,
+    );
     await queryRunner.query(
       `ALTER TABLE "armors" ADD "armor_class_bonus" integer`,
     );

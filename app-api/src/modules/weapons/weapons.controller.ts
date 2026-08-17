@@ -53,7 +53,7 @@ export class WeaponsController {
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida, dados obrigatórios ausentes, valores de hands/weaponStyle/damageDie (incluindo dentro dos danos alternativos/extras) fora do enum, ou volume/distanceMeters (incluindo dentro dos danos alternativos/extras) com mais de 1 casa decimal ou negativos, ou valores negativos em damageValue/reloadActions (incluindo dentro dos danos alternativos/extras)',
+      'URL de imagem de referência inválida, dados obrigatórios ausentes, valores de hands/weaponStyle/damageDie (incluindo dentro dos danos alternativos/extras) fora do enum, ou volume/distanceMeters (incluindo dentro dos danos alternativos/extras) com mais de 1 casa decimal ou negativos, ou valores negativos em damageValue/reloadActions (incluindo dentro dos danos alternativos/extras), ou nome ausente/vazio em algum item de encantamentos/aprimoramentos',
   })
   async create(@Body() dto: CreateWeaponDto): Promise<WeaponResponseDto> {
     const weapon = await this.weaponsService.create(dto);
@@ -106,7 +106,7 @@ export class WeaponsController {
   @ApiConflictResponse({ description: 'Já existe uma arma com este nome' })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida, ID em formato inválido, valores de hands/weaponStyle/damageDie (incluindo dentro dos danos alternativos/extras) fora do enum, ou volume/distanceMeters (incluindo dentro dos danos alternativos/extras) com mais de 1 casa decimal ou negativos, ou valores negativos em damageValue/reloadActions (incluindo dentro dos danos alternativos/extras)',
+      'URL de imagem de referência inválida, ID em formato inválido, valores de hands/weaponStyle/damageDie (incluindo dentro dos danos alternativos/extras) fora do enum, ou volume/distanceMeters (incluindo dentro dos danos alternativos/extras) com mais de 1 casa decimal ou negativos, ou valores negativos em damageValue/reloadActions (incluindo dentro dos danos alternativos/extras), ou nome ausente/vazio em algum item de encantamentos/aprimoramentos',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,

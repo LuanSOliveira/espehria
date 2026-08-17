@@ -426,13 +426,16 @@ export class SheetsController {
   @ApiOperation({ summary: 'Adiciona uma característica extra à ficha' })
   @ApiCreatedResponse({ type: SheetAbilitiesMutationResponseDto })
   @ApiNotFoundResponse({
-    description: 'Ficha não encontrada ou não pertence ao usuário, ou característica não encontrada',
+    description:
+      'Ficha não encontrada ou não pertence ao usuário, ou característica não encontrada',
   })
   @ApiConflictResponse({
     description:
       'Item já vinculado à ficha (herdado, slot ou extra), ou requisitos não atendidos',
   })
-  @ApiBadRequestResponse({ description: 'ID de ficha ou característica em formato inválido' })
+  @ApiBadRequestResponse({
+    description: 'ID de ficha ou característica em formato inválido',
+  })
   async addCharacteristicExtra(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AddCharacteristicExtraDto,
@@ -453,7 +456,9 @@ export class SheetsController {
     description:
       'Ficha não encontrada ou não pertence ao usuário, ou característica não encontrada como extra desta ficha',
   })
-  @ApiBadRequestResponse({ description: 'ID de ficha ou característica em formato inválido' })
+  @ApiBadRequestResponse({
+    description: 'ID de ficha ou característica em formato inválido',
+  })
   async removeCharacteristicExtra(
     @Param('id', ParseUUIDPipe) id: string,
     @Param('characteristicId', ParseUUIDPipe) characteristicId: string,
@@ -471,13 +476,16 @@ export class SheetsController {
   @ApiOperation({ summary: 'Adiciona um treinamento extra à ficha' })
   @ApiCreatedResponse({ type: SheetAbilitiesMutationResponseDto })
   @ApiNotFoundResponse({
-    description: 'Ficha não encontrada ou não pertence ao usuário, ou treinamento não encontrado',
+    description:
+      'Ficha não encontrada ou não pertence ao usuário, ou treinamento não encontrado',
   })
   @ApiConflictResponse({
     description:
       'Item já vinculado à ficha (herdado, slot ou extra), ou requisitos não atendidos',
   })
-  @ApiBadRequestResponse({ description: 'ID de ficha ou treinamento em formato inválido' })
+  @ApiBadRequestResponse({
+    description: 'ID de ficha ou treinamento em formato inválido',
+  })
   async addTrainingExtra(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AddTrainingExtraDto,
@@ -498,7 +506,9 @@ export class SheetsController {
     description:
       'Ficha não encontrada ou não pertence ao usuário, ou treinamento não encontrado como extra desta ficha',
   })
-  @ApiBadRequestResponse({ description: 'ID de ficha ou treinamento em formato inválido' })
+  @ApiBadRequestResponse({
+    description: 'ID de ficha ou treinamento em formato inválido',
+  })
   async removeTrainingExtra(
     @Param('id', ParseUUIDPipe) id: string,
     @Param('trainingId', ParseUUIDPipe) trainingId: string,
@@ -516,13 +526,16 @@ export class SheetsController {
   @ApiOperation({ summary: 'Adiciona um talento extra à ficha' })
   @ApiCreatedResponse({ type: SheetAbilitiesMutationResponseDto })
   @ApiNotFoundResponse({
-    description: 'Ficha não encontrada ou não pertence ao usuário, ou talento não encontrado',
+    description:
+      'Ficha não encontrada ou não pertence ao usuário, ou talento não encontrado',
   })
   @ApiConflictResponse({
     description:
       'Item já vinculado à ficha (herdado, slot ou extra), ou requisitos não atendidos',
   })
-  @ApiBadRequestResponse({ description: 'ID de ficha ou talento em formato inválido' })
+  @ApiBadRequestResponse({
+    description: 'ID de ficha ou talento em formato inválido',
+  })
   async addTalentExtra(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AddTalentExtraDto,
@@ -543,7 +556,9 @@ export class SheetsController {
     description:
       'Ficha não encontrada ou não pertence ao usuário, ou talento não encontrado como extra desta ficha',
   })
-  @ApiBadRequestResponse({ description: 'ID de ficha ou talento em formato inválido' })
+  @ApiBadRequestResponse({
+    description: 'ID de ficha ou talento em formato inválido',
+  })
   async removeTalentExtra(
     @Param('id', ParseUUIDPipe) id: string,
     @Param('talentId', ParseUUIDPipe) talentId: string,
@@ -569,7 +584,8 @@ export class SheetsController {
       'Slot já preenchido, item já vinculado à ficha (herdado, slot ou extra), ou requisitos não atendidos',
   })
   @ApiBadRequestResponse({
-    description: 'ID de ficha, índice de slot ou de treinamento em formato inválido',
+    description:
+      'ID de ficha, índice de slot ou de treinamento em formato inválido',
   })
   async fillTrainingSlot(
     @Param('id', ParseUUIDPipe) id: string,
@@ -587,13 +603,17 @@ export class SheetsController {
   }
 
   @Delete(':id/trainings/slots/:slotIndex/training')
-  @ApiOperation({ summary: 'Esvazia um slot de treinamento preenchido da ficha' })
+  @ApiOperation({
+    summary: 'Esvazia um slot de treinamento preenchido da ficha',
+  })
   @ApiOkResponse({ type: SheetAbilitiesMutationResponseDto })
   @ApiNotFoundResponse({
     description:
       'Ficha não encontrada ou não pertence ao usuário, ou slot vazio/não encontrado nesta ficha',
   })
-  @ApiBadRequestResponse({ description: 'ID de ficha ou índice de slot em formato inválido' })
+  @ApiBadRequestResponse({
+    description: 'ID de ficha ou índice de slot em formato inválido',
+  })
   async emptyTrainingSlot(
     @Param('id', ParseUUIDPipe) id: string,
     @Param('slotIndex', ParseIntPipe) slotIndex: number,

@@ -30,4 +30,6 @@ export enum LinkableEntityType {
   PLANNED_SESSION = 'planned_session',
   BIOGRAPHY = 'biography',
   TRAIT = 'trait',
+  ENCHANTMENT = 'enchantment',
+  ENHANCEMENT = 'enhancement',
 }

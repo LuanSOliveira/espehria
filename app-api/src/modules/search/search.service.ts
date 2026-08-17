@@ -33,6 +33,8 @@ import { Spell } from '../spells/entities/spell.entity';
 import { Characteristic } from '../characteristics/entities/characteristic.entity';
 import { Biography } from '../biographies/entities/biography.entity';
 import { Trait } from '../traits/entities/trait.entity';
+import { Enchantment } from '../enchantments/entities/enchantment.entity';
+import { Enhancement } from '../enhancements/entities/enhancement.entity';
 import { LinkableEntityType } from './enums/linkable-entity-type.enum';
 import { SearchResultItemResponseDto } from './dto/search-result-item-response.dto';
 
@@ -103,6 +105,10 @@ export class SearchService {
     private readonly biographiesRepository: Repository<Biography>,
     @InjectRepository(Trait)
     private readonly traitsRepository: Repository<Trait>,
+    @InjectRepository(Enchantment)
+    private readonly enchantmentsRepository: Repository<Enchantment>,
+    @InjectRepository(Enhancement)
+    private readonly enhancementsRepository: Repository<Enhancement>,
   ) {}
 
   async search(
@@ -221,6 +227,14 @@ export class SearchService {
       {
         entityType: LinkableEntityType.TRAIT,
         repository: this.traitsRepository,
+      },
+      {
+        entityType: LinkableEntityType.ENCHANTMENT,
+        repository: this.enchantmentsRepository,
+      },
+      {
+        entityType: LinkableEntityType.ENHANCEMENT,
+        repository: this.enhancementsRepository,
       },
     ];
 

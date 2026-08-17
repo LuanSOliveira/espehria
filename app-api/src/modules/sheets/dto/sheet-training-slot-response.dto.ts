@@ -18,7 +18,8 @@ export class SheetTrainingSlotResponseDto {
   @ApiPropertyOptional({
     type: () => SheetAbilityCardResponseDto,
     nullable: true,
-    description: 'Treinamento que preenche este slot (nulo se o slot estiver vazio)',
+    description:
+      'Treinamento que preenche este slot (nulo se o slot estiver vazio)',
   })
   training: SheetAbilityCardResponseDto | null;
 

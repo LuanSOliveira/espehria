@@ -130,7 +130,8 @@ export class CreateArmorDto {
 
   @ApiPropertyOptional({
     example: 13,
-    description: 'Força mínima exigida pela armadura, mínimo 0 (número inteiro, opcional)',
+    description:
+      'Força mínima exigida pela armadura, mínimo 0 (número inteiro, opcional)',
   })
   @IsOptional()
   @IsInt({ message: 'A força deve ser um número inteiro.' })
@@ -139,7 +140,8 @@ export class CreateArmorDto {
 
   @ApiPropertyOptional({
     example: 1,
-    description: 'Penalidade em teste da armadura, mínimo 1 (número inteiro, opcional)',
+    description:
+      'Penalidade em teste da armadura, mínimo 1 (número inteiro, opcional)',
   })
   @IsOptional()
   @IsInt({ message: 'A penalidade em teste deve ser um número inteiro.' })
@@ -154,7 +156,9 @@ export class CreateArmorDto {
   @IsOptional()
   @IsNumber(
     { maxDecimalPlaces: 1 },
-    { message: 'A penalidade de velocidade deve ter no máximo 1 casa decimal.' },
+    {
+      message: 'A penalidade de velocidade deve ter no máximo 1 casa decimal.',
+    },
   )
   @Min(0, { message: 'A penalidade de velocidade não pode ser negativa.' })
   speedPenaltyMeters?: number;

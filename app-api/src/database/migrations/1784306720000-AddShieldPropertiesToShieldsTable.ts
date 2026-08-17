@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddShieldPropertiesToShieldsTable1784306720000
-  implements MigrationInterface
-{
+export class AddShieldPropertiesToShieldsTable1784306720000 implements MigrationInterface {
   name = 'AddShieldPropertiesToShieldsTable1784306720000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

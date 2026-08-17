@@ -34,3 +34,5 @@ export * from './PageStore/SpellsStore';
 export * from './PageStore/CampaignsStore';
 export * from './PageStore/PlannedSessionsStore';
 export * from './PageStore/BiographiesStore';
+export * from './PageStore/EnchantmentsStore';
+export * from './PageStore/EnhancementsStore';

@@ -43,6 +43,7 @@ import {
 } from '../../data';
 import { WeaponTraitsField } from '../WeaponTraitsField';
 import { WeaponDamagesField } from '../WeaponDamagesField';
+import { WeaponEmbeddedEffectsField } from '../WeaponEmbeddedEffectsField';
 
 export interface WeaponCreateFormProps {
   onSaved: () => void;
@@ -56,6 +57,11 @@ interface WeaponDamagePayload {
   distanceMeters?: number | null;
   usesAmmunition: boolean;
   reloadActions?: number | null;
+}
+
+interface WeaponEmbeddedEffectPayload {
+  name: string;
+  effect?: string;
 }
 
 interface WeaponPayload extends Omit<
@@ -77,6 +83,8 @@ interface WeaponPayload extends Omit<
   | 'reloadActions'
   | 'alternativeDamages'
   | 'extraDamages'
+  | 'enchantments'
+  | 'enhancements'
 > {
   referenceImage?: string;
   description?: string;
@@ -96,6 +104,8 @@ interface WeaponPayload extends Omit<
   reloadActions?: number | null;
   alternativeDamages: WeaponDamagePayload[];
   extraDamages: WeaponDamagePayload[];
+  enchantments: WeaponEmbeddedEffectPayload[];
+  enhancements: WeaponEmbeddedEffectPayload[];
 }
 
 export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
@@ -200,6 +210,14 @@ export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
         reloadActions:
           damage.reloadActions != null ? String(damage.reloadActions) : '',
       })),
+      enchantments: (weaponDetail.enchantments ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? '',
+      })),
+      enhancements: (weaponDetail.enhancements ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? '',
+      })),
     });
 
     setTraits(
@@ -242,6 +260,14 @@ export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
         : null,
     }));
 
+  const buildEmbeddedEffectPayload = (
+    items: WeaponFormData['enchantments'],
+  ): WeaponEmbeddedEffectPayload[] =>
+    items.map((item) => ({
+      name: item.name,
+      effect: item.effect || undefined,
+    }));
+
   const buildPayload = (data: WeaponFormData): WeaponPayload => ({
     ...data,
     referenceImage: data.referenceImage || undefined,
@@ -265,6 +291,8 @@ export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
     reloadActions: data.reloadActions ? Number(data.reloadActions) : null,
     alternativeDamages: buildDamagePayload(data.alternativeDamages),
     extraDamages: buildDamagePayload(data.extraDamages),
+    enchantments: buildEmbeddedEffectPayload(data.enchantments),
+    enhancements: buildEmbeddedEffectPayload(data.enhancements),
   });
 
   const createWeaponMutation = usePostEntity<IWeapon, WeaponPayload>({
@@ -543,6 +571,8 @@ export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
         addButtonLabel="Adicionar Dano Extra"
         damageTypeOptions={damageTypeOptions}
       />
+
+      <WeaponEmbeddedEffectsField control={control} />
 
       <div className="grid grid-cols-1 gap-4">
         <FormRichTextInput

@@ -149,7 +149,9 @@ export class WeaponsService {
     const damageTypes = await this.damageTypesRepository.findBy({
       id: In(uniqueIds),
     });
-    return new Map(damageTypes.map((damageType) => [damageType.id, damageType]));
+    return new Map(
+      damageTypes.map((damageType) => [damageType.id, damageType]),
+    );
   }
 
   private async buildAlternativeDamageEntries(
@@ -318,6 +320,14 @@ export class WeaponsService {
       reloadActions: dto.reloadActions ?? null,
       alternativeDamages,
       extraDamages,
+      enchantments: (dto.enchantments ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      })),
+      enhancements: (dto.enhancements ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      })),
     });
 
     const savedWeapon = await this.weaponsRepository.save(weapon);
@@ -528,6 +538,19 @@ export class WeaponsService {
         dto.extraDamages.length > 0
           ? await this.buildExtraDamageEntries(dto.extraDamages)
           : [];
+    }
+
+    if (dto.enchantments !== undefined) {
+      weapon.enchantments = dto.enchantments.map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      }));
+    }
+    if (dto.enhancements !== undefined) {
+      weapon.enhancements = dto.enhancements.map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      }));
     }
 
     const savedWeapon = await this.weaponsRepository.save(weapon);

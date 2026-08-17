@@ -89,7 +89,11 @@ type SheetAbilityBucketKey = 'trainings' | 'talents' | 'characteristics';
 
 const OWNER_COLUMN_BY_SOURCE_TYPE: Record<
   SheetProficiencyAdjustmentSourceType,
-  'ownerRace' | 'ownerBiography' | 'ownerTraining' | 'ownerTalent' | 'ownerCharacteristic'
+  | 'ownerRace'
+  | 'ownerBiography'
+  | 'ownerTraining'
+  | 'ownerTalent'
+  | 'ownerCharacteristic'
 > = {
   race: 'ownerRace',
   biography: 'ownerBiography',
@@ -147,7 +151,10 @@ export interface SheetTrainingSlotCard {
 }
 
 export interface SheetAbilitiesData {
-  characteristics: { inherited: SheetAbilityCard[]; extras: SheetAbilityCard[] };
+  characteristics: {
+    inherited: SheetAbilityCard[];
+    extras: SheetAbilityCard[];
+  };
   trainings: {
     slots: SheetTrainingSlotCard[];
     inherited: SheetAbilityCard[];
@@ -543,7 +550,9 @@ export class SheetsService {
     );
   }
 
-  private async loadSlotsWithTags(sheetId: string): Promise<SheetTrainingSlot[]> {
+  private async loadSlotsWithTags(
+    sheetId: string,
+  ): Promise<SheetTrainingSlot[]> {
     const slots = await this.sheetTrainingSlotsRepository.find({
       where: { sheet: { id: sheetId } },
       relations: { training: true },
@@ -567,7 +576,9 @@ export class SheetsService {
     return slots;
   }
 
-  private async loadExtrasWithTags(sheetId: string): Promise<SheetAbilityExtra[]> {
+  private async loadExtrasWithTags(
+    sheetId: string,
+  ): Promise<SheetAbilityExtra[]> {
     const extras = await this.sheetAbilityExtrasRepository.find({
       where: { sheet: { id: sheetId } },
       relations: { training: true, talent: true, characteristic: true },
@@ -777,7 +788,10 @@ export class SheetsService {
       id: string;
       name: string;
     };
-    type OriginEntry = { origin: OriginRef; abilities: EntityReferenceResponseDto[] };
+    type OriginEntry = {
+      origin: OriginRef;
+      abilities: EntityReferenceResponseDto[];
+    };
 
     const originEntries: OriginEntry[] = [];
     if (sheet.biography) {
@@ -931,7 +945,9 @@ export class SheetsService {
     const trainingExtraItems = trainingExtras.map((extra) =>
       toRawItem(extra.training!),
     );
-    const talentExtraItems = talentExtras.map((extra) => toRawItem(extra.talent!));
+    const talentExtraItems = talentExtras.map((extra) =>
+      toRawItem(extra.talent!),
+    );
 
     // 4. Presença atual por bucket (herdados + slot preenchido + extras).
     const presentIdsByBucket = {
@@ -963,8 +979,10 @@ export class SheetsService {
 
     // 5. Requisitos próprios de cada item exibido (batched, uma query por
     //    combinação (linkType, coluna de dono) dentro de EntityLinksService).
-    const requirementOwners: { entityType: ReferenceableEntityType; id: string }[] =
-      [];
+    const requirementOwners: {
+      entityType: ReferenceableEntityType;
+      id: string;
+    }[] = [];
     const seenRequirementOwnerKeys = new Set<string>();
     const addRequirementOwner = (
       entityType: ReferenceableEntityType,
@@ -977,7 +995,10 @@ export class SheetsService {
       }
     };
     for (const entry of characteristicsInherited) {
-      addRequirementOwner(ReferenceableEntityType.CHARACTERISTIC, entry.item.id);
+      addRequirementOwner(
+        ReferenceableEntityType.CHARACTERISTIC,
+        entry.item.id,
+      );
     }
     for (const entry of trainingsInherited) {
       addRequirementOwner(ReferenceableEntityType.TRAINING, entry.item.id);
@@ -1056,8 +1077,8 @@ export class SheetsService {
       origin: null,
     });
 
-    const characteristicsInheritedCards = characteristicsInherited.map((entry) =>
-      toCard(entry, ReferenceableEntityType.CHARACTERISTIC),
+    const characteristicsInheritedCards = characteristicsInherited.map(
+      (entry) => toCard(entry, ReferenceableEntityType.CHARACTERISTIC),
     );
     const trainingsInheritedCards = trainingsInherited.map((entry) =>
       toCard(entry, ReferenceableEntityType.TRAINING),
@@ -1080,7 +1101,10 @@ export class SheetsService {
       slotIndex: slot.slotIndex,
       unlockedAtLevel: computeUnlockedAtLevel(slot.slotIndex),
       training: slot.training
-        ? toExtraCard(toRawItem(slot.training), ReferenceableEntityType.TRAINING)
+        ? toExtraCard(
+            toRawItem(slot.training),
+            ReferenceableEntityType.TRAINING,
+          )
         : null,
     }));
 
@@ -1197,7 +1221,9 @@ export class SheetsService {
 
       improvements.push(
         ...items
-          .filter((item) => item.category === ImprovementFlawCategory.IMPROVEMENT)
+          .filter(
+            (item) => item.category === ImprovementFlawCategory.IMPROVEMENT,
+          )
           .map(toEntry),
       );
       flaws.push(
@@ -1813,7 +1839,10 @@ export class SheetsService {
     return this.sheetsRepository.save(sheet);
   }
 
-  async getAbilities(id: string, currentUser: User): Promise<SheetAbilitiesData> {
+  async getAbilities(
+    id: string,
+    currentUser: User,
+  ): Promise<SheetAbilitiesData> {
     const sheet = await this.findAccessibleById(id, currentUser);
     if (!sheet) {
       throw new NotFoundException(
@@ -2110,7 +2139,12 @@ export class SheetsService {
 
     const requirementsByOwnerKey =
       await this.entityLinksService.loadLinksForOwnersBatched(
-        [{ entityType: ReferenceableEntityType.CHARACTERISTIC, id: characteristic.id }],
+        [
+          {
+            entityType: ReferenceableEntityType.CHARACTERISTIC,
+            id: characteristic.id,
+          },
+        ],
         [EntityLinkType.REQUIREMENT],
       );
     const requirementsMet = this.evaluateAbilityRequirements(
@@ -2128,7 +2162,9 @@ export class SheetsService {
       computed.presentIdsByBucket,
     );
     if (!requirementsMet) {
-      throw new ConflictException('A ficha não atende aos requisitos deste item.');
+      throw new ConflictException(
+        'A ficha não atende aos requisitos deste item.',
+      );
     }
 
     const extra = this.sheetAbilityExtrasRepository.create({
@@ -2219,7 +2255,9 @@ export class SheetsService {
       computed.presentIdsByBucket,
     );
     if (!requirementsMet) {
-      throw new ConflictException('A ficha não atende aos requisitos deste item.');
+      throw new ConflictException(
+        'A ficha não atende aos requisitos deste item.',
+      );
     }
 
     const extra = this.sheetAbilityExtrasRepository.create({
@@ -2307,7 +2345,9 @@ export class SheetsService {
       computed.presentIdsByBucket,
     );
     if (!requirementsMet) {
-      throw new ConflictException('A ficha não atende aos requisitos deste item.');
+      throw new ConflictException(
+        'A ficha não atende aos requisitos deste item.',
+      );
     }
 
     const extra = this.sheetAbilityExtrasRepository.create({
@@ -2369,7 +2409,9 @@ export class SheetsService {
       relations: { training: true },
     });
     if (!slot) {
-      throw new NotFoundException('Slot de treinamento não encontrado nesta ficha.');
+      throw new NotFoundException(
+        'Slot de treinamento não encontrado nesta ficha.',
+      );
     }
     if (slot.training) {
       throw new ConflictException('Este slot já está preenchido.');
@@ -2407,7 +2449,9 @@ export class SheetsService {
       computed.presentIdsByBucket,
     );
     if (!requirementsMet) {
-      throw new ConflictException('A ficha não atende aos requisitos deste item.');
+      throw new ConflictException(
+        'A ficha não atende aos requisitos deste item.',
+      );
     }
 
     slot.training = training;

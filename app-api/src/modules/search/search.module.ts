@@ -31,6 +31,8 @@ import { Campaign } from '../campaigns/entities/campaign.entity';
 import { PlannedSession } from '../planned-sessions/entities/planned-session.entity';
 import { Biography } from '../biographies/entities/biography.entity';
 import { Trait } from '../traits/entities/trait.entity';
+import { Enchantment } from '../enchantments/entities/enchantment.entity';
+import { Enhancement } from '../enhancements/entities/enhancement.entity';
 import { SearchController } from './search.controller';
 import { SearchService } from './search.service';
 
@@ -68,6 +70,8 @@ import { SearchService } from './search.service';
       PlannedSession,
       Biography,
       Trait,
+      Enchantment,
+      Enhancement,
     ]),
   ],
   controllers: [SearchController],

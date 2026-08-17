@@ -55,9 +55,7 @@ export class AccessoriesController {
     description:
       'URL de imagem de referência inválida ou dados obrigatórios ausentes',
   })
-  async create(
-    @Body() dto: CreateAccessoryDto,
-  ): Promise<AccessoryResponseDto> {
+  async create(@Body() dto: CreateAccessoryDto): Promise<AccessoryResponseDto> {
     const accessory = await this.accessoriesService.create(dto);
     return AccessoryResponseDto.fromEntity(accessory);
   }

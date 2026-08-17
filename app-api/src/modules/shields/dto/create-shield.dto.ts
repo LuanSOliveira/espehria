@@ -113,7 +113,9 @@ export class CreateShieldDto {
   @IsOptional()
   @IsNumber(
     { maxDecimalPlaces: 1 },
-    { message: 'A penalidade de velocidade deve ter no máximo 1 casa decimal.' },
+    {
+      message: 'A penalidade de velocidade deve ter no máximo 1 casa decimal.',
+    },
   )
   @Min(0, { message: 'A penalidade de velocidade não pode ser negativa.' })
   speedPenaltyMeters?: number;
@@ -129,7 +131,8 @@ export class CreateShieldDto {
 
   @ApiPropertyOptional({
     example: 10,
-    description: 'Pontos de vida do escudo, mínimo 0 (número inteiro, opcional)',
+    description:
+      'Pontos de vida do escudo, mínimo 0 (número inteiro, opcional)',
   })
   @IsOptional()
   @IsInt({ message: 'Os pontos de vida devem ser um número inteiro.' })
