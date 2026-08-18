@@ -4,6 +4,7 @@ import { ICurrency } from '../Currency';
 import { ISizeGrade } from '../SizeGrade';
 import { ITrait } from '../Trait';
 import { IDamageType } from '../DamageType';
+import { IEmbeddedEffect } from '../EmbeddedEffect';
 
 export type WeaponHands = '1' | '2';
 export type WeaponStyle = 'melee' | 'ranged';
@@ -41,11 +42,6 @@ export interface IWeaponDamage {
   reloadActions?: number | null;
 }
 
-export interface IWeaponEmbeddedEffect {
-  name: string;
-  effect?: string | null;
-}
-
 export interface IWeapon extends IEntity {
   name: string;
   referenceImage?: string | null;
@@ -71,8 +67,8 @@ export interface IWeapon extends IEntity {
   reloadActions?: number | null;
   alternativeDamages: IWeaponDamage[];
   extraDamages: IWeaponDamage[];
-  enchantments: IWeaponEmbeddedEffect[];
-  enhancements: IWeaponEmbeddedEffect[];
+  enchantments: IEmbeddedEffect[];
+  enhancements: IEmbeddedEffect[];
 }
 
 export interface IWeaponListFilters {

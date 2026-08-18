@@ -53,7 +53,7 @@ export class AccessoriesController {
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida ou dados obrigatórios ausentes',
+      'URL de imagem de referência inválida, dados obrigatórios ausentes, ou nome ausente/vazio em algum item de encantamentos/aprimoramentos',
   })
   async create(@Body() dto: CreateAccessoryDto): Promise<AccessoryResponseDto> {
     const accessory = await this.accessoriesService.create(dto);
@@ -108,7 +108,7 @@ export class AccessoriesController {
   @ApiConflictResponse({ description: 'Já existe um acessório com este nome' })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida ou ID em formato inválido',
+      'URL de imagem de referência inválida, ID em formato inválido, ou nome ausente/vazio em algum item de encantamentos/aprimoramentos',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,

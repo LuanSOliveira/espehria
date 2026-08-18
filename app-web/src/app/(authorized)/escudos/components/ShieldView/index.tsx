@@ -15,10 +15,12 @@ import {
   FiTag,
   FiWind,
 } from 'react-icons/fi';
+import { GiMagicSwirl, GiUpgrade } from 'react-icons/gi';
 import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
+import { EmbeddedEffectsSectionView } from '@/shared/components/EmbeddedEffectsSectionView';
 import { useGetEntityById } from '@/hooks/Queries';
 import { IShield } from '@/shared/interfaces';
 import {
@@ -299,6 +301,18 @@ export const ShieldView = ({ shieldId, onNotFound }: ShieldViewProps) => {
           </div>
         </div>
       </div>
+
+      <EmbeddedEffectsSectionView
+        icon={GiMagicSwirl}
+        label="Encantamentos"
+        items={shield.enchantments}
+      />
+
+      <EmbeddedEffectsSectionView
+        icon={GiUpgrade}
+        label="Aprimoramentos"
+        items={shield.enhancements}
+      />
 
       <div
         className="flex-1 min-w-0 flex flex-col"

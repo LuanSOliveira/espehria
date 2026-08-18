@@ -11,6 +11,7 @@ import {
 } from '@/shared/components/Inputs';
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
+import { EmbeddedEffectsField } from '@/shared/components/EmbeddedEffectsField';
 import {
   useArmorCategoriesQuery,
   useCurrenciesQuery,
@@ -39,6 +40,11 @@ export interface ArmorCreateFormProps {
   onSaved: () => void;
 }
 
+interface EmbeddedEffectPayload {
+  name: string;
+  effect?: string;
+}
+
 interface ArmorPayload
   extends Omit<
     ArmorFormData,
@@ -55,6 +61,8 @@ interface ArmorPayload
     | 'strength'
     | 'checkPenalty'
     | 'speedPenaltyMeters'
+    | 'enchantments'
+    | 'enhancements'
   > {
   referenceImage?: string;
   description?: string;
@@ -70,6 +78,8 @@ interface ArmorPayload
   checkPenalty?: number | null;
   speedPenaltyMeters?: number | null;
   traitIds: string[];
+  enchantments: EmbeddedEffectPayload[];
+  enhancements: EmbeddedEffectPayload[];
 }
 
 export const ArmorCreateForm = ({ onSaved }: ArmorCreateFormProps) => {
@@ -138,6 +148,14 @@ export const ArmorCreateForm = ({ onSaved }: ArmorCreateFormProps) => {
           : '',
       privateInformation: armorDetail.privateInformation ?? '',
       tagIds: armorDetail.tags?.map((tag) => tag.id) ?? [],
+      enchantments: (armorDetail.enchantments ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? '',
+      })),
+      enhancements: (armorDetail.enhancements ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? '',
+      })),
     });
 
     setTraits(
@@ -163,6 +181,14 @@ export const ArmorCreateForm = ({ onSaved }: ArmorCreateFormProps) => {
     });
   }, [isArmorDetailError, armorDetailError]);
 
+  const buildEmbeddedEffectPayload = (
+    items: ArmorFormData['enchantments'],
+  ): EmbeddedEffectPayload[] =>
+    items.map((item) => ({
+      name: item.name,
+      effect: item.effect || undefined,
+    }));
+
   const buildPayload = (data: ArmorFormData): ArmorPayload => ({
     ...data,
     referenceImage: data.referenceImage || undefined,
@@ -184,6 +210,8 @@ export const ArmorCreateForm = ({ onSaved }: ArmorCreateFormProps) => {
       ? Number(data.speedPenaltyMeters)
       : null,
     traitIds: traits.map((t) => t.id),
+    enchantments: buildEmbeddedEffectPayload(data.enchantments),
+    enhancements: buildEmbeddedEffectPayload(data.enhancements),
   });
 
   const createArmorMutation = usePostEntity<IArmor, ArmorPayload>({
@@ -396,6 +424,8 @@ export const ArmorCreateForm = ({ onSaved }: ArmorCreateFormProps) => {
       </div>
 
       <ArmorTraitsField value={traits} onChange={setTraits} />
+
+      <EmbeddedEffectsField control={control} applicableType="armor" />
 
       <div className="grid grid-cols-1 gap-4">
         <FormRichTextInput

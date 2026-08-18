@@ -53,7 +53,7 @@ export class ArmorsController {
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida, dados obrigatórios ausentes, volume/penalidade de velocidade com mais de 1 casa decimal ou negativos, ou demais campos numéricos negativos ou fora do mínimo exigido',
+      'URL de imagem de referência inválida, dados obrigatórios ausentes, volume/penalidade de velocidade com mais de 1 casa decimal ou negativos, demais campos numéricos negativos ou fora do mínimo exigido, ou nome ausente/vazio em algum item de encantamentos/aprimoramentos',
   })
   async create(@Body() dto: CreateArmorDto): Promise<ArmorResponseDto> {
     const armor = await this.armorsService.create(dto);
@@ -106,7 +106,7 @@ export class ArmorsController {
   @ApiConflictResponse({ description: 'Já existe uma armadura com este nome' })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem de referência inválida, ID em formato inválido, volume/penalidade de velocidade com mais de 1 casa decimal ou negativos, ou demais campos numéricos negativos ou fora do mínimo exigido',
+      'URL de imagem de referência inválida, ID em formato inválido, volume/penalidade de velocidade com mais de 1 casa decimal ou negativos, demais campos numéricos negativos ou fora do mínimo exigido, ou nome ausente/vazio em algum item de encantamentos/aprimoramentos',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,

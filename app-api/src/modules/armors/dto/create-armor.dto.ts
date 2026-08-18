@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsInt,
@@ -10,7 +11,9 @@ import {
   IsUUID,
   Min,
   ValidateIf,
+  ValidateNested,
 } from 'class-validator';
+import { EmbeddedEffectDto } from '../../../common/dto/embedded-effect.dto';
 
 export class CreateArmorDto {
   @ApiProperty({
@@ -174,4 +177,26 @@ export class CreateArmorDto {
   @IsArray()
   @IsUUID('4', { each: true })
   traitIds?: string[];
+
+  @ApiPropertyOptional({
+    type: () => [EmbeddedEffectDto],
+    description:
+      'Encantamentos da armadura: cópia independente de nome/efeito escolhidos do catálogo de Encantamentos, sem vínculo/FK com a entidade Enchantment. Ordem de inserção preservada. Cada item deve conter um nome (obrigatório) e um efeito opcional',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => EmbeddedEffectDto)
+  enchantments?: EmbeddedEffectDto[];
+
+  @ApiPropertyOptional({
+    type: () => [EmbeddedEffectDto],
+    description:
+      'Aprimoramentos da armadura: cópia independente de nome/efeito escolhidos do catálogo de Aprimoramentos, sem vínculo/FK com a entidade Enhancement. Ordem de inserção preservada. Cada item deve conter um nome (obrigatório) e um efeito opcional',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => EmbeddedEffectDto)
+  enhancements?: EmbeddedEffectDto[];
 }

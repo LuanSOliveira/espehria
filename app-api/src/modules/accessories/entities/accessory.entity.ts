@@ -3,6 +3,8 @@ import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Tag } from '../../tags/entities/tag.entity';
 import { Currency } from '../../currencies/entities/currency.entity';
+import { EmbeddedEffectResponseDto } from '../../../common/dto/embedded-effect-response.dto';
+import type { EmbeddedEffect } from '../../../common/interfaces/embedded-effect.interface';
 
 @Entity('accessories')
 export class Accessory extends BaseEntity {
@@ -32,4 +34,20 @@ export class Accessory extends BaseEntity {
     description: 'Tags associadas ao acessório',
   })
   tags!: Tag[];
+
+  @ApiProperty({
+    type: () => [EmbeddedEffectResponseDto],
+    description:
+      'Encantamentos do acessório (cópia de nome/efeito, sem vínculo/FK com o catálogo de Encantamentos)',
+  })
+  @Column({ type: 'jsonb', default: [] })
+  enchantments!: EmbeddedEffect[];
+
+  @ApiProperty({
+    type: () => [EmbeddedEffectResponseDto],
+    description:
+      'Aprimoramentos do acessório (cópia de nome/efeito, sem vínculo/FK com o catálogo de Aprimoramentos)',
+  })
+  @Column({ type: 'jsonb', default: [] })
+  enhancements!: EmbeddedEffect[];
 }

@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { embeddedEffectItemSchema } from '../EmbeddedEffectFormSchema';
 
 export const shieldFormSchema = z
   .object({
@@ -51,6 +52,8 @@ export const shieldFormSchema = z
     tagIds: z.array(z.string()).optional(),
     description: z.string(),
     privateInformation: z.string(),
+    enchantments: z.array(embeddedEffectItemSchema),
+    enhancements: z.array(embeddedEffectItemSchema),
   })
   .superRefine((data, ctx) => {
     if (data.price !== '' && data.currencyId === '') {
@@ -80,4 +83,6 @@ export const shieldFormDefaultValues: ShieldFormData = {
   tagIds: [],
   description: '',
   privateInformation: '',
+  enchantments: [],
+  enhancements: [],
 };

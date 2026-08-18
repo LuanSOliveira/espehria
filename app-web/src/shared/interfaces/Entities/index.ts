@@ -51,3 +51,4 @@ export * from './Sheet';
 export * from './EquipmentApplicableType';
 export * from './Enchantment';
 export * from './Enhancement';
+export * from './EmbeddedEffect';

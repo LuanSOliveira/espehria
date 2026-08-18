@@ -1,17 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { Control } from 'react-hook-form';
+import { Control, FieldValues } from 'react-hook-form';
 import { Tab, Tabs } from '@mui/material';
-import { WeaponFormData } from '@/shared/formSchemas';
+import { EquipmentApplicableType } from '@/shared/interfaces';
 import { APP_COLORS } from '@/shared/constants';
-import { WeaponEmbeddedEffectsTabPanel } from './WeaponEmbeddedEffectsTabPanel';
+import { EmbeddedEffectsTabPanel } from './EmbeddedEffectsTabPanel';
+import { EmbeddedEffectsFormShape } from './types';
 
-export interface WeaponEmbeddedEffectsFieldProps {
-  control: Control<WeaponFormData>;
+export interface EmbeddedEffectsFieldProps<
+  TFieldValues extends FieldValues & EmbeddedEffectsFormShape,
+> {
+  control: Control<TFieldValues>;
+  applicableType: EquipmentApplicableType;
 }
 
-interface WeaponEmbeddedEffectTabConfig {
+interface EmbeddedEffectTabConfig {
   fieldName: 'enchantments' | 'enhancements';
   tabLabel: string;
   entityLabel: string;
@@ -19,7 +23,7 @@ interface WeaponEmbeddedEffectTabConfig {
   addButtonLabel: string;
 }
 
-const WEAPON_EMBEDDED_EFFECT_TABS: WeaponEmbeddedEffectTabConfig[] = [
+const EMBEDDED_EFFECT_TABS: EmbeddedEffectTabConfig[] = [
   {
     fieldName: 'enchantments',
     tabLabel: 'Encantamentos',
@@ -36,9 +40,12 @@ const WEAPON_EMBEDDED_EFFECT_TABS: WeaponEmbeddedEffectTabConfig[] = [
   },
 ];
 
-export const WeaponEmbeddedEffectsField = ({
+export const EmbeddedEffectsField = <
+  TFieldValues extends FieldValues & EmbeddedEffectsFormShape,
+>({
   control,
-}: WeaponEmbeddedEffectsFieldProps) => {
+  applicableType,
+}: EmbeddedEffectsFieldProps<TFieldValues>) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
 
   return (
@@ -53,13 +60,13 @@ export const WeaponEmbeddedEffectsField = ({
           '& .MuiTabs-indicator': { backgroundColor: APP_COLORS.goldDark },
         }}
       >
-        {WEAPON_EMBEDDED_EFFECT_TABS.map((tab) => (
+        {EMBEDDED_EFFECT_TABS.map((tab) => (
           <Tab key={tab.fieldName} label={tab.tabLabel} />
         ))}
       </Tabs>
 
-      {WEAPON_EMBEDDED_EFFECT_TABS.map((tab, index) => (
-        <WeaponEmbeddedEffectsTabPanel
+      {EMBEDDED_EFFECT_TABS.map((tab, index) => (
+        <EmbeddedEffectsTabPanel<TFieldValues>
           key={tab.fieldName}
           control={control}
           active={activeTabIndex === index}
@@ -67,6 +74,7 @@ export const WeaponEmbeddedEffectsField = ({
           entityLabel={tab.entityLabel}
           entityUrl={tab.entityUrl}
           addButtonLabel={tab.addButtonLabel}
+          applicableType={applicableType}
         />
       ))}
     </div>

@@ -3,6 +3,7 @@ import { ITag } from '../Tag';
 import { ICurrency } from '../Currency';
 import { IArmorCategory } from '../ArmorCategory';
 import { ITrait } from '../Trait';
+import { IEmbeddedEffect } from '../EmbeddedEffect';
 
 export interface IArmorListItem {
   id: string;
@@ -36,6 +37,8 @@ export interface IArmor extends IEntity {
   checkPenalty?: number | null;
   speedPenaltyMeters?: number | null;
   traits: ITrait[];
+  enchantments: IEmbeddedEffect[];
+  enhancements: IEmbeddedEffect[];
 }
 
 export interface IArmorListFilters {

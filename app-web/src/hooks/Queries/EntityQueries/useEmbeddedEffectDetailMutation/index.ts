@@ -6,7 +6,7 @@ import { ApiFactory } from '@/services/api';
 import { getAuthToken } from '@/services/jwt';
 import { IAxioDataError, IEnchantment, IEnhancement } from '@/shared/interfaces';
 
-export interface UseWeaponEmbeddedEffectDetailMutationParams {
+export interface UseEmbeddedEffectDetailMutationParams {
   entityUrl: '/enchantments' | '/enhancements';
   onSuccess?: (data: IEnchantment | IEnhancement) => void;
   onError?: (error: AxiosError<IAxioDataError>) => void;
@@ -14,17 +14,18 @@ export interface UseWeaponEmbeddedEffectDetailMutationParams {
 
 /**
  * Busca o detalhe de um encantamento/aprimoramento existente sob demanda, ao
- * ser selecionado no WeaponEmbeddedEffectPickerModal, para copiar seu
- * `name`/`effect` para o formulário de arma. É uma ação pontual disparada
- * pelo clique de seleção (não uma leitura reativa), por isso usa
- * `useMutation` em vez de `useGetEntityById` — assim `onSuccess`/`onError`
- * ficam disponíveis sem depender de `useEffect`.
+ * ser selecionado no EmbeddedEffectPickerModal, para copiar seu
+ * `name`/`effect` para o formulário do equipamento (arma, armadura, escudo
+ * ou acessório). É uma ação pontual disparada pelo clique de seleção (não
+ * uma leitura reativa), por isso usa `useMutation` em vez de
+ * `useGetEntityById` — assim `onSuccess`/`onError` ficam disponíveis sem
+ * depender de `useEffect`.
  */
-export const useWeaponEmbeddedEffectDetailMutation = ({
+export const useEmbeddedEffectDetailMutation = ({
   entityUrl,
   onSuccess,
   onError,
-}: UseWeaponEmbeddedEffectDetailMutationParams) => {
+}: UseEmbeddedEffectDetailMutationParams) => {
   return useMutation<
     IEnchantment | IEnhancement,
     AxiosError<IAxioDataError>,

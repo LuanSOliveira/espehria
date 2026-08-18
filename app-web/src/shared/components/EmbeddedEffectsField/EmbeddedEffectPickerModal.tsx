@@ -18,8 +18,8 @@ import { FormModal } from '@/shared/components/Modals';
 import { DefaultTextInput } from '@/shared/components/Inputs';
 import { DefaultText, Label } from '@/shared/components/Texts';
 import {
+  useEmbeddedEffectDetailMutation,
   useGetEntityList,
-  useWeaponEmbeddedEffectDetailMutation,
 } from '@/hooks/Queries';
 import {
   EquipmentApplicableType,
@@ -29,7 +29,7 @@ import {
 import { showToast } from '@/shared/util';
 import { APP_COLORS, APP_DEFAULT_PAGE_SIZE } from '@/shared/constants';
 
-interface WeaponEmbeddedEffectCandidateListFilters {
+interface EmbeddedEffectCandidateListFilters {
   name?: string;
   type: EquipmentApplicableType;
   page: number;
@@ -37,21 +37,23 @@ interface WeaponEmbeddedEffectCandidateListFilters {
   [key: string]: string | number | boolean | undefined;
 }
 
-export interface WeaponEmbeddedEffectPickerModalProps {
+export interface EmbeddedEffectPickerModalProps {
   open: boolean;
   onClose: () => void;
   entityLabel: string;
   entityUrl: '/enchantments' | '/enhancements';
+  applicableType: EquipmentApplicableType;
   onSelect: (item: { name: string; effect?: string | null }) => void;
 }
 
-export const WeaponEmbeddedEffectPickerModal = ({
+export const EmbeddedEffectPickerModal = ({
   open,
   onClose,
   entityLabel,
   entityUrl,
+  applicableType,
   onSelect,
-}: WeaponEmbeddedEffectPickerModalProps) => {
+}: EmbeddedEffectPickerModalProps) => {
   return (
     <FormModal
       open={open}
@@ -60,9 +62,10 @@ export const WeaponEmbeddedEffectPickerModal = ({
       size="wide"
     >
       {open && (
-        <WeaponEmbeddedEffectPickerModalBody
+        <EmbeddedEffectPickerModalBody
           entityLabel={entityLabel}
           entityUrl={entityUrl}
+          applicableType={applicableType}
           onSelect={onSelect}
           onClose={onClose}
         />
@@ -71,9 +74,10 @@ export const WeaponEmbeddedEffectPickerModal = ({
   );
 };
 
-interface WeaponEmbeddedEffectPickerModalBodyProps {
+interface EmbeddedEffectPickerModalBodyProps {
   entityLabel: string;
   entityUrl: '/enchantments' | '/enhancements';
+  applicableType: EquipmentApplicableType;
   onSelect: (item: { name: string; effect?: string | null }) => void;
   onClose: () => void;
 }
@@ -85,12 +89,13 @@ interface WeaponEmbeddedEffectPickerModalBodyProps {
  * uma busca de detalhe ainda em voo, já que o `useMutation` é desmontado
  * junto — sem precisar de um `useEffect` para resetar estado.
  */
-const WeaponEmbeddedEffectPickerModalBody = ({
+const EmbeddedEffectPickerModalBody = ({
   entityLabel,
   entityUrl,
+  applicableType,
   onSelect,
   onClose,
-}: WeaponEmbeddedEffectPickerModalBodyProps) => {
+}: EmbeddedEffectPickerModalBodyProps) => {
   const [nameFilter, setNameFilter] = useState('');
   const [page, setPage] = useState(1);
 
@@ -101,18 +106,18 @@ const WeaponEmbeddedEffectPickerModalBody = ({
 
   const { data, isLoading } = useGetEntityList<
     IEnchantmentListItem | IEnhancementListItem,
-    WeaponEmbeddedEffectCandidateListFilters
+    EmbeddedEffectCandidateListFilters
   >({
     url: entityUrl,
     filters: {
       name: nameFilter || undefined,
-      type: 'weapon',
+      type: applicableType,
       page,
       perPage: APP_DEFAULT_PAGE_SIZE,
     },
   });
 
-  const detailMutation = useWeaponEmbeddedEffectDetailMutation({
+  const detailMutation = useEmbeddedEffectDetailMutation({
     entityUrl,
     onSuccess: (detail) => {
       onSelect({ name: detail.name, effect: detail.effect ?? '' });
@@ -135,7 +140,7 @@ const WeaponEmbeddedEffectPickerModalBody = ({
   return (
     <div className="flex flex-col gap-4">
       <DefaultTextInput
-        id="weapon-embedded-effect-picker-name-filter"
+        id="embedded-effect-picker-name-filter"
         label="Nome"
         placeholder="Buscar por nome"
         value={nameFilter}

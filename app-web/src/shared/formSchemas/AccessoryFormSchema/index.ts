@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { embeddedEffectItemSchema } from '../EmbeddedEffectFormSchema';
 
 export const accessoryFormSchema = z
   .object({
@@ -20,6 +21,8 @@ export const accessoryFormSchema = z
     tagIds: z.array(z.string()).optional(),
     description: z.string(),
     privateInformation: z.string(),
+    enchantments: z.array(embeddedEffectItemSchema),
+    enhancements: z.array(embeddedEffectItemSchema),
   })
   .superRefine((data, ctx) => {
     if (data.price !== '' && data.currencyId === '') {
@@ -43,4 +46,6 @@ export const accessoryFormDefaultValues: AccessoryFormData = {
   tagIds: [],
   description: '',
   privateInformation: '',
+  enchantments: [],
+  enhancements: [],
 };

@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsInt,
@@ -10,7 +11,9 @@ import {
   IsUUID,
   Min,
   ValidateIf,
+  ValidateNested,
 } from 'class-validator';
+import { EmbeddedEffectDto } from '../../../common/dto/embedded-effect.dto';
 
 export class CreateShieldDto {
   @ApiProperty({
@@ -138,4 +141,26 @@ export class CreateShieldDto {
   @IsInt({ message: 'Os pontos de vida devem ser um número inteiro.' })
   @Min(0, { message: 'Os pontos de vida não podem ser negativos.' })
   hitPoints?: number;
+
+  @ApiPropertyOptional({
+    type: () => [EmbeddedEffectDto],
+    description:
+      'Encantamentos do escudo: cópia independente de nome/efeito escolhidos do catálogo de Encantamentos, sem vínculo/FK com a entidade Enchantment. Ordem de inserção preservada. Cada item deve conter um nome (obrigatório) e um efeito opcional',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => EmbeddedEffectDto)
+  enchantments?: EmbeddedEffectDto[];
+
+  @ApiPropertyOptional({
+    type: () => [EmbeddedEffectDto],
+    description:
+      'Aprimoramentos do escudo: cópia independente de nome/efeito escolhidos do catálogo de Aprimoramentos, sem vínculo/FK com a entidade Enhancement. Ordem de inserção preservada. Cada item deve conter um nome (obrigatório) e um efeito opcional',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => EmbeddedEffectDto)
+  enhancements?: EmbeddedEffectDto[];
 }

@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react';
 import { Box, Chip, CircularProgress } from '@mui/material';
 import { FiDollarSign, FiFileText, FiImage, FiLock } from 'react-icons/fi';
+import { GiMagicSwirl, GiUpgrade } from 'react-icons/gi';
 import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
 import { ImagePreviewDialog } from '@/shared/components/ImagePreviewDialog';
 import { RichTextViewer } from '@/shared/components/RichTextViewer';
+import { EmbeddedEffectsSectionView } from '@/shared/components/EmbeddedEffectsSectionView';
 import { useGetEntityById } from '@/hooks/Queries';
 import { IAccessory } from '@/shared/interfaces';
 import {
@@ -179,6 +181,18 @@ export const AccessoryView = ({
           </div>
         </div>
       </div>
+
+      <EmbeddedEffectsSectionView
+        icon={GiMagicSwirl}
+        label="Encantamentos"
+        items={accessory.enchantments}
+      />
+
+      <EmbeddedEffectsSectionView
+        icon={GiUpgrade}
+        label="Aprimoramentos"
+        items={accessory.enhancements}
+      />
 
       <div
         className="flex-1 min-w-0 flex flex-col"

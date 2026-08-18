@@ -12,6 +12,7 @@ import {
 } from '@/shared/components/Inputs';
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
+import { EmbeddedEffectsField } from '@/shared/components/EmbeddedEffectsField';
 import {
   useCurrenciesQuery,
   useGetEntityById,
@@ -32,6 +33,11 @@ export interface ShieldCreateFormProps {
   onSaved: () => void;
 }
 
+interface EmbeddedEffectPayload {
+  name: string;
+  effect?: string;
+}
+
 interface ShieldPayload
   extends Omit<
     ShieldFormData,
@@ -46,6 +52,8 @@ interface ShieldPayload
     | 'speedPenaltyMeters'
     | 'hardness'
     | 'hitPoints'
+    | 'enchantments'
+    | 'enhancements'
   > {
   referenceImage?: string;
   description?: string;
@@ -58,6 +66,8 @@ interface ShieldPayload
   speedPenaltyMeters?: number | null;
   hardness?: number | null;
   hitPoints?: number | null;
+  enchantments: EmbeddedEffectPayload[];
+  enhancements: EmbeddedEffectPayload[];
 }
 
 export const ShieldCreateForm = ({ onSaved }: ShieldCreateFormProps) => {
@@ -121,6 +131,14 @@ export const ShieldCreateForm = ({ onSaved }: ShieldCreateFormProps) => {
         shieldDetail.hitPoints != null ? String(shieldDetail.hitPoints) : '',
       privateInformation: shieldDetail.privateInformation ?? '',
       tagIds: shieldDetail.tags?.map((tag) => tag.id) ?? [],
+      enchantments: (shieldDetail.enchantments ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? '',
+      })),
+      enhancements: (shieldDetail.enhancements ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? '',
+      })),
     });
   }, [isEditMode, shieldDetail, reset]);
 
@@ -136,6 +154,14 @@ export const ShieldCreateForm = ({ onSaved }: ShieldCreateFormProps) => {
       type: 'error',
     });
   }, [isShieldDetailError, shieldDetailError]);
+
+  const buildEmbeddedEffectPayload = (
+    items: ShieldFormData['enchantments'],
+  ): EmbeddedEffectPayload[] =>
+    items.map((item) => ({
+      name: item.name,
+      effect: item.effect || undefined,
+    }));
 
   const buildPayload = (data: ShieldFormData): ShieldPayload => ({
     ...data,
@@ -153,6 +179,8 @@ export const ShieldCreateForm = ({ onSaved }: ShieldCreateFormProps) => {
       : null,
     hardness: data.hardness ? Number(data.hardness) : null,
     hitPoints: data.hitPoints ? Number(data.hitPoints) : null,
+    enchantments: buildEmbeddedEffectPayload(data.enchantments),
+    enhancements: buildEmbeddedEffectPayload(data.enhancements),
   });
 
   const createShieldMutation = usePostEntity<IShield, ShieldPayload>({
@@ -349,6 +377,8 @@ export const ShieldCreateForm = ({ onSaved }: ShieldCreateFormProps) => {
           type="number"
         />
       </div>
+
+      <EmbeddedEffectsField control={control} applicableType="shield" />
 
       <div className="grid grid-cols-1 gap-4">
         <FormRichTextInput

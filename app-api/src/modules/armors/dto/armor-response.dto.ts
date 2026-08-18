@@ -4,6 +4,7 @@ import { TagResponseDto } from '../../tags/dto/tag-response.dto';
 import { CurrencyResponseDto } from '../../currencies/dto/currency-response.dto';
 import { ArmorCategoryResponseDto } from '../../armor-categories/dto/armor-category-response.dto';
 import { TraitResponseDto } from '../../traits/dto/trait-response.dto';
+import { EmbeddedEffectResponseDto } from '../../../common/dto/embedded-effect-response.dto';
 
 export class ArmorResponseDto {
   @ApiProperty({
@@ -107,6 +108,20 @@ export class ArmorResponseDto {
   })
   traits: TraitResponseDto[];
 
+  @ApiProperty({
+    type: () => [EmbeddedEffectResponseDto],
+    description:
+      'Encantamentos da armadura: cópia independente de nome/efeito escolhidos do catálogo de Encantamentos, sem vínculo/FK com a entidade Enchantment. Ordem de inserção preservada',
+  })
+  enchantments: EmbeddedEffectResponseDto[];
+
+  @ApiProperty({
+    type: () => [EmbeddedEffectResponseDto],
+    description:
+      'Aprimoramentos da armadura: cópia independente de nome/efeito escolhidos do catálogo de Aprimoramentos, sem vínculo/FK com a entidade Enhancement. Ordem de inserção preservada',
+  })
+  enhancements: EmbeddedEffectResponseDto[];
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -137,6 +152,12 @@ export class ArmorResponseDto {
     dto.speedPenaltyMeters = armor.speedPenaltyMeters;
     dto.traits = (armor.traits ?? []).map((trait) =>
       TraitResponseDto.fromEntity(trait),
+    );
+    dto.enchantments = (armor.enchantments ?? []).map((item) =>
+      EmbeddedEffectResponseDto.fromEntity(item),
+    );
+    dto.enhancements = (armor.enhancements ?? []).map((item) =>
+      EmbeddedEffectResponseDto.fromEntity(item),
     );
     dto.createdAt = armor.createdAt;
     dto.updatedAt = armor.updatedAt;

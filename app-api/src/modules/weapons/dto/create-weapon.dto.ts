@@ -19,7 +19,7 @@ import { WeaponHands } from '../enums/weapon-hands.enum';
 import { WeaponStyle } from '../enums/weapon-style.enum';
 import { WeaponDamageDie } from '../enums/weapon-damage-die.enum';
 import { WeaponDamageInputDto } from './weapon-damage-input.dto';
-import { WeaponEmbeddedEffectDto } from './weapon-embedded-effect.dto';
+import { EmbeddedEffectDto } from '../../../common/dto/embedded-effect.dto';
 
 export class CreateWeaponDto {
   @ApiProperty({
@@ -232,24 +232,24 @@ export class CreateWeaponDto {
   extraDamages?: WeaponDamageInputDto[];
 
   @ApiPropertyOptional({
-    type: () => [WeaponEmbeddedEffectDto],
+    type: () => [EmbeddedEffectDto],
     description:
       'Encantamentos da arma: cópia independente de nome/efeito escolhidos do catálogo de Encantamentos, sem vínculo/FK com a entidade Enchantment. Ordem de inserção preservada. Cada item deve conter um nome (obrigatório) e um efeito opcional',
   })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => WeaponEmbeddedEffectDto)
-  enchantments?: WeaponEmbeddedEffectDto[];
+  @Type(() => EmbeddedEffectDto)
+  enchantments?: EmbeddedEffectDto[];
 
   @ApiPropertyOptional({
-    type: () => [WeaponEmbeddedEffectDto],
+    type: () => [EmbeddedEffectDto],
     description:
       'Aprimoramentos da arma: cópia independente de nome/efeito escolhidos do catálogo de Aprimoramentos, sem vínculo/FK com a entidade Enhancement. Ordem de inserção preservada. Cada item deve conter um nome (obrigatório) e um efeito opcional',
   })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => WeaponEmbeddedEffectDto)
-  enhancements?: WeaponEmbeddedEffectDto[];
+  @Type(() => EmbeddedEffectDto)
+  enhancements?: EmbeddedEffectDto[];
 }

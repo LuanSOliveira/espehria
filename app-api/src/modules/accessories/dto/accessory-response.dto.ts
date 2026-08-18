@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Accessory } from '../entities/accessory.entity';
 import { TagResponseDto } from '../../tags/dto/tag-response.dto';
 import { CurrencyResponseDto } from '../../currencies/dto/currency-response.dto';
+import { EmbeddedEffectResponseDto } from '../../../common/dto/embedded-effect-response.dto';
 
 export class AccessoryResponseDto {
   @ApiProperty({
@@ -51,6 +52,20 @@ export class AccessoryResponseDto {
   })
   tags: TagResponseDto[];
 
+  @ApiProperty({
+    type: () => [EmbeddedEffectResponseDto],
+    description:
+      'Encantamentos do acessório: cópia independente de nome/efeito escolhidos do catálogo de Encantamentos, sem vínculo/FK com a entidade Enchantment. Ordem de inserção preservada',
+  })
+  enchantments: EmbeddedEffectResponseDto[];
+
+  @ApiProperty({
+    type: () => [EmbeddedEffectResponseDto],
+    description:
+      'Aprimoramentos do acessório: cópia independente de nome/efeito escolhidos do catálogo de Aprimoramentos, sem vínculo/FK com a entidade Enhancement. Ordem de inserção preservada',
+  })
+  enhancements: EmbeddedEffectResponseDto[];
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -70,6 +85,12 @@ export class AccessoryResponseDto {
     dto.privateInformation = accessory.privateInformation;
     dto.tags = (accessory.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),
+    );
+    dto.enchantments = (accessory.enchantments ?? []).map((item) =>
+      EmbeddedEffectResponseDto.fromEntity(item),
+    );
+    dto.enhancements = (accessory.enhancements ?? []).map((item) =>
+      EmbeddedEffectResponseDto.fromEntity(item),
     );
     dto.createdAt = accessory.createdAt;
     dto.updatedAt = accessory.updatedAt;

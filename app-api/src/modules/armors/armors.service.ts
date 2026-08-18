@@ -203,6 +203,14 @@ export class ArmorsService {
       strength: dto.strength ?? null,
       checkPenalty: dto.checkPenalty ?? null,
       speedPenaltyMeters: dto.speedPenaltyMeters ?? null,
+      enchantments: (dto.enchantments ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      })),
+      enhancements: (dto.enhancements ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      })),
     });
 
     const savedArmor = await this.armorsRepository.save(armor);
@@ -351,6 +359,18 @@ export class ArmorsService {
     }
     if (dto.speedPenaltyMeters !== undefined) {
       armor.speedPenaltyMeters = dto.speedPenaltyMeters;
+    }
+    if (dto.enchantments !== undefined) {
+      armor.enchantments = dto.enchantments.map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      }));
+    }
+    if (dto.enhancements !== undefined) {
+      armor.enhancements = dto.enhancements.map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      }));
     }
 
     let tags = armor.tags;

@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Shield } from '../entities/shield.entity';
 import { TagResponseDto } from '../../tags/dto/tag-response.dto';
 import { CurrencyResponseDto } from '../../currencies/dto/currency-response.dto';
+import { EmbeddedEffectResponseDto } from '../../../common/dto/embedded-effect-response.dto';
 
 export class ShieldResponseDto {
   @ApiProperty({
@@ -94,6 +95,20 @@ export class ShieldResponseDto {
   })
   breakThreshold: number;
 
+  @ApiProperty({
+    type: () => [EmbeddedEffectResponseDto],
+    description:
+      'Encantamentos do escudo: cópia independente de nome/efeito escolhidos do catálogo de Encantamentos, sem vínculo/FK com a entidade Enchantment. Ordem de inserção preservada',
+  })
+  enchantments: EmbeddedEffectResponseDto[];
+
+  @ApiProperty({
+    type: () => [EmbeddedEffectResponseDto],
+    description:
+      'Aprimoramentos do escudo: cópia independente de nome/efeito escolhidos do catálogo de Aprimoramentos, sem vínculo/FK com a entidade Enhancement. Ordem de inserção preservada',
+  })
+  enhancements: EmbeddedEffectResponseDto[];
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -119,6 +134,12 @@ export class ShieldResponseDto {
     dto.hardness = shield.hardness;
     dto.hitPoints = shield.hitPoints;
     dto.breakThreshold = shield.breakThreshold;
+    dto.enchantments = (shield.enchantments ?? []).map((item) =>
+      EmbeddedEffectResponseDto.fromEntity(item),
+    );
+    dto.enhancements = (shield.enhancements ?? []).map((item) =>
+      EmbeddedEffectResponseDto.fromEntity(item),
+    );
     dto.createdAt = shield.createdAt;
     dto.updatedAt = shield.updatedAt;
     return dto;

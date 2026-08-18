@@ -9,7 +9,7 @@ import { WeaponHands } from '../enums/weapon-hands.enum';
 import { WeaponStyle } from '../enums/weapon-style.enum';
 import { WeaponDamageDie } from '../enums/weapon-damage-die.enum';
 import { WeaponDamageResponseDto } from './weapon-damage-response.dto';
-import { WeaponEmbeddedEffectResponseDto } from './weapon-embedded-effect-response.dto';
+import { EmbeddedEffectResponseDto } from '../../../common/dto/embedded-effect-response.dto';
 
 export class WeaponResponseDto {
   @ApiProperty({
@@ -152,18 +152,18 @@ export class WeaponResponseDto {
   extraDamages: WeaponDamageResponseDto[];
 
   @ApiProperty({
-    type: () => [WeaponEmbeddedEffectResponseDto],
+    type: () => [EmbeddedEffectResponseDto],
     description:
       'Encantamentos da arma: cópia independente de nome/efeito escolhidos do catálogo de Encantamentos, sem vínculo/FK com a entidade Enchantment. Ordem de inserção preservada',
   })
-  enchantments: WeaponEmbeddedEffectResponseDto[];
+  enchantments: EmbeddedEffectResponseDto[];
 
   @ApiProperty({
-    type: () => [WeaponEmbeddedEffectResponseDto],
+    type: () => [EmbeddedEffectResponseDto],
     description:
       'Aprimoramentos da arma: cópia independente de nome/efeito escolhidos do catálogo de Aprimoramentos, sem vínculo/FK com a entidade Enhancement. Ordem de inserção preservada',
   })
-  enhancements: WeaponEmbeddedEffectResponseDto[];
+  enhancements: EmbeddedEffectResponseDto[];
 
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
@@ -211,10 +211,10 @@ export class WeaponResponseDto {
       .sort((a, b) => a.order - b.order)
       .map((damage) => WeaponDamageResponseDto.fromEntity(damage));
     dto.enchantments = (weapon.enchantments ?? []).map((item) =>
-      WeaponEmbeddedEffectResponseDto.fromEntity(item),
+      EmbeddedEffectResponseDto.fromEntity(item),
     );
     dto.enhancements = (weapon.enhancements ?? []).map((item) =>
-      WeaponEmbeddedEffectResponseDto.fromEntity(item),
+      EmbeddedEffectResponseDto.fromEntity(item),
     );
     dto.createdAt = weapon.createdAt;
     dto.updatedAt = weapon.updatedAt;

@@ -1,6 +1,7 @@
 import { IEntity } from '../Entity';
 import { ITag } from '../Tag';
 import { ICurrency } from '../Currency';
+import { IEmbeddedEffect } from '../EmbeddedEffect';
 
 export interface IShieldListItem {
   id: string;
@@ -32,6 +33,8 @@ export interface IShield extends IEntity {
   hardness?: number | null;
   hitPoints?: number | null;
   breakThreshold?: number | null;
+  enchantments: IEmbeddedEffect[];
+  enhancements: IEmbeddedEffect[];
 }
 
 export interface IShieldListFilters {

@@ -115,6 +115,14 @@ export class ShieldsService {
         dto.hitPoints !== undefined && dto.hitPoints !== null
           ? Math.floor(dto.hitPoints / 2)
           : 0,
+      enchantments: (dto.enchantments ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      })),
+      enhancements: (dto.enhancements ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      })),
     });
 
     const savedShield = await this.shieldsRepository.save(shield);
@@ -253,6 +261,18 @@ export class ShieldsService {
       shield.hitPoints = dto.hitPoints;
       shield.breakThreshold =
         dto.hitPoints !== null ? Math.floor(dto.hitPoints / 2) : 0;
+    }
+    if (dto.enchantments !== undefined) {
+      shield.enchantments = dto.enchantments.map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      }));
+    }
+    if (dto.enhancements !== undefined) {
+      shield.enhancements = dto.enhancements.map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      }));
     }
     let tags = shield.tags;
     if (dto.tagIds !== undefined) {

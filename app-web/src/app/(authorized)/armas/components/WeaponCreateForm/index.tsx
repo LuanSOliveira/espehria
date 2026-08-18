@@ -12,6 +12,7 @@ import {
 } from '@/shared/components/Inputs';
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText, Label } from '@/shared/components/Texts';
+import { EmbeddedEffectsField } from '@/shared/components/EmbeddedEffectsField';
 import {
   useCurrenciesQuery,
   useDamageTypesQuery,
@@ -43,7 +44,6 @@ import {
 } from '../../data';
 import { WeaponTraitsField } from '../WeaponTraitsField';
 import { WeaponDamagesField } from '../WeaponDamagesField';
-import { WeaponEmbeddedEffectsField } from '../WeaponEmbeddedEffectsField';
 
 export interface WeaponCreateFormProps {
   onSaved: () => void;
@@ -572,7 +572,7 @@ export const WeaponCreateForm = ({ onSaved }: WeaponCreateFormProps) => {
         damageTypeOptions={damageTypeOptions}
       />
 
-      <WeaponEmbeddedEffectsField control={control} />
+      <EmbeddedEffectsField control={control} applicableType="weapon" />
 
       <div className="grid grid-cols-1 gap-4">
         <FormRichTextInput

@@ -11,6 +11,7 @@ import {
 } from '@/shared/components/Inputs';
 import { PrimaryButton } from '@/shared/components/Buttons';
 import { DefaultText } from '@/shared/components/Texts';
+import { EmbeddedEffectsField } from '@/shared/components/EmbeddedEffectsField';
 import {
   useCurrenciesQuery,
   useGetEntityById,
@@ -31,16 +32,29 @@ export interface AccessoryCreateFormProps {
   onSaved: () => void;
 }
 
+interface EmbeddedEffectPayload {
+  name: string;
+  effect?: string;
+}
+
 interface AccessoryPayload
   extends Omit<
     AccessoryFormData,
-    'referenceImage' | 'description' | 'price' | 'currencyId' | 'privateInformation'
+    | 'referenceImage'
+    | 'description'
+    | 'price'
+    | 'currencyId'
+    | 'privateInformation'
+    | 'enchantments'
+    | 'enhancements'
   > {
   referenceImage?: string;
   description?: string;
   price?: number | null;
   currencyId?: string;
   privateInformation?: string;
+  enchantments: EmbeddedEffectPayload[];
+  enhancements: EmbeddedEffectPayload[];
 }
 
 export const AccessoryCreateForm = ({ onSaved }: AccessoryCreateFormProps) => {
@@ -87,6 +101,14 @@ export const AccessoryCreateForm = ({ onSaved }: AccessoryCreateFormProps) => {
       currencyId: accessoryDetail.currency?.id ?? '',
       privateInformation: accessoryDetail.privateInformation ?? '',
       tagIds: accessoryDetail.tags?.map((tag) => tag.id) ?? [],
+      enchantments: (accessoryDetail.enchantments ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? '',
+      })),
+      enhancements: (accessoryDetail.enhancements ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? '',
+      })),
     });
   }, [isEditMode, accessoryDetail, reset]);
 
@@ -103,6 +125,14 @@ export const AccessoryCreateForm = ({ onSaved }: AccessoryCreateFormProps) => {
     });
   }, [isAccessoryDetailError, accessoryDetailError]);
 
+  const buildEmbeddedEffectPayload = (
+    items: AccessoryFormData['enchantments'],
+  ): EmbeddedEffectPayload[] =>
+    items.map((item) => ({
+      name: item.name,
+      effect: item.effect || undefined,
+    }));
+
   const buildPayload = (data: AccessoryFormData): AccessoryPayload => ({
     ...data,
     referenceImage: data.referenceImage || undefined,
@@ -111,6 +141,8 @@ export const AccessoryCreateForm = ({ onSaved }: AccessoryCreateFormProps) => {
     currencyId: data.currencyId || undefined,
     privateInformation: data.privateInformation || undefined,
     tagIds: data.tagIds ?? [],
+    enchantments: buildEmbeddedEffectPayload(data.enchantments),
+    enhancements: buildEmbeddedEffectPayload(data.enhancements),
   });
 
   const createAccessoryMutation = usePostEntity<IAccessory, AccessoryPayload>({
@@ -231,6 +263,8 @@ export const AccessoryCreateForm = ({ onSaved }: AccessoryCreateFormProps) => {
           placeholder="Selecione as tags"
         />
       </div>
+
+      <EmbeddedEffectsField control={control} applicableType="accessory" />
 
       <div className="grid grid-cols-1 gap-4">
         <FormRichTextInput

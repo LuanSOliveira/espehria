@@ -6,6 +6,8 @@ import { Currency } from '../../currencies/entities/currency.entity';
 import { ArmorCategory } from '../../armor-categories/entities/armor-category.entity';
 import { Trait } from '../../traits/entities/trait.entity';
 import { DecimalTransformer } from '../../../common/transformers/decimal.transformer';
+import { EmbeddedEffectResponseDto } from '../../../common/dto/embedded-effect-response.dto';
+import type { EmbeddedEffect } from '../../../common/interfaces/embedded-effect.interface';
 
 @Entity('armors')
 export class Armor extends BaseEntity {
@@ -79,4 +81,20 @@ export class Armor extends BaseEntity {
     description: 'Traços associados à armadura',
   })
   traits!: Trait[];
+
+  @ApiProperty({
+    type: () => [EmbeddedEffectResponseDto],
+    description:
+      'Encantamentos da armadura (cópia de nome/efeito, sem vínculo/FK com o catálogo de Encantamentos)',
+  })
+  @Column({ type: 'jsonb', default: [] })
+  enchantments!: EmbeddedEffect[];
+
+  @ApiProperty({
+    type: () => [EmbeddedEffectResponseDto],
+    description:
+      'Aprimoramentos da armadura (cópia de nome/efeito, sem vínculo/FK com o catálogo de Aprimoramentos)',
+  })
+  @Column({ type: 'jsonb', default: [] })
+  enhancements!: EmbeddedEffect[];
 }

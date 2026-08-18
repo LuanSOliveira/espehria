@@ -4,7 +4,7 @@ import { FormModal } from '@/shared/components/Modals';
 import { DefaultText } from '@/shared/components/Texts';
 import { PrimaryButton, SecondaryButton } from '@/shared/components/Buttons';
 
-export interface WeaponEmbeddedEffectChoiceModalProps {
+export interface EmbeddedEffectChoiceModalProps {
   open: boolean;
   onClose: () => void;
   entityLabel: string;
@@ -12,13 +12,13 @@ export interface WeaponEmbeddedEffectChoiceModalProps {
   onSelectExisting: () => void;
 }
 
-export const WeaponEmbeddedEffectChoiceModal = ({
+export const EmbeddedEffectChoiceModal = ({
   open,
   onClose,
   entityLabel,
   onCreateBlank,
   onSelectExisting,
-}: WeaponEmbeddedEffectChoiceModalProps) => {
+}: EmbeddedEffectChoiceModalProps) => {
   const handleCreateBlank = () => {
     onCreateBlank();
     onClose();

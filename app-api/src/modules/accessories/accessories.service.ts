@@ -105,6 +105,14 @@ export class AccessoriesService {
       price: dto.price ?? null,
       currency,
       privateInformation: dto.privateInformation ?? null,
+      enchantments: (dto.enchantments ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      })),
+      enhancements: (dto.enhancements ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      })),
     });
 
     const savedAccessory = await this.accessoriesRepository.save(accessory);
@@ -226,6 +234,18 @@ export class AccessoriesService {
     }
     if (dto.privateInformation !== undefined) {
       accessory.privateInformation = dto.privateInformation;
+    }
+    if (dto.enchantments !== undefined) {
+      accessory.enchantments = dto.enchantments.map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      }));
+    }
+    if (dto.enhancements !== undefined) {
+      accessory.enhancements = dto.enhancements.map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      }));
     }
     let tags = accessory.tags;
     if (dto.tagIds !== undefined) {

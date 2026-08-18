@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class WeaponEmbeddedEffectDto {
+export class EmbeddedEffectDto {
   @ApiProperty({
     example: 'Flamejante',
     description: 'Nome do encantamento/aprimoramento (obrigatório)',
@@ -11,7 +11,7 @@ export class WeaponEmbeddedEffectDto {
   name: string;
 
   @ApiPropertyOptional({
-    example: '<p>A arma causa dano de fogo adicional</p>',
+    example: '<p>Causa dano de fogo adicional</p>',
     description:
       'Efeito do encantamento/aprimoramento (suporta HTML, opcional)',
   })

@@ -1,6 +1,7 @@
 import { IEntity } from '../Entity';
 import { ITag } from '../Tag';
 import { ICurrency } from '../Currency';
+import { IEmbeddedEffect } from '../EmbeddedEffect';
 
 export interface IAccessoryListItem {
   id: string;
@@ -21,6 +22,8 @@ export interface IAccessory extends IEntity {
   tags: ITag[];
   createdAt: string;
   updatedAt: string;
+  enchantments: IEmbeddedEffect[];
+  enhancements: IEmbeddedEffect[];
 }
 
 export interface IAccessoryListFilters {

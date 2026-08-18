@@ -4,6 +4,8 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 import { Tag } from '../../tags/entities/tag.entity';
 import { Currency } from '../../currencies/entities/currency.entity';
 import { DecimalTransformer } from '../../../common/transformers/decimal.transformer';
+import { EmbeddedEffectResponseDto } from '../../../common/dto/embedded-effect-response.dto';
+import type { EmbeddedEffect } from '../../../common/interfaces/embedded-effect.interface';
 
 @Entity('shields')
 export class Shield extends BaseEntity {
@@ -67,4 +69,20 @@ export class Shield extends BaseEntity {
 
   @Column({ type: 'int', name: 'break_threshold', default: 0 })
   breakThreshold!: number;
+
+  @ApiProperty({
+    type: () => [EmbeddedEffectResponseDto],
+    description:
+      'Encantamentos do escudo (cópia de nome/efeito, sem vínculo/FK com o catálogo de Encantamentos)',
+  })
+  @Column({ type: 'jsonb', default: [] })
+  enchantments!: EmbeddedEffect[];
+
+  @ApiProperty({
+    type: () => [EmbeddedEffectResponseDto],
+    description:
+      'Aprimoramentos do escudo (cópia de nome/efeito, sem vínculo/FK com o catálogo de Aprimoramentos)',
+  })
+  @Column({ type: 'jsonb', default: [] })
+  enhancements!: EmbeddedEffect[];
 }
