@@ -67,6 +67,8 @@ import {
 import { SheetCharacteristicsPanel } from './components/SheetCharacteristicsPanel';
 import { SheetTrainingsPanel } from './components/SheetTrainingsPanel';
 import { SheetTalentsPanel } from './components/SheetTalentsPanel';
+import { SheetVolumePanel } from './components/SheetVolumePanel';
+import { SheetCoinsPanel, SheetCoinsValues } from './components/SheetCoinsPanel';
 import { useFieldAutosave } from './hooks/useFieldAutosave';
 import {
   SheetSkillModifierResult,
@@ -97,7 +99,7 @@ const SHEET_TABS_SX = {
   '& .MuiTabs-indicator': { backgroundColor: APP_COLORS.goldDark },
 };
 
-type SheetDetailTab = 'estatisticas' | 'bonus' | 'habilidades';
+type SheetDetailTab = 'estatisticas' | 'bonus' | 'habilidades' | 'inventario';
 type SheetBonusSubTab = 'melhorias' | 'defeitos' | 'proficiencias';
 type SheetAbilitiesSubTab = 'caracteristicas' | 'treinamentos' | 'talentos';
 
@@ -155,6 +157,11 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
   const [temporaryHitPoints, setTemporaryHitPoints] = useState<number | null>(
     null,
   );
+  const [pcCoins, setPcCoins] = useState(0);
+  const [ppCoins, setPpCoins] = useState(0);
+  const [poCoins, setPoCoins] = useState(0);
+  const [plCoins, setPlCoins] = useState(0);
+  const [currentVolume, setCurrentVolume] = useState(0);
   const [melhorias, setMelhorias] = useState<ISheetImprovementDefectSnapshot>(
     SHEET_EMPTY_IMPROVEMENT_DEFECT_SNAPSHOT,
   );
@@ -208,6 +215,11 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     setReferenceImage(sheet.referenceImage ?? null);
     setCurrentHitPoints(sheet.currentHitPoints ?? null);
     setTemporaryHitPoints(sheet.temporaryHitPoints ?? null);
+    setPcCoins(sheet.pc ?? 0);
+    setPpCoins(sheet.pp ?? 0);
+    setPoCoins(sheet.po ?? 0);
+    setPlCoins(sheet.pl ?? 0);
+    setCurrentVolume(sheet.loadedVolume ?? 0);
     setHasHydrated(true);
   }, [sheet, hasHydrated]);
 
@@ -359,6 +371,18 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
   );
   const hitPointsAttributeModifier = hitPointsMatchedAttribute?.modifier ?? 0;
 
+  const forcaAttribute = useMemo(
+    () =>
+      attributes.find(
+        (attribute) => attribute.label.trim().toLowerCase() === 'força',
+      ),
+    [attributes],
+  );
+  const forcaModifier = forcaAttribute?.modifier ?? 0;
+  const maxVolume = Math.max(0, 5 + forcaModifier);
+  const limitVolume = Math.max(0, forcaModifier + 10);
+  const totalCoins = pcCoins + ppCoins + poCoins + plCoins;
+
   const raceHitPointsBonus = race?.hitPoints ?? 0;
   const maxHitPoints = (raceHitPointsBonus + hitPointsAttributeModifier) * level;
   const maxHitPointsBreakdown = [
@@ -509,6 +533,38 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
         message:
           mutationError.response?.data?.message ??
           'Não foi possível salvar o PV temporário da ficha.',
+        type: 'error',
+      });
+    },
+  });
+
+  const updateCoinsMutation = usePutEntity<
+    ISheet,
+    { pc: number; pp: number; po: number; pl: number }
+  >({
+    url: `/sheets/${sheetId}`,
+    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
+    onError: (mutationError) => {
+      showToast({
+        message:
+          mutationError.response?.data?.message ??
+          'Não foi possível salvar as moedas da ficha.',
+        type: 'error',
+      });
+    },
+  });
+
+  const updateVolumeMutation = usePutEntity<
+    ISheet,
+    { loadedVolume: number }
+  >({
+    url: `/sheets/${sheetId}`,
+    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
+    onError: (mutationError) => {
+      showToast({
+        message:
+          mutationError.response?.data?.message ??
+          'Não foi possível salvar o volume carregado da ficha.',
         type: 'error',
       });
     },
@@ -733,6 +789,41 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
       }),
   });
 
+  /**
+   * Volume Carregado = volume dos itens do inventário (0 nesta demanda —
+   * itens de inventário ficarão para demanda futura) + floor(total de
+   * moedas / 1000).
+   */
+  useEffect(() => {
+    setCurrentVolume(Math.floor(totalCoins / 1000));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- só recalcula a partir das moedas; a contribuição de itens (0 por ora) não é uma dependência reativa ainda
+  }, [totalCoins]);
+
+  const coinsValues: SheetCoinsValues = useMemo(
+    () => ({ pc: pcCoins, pp: ppCoins, po: poCoins, pl: plCoins }),
+    [pcCoins, ppCoins, poCoins, plCoins],
+  );
+
+  const handleCoinsChange = (newValues: SheetCoinsValues) => {
+    setPcCoins(newValues.pc);
+    setPpCoins(newValues.pp);
+    setPoCoins(newValues.po);
+    setPlCoins(newValues.pl);
+  };
+
+  useFieldAutosave({
+    value: coinsValues,
+    enabled: hasHydrated,
+    onSave: (newCoinsValues) => updateCoinsMutation.mutate(newCoinsValues),
+  });
+
+  useFieldAutosave({
+    value: currentVolume,
+    enabled: hasHydrated,
+    onSave: (newCurrentVolume) =>
+      updateVolumeMutation.mutate({ loadedVolume: newCurrentVolume }),
+  });
+
   const handleImageSave = (url: string) => {
     updateImageMutation.mutate({ referenceImage: url || null });
   };
@@ -840,6 +931,7 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
           <Tab value="estatisticas" label="Estatísticas" />
           <Tab value="bonus" label="Bônus" />
           <Tab value="habilidades" label="Habilidades" />
+          <Tab value="inventario" label="Inventário" />
         </Tabs>
 
         {activeTab === 'bonus' && (
@@ -1050,6 +1142,18 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
                 isLoading={isLoadingAbilities}
               />
             )}
+
+          {activeTab === 'inventario' && (
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <SheetVolumePanel
+                currentVolume={currentVolume}
+                maxVolume={maxVolume}
+                limitVolume={limitVolume}
+              />
+
+              <SheetCoinsPanel values={coinsValues} onChange={handleCoinsChange} />
+            </div>
+          )}
         </div>
       </div>
 

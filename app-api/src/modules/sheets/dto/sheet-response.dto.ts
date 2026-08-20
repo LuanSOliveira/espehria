@@ -47,6 +47,36 @@ export class SheetResponseDto {
   })
   temporaryHitPoints: number | null;
 
+  @ApiProperty({
+    description: 'Quantidade de Peças de Cobre (PC) da ficha',
+    example: 0,
+  })
+  pc: number;
+
+  @ApiProperty({
+    description: 'Quantidade de Peças de Prata (PP) da ficha',
+    example: 0,
+  })
+  pp: number;
+
+  @ApiProperty({
+    description: 'Quantidade de Peças de Ouro (PO) da ficha',
+    example: 0,
+  })
+  po: number;
+
+  @ApiProperty({
+    description: 'Quantidade de Peças de Platina (PL) da ficha',
+    example: 0,
+  })
+  pl: number;
+
+  @ApiProperty({
+    description: 'Volume Carregado da ficha',
+    example: 0,
+  })
+  loadedVolume: number;
+
   @ApiPropertyOptional({
     type: () => CampaignOptionResponseDto,
     description: 'Campanha vinculada à ficha (pode ser nula se não informada)',
@@ -127,6 +157,11 @@ export class SheetResponseDto {
     dto.level = sheet.level;
     dto.currentHitPoints = sheet.currentHitPoints;
     dto.temporaryHitPoints = sheet.temporaryHitPoints;
+    dto.pc = sheet.pc;
+    dto.pp = sheet.pp;
+    dto.po = sheet.po;
+    dto.pl = sheet.pl;
+    dto.loadedVolume = sheet.loadedVolume;
     dto.campaign = sheet.campaign
       ? CampaignOptionResponseDto.fromEntity(sheet.campaign)
       : null;

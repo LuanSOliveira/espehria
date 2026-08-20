@@ -136,6 +136,11 @@ export interface ISheet extends IEntity {
   biography?: ISheetBiography | null;
   currentHitPoints: number | null;
   temporaryHitPoints: number | null;
+  pc: number;
+  pp: number;
+  po: number;
+  pl: number;
+  loadedVolume: number;
   melhorias: ISheetImprovementDefectSnapshot;
   defeitos: ISheetImprovementDefectSnapshot;
   proficiencias: ISheetProficiencySnapshot;

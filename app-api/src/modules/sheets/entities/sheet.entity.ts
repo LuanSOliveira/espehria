@@ -49,6 +49,45 @@ export class Sheet extends BaseEntity {
   @Column({ type: 'int', nullable: true, name: 'temporary_hit_points' })
   temporaryHitPoints!: number | null;
 
+  @ApiProperty({
+    description:
+      'Quantidade de Peças de Cobre (PC) da ficha (número inteiro, maior ou igual a 0)',
+    example: 0,
+  })
+  @Column({ type: 'int', default: 0 })
+  pc!: number;
+
+  @ApiProperty({
+    description:
+      'Quantidade de Peças de Prata (PP) da ficha (número inteiro, maior ou igual a 0)',
+    example: 0,
+  })
+  @Column({ type: 'int', default: 0 })
+  pp!: number;
+
+  @ApiProperty({
+    description:
+      'Quantidade de Peças de Ouro (PO) da ficha (número inteiro, maior ou igual a 0)',
+    example: 0,
+  })
+  @Column({ type: 'int', default: 0 })
+  po!: number;
+
+  @ApiProperty({
+    description:
+      'Quantidade de Peças de Platina (PL) da ficha (número inteiro, maior ou igual a 0)',
+    example: 0,
+  })
+  @Column({ type: 'int', default: 0 })
+  pl!: number;
+
+  @ApiProperty({
+    description: 'Volume Carregado da ficha (número inteiro, maior ou igual a 0)',
+    example: 0,
+  })
+  @Column({ type: 'int', default: 0, name: 'loaded_volume' })
+  loadedVolume!: number;
+
   @ApiPropertyOptional({ type: () => Campaign })
   @ManyToOne(() => Campaign, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'campaign_id' })

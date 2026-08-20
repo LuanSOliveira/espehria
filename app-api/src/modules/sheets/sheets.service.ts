@@ -1511,6 +1511,21 @@ export class SheetsService {
     if (dto.temporaryHitPoints !== undefined) {
       sheet.temporaryHitPoints = dto.temporaryHitPoints;
     }
+    if (dto.pc !== undefined) {
+      sheet.pc = dto.pc;
+    }
+    if (dto.pp !== undefined) {
+      sheet.pp = dto.pp;
+    }
+    if (dto.po !== undefined) {
+      sheet.po = dto.po;
+    }
+    if (dto.pl !== undefined) {
+      sheet.pl = dto.pl;
+    }
+    if (dto.loadedVolume !== undefined) {
+      sheet.loadedVolume = dto.loadedVolume;
+    }
     if (dto.campaignId !== undefined) {
       sheet.campaign = dto.campaignId
         ? await this.findCampaignById(dto.campaignId)

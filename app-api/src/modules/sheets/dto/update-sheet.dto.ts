@@ -88,4 +88,69 @@ export class UpdateSheetDto {
   @Type(() => Number)
   @IsInt({ message: 'O PV temporário deve ser um número inteiro.' })
   temporaryHitPoints?: number | null;
+
+  @ApiPropertyOptional({
+    minimum: 0,
+    example: 0,
+    description: 'Quantidade de Peças de Cobre (PC) da ficha (inteiro >= 0)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'A quantidade de Peças de Cobre deve ser um número inteiro.' })
+  @Min(0, {
+    message: 'A quantidade de Peças de Cobre deve ser maior ou igual a 0.',
+  })
+  pc?: number;
+
+  @ApiPropertyOptional({
+    minimum: 0,
+    example: 0,
+    description: 'Quantidade de Peças de Prata (PP) da ficha (inteiro >= 0)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'A quantidade de Peças de Prata deve ser um número inteiro.' })
+  @Min(0, {
+    message: 'A quantidade de Peças de Prata deve ser maior ou igual a 0.',
+  })
+  pp?: number;
+
+  @ApiPropertyOptional({
+    minimum: 0,
+    example: 0,
+    description: 'Quantidade de Peças de Ouro (PO) da ficha (inteiro >= 0)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'A quantidade de Peças de Ouro deve ser um número inteiro.' })
+  @Min(0, {
+    message: 'A quantidade de Peças de Ouro deve ser maior ou igual a 0.',
+  })
+  po?: number;
+
+  @ApiPropertyOptional({
+    minimum: 0,
+    example: 0,
+    description: 'Quantidade de Peças de Platina (PL) da ficha (inteiro >= 0)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({
+    message: 'A quantidade de Peças de Platina deve ser um número inteiro.',
+  })
+  @Min(0, {
+    message: 'A quantidade de Peças de Platina deve ser maior ou igual a 0.',
+  })
+  pl?: number;
+
+  @ApiPropertyOptional({
+    minimum: 0,
+    example: 0,
+    description: 'Volume Carregado da ficha (inteiro >= 0)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'O Volume Carregado deve ser um número inteiro.' })
+  @Min(0, { message: 'O Volume Carregado deve ser maior ou igual a 0.' })
+  loadedVolume?: number;
 }
