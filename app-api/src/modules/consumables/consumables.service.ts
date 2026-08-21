@@ -83,6 +83,35 @@ export class ConsumablesService {
     return currency;
   }
 
+  /**
+   * Monta uma instância de `Consumable` com as relações resolvidas (moeda, tags), sem
+   * persistir nada — usada para gerar o snapshot de um item avulso de inventário de
+   * ficha (`SheetsService`), reaproveitando a mesma resolução de referências usada em
+   * `create()`.
+   */
+  async buildSnapshotFromDto(dto: CreateConsumableDto): Promise<Consumable> {
+    const tags =
+      dto.tagIds && dto.tagIds.length > 0
+        ? await this.findTagsByIds(dto.tagIds)
+        : [];
+
+    const currency = dto.currencyId
+      ? await this.findCurrencyById(dto.currencyId)
+      : null;
+
+    const consumable = this.consumablesRepository.create({
+      name: dto.name,
+      referenceImage: dto.referenceImage ?? null,
+      description: dto.description ?? null,
+      price: dto.price ?? null,
+      currency,
+      privateInformation: dto.privateInformation ?? null,
+      volume: dto.volume ?? null,
+    });
+    consumable.tags = tags;
+    return consumable;
+  }
+
   async create(dto: CreateConsumableDto): Promise<Consumable> {
     const existing = await this.findByName(dto.name);
     if (existing) {
@@ -105,6 +134,7 @@ export class ConsumablesService {
       price: dto.price ?? null,
       currency,
       privateInformation: dto.privateInformation ?? null,
+      volume: dto.volume ?? null,
     });
 
     const savedConsumable = await this.consumablesRepository.save(consumable);
@@ -228,6 +258,9 @@ export class ConsumablesService {
     }
     if (dto.privateInformation !== undefined) {
       consumable.privateInformation = dto.privateInformation;
+    }
+    if (dto.volume !== undefined) {
+      consumable.volume = dto.volume;
     }
     let tags = consumable.tags;
     if (dto.tagIds !== undefined) {

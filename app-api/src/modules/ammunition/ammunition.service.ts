@@ -83,6 +83,35 @@ export class AmmunitionService {
     return currency;
   }
 
+  /**
+   * Monta uma instância de `Ammunition` com as relações resolvidas (moeda, tags), sem
+   * persistir nada — usada para gerar o snapshot de um item avulso de inventário de
+   * ficha (`SheetsService`), reaproveitando a mesma resolução de referências usada em
+   * `create()`.
+   */
+  async buildSnapshotFromDto(dto: CreateAmmunitionDto): Promise<Ammunition> {
+    const tags =
+      dto.tagIds && dto.tagIds.length > 0
+        ? await this.findTagsByIds(dto.tagIds)
+        : [];
+
+    const currency = dto.currencyId
+      ? await this.findCurrencyById(dto.currencyId)
+      : null;
+
+    const ammunition = this.ammunitionRepository.create({
+      name: dto.name,
+      referenceImage: dto.referenceImage ?? null,
+      description: dto.description ?? null,
+      price: dto.price ?? null,
+      currency,
+      privateInformation: dto.privateInformation ?? null,
+      volume: dto.volume ?? null,
+    });
+    ammunition.tags = tags;
+    return ammunition;
+  }
+
   async create(dto: CreateAmmunitionDto): Promise<Ammunition> {
     const existing = await this.findByName(dto.name);
     if (existing) {
@@ -107,6 +136,7 @@ export class AmmunitionService {
       price: dto.price ?? null,
       currency,
       privateInformation: dto.privateInformation ?? null,
+      volume: dto.volume ?? null,
     });
 
     const savedAmmunition = await this.ammunitionRepository.save(ammunition);
@@ -231,6 +261,9 @@ export class AmmunitionService {
     }
     if (dto.privateInformation !== undefined) {
       ammunition.privateInformation = dto.privateInformation;
+    }
+    if (dto.volume !== undefined) {
+      ammunition.volume = dto.volume;
     }
     let tags = ammunition.tags;
     if (dto.tagIds !== undefined) {

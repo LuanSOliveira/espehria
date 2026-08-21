@@ -3,9 +3,24 @@ import {
   ISheetAbilityOrigin,
   ISheetAbilityOriginEntityType,
   ISheetImprovementDefectSnapshot,
+  ISheetInventoryItemCategory,
   ISheetKnowledgeSnapshot,
   ISheetProficiencySnapshot,
 } from '@/shared/interfaces';
+import { APP_COLORS } from '@/shared/constants';
+
+/**
+ * Estilo compartilhado das `Tabs` da tela de ficha (abas principais e
+ * sub-abas), usado tanto em `page.tsx` quanto em `SheetInventoryItemsSection`
+ * (duas `Tabs` internas: Carregados/Equipados e, dentro delas, por
+ * categoria).
+ */
+export const SHEET_TABS_SX = {
+  borderBottom: `1px solid ${APP_COLORS.gold}`,
+  '& .MuiTab-root': { color: APP_COLORS.textBrownDark },
+  '& .Mui-selected': { color: `${APP_COLORS.goldDark} !important` },
+  '& .MuiTabs-indicator': { backgroundColor: APP_COLORS.goldDark },
+};
 
 /**
  * Ordem de exibição dos 6 atributos na aba Estatísticas, conforme wireframe
@@ -171,3 +186,72 @@ export const SHEET_ABILITY_ORIGIN_LABELS: Record<
  */
 export const formatSheetAbilityOriginLabel = (origin: ISheetAbilityOrigin) =>
   `via ${SHEET_ABILITY_ORIGIN_LABELS[origin.entityType]} ${origin.name}`;
+
+/**
+ * Configuração fixa das 8 categorias de item de inventário (aba Inventário >
+ * `SheetInventoryItemsSection`), na ordem de exibição em "Carregados" pedida
+ * pelo `spec.md`. `equipable` marca as 4 categorias com ações de
+ * Equipar/Desequipar (também a ordem de exibição em "Equipados", filtrando
+ * esta mesma lista). `catalogEndpoint` é o endpoint de catálogo usado pelo
+ * `Sheet<X>CatalogPickerModal`/`Sheet<X>StandaloneForm` de cada categoria.
+ */
+export interface SheetInventoryCategoryConfig {
+  category: ISheetInventoryItemCategory;
+  label: string;
+  catalogEndpoint: string;
+  equipable: boolean;
+}
+
+export const SHEET_INVENTORY_CATEGORIES: SheetInventoryCategoryConfig[] = [
+  {
+    category: 'utility',
+    label: 'Utilitários',
+    catalogEndpoint: '/utilities',
+    equipable: false,
+  },
+  {
+    category: 'consumable',
+    label: 'Consumíveis',
+    catalogEndpoint: '/consumables',
+    equipable: false,
+  },
+  {
+    category: 'material',
+    label: 'Materiais',
+    catalogEndpoint: '/materials',
+    equipable: false,
+  },
+  {
+    category: 'ammunition',
+    label: 'Munições',
+    catalogEndpoint: '/ammunition',
+    equipable: false,
+  },
+  {
+    category: 'weapon',
+    label: 'Armas',
+    catalogEndpoint: '/weapons',
+    equipable: true,
+  },
+  {
+    category: 'armor',
+    label: 'Armaduras',
+    catalogEndpoint: '/armors',
+    equipable: true,
+  },
+  {
+    category: 'accessory',
+    label: 'Acessórios',
+    catalogEndpoint: '/accessories',
+    equipable: true,
+  },
+  {
+    category: 'shield',
+    label: 'Escudos',
+    catalogEndpoint: '/shields',
+    equipable: true,
+  },
+];
+
+export const SHEET_INVENTORY_EQUIPABLE_CATEGORIES =
+  SHEET_INVENTORY_CATEGORIES.filter((config) => config.equipable);

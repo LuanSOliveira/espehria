@@ -51,6 +51,12 @@ export class AmmunitionResponseDto {
   })
   tags: TagResponseDto[];
 
+  @ApiPropertyOptional({
+    description: 'Volume do item de munição',
+    example: 0.1,
+  })
+  volume: number | null;
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -71,6 +77,7 @@ export class AmmunitionResponseDto {
     dto.tags = (ammunition.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),
     );
+    dto.volume = ammunition.volume;
     dto.createdAt = ammunition.createdAt;
     dto.updatedAt = ammunition.updatedAt;
     return dto;

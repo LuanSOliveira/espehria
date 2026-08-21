@@ -45,6 +45,7 @@ interface AccessoryPayload
     | 'price'
     | 'currencyId'
     | 'privateInformation'
+    | 'volume'
     | 'enchantments'
     | 'enhancements'
   > {
@@ -53,6 +54,7 @@ interface AccessoryPayload
   price?: number | null;
   currencyId?: string;
   privateInformation?: string;
+  volume?: number | null;
   enchantments: EmbeddedEffectPayload[];
   enhancements: EmbeddedEffectPayload[];
 }
@@ -99,6 +101,8 @@ export const AccessoryCreateForm = ({ onSaved }: AccessoryCreateFormProps) => {
       description: accessoryDetail.description ?? '',
       price: accessoryDetail.price != null ? String(accessoryDetail.price) : '',
       currencyId: accessoryDetail.currency?.id ?? '',
+      volume:
+        accessoryDetail.volume != null ? String(accessoryDetail.volume) : '',
       privateInformation: accessoryDetail.privateInformation ?? '',
       tagIds: accessoryDetail.tags?.map((tag) => tag.id) ?? [],
       enchantments: (accessoryDetail.enchantments ?? []).map((item) => ({
@@ -139,6 +143,7 @@ export const AccessoryCreateForm = ({ onSaved }: AccessoryCreateFormProps) => {
     description: data.description || undefined,
     price: data.price ? Number(data.price) : null,
     currencyId: data.currencyId || undefined,
+    volume: data.volume ? Number(data.volume) : null,
     privateInformation: data.privateInformation || undefined,
     tagIds: data.tagIds ?? [],
     enchantments: buildEmbeddedEffectPayload(data.enchantments),
@@ -261,6 +266,18 @@ export const AccessoryCreateForm = ({ onSaved }: AccessoryCreateFormProps) => {
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"
+        />
+
+        <FormTextInput
+          id="accessory-form-volume"
+          name="volume"
+          control={control}
+          label="Volume"
+          placeholder="Digite o volume"
+          type="number"
+          slotProps={{
+            htmlInput: { min: 0, step: 0.1, inputMode: 'decimal' },
+          }}
         />
       </div>
 

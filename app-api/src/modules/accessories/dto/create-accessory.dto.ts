@@ -4,6 +4,7 @@ import {
   IsArray,
   IsInt,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   IsUrl,
@@ -99,4 +100,16 @@ export class CreateAccessoryDto {
   @ValidateNested({ each: true })
   @Type(() => EmbeddedEffectDto)
   enhancements?: EmbeddedEffectDto[];
+
+  @ApiPropertyOptional({
+    example: 0.1,
+    description: 'Volume do acessório (no máximo 1 casa decimal, opcional)',
+  })
+  @IsOptional()
+  @IsNumber(
+    { maxDecimalPlaces: 1 },
+    { message: 'O volume deve ter no máximo 1 casa decimal.' },
+  )
+  @Min(0, { message: 'O volume não pode ser negativo.' })
+  volume?: number;
 }

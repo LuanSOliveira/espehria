@@ -3,6 +3,7 @@ import {
   IsArray,
   IsInt,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   IsUrl,
@@ -74,4 +75,16 @@ export class CreateUtilityDto {
   @IsArray()
   @IsUUID('4', { each: true })
   tagIds?: string[];
+
+  @ApiPropertyOptional({
+    example: 1.5,
+    description: 'Volume do utilitário (no máximo 1 casa decimal, opcional)',
+  })
+  @IsOptional()
+  @IsNumber(
+    { maxDecimalPlaces: 1 },
+    { message: 'O volume deve ter no máximo 1 casa decimal.' },
+  )
+  @Min(0, { message: 'O volume não pode ser negativo.' })
+  volume?: number;
 }

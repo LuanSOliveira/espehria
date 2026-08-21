@@ -14,9 +14,8 @@ import {
   weaponDamageItemDefaultValues,
   WeaponFormData,
 } from '@/shared/formSchemas';
-import { APP_COLORS } from '@/shared/constants';
+import { APP_COLORS, WEAPON_DAMAGE_DIE_OPTIONS } from '@/shared/constants';
 import { IDamageType } from '@/shared/interfaces';
-import { WEAPON_DAMAGE_DIE_OPTIONS } from '../../data';
 
 export interface WeaponDamagesFieldProps {
   control: Control<WeaponFormData>;

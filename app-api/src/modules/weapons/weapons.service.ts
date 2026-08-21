@@ -261,6 +261,81 @@ export class WeaponsService {
     await this.createOrderedTraitJunctions(weapon, traits);
   }
 
+  /**
+   * Monta uma instância de `Weapon` com as relações resolvidas (moeda, tags, traços,
+   * grau de tamanho, tipo de dano, danos alternativos/extras), sem persistir nada —
+   * usada para gerar o snapshot de um item avulso de inventário de ficha
+   * (`SheetsService`), reaproveitando a mesma resolução de referências usada em
+   * `create()`.
+   */
+  async buildSnapshotFromDto(dto: CreateWeaponDto): Promise<Weapon> {
+    const tags =
+      dto.tagIds && dto.tagIds.length > 0
+        ? await this.findTagsByIds(dto.tagIds)
+        : [];
+
+    const traits =
+      dto.traitIds && dto.traitIds.length > 0
+        ? await this.findTraitsByIds(dto.traitIds)
+        : [];
+
+    const currency = dto.currencyId
+      ? await this.findCurrencyById(dto.currencyId)
+      : null;
+
+    const sizeGrade = dto.sizeGradeId
+      ? await this.findSizeGradeById(dto.sizeGradeId)
+      : null;
+
+    const damageType = dto.damageTypeId
+      ? await this.findDamageTypeById(dto.damageTypeId)
+      : null;
+
+    const alternativeDamages =
+      dto.alternativeDamages && dto.alternativeDamages.length > 0
+        ? await this.buildAlternativeDamageEntries(dto.alternativeDamages)
+        : [];
+
+    const extraDamages =
+      dto.extraDamages && dto.extraDamages.length > 0
+        ? await this.buildExtraDamageEntries(dto.extraDamages)
+        : [];
+
+    const weapon = this.weaponsRepository.create({
+      name: dto.name,
+      referenceImage: dto.referenceImage ?? null,
+      description: dto.description ?? null,
+      price: dto.price ?? null,
+      currency,
+      privateInformation: dto.privateInformation ?? null,
+      nickname: dto.nickname ?? null,
+      volume: dto.volume ?? null,
+      sizeGrade,
+      hands: dto.hands ?? null,
+      weaponStyle: dto.weaponStyle ?? null,
+      damageValue: dto.damageValue ?? null,
+      damageDie: dto.damageDie ?? null,
+      damageType,
+      magicalDamage: dto.magicalDamage ?? false,
+      distanceMeters: dto.distanceMeters ?? null,
+      usesAmmunition: dto.usesAmmunition ?? false,
+      reloadActions: dto.reloadActions ?? null,
+      alternativeDamages,
+      extraDamages,
+      enchantments: (dto.enchantments ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      })),
+      enhancements: (dto.enhancements ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      })),
+    });
+    weapon.tags = tags;
+    weapon.traits = traits;
+    return weapon;
+  }
+
   async create(dto: CreateWeaponDto): Promise<Weapon> {
     const existing = await this.findByName(dto.name);
     if (existing) {

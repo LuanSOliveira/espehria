@@ -33,33 +33,52 @@ import {
 } from '@/shared/util';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 
-export interface ArmorViewProps {
-  armorId: string;
-  /**
-   * Chamado quando a armadura não é encontrada (404) — usado pelo
-   * EntityMentionViewDispatcher para fechar o modal aberto a partir de uma
-   * menção órfã (entidade excluída).
-   */
-  onNotFound?: () => void;
-}
+export type ArmorViewProps =
+  | {
+      armorId: string;
+      armor?: undefined;
+      /**
+       * Chamado quando a armadura não é encontrada (404) — usado pelo
+       * EntityMentionViewDispatcher para fechar o modal aberto a partir de
+       * uma menção órfã (entidade excluída). Não se aplica ao modo `armor`
+       * (snapshot já resolvido, nunca "não encontrado").
+       */
+      onNotFound?: () => void;
+    }
+  | {
+      armorId?: undefined;
+      /**
+       * Snapshot já resolvido (ex.: item de inventário da ficha) — quando
+       * informado, o componente pula `GET /armors/:id` e renderiza direto a
+       * partir deste objeto.
+       */
+      armor: Omit<IArmor, 'id' | 'createdAt' | 'updatedAt'>;
+      onNotFound?: undefined;
+    };
 
 const NOT_INFORMED = 'Não informado';
 
-export const ArmorView = ({ armorId, onNotFound }: ArmorViewProps) => {
+export const ArmorView = (props: ArmorViewProps) => {
+  const { armorId, onNotFound } = props;
+  const resolvedArmor = props.armor;
+
   const {
-    data: armor,
+    data: fetchedArmor,
     isLoading,
     isError,
     error,
   } = useGetEntityById<IArmor>({
     url: `/armors/${armorId}`,
+    enabled: !resolvedArmor,
   });
+
+  const armor = resolvedArmor ?? fetchedArmor;
 
   const isGoogleUser = useIsGoogleUser();
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
 
   useEffect(() => {
-    if (!isError) {
+    if (resolvedArmor || !isError) {
       return;
     }
 
@@ -76,7 +95,7 @@ export const ArmorView = ({ armorId, onNotFound }: ArmorViewProps) => {
     if (isNotFound) {
       onNotFound?.();
     }
-  }, [isError, error, onNotFound]);
+  }, [isError, error, onNotFound, resolvedArmor]);
 
   if (isLoading) {
     return (

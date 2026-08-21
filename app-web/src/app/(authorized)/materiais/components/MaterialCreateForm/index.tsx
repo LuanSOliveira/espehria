@@ -34,13 +34,19 @@ export interface MaterialCreateFormProps {
 interface MaterialPayload
   extends Omit<
     MaterialFormData,
-    'referenceImage' | 'description' | 'price' | 'currencyId' | 'privateInformation'
+    | 'referenceImage'
+    | 'description'
+    | 'price'
+    | 'currencyId'
+    | 'privateInformation'
+    | 'volume'
   > {
   referenceImage?: string;
   description?: string;
   price?: number | null;
   currencyId?: string;
   privateInformation?: string;
+  volume?: number | null;
 }
 
 export const MaterialCreateForm = ({ onSaved }: MaterialCreateFormProps) => {
@@ -85,6 +91,7 @@ export const MaterialCreateForm = ({ onSaved }: MaterialCreateFormProps) => {
       description: materialDetail.description ?? '',
       price: materialDetail.price != null ? String(materialDetail.price) : '',
       currencyId: materialDetail.currency?.id ?? '',
+      volume: materialDetail.volume != null ? String(materialDetail.volume) : '',
       privateInformation: materialDetail.privateInformation ?? '',
       tagIds: materialDetail.tags?.map((tag) => tag.id) ?? [],
     });
@@ -109,6 +116,7 @@ export const MaterialCreateForm = ({ onSaved }: MaterialCreateFormProps) => {
     description: data.description || undefined,
     price: data.price ? Number(data.price) : null,
     currencyId: data.currencyId || undefined,
+    volume: data.volume ? Number(data.volume) : null,
     privateInformation: data.privateInformation || undefined,
     tagIds: data.tagIds ?? [],
   });
@@ -229,6 +237,18 @@ export const MaterialCreateForm = ({ onSaved }: MaterialCreateFormProps) => {
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"
+        />
+
+        <FormTextInput
+          id="material-form-volume"
+          name="volume"
+          control={control}
+          label="Volume"
+          placeholder="Digite o volume"
+          type="number"
+          slotProps={{
+            htmlInput: { min: 0, step: 0.1, inputMode: 'decimal' },
+          }}
         />
       </div>
 

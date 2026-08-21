@@ -10,6 +10,7 @@ export interface IAccessoryListItem {
   price?: number | null;
   currency?: ICurrency | null;
   tags: ITag[];
+  volume?: number | null;
 }
 
 export interface IAccessory extends IEntity {
@@ -22,6 +23,7 @@ export interface IAccessory extends IEntity {
   tags: ITag[];
   createdAt: string;
   updatedAt: string;
+  volume?: number | null;
   enchantments: IEmbeddedEffect[];
   enhancements: IEmbeddedEffect[];
 }

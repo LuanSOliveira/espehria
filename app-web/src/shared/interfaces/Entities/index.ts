@@ -48,6 +48,7 @@ export * from './KnowledgeItem';
 export * from './Campaign';
 export * from './PlannedSession';
 export * from './Sheet';
+export * from './SheetInventoryItem';
 export * from './EquipmentApplicableType';
 export * from './Enchantment';
 export * from './Enhancement';

@@ -51,6 +51,12 @@ export class MaterialResponseDto {
   })
   tags: TagResponseDto[];
 
+  @ApiPropertyOptional({
+    description: 'Volume do material',
+    example: 0.2,
+  })
+  volume: number | null;
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -71,6 +77,7 @@ export class MaterialResponseDto {
     dto.tags = (material.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),
     );
+    dto.volume = material.volume;
     dto.createdAt = material.createdAt;
     dto.updatedAt = material.updatedAt;
     return dto;

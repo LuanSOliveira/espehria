@@ -34,7 +34,7 @@ import {
 } from '@/shared/interfaces';
 import { formatTagLabel, showToast } from '@/shared/util';
 import { useSelectedArmorStore } from '@/store';
-import { ArmorTraitsField } from '../ArmorTraitsField';
+import { ArmorTraitsField } from '@/shared/components/EquipmentFields';
 
 export interface ArmorCreateFormProps {
   onSaved: () => void;

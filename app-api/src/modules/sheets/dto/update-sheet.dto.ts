@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import {
   IsInt,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   IsUrl,
@@ -96,7 +97,9 @@ export class UpdateSheetDto {
   })
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'A quantidade de Peças de Cobre deve ser um número inteiro.' })
+  @IsInt({
+    message: 'A quantidade de Peças de Cobre deve ser um número inteiro.',
+  })
   @Min(0, {
     message: 'A quantidade de Peças de Cobre deve ser maior ou igual a 0.',
   })
@@ -109,7 +112,9 @@ export class UpdateSheetDto {
   })
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'A quantidade de Peças de Prata deve ser um número inteiro.' })
+  @IsInt({
+    message: 'A quantidade de Peças de Prata deve ser um número inteiro.',
+  })
   @Min(0, {
     message: 'A quantidade de Peças de Prata deve ser maior ou igual a 0.',
   })
@@ -122,7 +127,9 @@ export class UpdateSheetDto {
   })
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'A quantidade de Peças de Ouro deve ser um número inteiro.' })
+  @IsInt({
+    message: 'A quantidade de Peças de Ouro deve ser um número inteiro.',
+  })
   @Min(0, {
     message: 'A quantidade de Peças de Ouro deve ser maior ou igual a 0.',
   })
@@ -146,11 +153,15 @@ export class UpdateSheetDto {
   @ApiPropertyOptional({
     minimum: 0,
     example: 0,
-    description: 'Volume Carregado da ficha (inteiro >= 0)',
+    description:
+      'Volume Carregado da ficha (decimal, no máximo 1 casa decimal, >= 0). Aceito neste PUT genérico para preservar o autosave local de moedas — itemsVolume não é aceito aqui, sendo escrito exclusivamente pelos endpoints de /sheets/:id/inventory-items',
   })
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'O Volume Carregado deve ser um número inteiro.' })
+  @IsNumber(
+    { maxDecimalPlaces: 1 },
+    { message: 'O Volume Carregado deve ter no máximo 1 casa decimal.' },
+  )
   @Min(0, { message: 'O Volume Carregado deve ser maior ou igual a 0.' })
   loadedVolume?: number;
 }

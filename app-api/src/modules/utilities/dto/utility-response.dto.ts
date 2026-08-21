@@ -51,6 +51,12 @@ export class UtilityResponseDto {
   })
   tags: TagResponseDto[];
 
+  @ApiPropertyOptional({
+    description: 'Volume do utilitário',
+    example: 1.5,
+  })
+  volume: number | null;
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -71,6 +77,7 @@ export class UtilityResponseDto {
     dto.tags = (utility.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),
     );
+    dto.volume = utility.volume;
     dto.createdAt = utility.createdAt;
     dto.updatedAt = utility.updatedAt;
     return dto;

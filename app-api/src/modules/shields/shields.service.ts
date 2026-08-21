@@ -83,6 +83,52 @@ export class ShieldsService {
     return currency;
   }
 
+  /**
+   * Monta uma instância de `Shield` com as relações resolvidas (moeda, tags), sem
+   * persistir nada — usada para gerar o snapshot de um item avulso de inventário de
+   * ficha (`SheetsService`), reaproveitando a mesma resolução de referências usada em
+   * `create()`.
+   */
+  async buildSnapshotFromDto(dto: CreateShieldDto): Promise<Shield> {
+    const tags =
+      dto.tagIds && dto.tagIds.length > 0
+        ? await this.findTagsByIds(dto.tagIds)
+        : [];
+
+    const currency = dto.currencyId
+      ? await this.findCurrencyById(dto.currencyId)
+      : null;
+
+    const shield = this.shieldsRepository.create({
+      name: dto.name,
+      referenceImage: dto.referenceImage ?? null,
+      description: dto.description ?? null,
+      price: dto.price ?? null,
+      currency,
+      privateInformation: dto.privateInformation ?? null,
+      nickname: dto.nickname ?? null,
+      volume: dto.volume ?? null,
+      armorClassBonus: dto.armorClassBonus ?? null,
+      speedPenaltyMeters: dto.speedPenaltyMeters ?? null,
+      hardness: dto.hardness ?? null,
+      hitPoints: dto.hitPoints ?? null,
+      breakThreshold:
+        dto.hitPoints !== undefined && dto.hitPoints !== null
+          ? Math.floor(dto.hitPoints / 2)
+          : 0,
+      enchantments: (dto.enchantments ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      })),
+      enhancements: (dto.enhancements ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      })),
+    });
+    shield.tags = tags;
+    return shield;
+  }
+
   async create(dto: CreateShieldDto): Promise<Shield> {
     const existing = await this.findByName(dto.name);
     if (existing) {

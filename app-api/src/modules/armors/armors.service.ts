@@ -164,6 +164,60 @@ export class ArmorsService {
     await this.createOrderedTraitJunctions(armor, traits);
   }
 
+  /**
+   * Monta uma instância de `Armor` com as relações resolvidas (moeda, tags, traços,
+   * categoria da armadura), sem persistir nada — usada para gerar o snapshot de um
+   * item avulso de inventário de ficha (`SheetsService`), reaproveitando a mesma
+   * resolução de referências usada em `create()`.
+   */
+  async buildSnapshotFromDto(dto: CreateArmorDto): Promise<Armor> {
+    const tags =
+      dto.tagIds && dto.tagIds.length > 0
+        ? await this.findTagsByIds(dto.tagIds)
+        : [];
+
+    const traits =
+      dto.traitIds && dto.traitIds.length > 0
+        ? await this.findTraitsByIds(dto.traitIds)
+        : [];
+
+    const currency = dto.currencyId
+      ? await this.findCurrencyById(dto.currencyId)
+      : null;
+
+    const armorCategory = dto.armorCategoryId
+      ? await this.findArmorCategoryById(dto.armorCategoryId)
+      : null;
+
+    const armor = this.armorsRepository.create({
+      name: dto.name,
+      referenceImage: dto.referenceImage ?? null,
+      description: dto.description ?? null,
+      price: dto.price ?? null,
+      currency,
+      privateInformation: dto.privateInformation ?? null,
+      nickname: dto.nickname ?? null,
+      volume: dto.volume ?? null,
+      armorCategory,
+      armorClassBonus: dto.armorClassBonus ?? null,
+      dexterityModifierLimit: dto.dexterityModifierLimit ?? null,
+      strength: dto.strength ?? null,
+      checkPenalty: dto.checkPenalty ?? null,
+      speedPenaltyMeters: dto.speedPenaltyMeters ?? null,
+      enchantments: (dto.enchantments ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      })),
+      enhancements: (dto.enhancements ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      })),
+    });
+    armor.tags = tags;
+    armor.traits = traits;
+    return armor;
+  }
+
   async create(dto: CreateArmorDto): Promise<Armor> {
     const existing = await this.findByName(dto.name);
     if (existing) {

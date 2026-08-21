@@ -7,6 +7,7 @@ import {
   FiFileText,
   FiImage,
   FiLock,
+  FiPackage,
 } from 'react-icons/fi';
 import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
@@ -21,33 +22,52 @@ import {
 } from '@/shared/util';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 
-export interface MaterialViewProps {
-  materialId: string;
-  /**
-   * Chamado quando o material não é encontrado (404) — usado pelo
-   * EntityMentionViewDispatcher para fechar o modal aberto a partir de uma
-   * menção órfã (entidade excluída).
-   */
-  onNotFound?: () => void;
-}
+export type MaterialViewProps =
+  | {
+      materialId: string;
+      material?: undefined;
+      /**
+       * Chamado quando o material não é encontrado (404) — usado pelo
+       * EntityMentionViewDispatcher para fechar o modal aberto a partir de
+       * uma menção órfã (entidade excluída). Não se aplica ao modo
+       * `material` (snapshot já resolvido, nunca "não encontrado").
+       */
+      onNotFound?: () => void;
+    }
+  | {
+      materialId?: undefined;
+      /**
+       * Snapshot já resolvido (ex.: item de inventário da ficha) — quando
+       * informado, o componente pula `GET /materials/:id` e renderiza
+       * direto a partir deste objeto.
+       */
+      material: Omit<IMaterial, 'id' | 'createdAt' | 'updatedAt'>;
+      onNotFound?: undefined;
+    };
 
 const NOT_INFORMED = 'Não informado';
 
-export const MaterialView = ({ materialId, onNotFound }: MaterialViewProps) => {
+export const MaterialView = (props: MaterialViewProps) => {
+  const { materialId, onNotFound } = props;
+  const resolvedMaterial = props.material;
+
   const {
-    data: material,
+    data: fetchedMaterial,
     isLoading,
     isError,
     error,
   } = useGetEntityById<IMaterial>({
     url: `/materials/${materialId}`,
+    enabled: !resolvedMaterial,
   });
+
+  const material = resolvedMaterial ?? fetchedMaterial;
 
   const isGoogleUser = useIsGoogleUser();
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
 
   useEffect(() => {
-    if (!isError) {
+    if (resolvedMaterial || !isError) {
       return;
     }
 
@@ -64,7 +84,7 @@ export const MaterialView = ({ materialId, onNotFound }: MaterialViewProps) => {
     if (isNotFound) {
       onNotFound?.();
     }
-  }, [isError, error, onNotFound]);
+  }, [isError, error, onNotFound, resolvedMaterial]);
 
   if (isLoading) {
     return (
@@ -163,20 +183,37 @@ export const MaterialView = ({ materialId, onNotFound }: MaterialViewProps) => {
             </div>
           )}
 
-          <div
-            className="flex items-start gap-2 px-3 py-2"
-            style={APP_CONTAINER_STYLES.detailInfoField}
-          >
-            <FiDollarSign
-              style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
-            />
-            <div>
-              <Label component="span" sx={{ margin: 0 }}>
-                Preço
-              </Label>
-              <DefaultText>
-                {formatPriceWithCurrency(material.price, material.currency)}
-              </DefaultText>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiDollarSign
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Preço
+                </Label>
+                <DefaultText>
+                  {formatPriceWithCurrency(material.price, material.currency)}
+                </DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiPackage
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Volume
+                </Label>
+                <DefaultText>{material.volume ?? NOT_INFORMED}</DefaultText>
+              </div>
             </div>
           </div>
         </div>

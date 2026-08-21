@@ -83,6 +83,35 @@ export class UtilitiesService {
     return currency;
   }
 
+  /**
+   * Monta uma instância de `Utility` com as relações resolvidas (moeda, tags), sem
+   * persistir nada — usada para gerar o snapshot de um item avulso de inventário de
+   * ficha (`SheetsService`), reaproveitando a mesma resolução de referências usada em
+   * `create()`.
+   */
+  async buildSnapshotFromDto(dto: CreateUtilityDto): Promise<Utility> {
+    const tags =
+      dto.tagIds && dto.tagIds.length > 0
+        ? await this.findTagsByIds(dto.tagIds)
+        : [];
+
+    const currency = dto.currencyId
+      ? await this.findCurrencyById(dto.currencyId)
+      : null;
+
+    const utility = this.utilitiesRepository.create({
+      name: dto.name,
+      referenceImage: dto.referenceImage ?? null,
+      description: dto.description ?? null,
+      price: dto.price ?? null,
+      currency,
+      privateInformation: dto.privateInformation ?? null,
+      volume: dto.volume ?? null,
+    });
+    utility.tags = tags;
+    return utility;
+  }
+
   async create(dto: CreateUtilityDto): Promise<Utility> {
     const existing = await this.findByName(dto.name);
     if (existing) {
@@ -105,6 +134,7 @@ export class UtilitiesService {
       price: dto.price ?? null,
       currency,
       privateInformation: dto.privateInformation ?? null,
+      volume: dto.volume ?? null,
     });
 
     const savedUtility = await this.utilitiesRepository.save(utility);
@@ -225,6 +255,9 @@ export class UtilitiesService {
     }
     if (dto.privateInformation !== undefined) {
       utility.privateInformation = dto.privateInformation;
+    }
+    if (dto.volume !== undefined) {
+      utility.volume = dto.volume;
     }
     let tags = utility.tags;
     if (dto.tagIds !== undefined) {

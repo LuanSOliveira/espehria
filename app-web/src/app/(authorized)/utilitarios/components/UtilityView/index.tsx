@@ -7,6 +7,7 @@ import {
   FiFileText,
   FiImage,
   FiLock,
+  FiPackage,
 } from 'react-icons/fi';
 import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
@@ -21,33 +22,52 @@ import {
 } from '@/shared/util';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 
-export interface UtilityViewProps {
-  utilityId: string;
-  /**
-   * Chamado quando o utilitário não é encontrado (404) — usado pelo
-   * EntityMentionViewDispatcher para fechar o modal aberto a partir de uma
-   * menção órfã (entidade excluída).
-   */
-  onNotFound?: () => void;
-}
+export type UtilityViewProps =
+  | {
+      utilityId: string;
+      utility?: undefined;
+      /**
+       * Chamado quando o utilitário não é encontrado (404) — usado pelo
+       * EntityMentionViewDispatcher para fechar o modal aberto a partir de
+       * uma menção órfã (entidade excluída). Não se aplica ao modo
+       * `utility` (snapshot já resolvido, nunca "não encontrado").
+       */
+      onNotFound?: () => void;
+    }
+  | {
+      utilityId?: undefined;
+      /**
+       * Snapshot já resolvido (ex.: item de inventário da ficha) — quando
+       * informado, o componente pula `GET /utilities/:id` e renderiza direto
+       * a partir deste objeto.
+       */
+      utility: Omit<IUtility, 'id' | 'createdAt' | 'updatedAt'>;
+      onNotFound?: undefined;
+    };
 
 const NOT_INFORMED = 'Não informado';
 
-export const UtilityView = ({ utilityId, onNotFound }: UtilityViewProps) => {
+export const UtilityView = (props: UtilityViewProps) => {
+  const { utilityId, onNotFound } = props;
+  const resolvedUtility = props.utility;
+
   const {
-    data: utility,
+    data: fetchedUtility,
     isLoading,
     isError,
     error,
   } = useGetEntityById<IUtility>({
     url: `/utilities/${utilityId}`,
+    enabled: !resolvedUtility,
   });
+
+  const utility = resolvedUtility ?? fetchedUtility;
 
   const isGoogleUser = useIsGoogleUser();
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
 
   useEffect(() => {
-    if (!isError) {
+    if (resolvedUtility || !isError) {
       return;
     }
 
@@ -64,7 +84,7 @@ export const UtilityView = ({ utilityId, onNotFound }: UtilityViewProps) => {
     if (isNotFound) {
       onNotFound?.();
     }
-  }, [isError, error, onNotFound]);
+  }, [isError, error, onNotFound, resolvedUtility]);
 
   if (isLoading) {
     return (
@@ -163,20 +183,37 @@ export const UtilityView = ({ utilityId, onNotFound }: UtilityViewProps) => {
             </div>
           )}
 
-          <div
-            className="flex items-start gap-2 px-3 py-2"
-            style={APP_CONTAINER_STYLES.detailInfoField}
-          >
-            <FiDollarSign
-              style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
-            />
-            <div>
-              <Label component="span" sx={{ margin: 0 }}>
-                Preço
-              </Label>
-              <DefaultText>
-                {formatPriceWithCurrency(utility.price, utility.currency)}
-              </DefaultText>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiDollarSign
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Preço
+                </Label>
+                <DefaultText>
+                  {formatPriceWithCurrency(utility.price, utility.currency)}
+                </DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiPackage
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Volume
+                </Label>
+                <DefaultText>{utility.volume ?? NOT_INFORMED}</DefaultText>
+              </div>
             </div>
           </div>
         </div>

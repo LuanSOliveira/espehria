@@ -17,6 +17,12 @@ export const materialFormSchema = z
         'Informe um preço inteiro válido',
       ),
     currencyId: z.string(),
+    volume: z
+      .string()
+      .refine(
+        (v) => v === '' || /^\d+(\.\d)?$/.test(v),
+        'Informe um volume válido (no máximo 1 casa decimal)',
+      ),
     tagIds: z.array(z.string()).optional(),
     description: z.string(),
     privateInformation: z.string(),
@@ -40,6 +46,7 @@ export const materialFormDefaultValues: MaterialFormData = {
   referenceImage: '',
   price: '',
   currencyId: '',
+  volume: '',
   tagIds: [],
   description: '',
   privateInformation: '',

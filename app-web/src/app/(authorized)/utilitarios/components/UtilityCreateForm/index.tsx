@@ -34,13 +34,19 @@ export interface UtilityCreateFormProps {
 interface UtilityPayload
   extends Omit<
     UtilityFormData,
-    'referenceImage' | 'description' | 'price' | 'currencyId' | 'privateInformation'
+    | 'referenceImage'
+    | 'description'
+    | 'price'
+    | 'currencyId'
+    | 'privateInformation'
+    | 'volume'
   > {
   referenceImage?: string;
   description?: string;
   price?: number | null;
   currencyId?: string;
   privateInformation?: string;
+  volume?: number | null;
 }
 
 export const UtilityCreateForm = ({ onSaved }: UtilityCreateFormProps) => {
@@ -85,6 +91,7 @@ export const UtilityCreateForm = ({ onSaved }: UtilityCreateFormProps) => {
       description: utilityDetail.description ?? '',
       price: utilityDetail.price != null ? String(utilityDetail.price) : '',
       currencyId: utilityDetail.currency?.id ?? '',
+      volume: utilityDetail.volume != null ? String(utilityDetail.volume) : '',
       privateInformation: utilityDetail.privateInformation ?? '',
       tagIds: utilityDetail.tags?.map((tag) => tag.id) ?? [],
     });
@@ -109,6 +116,7 @@ export const UtilityCreateForm = ({ onSaved }: UtilityCreateFormProps) => {
     description: data.description || undefined,
     price: data.price ? Number(data.price) : null,
     currencyId: data.currencyId || undefined,
+    volume: data.volume ? Number(data.volume) : null,
     privateInformation: data.privateInformation || undefined,
     tagIds: data.tagIds ?? [],
   });
@@ -229,6 +237,18 @@ export const UtilityCreateForm = ({ onSaved }: UtilityCreateFormProps) => {
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"
+        />
+
+        <FormTextInput
+          id="utility-form-volume"
+          name="volume"
+          control={control}
+          label="Volume"
+          placeholder="Digite o volume"
+          type="number"
+          slotProps={{
+            htmlInput: { min: 0, step: 0.1, inputMode: 'decimal' },
+          }}
         />
       </div>
 

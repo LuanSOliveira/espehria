@@ -4,3 +4,4 @@ export * from './Styles';
 export * from './Variables';
 export * from './EntityMentions';
 export * from './EquipmentApplicableType';
+export * from './WeaponDamageDie';

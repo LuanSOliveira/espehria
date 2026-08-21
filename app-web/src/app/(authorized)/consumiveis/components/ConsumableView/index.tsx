@@ -7,6 +7,7 @@ import {
   FiFileText,
   FiImage,
   FiLock,
+  FiPackage,
 } from 'react-icons/fi';
 import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
@@ -21,36 +22,52 @@ import {
 } from '@/shared/util';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 
-export interface ConsumableViewProps {
-  consumableId: string;
-  /**
-   * Chamado quando o consumível não é encontrado (404) — usado pelo
-   * EntityMentionViewDispatcher para fechar o modal aberto a partir de uma
-   * menção órfã (entidade excluída).
-   */
-  onNotFound?: () => void;
-}
+export type ConsumableViewProps =
+  | {
+      consumableId: string;
+      consumable?: undefined;
+      /**
+       * Chamado quando o consumível não é encontrado (404) — usado pelo
+       * EntityMentionViewDispatcher para fechar o modal aberto a partir de
+       * uma menção órfã (entidade excluída). Não se aplica ao modo
+       * `consumable` (snapshot já resolvido, nunca "não encontrado").
+       */
+      onNotFound?: () => void;
+    }
+  | {
+      consumableId?: undefined;
+      /**
+       * Snapshot já resolvido (ex.: item de inventário da ficha) — quando
+       * informado, o componente pula `GET /consumables/:id` e renderiza
+       * direto a partir deste objeto.
+       */
+      consumable: Omit<IConsumable, 'id' | 'createdAt' | 'updatedAt'>;
+      onNotFound?: undefined;
+    };
 
 const NOT_INFORMED = 'Não informado';
 
-export const ConsumableView = ({
-  consumableId,
-  onNotFound,
-}: ConsumableViewProps) => {
+export const ConsumableView = (props: ConsumableViewProps) => {
+  const { consumableId, onNotFound } = props;
+  const resolvedConsumable = props.consumable;
+
   const {
-    data: consumable,
+    data: fetchedConsumable,
     isLoading,
     isError,
     error,
   } = useGetEntityById<IConsumable>({
     url: `/consumables/${consumableId}`,
+    enabled: !resolvedConsumable,
   });
+
+  const consumable = resolvedConsumable ?? fetchedConsumable;
 
   const isGoogleUser = useIsGoogleUser();
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
 
   useEffect(() => {
-    if (!isError) {
+    if (resolvedConsumable || !isError) {
       return;
     }
 
@@ -67,7 +84,7 @@ export const ConsumableView = ({
     if (isNotFound) {
       onNotFound?.();
     }
-  }, [isError, error, onNotFound]);
+  }, [isError, error, onNotFound, resolvedConsumable]);
 
   if (isLoading) {
     return (
@@ -166,20 +183,37 @@ export const ConsumableView = ({
             </div>
           )}
 
-          <div
-            className="flex items-start gap-2 px-3 py-2"
-            style={APP_CONTAINER_STYLES.detailInfoField}
-          >
-            <FiDollarSign
-              style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
-            />
-            <div>
-              <Label component="span" sx={{ margin: 0 }}>
-                Preço
-              </Label>
-              <DefaultText>
-                {formatPriceWithCurrency(consumable.price, consumable.currency)}
-              </DefaultText>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiDollarSign
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Preço
+                </Label>
+                <DefaultText>
+                  {formatPriceWithCurrency(consumable.price, consumable.currency)}
+                </DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiPackage
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Volume
+                </Label>
+                <DefaultText>{consumable.volume ?? NOT_INFORMED}</DefaultText>
+              </div>
             </div>
           </div>
         </div>

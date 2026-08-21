@@ -83,6 +83,43 @@ export class AccessoriesService {
     return currency;
   }
 
+  /**
+   * Monta uma instância de `Accessory` com as relações resolvidas (moeda, tags), sem
+   * persistir nada — usada para gerar o snapshot de um item avulso de inventário de
+   * ficha (`SheetsService`), reaproveitando a mesma resolução de referências usada em
+   * `create()`.
+   */
+  async buildSnapshotFromDto(dto: CreateAccessoryDto): Promise<Accessory> {
+    const tags =
+      dto.tagIds && dto.tagIds.length > 0
+        ? await this.findTagsByIds(dto.tagIds)
+        : [];
+
+    const currency = dto.currencyId
+      ? await this.findCurrencyById(dto.currencyId)
+      : null;
+
+    const accessory = this.accessoriesRepository.create({
+      name: dto.name,
+      referenceImage: dto.referenceImage ?? null,
+      description: dto.description ?? null,
+      price: dto.price ?? null,
+      currency,
+      privateInformation: dto.privateInformation ?? null,
+      enchantments: (dto.enchantments ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      })),
+      enhancements: (dto.enhancements ?? []).map((item) => ({
+        name: item.name,
+        effect: item.effect ?? null,
+      })),
+      volume: dto.volume ?? null,
+    });
+    accessory.tags = tags;
+    return accessory;
+  }
+
   async create(dto: CreateAccessoryDto): Promise<Accessory> {
     const existing = await this.findByName(dto.name);
     if (existing) {
@@ -113,6 +150,7 @@ export class AccessoriesService {
         name: item.name,
         effect: item.effect ?? null,
       })),
+      volume: dto.volume ?? null,
     });
 
     const savedAccessory = await this.accessoriesRepository.save(accessory);
@@ -246,6 +284,9 @@ export class AccessoriesService {
         name: item.name,
         effect: item.effect ?? null,
       }));
+    }
+    if (dto.volume !== undefined) {
+      accessory.volume = dto.volume;
     }
     let tags = accessory.tags;
     if (dto.tagIds !== undefined) {

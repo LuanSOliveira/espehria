@@ -51,6 +51,12 @@ export class ConsumableResponseDto {
   })
   tags: TagResponseDto[];
 
+  @ApiPropertyOptional({
+    description: 'Volume do consumível',
+    example: 0.5,
+  })
+  volume: number | null;
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -71,6 +77,7 @@ export class ConsumableResponseDto {
     dto.tags = (consumable.tags ?? []).map((tag) =>
       TagResponseDto.fromEntity(tag),
     );
+    dto.volume = consumable.volume;
     dto.createdAt = consumable.createdAt;
     dto.updatedAt = consumable.updatedAt;
     return dto;

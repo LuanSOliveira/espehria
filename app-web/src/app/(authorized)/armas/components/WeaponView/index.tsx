@@ -32,40 +32,59 @@ import {
   getContrastTextColor,
   showToast,
 } from '@/shared/util';
-import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 import {
+  APP_COLORS,
+  APP_CONTAINER_STYLES,
   WEAPON_DAMAGE_DIE_OPTIONS,
-  WEAPON_HANDS_OPTIONS,
-  WEAPON_STYLE_OPTIONS,
-} from '../../data';
+} from '@/shared/constants';
+import { WEAPON_HANDS_OPTIONS, WEAPON_STYLE_OPTIONS } from '../../data';
 
-export interface WeaponViewProps {
-  weaponId: string;
-  /**
-   * Chamado quando a arma não é encontrada (404) — usado pelo
-   * EntityMentionViewDispatcher para fechar o modal aberto a partir de uma
-   * menção órfã (entidade excluída).
-   */
-  onNotFound?: () => void;
-}
+export type WeaponViewProps =
+  | {
+      weaponId: string;
+      weapon?: undefined;
+      /**
+       * Chamado quando a arma não é encontrada (404) — usado pelo
+       * EntityMentionViewDispatcher para fechar o modal aberto a partir de
+       * uma menção órfã (entidade excluída). Não se aplica ao modo
+       * `weapon` (snapshot já resolvido, nunca "não encontrado").
+       */
+      onNotFound?: () => void;
+    }
+  | {
+      weaponId?: undefined;
+      /**
+       * Snapshot já resolvido (ex.: item de inventário da ficha) — quando
+       * informado, o componente pula `GET /weapons/:id` e renderiza direto a
+       * partir deste objeto.
+       */
+      weapon: Omit<IWeapon, 'id' | 'createdAt' | 'updatedAt'>;
+      onNotFound?: undefined;
+    };
 
 const NOT_INFORMED = 'Não informado';
 
-export const WeaponView = ({ weaponId, onNotFound }: WeaponViewProps) => {
+export const WeaponView = (props: WeaponViewProps) => {
+  const { weaponId, onNotFound } = props;
+  const resolvedWeapon = props.weapon;
+
   const {
-    data: weapon,
+    data: fetchedWeapon,
     isLoading,
     isError,
     error,
   } = useGetEntityById<IWeapon>({
     url: `/weapons/${weaponId}`,
+    enabled: !resolvedWeapon,
   });
+
+  const weapon = resolvedWeapon ?? fetchedWeapon;
 
   const isGoogleUser = useIsGoogleUser();
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
 
   useEffect(() => {
-    if (!isError) {
+    if (resolvedWeapon || !isError) {
       return;
     }
 
@@ -82,7 +101,7 @@ export const WeaponView = ({ weaponId, onNotFound }: WeaponViewProps) => {
     if (isNotFound) {
       onNotFound?.();
     }
-  }, [isError, error, onNotFound]);
+  }, [isError, error, onNotFound, resolvedWeapon]);
 
   if (isLoading) {
     return (

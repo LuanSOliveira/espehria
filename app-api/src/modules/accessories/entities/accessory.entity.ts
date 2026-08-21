@@ -5,6 +5,7 @@ import { Tag } from '../../tags/entities/tag.entity';
 import { Currency } from '../../currencies/entities/currency.entity';
 import { EmbeddedEffectResponseDto } from '../../../common/dto/embedded-effect-response.dto';
 import type { EmbeddedEffect } from '../../../common/interfaces/embedded-effect.interface';
+import { DecimalTransformer } from '../../../common/transformers/decimal.transformer';
 
 @Entity('accessories')
 export class Accessory extends BaseEntity {
@@ -50,4 +51,13 @@ export class Accessory extends BaseEntity {
   })
   @Column({ type: 'jsonb', default: [] })
   enhancements!: EmbeddedEffect[];
+
+  @Column({
+    type: 'numeric',
+    precision: 4,
+    scale: 1,
+    nullable: true,
+    transformer: DecimalTransformer,
+  })
+  volume!: number | null;
 }

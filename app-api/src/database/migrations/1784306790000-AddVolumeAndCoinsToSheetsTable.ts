@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddVolumeAndCoinsToSheetsTable1784306790000
-  implements MigrationInterface
-{
+export class AddVolumeAndCoinsToSheetsTable1784306790000 implements MigrationInterface {
   name = 'AddVolumeAndCoinsToSheetsTable1784306790000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -24,9 +22,7 @@ export class AddVolumeAndCoinsToSheetsTable1784306790000
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE "sheets" DROP COLUMN "loaded_volume"`,
-    );
+    await queryRunner.query(`ALTER TABLE "sheets" DROP COLUMN "loaded_volume"`);
     await queryRunner.query(`ALTER TABLE "sheets" DROP COLUMN "pl"`);
     await queryRunner.query(`ALTER TABLE "sheets" DROP COLUMN "po"`);
     await queryRunner.query(`ALTER TABLE "sheets" DROP COLUMN "pp"`);

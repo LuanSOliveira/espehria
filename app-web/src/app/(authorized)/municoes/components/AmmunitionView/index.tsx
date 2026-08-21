@@ -7,6 +7,7 @@ import {
   FiFileText,
   FiImage,
   FiLock,
+  FiPackage,
 } from 'react-icons/fi';
 import { useIsGoogleUser } from '@/hooks/Auth';
 import { DefaultText, Label, Title } from '@/shared/components/Texts';
@@ -21,36 +22,52 @@ import {
 } from '@/shared/util';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 
-export interface AmmunitionViewProps {
-  ammunitionId: string;
-  /**
-   * Chamado quando a munição não é encontrada (404) — usado pelo
-   * EntityMentionViewDispatcher para fechar o modal aberto a partir de uma
-   * menção órfã (entidade excluída).
-   */
-  onNotFound?: () => void;
-}
+export type AmmunitionViewProps =
+  | {
+      ammunitionId: string;
+      ammunition?: undefined;
+      /**
+       * Chamado quando a munição não é encontrada (404) — usado pelo
+       * EntityMentionViewDispatcher para fechar o modal aberto a partir de
+       * uma menção órfã (entidade excluída). Não se aplica ao modo
+       * `ammunition` (snapshot já resolvido, nunca "não encontrado").
+       */
+      onNotFound?: () => void;
+    }
+  | {
+      ammunitionId?: undefined;
+      /**
+       * Snapshot já resolvido (ex.: item de inventário da ficha) — quando
+       * informado, o componente pula `GET /ammunition/:id` e renderiza
+       * direto a partir deste objeto.
+       */
+      ammunition: Omit<IAmmunition, 'id' | 'createdAt' | 'updatedAt'>;
+      onNotFound?: undefined;
+    };
 
 const NOT_INFORMED = 'Não informado';
 
-export const AmmunitionView = ({
-  ammunitionId,
-  onNotFound,
-}: AmmunitionViewProps) => {
+export const AmmunitionView = (props: AmmunitionViewProps) => {
+  const { ammunitionId, onNotFound } = props;
+  const resolvedAmmunition = props.ammunition;
+
   const {
-    data: ammunition,
+    data: fetchedAmmunition,
     isLoading,
     isError,
     error,
   } = useGetEntityById<IAmmunition>({
     url: `/ammunition/${ammunitionId}`,
+    enabled: !resolvedAmmunition,
   });
+
+  const ammunition = resolvedAmmunition ?? fetchedAmmunition;
 
   const isGoogleUser = useIsGoogleUser();
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
 
   useEffect(() => {
-    if (!isError) {
+    if (resolvedAmmunition || !isError) {
       return;
     }
 
@@ -67,7 +84,7 @@ export const AmmunitionView = ({
     if (isNotFound) {
       onNotFound?.();
     }
-  }, [isError, error, onNotFound]);
+  }, [isError, error, onNotFound, resolvedAmmunition]);
 
   if (isLoading) {
     return (
@@ -166,20 +183,37 @@ export const AmmunitionView = ({
             </div>
           )}
 
-          <div
-            className="flex items-start gap-2 px-3 py-2"
-            style={APP_CONTAINER_STYLES.detailInfoField}
-          >
-            <FiDollarSign
-              style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
-            />
-            <div>
-              <Label component="span" sx={{ margin: 0 }}>
-                Preço
-              </Label>
-              <DefaultText>
-                {formatPriceWithCurrency(ammunition.price, ammunition.currency)}
-              </DefaultText>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiDollarSign
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Preço
+                </Label>
+                <DefaultText>
+                  {formatPriceWithCurrency(ammunition.price, ammunition.currency)}
+                </DefaultText>
+              </div>
+            </div>
+
+            <div
+              className="flex items-start gap-2 px-3 py-2"
+              style={APP_CONTAINER_STYLES.detailInfoField}
+            >
+              <FiPackage
+                style={{ fontSize: 16, color: APP_COLORS.gold, marginTop: 2 }}
+              />
+              <div>
+                <Label component="span" sx={{ margin: 0 }}>
+                  Volume
+                </Label>
+                <DefaultText>{ammunition.volume ?? NOT_INFORMED}</DefaultText>
+              </div>
             </div>
           </div>
         </div>

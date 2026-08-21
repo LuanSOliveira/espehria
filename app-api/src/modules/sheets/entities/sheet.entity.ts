@@ -10,6 +10,7 @@ import type { SheetImprovementFlawSnapshot } from '../interfaces/sheet-improveme
 import type { SheetProficiencySnapshot } from '../interfaces/sheet-proficiency-snapshot.interface';
 import type { SheetProficiencyAdjustment } from '../interfaces/sheet-proficiency-adjustment.interface';
 import type { SheetKnowledgeSnapshot } from '../interfaces/sheet-knowledge-snapshot.interface';
+import { DecimalTransformer } from '../../../common/transformers/decimal.transformer';
 
 @Entity('sheets')
 export class Sheet extends BaseEntity {
@@ -82,11 +83,34 @@ export class Sheet extends BaseEntity {
   pl!: number;
 
   @ApiProperty({
-    description: 'Volume Carregado da ficha (número inteiro, maior ou igual a 0)',
+    description:
+      'Volume Carregado da ficha (decimal, no máximo 1 casa decimal, maior ou igual a 0) — soma de floor(moedas / 1000) com itemsVolume',
     example: 0,
   })
-  @Column({ type: 'int', default: 0, name: 'loaded_volume' })
+  @Column({
+    type: 'numeric',
+    precision: 6,
+    scale: 1,
+    default: 0,
+    transformer: DecimalTransformer,
+    name: 'loaded_volume',
+  })
   loadedVolume!: number;
+
+  @ApiProperty({
+    description:
+      'Volume vindo dos itens do inventário da ficha (decimal, no máximo 1 casa decimal, maior ou igual a 0) — somado a partir de quantity * unitVolume de todos os SheetInventoryItem, recalculado do zero a cada adição/remoção de item',
+    example: 0,
+  })
+  @Column({
+    type: 'numeric',
+    precision: 6,
+    scale: 1,
+    default: 0,
+    transformer: DecimalTransformer,
+    name: 'items_volume',
+  })
+  itemsVolume!: number;
 
   @ApiPropertyOptional({ type: () => Campaign })
   @ManyToOne(() => Campaign, { nullable: true, onDelete: 'SET NULL' })

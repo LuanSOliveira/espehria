@@ -9,6 +9,7 @@ export interface IAmmunitionListItem {
   price?: number | null;
   currency?: ICurrency | null;
   tags: ITag[];
+  volume?: number | null;
 }
 
 export interface IAmmunition extends IEntity {
@@ -21,6 +22,7 @@ export interface IAmmunition extends IEntity {
   tags: ITag[];
   createdAt: string;
   updatedAt: string;
+  volume?: number | null;
 }
 
 export interface IAmmunitionListFilters {

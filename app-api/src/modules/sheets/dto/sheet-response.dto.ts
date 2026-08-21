@@ -72,10 +72,18 @@ export class SheetResponseDto {
   pl: number;
 
   @ApiProperty({
-    description: 'Volume Carregado da ficha',
+    description:
+      'Volume Carregado da ficha (decimal, no máximo 1 casa decimal) — floor(moedas / 1000) + itemsVolume',
     example: 0,
   })
   loadedVolume: number;
+
+  @ApiProperty({
+    description:
+      'Volume vindo dos itens do inventário da ficha (decimal, no máximo 1 casa decimal). Campo somente leitura — escrito exclusivamente pelos endpoints de /sheets/:id/inventory-items',
+    example: 0,
+  })
+  itemsVolume: number;
 
   @ApiPropertyOptional({
     type: () => CampaignOptionResponseDto,
@@ -162,6 +170,7 @@ export class SheetResponseDto {
     dto.po = sheet.po;
     dto.pl = sheet.pl;
     dto.loadedVolume = sheet.loadedVolume;
+    dto.itemsVolume = sheet.itemsVolume;
     dto.campaign = sheet.campaign
       ? CampaignOptionResponseDto.fromEntity(sheet.campaign)
       : null;

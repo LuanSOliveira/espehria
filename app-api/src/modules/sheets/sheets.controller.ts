@@ -55,10 +55,19 @@ import { SheetTalentsAbilitiesResponseDto } from './dto/sheet-talents-abilities-
 import { SheetTrainingSlotResponseDto } from './dto/sheet-training-slot-response.dto';
 import { SheetAbilityCardResponseDto } from './dto/sheet-ability-card-response.dto';
 import { SheetAbilityOriginResponseDto } from './dto/sheet-ability-origin-response.dto';
+import { AddSheetInventoryItemDto } from './dto/add-sheet-inventory-item.dto';
+import { RemoveSheetInventoryItemDto } from './dto/remove-sheet-inventory-item.dto';
+import { IncreaseSheetInventoryItemDto } from './dto/increase-sheet-inventory-item.dto';
+import { FindSheetInventoryItemsQueryDto } from './dto/find-sheet-inventory-items-query.dto';
+import { SheetInventoryItemResponseDto } from './dto/sheet-inventory-item-response.dto';
+import { SheetInventoryListResponseDto } from './dto/sheet-inventory-list-response.dto';
+import { SheetInventoryMutationResponseDto } from './dto/sheet-inventory-mutation-response.dto';
 import {
   SheetAbilitiesData,
   SheetAbilityCard,
   SheetAbilityMutationResult,
+  SheetInventoryListResult,
+  SheetInventoryMutationResult,
   SheetsService,
 } from './sheets.service';
 
@@ -119,6 +128,26 @@ export class SheetsController {
     return SheetAbilitiesMutationResponseDto.fromRaw({
       sheet: SheetResponseDto.fromEntity(result.sheet),
       abilities: this.toAbilitiesResponseDto(result.abilities),
+    });
+  }
+
+  private toInventoryListResponseDto(
+    result: SheetInventoryListResult,
+  ): SheetInventoryListResponseDto {
+    return SheetInventoryListResponseDto.fromRaw({
+      counts: result.counts,
+      items: result.items.map((item) =>
+        SheetInventoryItemResponseDto.fromEntity(item),
+      ),
+    });
+  }
+
+  private toInventoryMutationResponseDto(
+    result: SheetInventoryMutationResult,
+  ): SheetInventoryMutationResponseDto {
+    return SheetInventoryMutationResponseDto.fromRaw({
+      sheet: SheetResponseDto.fromEntity(result.sheet),
+      inventory: this.toInventoryListResponseDto(result.inventory),
     });
   }
 
@@ -213,7 +242,7 @@ export class SheetsController {
   })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem inválida, nível fora do intervalo válido, IDs em formato inválido (incluindo armorClassKeyAttributeId), PV atual ou temporário em formato inválido (devem ser inteiros), moedas (PC, PP, PO, PL) ou Volume Carregado em formato inválido (devem ser inteiros >= 0), ou outros parâmetros de validação inválidos',
+      'URL de imagem inválida, nível fora do intervalo válido, IDs em formato inválido (incluindo armorClassKeyAttributeId), PV atual ou temporário em formato inválido (devem ser inteiros), moedas (PC, PP, PO, PL) em formato inválido (devem ser inteiros >= 0), Volume Carregado em formato inválido (decimal, máximo 1 casa decimal, >= 0), ou outros parâmetros de validação inválidos',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -625,6 +654,185 @@ export class SheetsController {
       currentUser,
     );
     return this.toMutationResponseDto(result);
+  }
+
+  @Get(':id/inventory-items')
+  @ApiOperation({
+    summary:
+      'Lista os itens de inventário da ficha, com contadores por categoria',
+  })
+  @ApiOkResponse({ type: SheetInventoryListResponseDto })
+  @ApiNotFoundResponse({
+    description: 'Ficha não encontrada ou não pertence ao usuário',
+  })
+  @ApiBadRequestResponse({
+    description: 'ID de ficha em formato inválido, ou filtros inválidos',
+  })
+  async listInventoryItems(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: FindSheetInventoryItemsQueryDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetInventoryListResponseDto> {
+    const result = await this.sheetsService.listInventoryItems(
+      id,
+      query,
+      currentUser,
+    );
+    return this.toInventoryListResponseDto(result);
+  }
+
+  @Post(':id/inventory-items')
+  @ApiOperation({
+    summary:
+      'Adiciona um item (avulso ou existente do catálogo) ao inventário da ficha',
+  })
+  @ApiCreatedResponse({ type: SheetInventoryMutationResponseDto })
+  @ApiNotFoundResponse({
+    description:
+      'Ficha não encontrada ou não pertence ao usuário, ou item do catálogo não encontrado',
+  })
+  @ApiConflictResponse({
+    description:
+      'A quantidade solicitada supera o volume limite que a ficha pode carregar',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'ID de ficha em formato inválido, catalogItemId/customData ausentes ou informados simultaneamente, ou dados do item avulso inválidos para a categoria informada',
+  })
+  async addInventoryItem(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AddSheetInventoryItemDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetInventoryMutationResponseDto> {
+    const result = await this.sheetsService.addInventoryItem(
+      id,
+      dto,
+      currentUser,
+    );
+    return this.toInventoryMutationResponseDto(result);
+  }
+
+  @Post(':id/inventory-items/:itemId/remove')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Remove quantidade parcial ou total de um item de inventário',
+  })
+  @ApiOkResponse({ type: SheetInventoryMutationResponseDto })
+  @ApiNotFoundResponse({
+    description:
+      'Ficha não encontrada ou não pertence ao usuário, ou item de inventário não encontrado nesta ficha',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'ID de ficha ou de item em formato inválido, ou quantidade a remover maior que a quantidade atual do item',
+  })
+  async removeInventoryItem(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('itemId', ParseUUIDPipe) itemId: string,
+    @Body() dto: RemoveSheetInventoryItemDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetInventoryMutationResponseDto> {
+    const result = await this.sheetsService.removeInventoryItem(
+      id,
+      itemId,
+      dto,
+      currentUser,
+    );
+    return this.toInventoryMutationResponseDto(result);
+  }
+
+  @Post(':id/inventory-items/:itemId/increase')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Aumenta a quantidade de um item já existente no inventário da ficha',
+  })
+  @ApiOkResponse({ type: SheetInventoryMutationResponseDto })
+  @ApiNotFoundResponse({
+    description:
+      'Ficha não encontrada ou não pertence ao usuário, ou item de inventário não encontrado nesta ficha',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'ID de ficha ou de item em formato inválido, ou quantidade inválida',
+  })
+  @ApiConflictResponse({
+    description:
+      'A quantidade solicitada supera o volume limite que a ficha pode carregar',
+  })
+  async increaseInventoryItem(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('itemId', ParseUUIDPipe) itemId: string,
+    @Body() dto: IncreaseSheetInventoryItemDto,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetInventoryMutationResponseDto> {
+    const result = await this.sheetsService.increaseInventoryItem(
+      id,
+      itemId,
+      dto,
+      currentUser,
+    );
+    return this.toInventoryMutationResponseDto(result);
+  }
+
+  @Put(':id/inventory-items/:itemId/equip')
+  @ApiOperation({
+    summary:
+      'Marca um item de inventário como equipado (idempotente; sem efeito se já equipado)',
+  })
+  @ApiOkResponse({ type: SheetInventoryMutationResponseDto })
+  @ApiNotFoundResponse({
+    description:
+      'Ficha não encontrada ou não pertence ao usuário, ou item de inventário não encontrado nesta ficha',
+  })
+  @ApiConflictResponse({
+    description:
+      'A categoria do item não é equipável (somente Arma/Armadura/Acessório/Escudo)',
+  })
+  @ApiBadRequestResponse({
+    description: 'ID de ficha ou de item em formato inválido',
+  })
+  async equipInventoryItem(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('itemId', ParseUUIDPipe) itemId: string,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetInventoryMutationResponseDto> {
+    const result = await this.sheetsService.equipInventoryItem(
+      id,
+      itemId,
+      currentUser,
+    );
+    return this.toInventoryMutationResponseDto(result);
+  }
+
+  @Put(':id/inventory-items/:itemId/unequip')
+  @ApiOperation({
+    summary:
+      'Marca um item de inventário como não equipado (idempotente; sem efeito se já desequipado)',
+  })
+  @ApiOkResponse({ type: SheetInventoryMutationResponseDto })
+  @ApiNotFoundResponse({
+    description:
+      'Ficha não encontrada ou não pertence ao usuário, ou item de inventário não encontrado nesta ficha',
+  })
+  @ApiConflictResponse({
+    description:
+      'A categoria do item não é equipável (somente Arma/Armadura/Acessório/Escudo)',
+  })
+  @ApiBadRequestResponse({
+    description: 'ID de ficha ou de item em formato inválido',
+  })
+  async unequipInventoryItem(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('itemId', ParseUUIDPipe) itemId: string,
+    @CurrentUser() currentUser: User,
+  ): Promise<SheetInventoryMutationResponseDto> {
+    const result = await this.sheetsService.unequipInventoryItem(
+      id,
+      itemId,
+      currentUser,
+    );
+    return this.toInventoryMutationResponseDto(result);
   }
 
   @Delete(':id')

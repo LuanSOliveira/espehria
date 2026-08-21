@@ -34,13 +34,19 @@ export interface ConsumableCreateFormProps {
 interface ConsumablePayload
   extends Omit<
     ConsumableFormData,
-    'referenceImage' | 'description' | 'price' | 'currencyId' | 'privateInformation'
+    | 'referenceImage'
+    | 'description'
+    | 'price'
+    | 'currencyId'
+    | 'privateInformation'
+    | 'volume'
   > {
   referenceImage?: string;
   description?: string;
   price?: number | null;
   currencyId?: string;
   privateInformation?: string;
+  volume?: number | null;
 }
 
 export const ConsumableCreateForm = ({
@@ -88,6 +94,8 @@ export const ConsumableCreateForm = ({
       price:
         consumableDetail.price != null ? String(consumableDetail.price) : '',
       currencyId: consumableDetail.currency?.id ?? '',
+      volume:
+        consumableDetail.volume != null ? String(consumableDetail.volume) : '',
       privateInformation: consumableDetail.privateInformation ?? '',
       tagIds: consumableDetail.tags?.map((tag) => tag.id) ?? [],
     });
@@ -112,6 +120,7 @@ export const ConsumableCreateForm = ({
     description: data.description || undefined,
     price: data.price ? Number(data.price) : null,
     currencyId: data.currencyId || undefined,
+    volume: data.volume ? Number(data.volume) : null,
     privateInformation: data.privateInformation || undefined,
     tagIds: data.tagIds ?? [],
   });
@@ -238,6 +247,18 @@ export const ConsumableCreateForm = ({
           getOptionValue={(tag) => tag.id}
           getOptionColor={(tag) => tag.color}
           placeholder="Selecione as tags"
+        />
+
+        <FormTextInput
+          id="consumable-form-volume"
+          name="volume"
+          control={control}
+          label="Volume"
+          placeholder="Digite o volume"
+          type="number"
+          slotProps={{
+            htmlInput: { min: 0, step: 0.1, inputMode: 'decimal' },
+          }}
         />
       </div>
 

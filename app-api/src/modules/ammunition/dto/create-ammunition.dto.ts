@@ -3,6 +3,7 @@ import {
   IsArray,
   IsInt,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   IsUrl,
@@ -75,4 +76,17 @@ export class CreateAmmunitionDto {
   @IsArray()
   @IsUUID('4', { each: true })
   tagIds?: string[];
+
+  @ApiPropertyOptional({
+    example: 0.1,
+    description:
+      'Volume do item de munição (no máximo 1 casa decimal, opcional)',
+  })
+  @IsOptional()
+  @IsNumber(
+    { maxDecimalPlaces: 1 },
+    { message: 'O volume deve ter no máximo 1 casa decimal.' },
+  )
+  @Min(0, { message: 'O volume não pode ser negativo.' })
+  volume?: number;
 }

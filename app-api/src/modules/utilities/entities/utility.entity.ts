@@ -3,6 +3,7 @@ import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Tag } from '../../tags/entities/tag.entity';
 import { Currency } from '../../currencies/entities/currency.entity';
+import { DecimalTransformer } from '../../../common/transformers/decimal.transformer';
 
 @Entity('utilities')
 export class Utility extends BaseEntity {
@@ -32,4 +33,13 @@ export class Utility extends BaseEntity {
     description: 'Tags associadas ao utilitário',
   })
   tags!: Tag[];
+
+  @Column({
+    type: 'numeric',
+    precision: 4,
+    scale: 1,
+    nullable: true,
+    transformer: DecimalTransformer,
+  })
+  volume!: number | null;
 }

@@ -141,6 +141,7 @@ export interface ISheet extends IEntity {
   po: number;
   pl: number;
   loadedVolume: number;
+  itemsVolume: number;
   melhorias: ISheetImprovementDefectSnapshot;
   defeitos: ISheetImprovementDefectSnapshot;
   proficiencias: ISheetProficiencySnapshot;

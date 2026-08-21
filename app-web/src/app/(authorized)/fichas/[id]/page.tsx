@@ -69,6 +69,7 @@ import { SheetTrainingsPanel } from './components/SheetTrainingsPanel';
 import { SheetTalentsPanel } from './components/SheetTalentsPanel';
 import { SheetVolumePanel } from './components/SheetVolumePanel';
 import { SheetCoinsPanel, SheetCoinsValues } from './components/SheetCoinsPanel';
+import { SheetInventoryItemsSection } from './components/SheetInventoryItemsSection';
 import { useFieldAutosave } from './hooks/useFieldAutosave';
 import {
   SheetSkillModifierResult,
@@ -77,12 +78,14 @@ import {
 import { useSheetKnowledgeModifiers } from './hooks/useSheetKnowledgeModifiers';
 import { useSheetSavingThrowModifiers } from './hooks/useSheetSavingThrowModifiers';
 import { useSheetAbilities } from './hooks/useSheetAbilities';
+import { useSheetInventoryItems } from './hooks/useSheetInventoryItems';
 import {
   SHEET_EMPTY_IMPROVEMENT_DEFECT_SNAPSHOT,
   SHEET_EMPTY_KNOWLEDGE_SNAPSHOT,
   SHEET_EMPTY_PROFICIENCY_SNAPSHOT,
   SHEET_HIT_POINTS_KEY_ATTRIBUTE_NAME,
   SHEET_IMPROVEMENT_DEFECT_CATEGORIES,
+  SHEET_TABS_SX,
   flattenKnowledgeSnapshot,
   flattenProficiencySnapshot,
   sortByAttributeOrder,
@@ -91,13 +94,6 @@ import {
 const ATTRIBUTE_TYPE_NAME = 'Atributo';
 const ATTRIBUTE_BASE_VALUE = 10;
 const ARMOR_CLASS_BASE_VALUE = 10;
-
-const SHEET_TABS_SX = {
-  borderBottom: `1px solid ${APP_COLORS.gold}`,
-  '& .MuiTab-root': { color: APP_COLORS.textBrownDark },
-  '& .Mui-selected': { color: `${APP_COLORS.goldDark} !important` },
-  '& .MuiTabs-indicator': { backgroundColor: APP_COLORS.goldDark },
-};
 
 type SheetDetailTab = 'estatisticas' | 'bonus' | 'habilidades' | 'inventario';
 type SheetBonusSubTab = 'melhorias' | 'defeitos' | 'proficiencias';
@@ -161,7 +157,6 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
   const [ppCoins, setPpCoins] = useState(0);
   const [poCoins, setPoCoins] = useState(0);
   const [plCoins, setPlCoins] = useState(0);
-  const [currentVolume, setCurrentVolume] = useState(0);
   const [melhorias, setMelhorias] = useState<ISheetImprovementDefectSnapshot>(
     SHEET_EMPTY_IMPROVEMENT_DEFECT_SNAPSHOT,
   );
@@ -219,7 +214,6 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     setPpCoins(sheet.pp ?? 0);
     setPoCoins(sheet.po ?? 0);
     setPlCoins(sheet.pl ?? 0);
-    setCurrentVolume(sheet.loadedVolume ?? 0);
     setHasHydrated(true);
   }, [sheet, hasHydrated]);
 
@@ -254,6 +248,17 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     emptyTrainingSlotMutation,
     refetchAbilitiesAfterLevelChange,
   } = useSheetAbilities({ sheetId, applySheetSnapshots });
+
+  const {
+    items: inventoryItems,
+    counts: inventoryCounts,
+    isLoadingItems: isLoadingInventoryItems,
+    addInventoryItemMutation,
+    removeInventoryItemMutation,
+    increaseInventoryItemMutation,
+    equipInventoryItemMutation,
+    unequipInventoryItemMutation,
+  } = useSheetInventoryItems({ sheetId });
 
   const { data: campaignOptionsData } = useSheetCampaignOptionsQuery();
   const campaignOptions = campaignOptionsData ?? [];
@@ -381,7 +386,6 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
   const forcaModifier = forcaAttribute?.modifier ?? 0;
   const maxVolume = Math.max(0, 5 + forcaModifier);
   const limitVolume = Math.max(0, forcaModifier + 10);
-  const totalCoins = pcCoins + ppCoins + poCoins + plCoins;
 
   const raceHitPointsBonus = race?.hitPoints ?? 0;
   const maxHitPoints = (raceHitPointsBonus + hitPointsAttributeModifier) * level;
@@ -549,22 +553,6 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
         message:
           mutationError.response?.data?.message ??
           'Não foi possível salvar as moedas da ficha.',
-        type: 'error',
-      });
-    },
-  });
-
-  const updateVolumeMutation = usePutEntity<
-    ISheet,
-    { loadedVolume: number }
-  >({
-    url: `/sheets/${sheetId}`,
-    invalidateQueryKeys: [['/sheets'], [`/sheets/${sheetId}`]],
-    onError: (mutationError) => {
-      showToast({
-        message:
-          mutationError.response?.data?.message ??
-          'Não foi possível salvar o volume carregado da ficha.',
         type: 'error',
       });
     },
@@ -789,16 +777,6 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
       }),
   });
 
-  /**
-   * Volume Carregado = volume dos itens do inventário (0 nesta demanda —
-   * itens de inventário ficarão para demanda futura) + floor(total de
-   * moedas / 1000).
-   */
-  useEffect(() => {
-    setCurrentVolume(Math.floor(totalCoins / 1000));
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- só recalcula a partir das moedas; a contribuição de itens (0 por ora) não é uma dependência reativa ainda
-  }, [totalCoins]);
-
   const coinsValues: SheetCoinsValues = useMemo(
     () => ({ pc: pcCoins, pp: ppCoins, po: poCoins, pl: plCoins }),
     [pcCoins, ppCoins, poCoins, plCoins],
@@ -815,13 +793,6 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
     value: coinsValues,
     enabled: hasHydrated,
     onSave: (newCoinsValues) => updateCoinsMutation.mutate(newCoinsValues),
-  });
-
-  useFieldAutosave({
-    value: currentVolume,
-    enabled: hasHydrated,
-    onSave: (newCurrentVolume) =>
-      updateVolumeMutation.mutate({ loadedVolume: newCurrentVolume }),
   });
 
   const handleImageSave = (url: string) => {
@@ -1144,14 +1115,30 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
             )}
 
           {activeTab === 'inventario' && (
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <SheetVolumePanel
-                currentVolume={currentVolume}
-                maxVolume={maxVolume}
-                limitVolume={limitVolume}
-              />
+            <div className="flex flex-col gap-6">
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <SheetVolumePanel
+                  currentVolume={sheet.loadedVolume ?? 0}
+                  maxVolume={maxVolume}
+                  limitVolume={limitVolume}
+                />
 
-              <SheetCoinsPanel values={coinsValues} onChange={handleCoinsChange} />
+                <SheetCoinsPanel values={coinsValues} onChange={handleCoinsChange} />
+              </div>
+
+              <SheetInventoryItemsSection
+                sheetId={sheetId}
+                items={inventoryItems}
+                counts={inventoryCounts}
+                isLoadingItems={isLoadingInventoryItems}
+                currentLoadedVolume={sheet.loadedVolume ?? 0}
+                limitVolume={limitVolume}
+                addInventoryItemMutation={addInventoryItemMutation}
+                removeInventoryItemMutation={removeInventoryItemMutation}
+                increaseInventoryItemMutation={increaseInventoryItemMutation}
+                equipInventoryItemMutation={equipInventoryItemMutation}
+                unequipInventoryItemMutation={unequipInventoryItemMutation}
+              />
             </div>
           )}
         </div>

@@ -25,3 +25,7 @@ export * from './useRemoveSheetTrainingExtraMutation';
 export * from './useFillSheetTrainingSlotMutation';
 export * from './useEmptySheetTrainingSlotMutation';
 export * from './useEmbeddedEffectDetailMutation';
+export * from './useRemoveSheetInventoryItemMutation';
+export * from './useIncreaseSheetInventoryItemQuantityMutation';
+export * from './useEquipSheetInventoryItemMutation';
+export * from './useUnequipSheetInventoryItemMutation';

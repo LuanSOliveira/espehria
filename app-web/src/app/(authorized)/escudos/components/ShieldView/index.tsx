@@ -30,33 +30,52 @@ import {
 } from '@/shared/util';
 import { APP_COLORS, APP_CONTAINER_STYLES } from '@/shared/constants';
 
-export interface ShieldViewProps {
-  shieldId: string;
-  /**
-   * Chamado quando o escudo não é encontrado (404) — usado pelo
-   * EntityMentionViewDispatcher para fechar o modal aberto a partir de uma
-   * menção órfã (entidade excluída).
-   */
-  onNotFound?: () => void;
-}
+export type ShieldViewProps =
+  | {
+      shieldId: string;
+      shield?: undefined;
+      /**
+       * Chamado quando o escudo não é encontrado (404) — usado pelo
+       * EntityMentionViewDispatcher para fechar o modal aberto a partir de
+       * uma menção órfã (entidade excluída). Não se aplica ao modo `shield`
+       * (snapshot já resolvido, nunca "não encontrado").
+       */
+      onNotFound?: () => void;
+    }
+  | {
+      shieldId?: undefined;
+      /**
+       * Snapshot já resolvido (ex.: item de inventário da ficha) — quando
+       * informado, o componente pula `GET /shields/:id` e renderiza direto a
+       * partir deste objeto.
+       */
+      shield: Omit<IShield, 'id' | 'createdAt' | 'updatedAt'>;
+      onNotFound?: undefined;
+    };
 
 const NOT_INFORMED = 'Não informado';
 
-export const ShieldView = ({ shieldId, onNotFound }: ShieldViewProps) => {
+export const ShieldView = (props: ShieldViewProps) => {
+  const { shieldId, onNotFound } = props;
+  const resolvedShield = props.shield;
+
   const {
-    data: shield,
+    data: fetchedShield,
     isLoading,
     isError,
     error,
   } = useGetEntityById<IShield>({
     url: `/shields/${shieldId}`,
+    enabled: !resolvedShield,
   });
+
+  const shield = resolvedShield ?? fetchedShield;
 
   const isGoogleUser = useIsGoogleUser();
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
 
   useEffect(() => {
-    if (!isError) {
+    if (resolvedShield || !isError) {
       return;
     }
 
@@ -73,7 +92,7 @@ export const ShieldView = ({ shieldId, onNotFound }: ShieldViewProps) => {
     if (isNotFound) {
       onNotFound?.();
     }
-  }, [isError, error, onNotFound]);
+  }, [isError, error, onNotFound, resolvedShield]);
 
   if (isLoading) {
     return (

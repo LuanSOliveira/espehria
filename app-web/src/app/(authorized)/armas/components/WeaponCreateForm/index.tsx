@@ -37,13 +37,12 @@ import {
 } from '@/shared/interfaces';
 import { formatTagLabel, showToast } from '@/shared/util';
 import { useSelectedWeaponStore } from '@/store';
+import { WEAPON_DAMAGE_DIE_OPTIONS } from '@/shared/constants';
+import { WEAPON_HANDS_OPTIONS, WEAPON_STYLE_OPTIONS } from '../../data';
 import {
-  WEAPON_DAMAGE_DIE_OPTIONS,
-  WEAPON_HANDS_OPTIONS,
-  WEAPON_STYLE_OPTIONS,
-} from '../../data';
-import { WeaponTraitsField } from '../WeaponTraitsField';
-import { WeaponDamagesField } from '../WeaponDamagesField';
+  WeaponTraitsField,
+  WeaponDamagesField,
+} from '@/shared/components/EquipmentFields';
 
 export interface WeaponCreateFormProps {
   onSaved: () => void;

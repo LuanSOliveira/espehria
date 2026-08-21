@@ -21,9 +21,18 @@ import { ProficiencyGradation } from '../proficiency-gradations/entities/profici
 import { Knowledge } from '../knowledges/entities/knowledge.entity';
 import { Attribute } from '../attributes/entities/attribute.entity';
 import { EntityLinksModule } from '../entity-links/entity-links.module';
+import { UtilitiesModule } from '../utilities/utilities.module';
+import { ConsumablesModule } from '../consumables/consumables.module';
+import { MaterialsModule } from '../materials/materials.module';
+import { AmmunitionModule } from '../ammunition/ammunition.module';
+import { WeaponsModule } from '../weapons/weapons.module';
+import { ArmorsModule } from '../armors/armors.module';
+import { AccessoriesModule } from '../accessories/accessories.module';
+import { ShieldsModule } from '../shields/shields.module';
 import { Sheet } from './entities/sheet.entity';
 import { SheetTrainingSlot } from './entities/sheet-training-slot.entity';
 import { SheetAbilityExtra } from './entities/sheet-ability-extra.entity';
+import { SheetInventoryItem } from './entities/sheet-inventory-item.entity';
 import { SheetsController } from './sheets.controller';
 import { SheetsService } from './sheets.service';
 
@@ -33,6 +42,7 @@ import { SheetsService } from './sheets.service';
       Sheet,
       SheetTrainingSlot,
       SheetAbilityExtra,
+      SheetInventoryItem,
       Campaign,
       Race,
       RaceTag,
@@ -55,6 +65,14 @@ import { SheetsService } from './sheets.service';
     ]),
     CampaignsModule,
     EntityLinksModule,
+    UtilitiesModule,
+    ConsumablesModule,
+    MaterialsModule,
+    AmmunitionModule,
+    WeaponsModule,
+    ArmorsModule,
+    AccessoriesModule,
+    ShieldsModule,
   ],
   controllers: [SheetsController],
   providers: [SheetsService],

@@ -66,6 +66,12 @@ export class AccessoryResponseDto {
   })
   enhancements: EmbeddedEffectResponseDto[];
 
+  @ApiPropertyOptional({
+    description: 'Volume do acessório',
+    example: 0.1,
+  })
+  volume: number | null;
+
   @ApiProperty({ description: 'Data de criação do registro' })
   createdAt: Date;
 
@@ -92,6 +98,7 @@ export class AccessoryResponseDto {
     dto.enhancements = (accessory.enhancements ?? []).map((item) =>
       EmbeddedEffectResponseDto.fromEntity(item),
     );
+    dto.volume = accessory.volume;
     dto.createdAt = accessory.createdAt;
     dto.updatedAt = accessory.updatedAt;
     return dto;

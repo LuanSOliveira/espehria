@@ -6,7 +6,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
-import { FindOptionsWhere, In, Not, Repository } from 'typeorm';
+import { DataSource, FindOptionsWhere, In, Not, Repository } from 'typeorm';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 import {
   DEFAULT_PAGE,
   DEFAULT_PER_PAGE,
@@ -54,12 +56,45 @@ import { AddTrainingExtraDto } from './dto/add-training-extra.dto';
 import { AddTalentExtraDto } from './dto/add-talent-extra.dto';
 import { FillTrainingSlotDto } from './dto/fill-training-slot.dto';
 import { FindSheetAbilityCandidatesQueryDto } from './dto/find-sheet-ability-candidates-query.dto';
+import { AddSheetInventoryItemDto } from './dto/add-sheet-inventory-item.dto';
+import { RemoveSheetInventoryItemDto } from './dto/remove-sheet-inventory-item.dto';
+import { IncreaseSheetInventoryItemDto } from './dto/increase-sheet-inventory-item.dto';
+import { FindSheetInventoryItemsQueryDto } from './dto/find-sheet-inventory-items-query.dto';
 import type { SheetAbilityOriginEntityType } from './dto/sheet-ability-origin-response.dto';
 import { Sheet } from './entities/sheet.entity';
 import { SheetTrainingSlot } from './entities/sheet-training-slot.entity';
 import { SheetAbilityExtra } from './entities/sheet-ability-extra.entity';
+import { SheetInventoryItem } from './entities/sheet-inventory-item.entity';
 import { SheetAbilityBucketType } from './enums/sheet-ability-bucket-type.enum';
-import { SheetImprovementFlawSnapshotEntry } from './interfaces/sheet-improvement-flaw-snapshot.interface';
+import { SheetInventoryItemCategory } from './enums/sheet-inventory-item-category.enum';
+import { UtilitiesService } from '../utilities/utilities.service';
+import { CreateUtilityDto } from '../utilities/dto/create-utility.dto';
+import { UtilityResponseDto } from '../utilities/dto/utility-response.dto';
+import { ConsumablesService } from '../consumables/consumables.service';
+import { CreateConsumableDto } from '../consumables/dto/create-consumable.dto';
+import { ConsumableResponseDto } from '../consumables/dto/consumable-response.dto';
+import { MaterialsService } from '../materials/materials.service';
+import { CreateMaterialDto } from '../materials/dto/create-material.dto';
+import { MaterialResponseDto } from '../materials/dto/material-response.dto';
+import { AmmunitionService } from '../ammunition/ammunition.service';
+import { CreateAmmunitionDto } from '../ammunition/dto/create-ammunition.dto';
+import { AmmunitionResponseDto } from '../ammunition/dto/ammunition-response.dto';
+import { WeaponsService } from '../weapons/weapons.service';
+import { CreateWeaponDto } from '../weapons/dto/create-weapon.dto';
+import { WeaponResponseDto } from '../weapons/dto/weapon-response.dto';
+import { ArmorsService } from '../armors/armors.service';
+import { CreateArmorDto } from '../armors/dto/create-armor.dto';
+import { ArmorResponseDto } from '../armors/dto/armor-response.dto';
+import { AccessoriesService } from '../accessories/accessories.service';
+import { CreateAccessoryDto } from '../accessories/dto/create-accessory.dto';
+import { AccessoryResponseDto } from '../accessories/dto/accessory-response.dto';
+import { ShieldsService } from '../shields/shields.service';
+import { CreateShieldDto } from '../shields/dto/create-shield.dto';
+import { ShieldResponseDto } from '../shields/dto/shield-response.dto';
+import {
+  SheetImprovementFlawSnapshot,
+  SheetImprovementFlawSnapshotEntry,
+} from './interfaces/sheet-improvement-flaw-snapshot.interface';
 import {
   SheetProficiencySnapshot,
   SheetProficiencySnapshotEntry,
@@ -78,6 +113,23 @@ const FREE_IMPROVEMENT_VALUE = 2;
 const DEFAULT_ARMOR_CLASS_KEY_ATTRIBUTE_NAME = 'Destreza';
 const INITIAL_TRAINING_SLOT_COUNT = 3;
 const RACE_TALENT_REQUIREMENT_TAG_NAME = 'Raça';
+const STRENGTH_PROPERTY_NAME = 'Força';
+const EQUIPPABLE_INVENTORY_CATEGORIES = new Set<SheetInventoryItemCategory>([
+  SheetInventoryItemCategory.WEAPON,
+  SheetInventoryItemCategory.ARMOR,
+  SheetInventoryItemCategory.ACCESSORY,
+  SheetInventoryItemCategory.SHIELD,
+]);
+
+export interface SheetInventoryListResult {
+  counts: Record<SheetInventoryItemCategory, number>;
+  items: SheetInventoryItem[];
+}
+
+export interface SheetInventoryMutationResult {
+  sheet: Sheet;
+  inventory: SheetInventoryListResult;
+}
 
 interface ProficiencySource {
   type: SheetProficiencyAdjustmentSourceType;
@@ -212,6 +264,8 @@ export class SheetsService {
     private readonly sheetTrainingSlotsRepository: Repository<SheetTrainingSlot>,
     @InjectRepository(SheetAbilityExtra)
     private readonly sheetAbilityExtrasRepository: Repository<SheetAbilityExtra>,
+    @InjectRepository(SheetInventoryItem)
+    private readonly sheetInventoryItemsRepository: Repository<SheetInventoryItem>,
     @InjectRepository(Campaign)
     private readonly campaignsRepository: Repository<Campaign>,
     @InjectRepository(Race)
@@ -249,6 +303,15 @@ export class SheetsService {
     @InjectRepository(Attribute)
     private readonly attributesRepository: Repository<Attribute>,
     private readonly entityLinksService: EntityLinksService,
+    private readonly dataSource: DataSource,
+    private readonly utilitiesService: UtilitiesService,
+    private readonly consumablesService: ConsumablesService,
+    private readonly materialsService: MaterialsService,
+    private readonly ammunitionService: AmmunitionService,
+    private readonly weaponsService: WeaponsService,
+    private readonly armorsService: ArmorsService,
+    private readonly accessoriesService: AccessoriesService,
+    private readonly shieldsService: ShieldsService,
   ) {}
 
   private async findCampaignById(id: string): Promise<Campaign> {
@@ -2515,5 +2578,662 @@ export class SheetsService {
       );
     }
     await this.sheetsRepository.delete({ id });
+  }
+
+  private roundToOneDecimal(value: number): number {
+    return Math.round(value * 10) / 10;
+  }
+
+  /**
+   * Soma o `value` das entradas de melhoria/defeito do tipo Atributo cuja
+   * propriedade seja `propertyName`, considerando todos os buckets do
+   * snapshot (race/biography/trainings/talents/characteristics) — mesmo
+   * critério (`type.name === ATTRIBUTE_TYPE_NAME`) já usado em
+   * `linkBiography` para identificar melhorias de Atributo.
+   */
+  private sumAttributePropertyValue(
+    snapshot: SheetImprovementFlawSnapshot,
+    propertyName: string,
+  ): number {
+    const buckets: (keyof SheetImprovementFlawSnapshot)[] = [
+      'race',
+      'biography',
+      'trainings',
+      'talents',
+      'characteristics',
+    ];
+    let total = 0;
+    for (const bucket of buckets) {
+      for (const entry of snapshot[bucket]) {
+        if (
+          entry.type.name === ATTRIBUTE_TYPE_NAME &&
+          entry.property.name === propertyName
+        ) {
+          total += entry.value;
+        }
+      }
+    }
+    return total;
+  }
+
+  /**
+   * Volume Limite = max(0, modificador de Força + 10), com modificador =
+   * floor((baseValue - 10) / 2) e baseValue = 10 + Σmelhorias − Σdefeitos de
+   * Força (mesma fonte — `sheet.melhorias`/`sheet.defeitos` — já usada para
+   * os demais cálculos de atributo do serviço).
+   */
+  private computeVolumeLimit(sheet: Sheet): number {
+    const improvements = this.sumAttributePropertyValue(
+      sheet.melhorias,
+      STRENGTH_PROPERTY_NAME,
+    );
+    const flaws = this.sumAttributePropertyValue(
+      sheet.defeitos,
+      STRENGTH_PROPERTY_NAME,
+    );
+    const baseValue = 10 + improvements - flaws;
+    const modifier = Math.floor((baseValue - 10) / 2);
+    return Math.max(0, modifier + 10);
+  }
+
+  /**
+   * Recalcula `sheet.itemsVolume`/`sheet.loadedVolume` sempre a partir da
+   * fonte (soma de `quantity * unitVolume` de todos os `SheetInventoryItem`
+   * da ficha, consultados do banco), nunca por incremento/decremento sobre o
+   * valor anterior. Aceita um repositório opcional para ser chamado dentro de
+   * uma transação (`manager.getRepository(SheetInventoryItem)`).
+   */
+  private async recomputeItemsAndLoadedVolume(
+    sheet: Sheet,
+    itemsRepository: Repository<SheetInventoryItem> = this
+      .sheetInventoryItemsRepository,
+  ): Promise<void> {
+    const items = await itemsRepository.find({
+      where: { sheet: { id: sheet.id } },
+    });
+    const rawItemsVolume = items.reduce(
+      (sum, item) => sum + item.quantity * item.unitVolume,
+      0,
+    );
+    sheet.itemsVolume = this.roundToOneDecimal(rawItemsVolume);
+    const coinsTotal = sheet.pc + sheet.pp + sheet.po + sheet.pl;
+    sheet.loadedVolume = Math.floor(coinsTotal / 1000) + sheet.itemsVolume;
+  }
+
+  /**
+   * Normaliza um valor (ordenando recursivamente as chaves de objetos) para
+   * comparação de igualdade estrutural via string — usado para detectar
+   * empilhamento de itens com `data` idêntico, independentemente da ordem de
+   * inserção das chaves.
+   */
+  private normalizeForComparison(value: unknown): unknown {
+    if (Array.isArray(value)) {
+      return value.map((item) => this.normalizeForComparison(item));
+    }
+    if (value !== null && typeof value === 'object') {
+      const sortedEntries = Object.entries(value as Record<string, unknown>)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([key, val]) => [key, this.normalizeForComparison(val)] as const);
+      return Object.fromEntries(sortedEntries);
+    }
+    return value;
+  }
+
+  private stableStringify(value: unknown): string {
+    return JSON.stringify(this.normalizeForComparison(value));
+  }
+
+  /**
+   * Serializa um `*ResponseDto` para o formato persistido em `data`, sempre
+   * sem `id`/`createdAt`/`updatedAt` — tanto para item avulso (onde essas
+   * chaves já vêm ausentes, pois a entidade nunca é salva) quanto para item
+   * existente do catálogo (onde, sem essa remoção, ficariam presentes com o
+   * id/timestamps do registro de catálogo de origem, não do
+   * `SheetInventoryItem`). Mantém o mesmo formato de snapshot nos dois
+   * fluxos.
+   */
+  private toPlainSnapshot(dto: object): Record<string, unknown> {
+    const plain = JSON.parse(JSON.stringify(dto)) as Record<string, unknown>;
+    delete plain.id;
+    delete plain.createdAt;
+    delete plain.updatedAt;
+    return plain;
+  }
+
+  /**
+   * Valida manualmente `payload` (item avulso) contra o `Create*Dto` da
+   * categoria informada, reaproveitando as mesmas regras de validação do
+   * cadastro do catálogo — sem persistir nada nos módulos de catálogo.
+   */
+  private async validateCustomData<T extends object>(
+    cls: new () => T,
+    payload: Record<string, unknown>,
+  ): Promise<T> {
+    const instance = plainToInstance(cls, payload);
+    const errors = await validate(instance as object, {
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    });
+    if (errors.length > 0) {
+      const messages = errors
+        .flatMap((error) => Object.values(error.constraints ?? {}))
+        .filter((message): message is string => !!message);
+      throw new BadRequestException(
+        messages.length > 0
+          ? messages
+          : 'Dados do item avulso inválidos para a categoria informada.',
+      );
+    }
+    return instance;
+  }
+
+  private async buildSnapshotFromCatalogItem(
+    category: SheetInventoryItemCategory,
+    catalogItemId: string,
+  ): Promise<Record<string, unknown>> {
+    switch (category) {
+      case SheetInventoryItemCategory.UTILITY: {
+        const entity = await this.utilitiesService.findById(catalogItemId);
+        if (!entity) {
+          throw new NotFoundException('Utilitário do catálogo não encontrado.');
+        }
+        return this.toPlainSnapshot(UtilityResponseDto.fromEntity(entity));
+      }
+      case SheetInventoryItemCategory.CONSUMABLE: {
+        const entity = await this.consumablesService.findById(catalogItemId);
+        if (!entity) {
+          throw new NotFoundException('Consumível do catálogo não encontrado.');
+        }
+        return this.toPlainSnapshot(ConsumableResponseDto.fromEntity(entity));
+      }
+      case SheetInventoryItemCategory.MATERIAL: {
+        const entity = await this.materialsService.findById(catalogItemId);
+        if (!entity) {
+          throw new NotFoundException('Material do catálogo não encontrado.');
+        }
+        return this.toPlainSnapshot(MaterialResponseDto.fromEntity(entity));
+      }
+      case SheetInventoryItemCategory.AMMUNITION: {
+        const entity = await this.ammunitionService.findById(catalogItemId);
+        if (!entity) {
+          throw new NotFoundException(
+            'Item de munição do catálogo não encontrado.',
+          );
+        }
+        return this.toPlainSnapshot(AmmunitionResponseDto.fromEntity(entity));
+      }
+      case SheetInventoryItemCategory.WEAPON: {
+        const entity = await this.weaponsService.findById(catalogItemId);
+        if (!entity) {
+          throw new NotFoundException('Arma do catálogo não encontrada.');
+        }
+        return this.toPlainSnapshot(WeaponResponseDto.fromEntity(entity));
+      }
+      case SheetInventoryItemCategory.ARMOR: {
+        const entity = await this.armorsService.findById(catalogItemId);
+        if (!entity) {
+          throw new NotFoundException('Armadura do catálogo não encontrada.');
+        }
+        return this.toPlainSnapshot(ArmorResponseDto.fromEntity(entity));
+      }
+      case SheetInventoryItemCategory.ACCESSORY: {
+        const entity = await this.accessoriesService.findById(catalogItemId);
+        if (!entity) {
+          throw new NotFoundException('Acessório do catálogo não encontrado.');
+        }
+        return this.toPlainSnapshot(AccessoryResponseDto.fromEntity(entity));
+      }
+      case SheetInventoryItemCategory.SHIELD: {
+        const entity = await this.shieldsService.findById(catalogItemId);
+        if (!entity) {
+          throw new NotFoundException('Escudo do catálogo não encontrado.');
+        }
+        return this.toPlainSnapshot(ShieldResponseDto.fromEntity(entity));
+      }
+      default:
+        throw new BadRequestException('Categoria de item inválida.');
+    }
+  }
+
+  private async buildSnapshotFromCustomData(
+    category: SheetInventoryItemCategory,
+    customData: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
+    switch (category) {
+      case SheetInventoryItemCategory.UTILITY: {
+        const dto = await this.validateCustomData(CreateUtilityDto, customData);
+        const entity = await this.utilitiesService.buildSnapshotFromDto(dto);
+        return this.toPlainSnapshot(UtilityResponseDto.fromEntity(entity));
+      }
+      case SheetInventoryItemCategory.CONSUMABLE: {
+        const dto = await this.validateCustomData(
+          CreateConsumableDto,
+          customData,
+        );
+        const entity = await this.consumablesService.buildSnapshotFromDto(dto);
+        return this.toPlainSnapshot(ConsumableResponseDto.fromEntity(entity));
+      }
+      case SheetInventoryItemCategory.MATERIAL: {
+        const dto = await this.validateCustomData(
+          CreateMaterialDto,
+          customData,
+        );
+        const entity = await this.materialsService.buildSnapshotFromDto(dto);
+        return this.toPlainSnapshot(MaterialResponseDto.fromEntity(entity));
+      }
+      case SheetInventoryItemCategory.AMMUNITION: {
+        const dto = await this.validateCustomData(
+          CreateAmmunitionDto,
+          customData,
+        );
+        const entity = await this.ammunitionService.buildSnapshotFromDto(dto);
+        return this.toPlainSnapshot(AmmunitionResponseDto.fromEntity(entity));
+      }
+      case SheetInventoryItemCategory.WEAPON: {
+        const dto = await this.validateCustomData(CreateWeaponDto, customData);
+        const entity = await this.weaponsService.buildSnapshotFromDto(dto);
+        return this.toPlainSnapshot(WeaponResponseDto.fromEntity(entity));
+      }
+      case SheetInventoryItemCategory.ARMOR: {
+        const dto = await this.validateCustomData(CreateArmorDto, customData);
+        const entity = await this.armorsService.buildSnapshotFromDto(dto);
+        return this.toPlainSnapshot(ArmorResponseDto.fromEntity(entity));
+      }
+      case SheetInventoryItemCategory.ACCESSORY: {
+        const dto = await this.validateCustomData(
+          CreateAccessoryDto,
+          customData,
+        );
+        const entity = await this.accessoriesService.buildSnapshotFromDto(dto);
+        return this.toPlainSnapshot(AccessoryResponseDto.fromEntity(entity));
+      }
+      case SheetInventoryItemCategory.SHIELD: {
+        const dto = await this.validateCustomData(CreateShieldDto, customData);
+        const entity = await this.shieldsService.buildSnapshotFromDto(dto);
+        return this.toPlainSnapshot(ShieldResponseDto.fromEntity(entity));
+      }
+      default:
+        throw new BadRequestException('Categoria de item inválida.');
+    }
+  }
+
+  /**
+   * Resolve o snapshot (`data`) e o volume unitário do item a adicionar, a
+   * partir de `catalogItemId` (item existente do catálogo) ou `customData`
+   * (item avulso, validado contra o `Create*Dto` da categoria). O volume
+   * unitário é extraído de `data.volume`; quando ausente/nulo (campo
+   * opcional em todas as 8 categorias), é tratado como `0` na soma, sem
+   * impedir a adição — `volume` é nullable no catálogo, e todo registro das
+   * 5 categorias que ganharam a coluna nesta mesma entrega nasce nulo.
+   */
+  private async resolveSnapshotForAdd(
+    dto: AddSheetInventoryItemDto,
+  ): Promise<{ data: Record<string, unknown>; unitVolume: number }> {
+    if (dto.catalogItemId && dto.customData) {
+      throw new BadRequestException(
+        'Informe catalogItemId (item do catálogo) ou customData (item avulso), nunca os dois.',
+      );
+    }
+    if (!dto.catalogItemId && !dto.customData) {
+      throw new BadRequestException(
+        'Informe catalogItemId (item do catálogo) ou customData (item avulso).',
+      );
+    }
+
+    const data = dto.catalogItemId
+      ? await this.buildSnapshotFromCatalogItem(dto.category, dto.catalogItemId)
+      : await this.buildSnapshotFromCustomData(dto.category, dto.customData!);
+
+    const rawVolume = data.volume;
+    const unitVolume =
+      typeof rawVolume === 'number' && Number.isFinite(rawVolume)
+        ? rawVolume
+        : 0;
+
+    return { data, unitVolume };
+  }
+
+  private async buildInventoryList(
+    sheetId: string,
+    query?: FindSheetInventoryItemsQueryDto,
+  ): Promise<SheetInventoryListResult> {
+    const allItems = await this.sheetInventoryItemsRepository.find({
+      where: { sheet: { id: sheetId } },
+      order: { createdAt: 'ASC', id: 'ASC' },
+    });
+
+    const counts = Object.values(SheetInventoryItemCategory).reduce(
+      (acc, category) => {
+        acc[category] = 0;
+        return acc;
+      },
+      {} as Record<SheetInventoryItemCategory, number>,
+    );
+    for (const item of allItems) {
+      counts[item.category] += 1;
+    }
+
+    let items = allItems;
+    if (query?.category) {
+      items = items.filter((item) => item.category === query.category);
+    }
+    if (query?.equippedOnly) {
+      items = items.filter((item) => item.equipped);
+    }
+
+    return { counts, items };
+  }
+
+  async listInventoryItems(
+    id: string,
+    query: FindSheetInventoryItemsQueryDto,
+    currentUser: User,
+  ): Promise<SheetInventoryListResult> {
+    const sheet = await this.findAccessibleById(id, currentUser);
+    if (!sheet) {
+      throw new NotFoundException(
+        'Ficha não encontrada ou não pertence ao usuário.',
+      );
+    }
+    return this.buildInventoryList(sheet.id, query);
+  }
+
+  async addInventoryItem(
+    id: string,
+    dto: AddSheetInventoryItemDto,
+    currentUser: User,
+  ): Promise<SheetInventoryMutationResult> {
+    const sheet = await this.findAccessibleById(id, currentUser);
+    if (!sheet) {
+      throw new NotFoundException(
+        'Ficha não encontrada ou não pertence ao usuário.',
+      );
+    }
+
+    const { data, unitVolume } = await this.resolveSnapshotForAdd(dto);
+    const additionalVolume = this.roundToOneDecimal(unitVolume * dto.quantity);
+
+    const savedSheet = await this.dataSource.transaction(async (manager) => {
+      const itemsRepository = manager.getRepository(SheetInventoryItem);
+      const sheetsRepository = manager.getRepository(Sheet);
+
+      // Lock pessimista na linha da ficha: serializa adições concorrentes,
+      // garantindo que a validação de volume limite abaixo sempre enxergue o
+      // `itemsVolume`/moedas mais recentes já commitados. A entidade `sheet`
+      // (com as relações já carregadas por `findAccessibleById`) é mantida —
+      // só seus campos escalares relevantes são atualizados com o valor
+      // travado da linha, para não perder `armorClassKeyAttribute`/
+      // `createdBy`/etc. exigidos por `SheetResponseDto.fromEntity`.
+      const lockedRow = await sheetsRepository.findOne({
+        where: { id: sheet.id },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!lockedRow) {
+        throw new NotFoundException(
+          'Ficha não encontrada ou não pertence ao usuário.',
+        );
+      }
+      sheet.pc = lockedRow.pc;
+      sheet.pp = lockedRow.pp;
+      sheet.po = lockedRow.po;
+      sheet.pl = lockedRow.pl;
+      sheet.melhorias = lockedRow.melhorias;
+      sheet.defeitos = lockedRow.defeitos;
+
+      await this.recomputeItemsAndLoadedVolume(sheet, itemsRepository);
+
+      const volumeLimit = this.computeVolumeLimit(sheet);
+      const coinsTotal = sheet.pc + sheet.pp + sheet.po + sheet.pl;
+      const projectedItemsVolume = this.roundToOneDecimal(
+        sheet.itemsVolume + additionalVolume,
+      );
+      const projectedLoadedVolume =
+        Math.floor(coinsTotal / 1000) + projectedItemsVolume;
+
+      if (
+        Math.round(projectedLoadedVolume * 10) > Math.round(volumeLimit * 10)
+      ) {
+        throw new ConflictException(
+          'A quantidade solicitada supera o volume limite que a ficha pode carregar.',
+        );
+      }
+
+      const existingItems = await itemsRepository.find({
+        where: { sheet: { id: sheet.id }, category: dto.category },
+      });
+      const normalizedData = this.stableStringify(data);
+      const stackTarget = existingItems.find(
+        (candidate) => this.stableStringify(candidate.data) === normalizedData,
+      );
+
+      if (stackTarget) {
+        stackTarget.quantity += dto.quantity;
+        await itemsRepository.save(stackTarget);
+      } else {
+        const newItem = itemsRepository.create({
+          sheet,
+          category: dto.category,
+          quantity: dto.quantity,
+          equipped: false,
+          unitVolume,
+          data,
+        });
+        await itemsRepository.save(newItem);
+      }
+
+      await this.recomputeItemsAndLoadedVolume(sheet, itemsRepository);
+      return sheetsRepository.save(sheet);
+    });
+
+    const inventory = await this.buildInventoryList(savedSheet.id);
+    return { sheet: savedSheet, inventory };
+  }
+
+  async removeInventoryItem(
+    id: string,
+    itemId: string,
+    dto: RemoveSheetInventoryItemDto,
+    currentUser: User,
+  ): Promise<SheetInventoryMutationResult> {
+    const sheet = await this.findAccessibleById(id, currentUser);
+    if (!sheet) {
+      throw new NotFoundException(
+        'Ficha não encontrada ou não pertence ao usuário.',
+      );
+    }
+
+    const savedSheet = await this.dataSource.transaction(async (manager) => {
+      const itemsRepository = manager.getRepository(SheetInventoryItem);
+      const sheetsRepository = manager.getRepository(Sheet);
+
+      // Lock pessimista na linha da ficha adquirido antes de qualquer
+      // leitura/escrita do `SheetInventoryItem`, na mesma ordem (Sheet →
+      // SheetInventoryItem) usada em `addInventoryItem`, para evitar espera
+      // circular entre uma adição/empilhamento e uma remoção concorrentes
+      // sobre o mesmo item. Só os campos escalares usados por
+      // `recomputeItemsAndLoadedVolume` (moedas) são ressincronizados a
+      // partir do valor travado; a entidade `sheet` carregada por
+      // `findAccessibleById` mantém suas relações para `SheetResponseDto.fromEntity`.
+      const lockedRow = await sheetsRepository.findOne({
+        where: { id: sheet.id },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!lockedRow) {
+        throw new NotFoundException(
+          'Ficha não encontrada ou não pertence ao usuário.',
+        );
+      }
+      sheet.pc = lockedRow.pc;
+      sheet.pp = lockedRow.pp;
+      sheet.po = lockedRow.po;
+      sheet.pl = lockedRow.pl;
+
+      const item = await itemsRepository.findOne({
+        where: { id: itemId, sheet: { id: sheet.id } },
+      });
+      if (!item) {
+        throw new NotFoundException(
+          'Item de inventário não encontrado nesta ficha.',
+        );
+      }
+      if (dto.quantity > item.quantity) {
+        throw new BadRequestException(
+          'A quantidade a remover não pode exceder a quantidade atual do item.',
+        );
+      }
+
+      if (dto.quantity === item.quantity) {
+        await itemsRepository.remove(item);
+      } else {
+        item.quantity -= dto.quantity;
+        await itemsRepository.save(item);
+      }
+
+      await this.recomputeItemsAndLoadedVolume(sheet, itemsRepository);
+      return sheetsRepository.save(sheet);
+    });
+
+    const inventory = await this.buildInventoryList(savedSheet.id);
+    return { sheet: savedSheet, inventory };
+  }
+
+  async increaseInventoryItem(
+    id: string,
+    itemId: string,
+    dto: IncreaseSheetInventoryItemDto,
+    currentUser: User,
+  ): Promise<SheetInventoryMutationResult> {
+    const sheet = await this.findAccessibleById(id, currentUser);
+    if (!sheet) {
+      throw new NotFoundException(
+        'Ficha não encontrada ou não pertence ao usuário.',
+      );
+    }
+
+    const savedSheet = await this.dataSource.transaction(async (manager) => {
+      const itemsRepository = manager.getRepository(SheetInventoryItem);
+      const sheetsRepository = manager.getRepository(Sheet);
+
+      // Lock pessimista na linha da ficha adquirido antes de qualquer
+      // leitura/escrita do `SheetInventoryItem`, na mesma ordem (Sheet →
+      // SheetInventoryItem) usada em `addInventoryItem`/`removeInventoryItem`,
+      // para não reabrir o risco de deadlock já corrigido nesta feature. Os
+      // campos escalares usados por `computeVolumeLimit`/
+      // `recomputeItemsAndLoadedVolume` (moedas e melhorias/defeitos) são
+      // ressincronizados a partir do valor travado; a entidade `sheet`
+      // carregada por `findAccessibleById` mantém suas relações para
+      // `SheetResponseDto.fromEntity`.
+      const lockedRow = await sheetsRepository.findOne({
+        where: { id: sheet.id },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!lockedRow) {
+        throw new NotFoundException(
+          'Ficha não encontrada ou não pertence ao usuário.',
+        );
+      }
+      sheet.pc = lockedRow.pc;
+      sheet.pp = lockedRow.pp;
+      sheet.po = lockedRow.po;
+      sheet.pl = lockedRow.pl;
+      sheet.melhorias = lockedRow.melhorias;
+      sheet.defeitos = lockedRow.defeitos;
+
+      const item = await itemsRepository.findOne({
+        where: { id: itemId, sheet: { id: sheet.id } },
+      });
+      if (!item) {
+        throw new NotFoundException(
+          'Item de inventário não encontrado nesta ficha.',
+        );
+      }
+
+      await this.recomputeItemsAndLoadedVolume(sheet, itemsRepository);
+
+      const volumeLimit = this.computeVolumeLimit(sheet);
+      const coinsTotal = sheet.pc + sheet.pp + sheet.po + sheet.pl;
+      const additionalVolume = this.roundToOneDecimal(
+        item.unitVolume * dto.quantity,
+      );
+      const projectedItemsVolume = this.roundToOneDecimal(
+        sheet.itemsVolume + additionalVolume,
+      );
+      const projectedLoadedVolume =
+        Math.floor(coinsTotal / 1000) + projectedItemsVolume;
+
+      if (
+        Math.round(projectedLoadedVolume * 10) > Math.round(volumeLimit * 10)
+      ) {
+        throw new ConflictException(
+          'A quantidade solicitada supera o volume limite que a ficha pode carregar.',
+        );
+      }
+
+      item.quantity += dto.quantity;
+      await itemsRepository.save(item);
+
+      await this.recomputeItemsAndLoadedVolume(sheet, itemsRepository);
+      return sheetsRepository.save(sheet);
+    });
+
+    const inventory = await this.buildInventoryList(savedSheet.id);
+    return { sheet: savedSheet, inventory };
+  }
+
+  /**
+   * Alterna `equipped` de um item de inventário (Arma/Armadura/Acessório/
+   * Escudo apenas). Idempotente: `equip` num item já equipado (ou `unequip`
+   * num item já desequipado) retorna 200 normalmente, sem efeito colateral.
+   */
+  private async setInventoryItemEquipped(
+    id: string,
+    itemId: string,
+    currentUser: User,
+    equipped: boolean,
+  ): Promise<SheetInventoryMutationResult> {
+    const sheet = await this.findAccessibleById(id, currentUser);
+    if (!sheet) {
+      throw new NotFoundException(
+        'Ficha não encontrada ou não pertence ao usuário.',
+      );
+    }
+
+    const item = await this.sheetInventoryItemsRepository.findOne({
+      where: { id: itemId, sheet: { id: sheet.id } },
+    });
+    if (!item) {
+      throw new NotFoundException(
+        'Item de inventário não encontrado nesta ficha.',
+      );
+    }
+    if (!EQUIPPABLE_INVENTORY_CATEGORIES.has(item.category)) {
+      throw new ConflictException(
+        'Apenas itens de Arma, Armadura, Acessório ou Escudo podem ser equipados.',
+      );
+    }
+
+    if (item.equipped !== equipped) {
+      item.equipped = equipped;
+      await this.sheetInventoryItemsRepository.save(item);
+    }
+
+    const inventory = await this.buildInventoryList(sheet.id);
+    return { sheet, inventory };
+  }
+
+  async equipInventoryItem(
+    id: string,
+    itemId: string,
+    currentUser: User,
+  ): Promise<SheetInventoryMutationResult> {
+    return this.setInventoryItemEquipped(id, itemId, currentUser, true);
+  }
+
+  async unequipInventoryItem(
+    id: string,
+    itemId: string,
+    currentUser: User,
+  ): Promise<SheetInventoryMutationResult> {
+    return this.setInventoryItemEquipped(id, itemId, currentUser, false);
   }
 }
