@@ -555,6 +555,13 @@ export default function SheetDetailsPage({ params }: SheetDetailsPageProps) {
           'Não foi possível salvar as moedas da ficha.',
         type: 'error',
       });
+
+      if (sheet) {
+        setPcCoins(sheet.pc ?? 0);
+        setPpCoins(sheet.pp ?? 0);
+        setPoCoins(sheet.po ?? 0);
+        setPlCoins(sheet.pl ?? 0);
+      }
     },
   });
 

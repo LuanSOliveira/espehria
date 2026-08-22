@@ -240,9 +240,13 @@ export class SheetsController {
     description:
       'Ficha não encontrada ou não pertence ao usuário, ou atributo chave não encontrado',
   })
+  @ApiConflictResponse({
+    description:
+      'A quantidade de moedas informada supera o volume limite que a ficha pode carregar',
+  })
   @ApiBadRequestResponse({
     description:
-      'URL de imagem inválida, nível fora do intervalo válido, IDs em formato inválido (incluindo armorClassKeyAttributeId), PV atual ou temporário em formato inválido (devem ser inteiros), moedas (PC, PP, PO, PL) em formato inválido (devem ser inteiros >= 0), Volume Carregado em formato inválido (decimal, máximo 1 casa decimal, >= 0), ou outros parâmetros de validação inválidos',
+      'URL de imagem inválida, nível fora do intervalo válido, IDs em formato inválido (incluindo armorClassKeyAttributeId), PV atual ou temporário em formato inválido (devem ser inteiros), moedas (PC, PP, PO, PL) em formato inválido (devem ser inteiros >= 0), ou outros parâmetros de validação inválidos',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,

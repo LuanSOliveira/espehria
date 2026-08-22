@@ -3,7 +3,6 @@ import { Type } from 'class-transformer';
 import {
   IsInt,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
   IsUrl,
@@ -149,19 +148,4 @@ export class UpdateSheetDto {
     message: 'A quantidade de Peças de Platina deve ser maior ou igual a 0.',
   })
   pl?: number;
-
-  @ApiPropertyOptional({
-    minimum: 0,
-    example: 0,
-    description:
-      'Volume Carregado da ficha (decimal, no máximo 1 casa decimal, >= 0). Aceito neste PUT genérico para preservar o autosave local de moedas — itemsVolume não é aceito aqui, sendo escrito exclusivamente pelos endpoints de /sheets/:id/inventory-items',
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber(
-    { maxDecimalPlaces: 1 },
-    { message: 'O Volume Carregado deve ter no máximo 1 casa decimal.' },
-  )
-  @Min(0, { message: 'O Volume Carregado deve ser maior ou igual a 0.' })
-  loadedVolume?: number;
 }

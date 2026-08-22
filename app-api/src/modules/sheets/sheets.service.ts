@@ -1574,6 +1574,11 @@ export class SheetsService {
     if (dto.temporaryHitPoints !== undefined) {
       sheet.temporaryHitPoints = dto.temporaryHitPoints;
     }
+    const coinsChanged =
+      dto.pc !== undefined ||
+      dto.pp !== undefined ||
+      dto.po !== undefined ||
+      dto.pl !== undefined;
     if (dto.pc !== undefined) {
       sheet.pc = dto.pc;
     }
@@ -1586,8 +1591,15 @@ export class SheetsService {
     if (dto.pl !== undefined) {
       sheet.pl = dto.pl;
     }
-    if (dto.loadedVolume !== undefined) {
-      sheet.loadedVolume = dto.loadedVolume;
+    if (coinsChanged) {
+      await this.recomputeItemsAndLoadedVolume(sheet);
+
+      const volumeLimit = this.computeVolumeLimit(sheet);
+      if (Math.round(sheet.loadedVolume * 10) > Math.round(volumeLimit * 10)) {
+        throw new ConflictException(
+          'A quantidade de moedas informada supera o volume limite que a ficha pode carregar.',
+        );
+      }
     }
     if (dto.campaignId !== undefined) {
       sheet.campaign = dto.campaignId
